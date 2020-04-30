@@ -2,13 +2,14 @@ package uk.co.ramp.people;
 
 import uk.co.ramp.RandomSingleton;
 
+import java.util.EnumMap;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Random;
 
 public class PopulationGenerator {
 
-    private static final double genderBalance = 0.99; // males/female
+    private static final double GENDER_BALANCE = 0.99; // males/female
 
 
     static double c1;
@@ -16,6 +17,10 @@ public class PopulationGenerator {
     static double c3;
     static double c4;
     static double c5;
+
+    private PopulationGenerator() {
+        // hidden constructor
+    }
 
     static {
 
@@ -43,7 +48,7 @@ public class PopulationGenerator {
             int age = findAge(rand);
 
             rand = r.nextDouble();
-            Gender g = rand > genderBalance / 2d ? Gender.FEMALE : Gender.MALE;
+            Gender g = rand > GENDER_BALANCE / 2d ? Gender.FEMALE : Gender.MALE;
             double compliance = r.nextGaussian();
             double health = r.nextGaussian();
 
@@ -121,13 +126,12 @@ public class PopulationGenerator {
 
         }
 
-        Map<VirusStatus, Integer> counts = new HashMap<>();
+        Map<VirusStatus, Integer> counts = new EnumMap<>(VirusStatus.class);
 
         counts.put(VirusStatus.SUSCEPTIBLE, s);
         counts.put(VirusStatus.EXPOSED, e);
         counts.put(VirusStatus.INFECTED, i);
         counts.put(VirusStatus.RECOVERED, r);
-
 
         return counts;
     }

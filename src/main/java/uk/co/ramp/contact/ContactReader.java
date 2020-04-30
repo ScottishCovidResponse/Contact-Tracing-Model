@@ -18,8 +18,11 @@ public class ContactReader {
 
     private static final Logger LOGGER = LogManager.getLogger(ContactReader.class);
 
+    private ContactReader() {
+        // hidden constructor
+    }
 
-    public static Map<Integer, List<ContactRecord>> read(int personLimit, int dayLimit) throws ContactException {
+    public static Map<Integer, List<ContactRecord>> read(int personLimit, int dayLimit) {
 
         Iterable<CSVRecord> records;
         File file = new File(ContactReader.class.getResource("/contacts.csv").getFile());
@@ -38,6 +41,8 @@ public class ContactReader {
             int from = Integer.parseInt(record.get(1)) - 1;
             int to = Integer.parseInt(record.get(2)) - 1;
             double weight = Double.parseDouble(record.get(3));
+
+            // TODO remove these when no longer developing
             if (day > dayLimit) break;
             if (from >= personLimit || to >= personLimit) continue;
 
@@ -51,7 +56,7 @@ public class ContactReader {
 
         }
 
-        LOGGER.info("maxWeight = " + maxWeight);
+        LOGGER.info("maxWeight = {}", maxWeight);
 
         return dailyRecord;
 

@@ -43,7 +43,7 @@ public class ContactRunner {
 
         for (Integer id : infectedIds) {
             population.get(id).updateStatus(INFECTED, 0);
-            LOGGER.info("population.get(id).getNextStatusChange() = " + population.get(id).getNextStatusChange());
+            LOGGER.info("population.get(id).getNextStatusChange() = {}", population.get(id).getNextStatusChange());
         }
 
 
@@ -74,20 +74,20 @@ public class ContactRunner {
 
         try {
             FileWriter out = new FileWriter("book.csv");
-            String[] HEADERS = {"Day", "S", "E", "I", "R"};
-            try (CSVPrinter printer = new CSVPrinter(out, CSVFormat.DEFAULT.withHeader(HEADERS))) {
+            String[] headers = {"Day", "S", "E", "I", "R"};
+            try (CSVPrinter printer = new CSVPrinter(out, CSVFormat.DEFAULT.withHeader(headers))) {
                 records.forEach((day, record) -> {
                     try {
                         printer.printRecord(day, record.getS(), record.getE(), record.getI(), record.getR());
                     } catch (IOException e) {
-                        e.printStackTrace();
+                        LOGGER.error(e);
                     }
                 });
             }
 
 
         } catch (IOException e) {
-            e.printStackTrace();
+            LOGGER.error(e);
         }
 
     }
@@ -102,12 +102,10 @@ public class ContactRunner {
         Person personA = getMostSevere(population.get(c.getTo()), population.get(c.getFrom()));
         Person personB = personA == population.get(c.getTo()) ? population.get(c.getFrom()) : population.get(c.getTo());
 
-        if (personA.getStatus() == INFECTED) {
-            if (personB.getStatus() == SUSCEPTIBLE) {
-                if (RandomSingleton.getInstance(0).nextDouble() < c.getWeight() / 30d) {
-                    personB.updateStatus(EXPOSED, time);
-                }
-            }
+        boolean dangerMix = personA.getStatus() == INFECTED && personB.getStatus() == SUSCEPTIBLE;
+
+        if (dangerMix && RandomSingleton.getInstance(0).nextDouble() < c.getWeight() / 30d) {
+            personB.updateStatus(EXPOSED, time);
         }
     }
 
@@ -116,12 +114,12 @@ public class ContactRunner {
 
         records.put(time, new SeirRecord(time, seirCounts));
 
-        LOGGER.info("Conditions @ time: " + time);
+        LOGGER.info("Conditions @ time: {}", time);
 
-        LOGGER.info(SUSCEPTIBLE + "  " + seirCounts.get(SUSCEPTIBLE));
-        LOGGER.info(EXPOSED + "      " + seirCounts.get(EXPOSED));
-        LOGGER.info(INFECTED + "     " + seirCounts.get(INFECTED));
-        LOGGER.info(RECOVERED + "    " + seirCounts.get(RECOVERED));
+        LOGGER.info("{}  {}", SUSCEPTIBLE, seirCounts.get(SUSCEPTIBLE));
+        LOGGER.info("{}      {}", EXPOSED, seirCounts.get(EXPOSED));
+        LOGGER.info("{}     {}", INFECTED, seirCounts.get(INFECTED));
+        LOGGER.info("{}    {}", RECOVERED, seirCounts.get(RECOVERED));
 
         LOGGER.info("");
     }

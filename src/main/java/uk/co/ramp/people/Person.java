@@ -77,7 +77,7 @@ public class Person {
     public void checkTime(int time) {
 
         if (nextStatusChange == time) {
-            LOGGER.info("Changing status for id: " + id);
+            LOGGER.info("Changing status for id: {}", id);
 
             nextStatusChange = -1;
 
