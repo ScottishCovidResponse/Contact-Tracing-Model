@@ -1,54 +1,26 @@
 package uk.co.ramp.people;
 
-import uk.co.ramp.RandomSingleton;
+import uk.co.ramp.io.PopulationProperties;
+import uk.co.ramp.utilities.MinMax;
+import uk.co.ramp.utilities.RandomSingleton;
 
-import java.util.EnumMap;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Random;
+import java.util.*;
 
 public class PopulationGenerator {
-
-    private static final double GENDER_BALANCE = 0.99; // males/female
-
-
-    static double c1;
-    static double c2;
-    static double c3;
-    static double c4;
-    static double c5;
 
     private PopulationGenerator() {
         // hidden constructor
     }
 
-    static {
-
-        double p1 = 0.1759;
-        double p2 = 0.1171;
-        double p3 = 0.4029;
-        double p4 = 0.1222;
-        double p5 = 0.1819;
-
-        c1 = p1;
-        c2 = c1 + p2;
-        c3 = c2 + p3;
-        c4 = c3 + p4;
-        c5 = c4 + p5;
-
-    }
-
-
-    public static Map<Integer, Person> generate(int popSize) {
-        Random r = RandomSingleton.getInstance(0);
+    public static Map<Integer, Person> generate(int popSize, PopulationProperties properties, int sid) {
+        Random r = RandomSingleton.getInstance(sid);
+        Map<Integer, Double> cumulative = createCumulative(properties.getPopulationDistribution());
         Map<Integer, Person> population = new HashMap<>();
         for (int i = 0; i < popSize; i++) {
 
-            double rand = r.nextDouble();
-            int age = findAge(rand);
+            int age = findAge(r.nextDouble(), cumulative, properties.getPopulationAges());
 
-            rand = r.nextDouble();
-            Gender g = rand > GENDER_BALANCE / 2d ? Gender.FEMALE : Gender.MALE;
+            Gender g = r.nextDouble() > properties.getGenderBalance() / 2d ? Gender.FEMALE : Gender.MALE;
             double compliance = r.nextGaussian();
             double health = r.nextGaussian();
 
@@ -57,48 +29,61 @@ public class PopulationGenerator {
         }
 
         return population;
-
     }
 
-    private static int findAge(double v) {
+    private static int findAge(double v, Map<Integer, Double> c, Map<Integer, MinMax> populationAges) {
 
-        int ageMin;
-        int ageMax;
-        double rMin;
-        double rMax;
+        int index;
 
-        if (v < c1) {
-            rMin = 0;
-            rMax = c1;
-            ageMin = 0;
-            ageMax = 14;
-        } else if (v > c1 && v <= c2) {
-            rMin = c1;
-            rMax = c2;
-            ageMin = 15;
-            ageMax = 24;
-        } else if (v > c2 && v <= c3) {
-            rMin = c2;
-            rMax = c3;
-            ageMin = 25;
-            ageMax = 54;
-        } else if (v > c3 && v <= c4) {
-            rMin = c3;
-            rMax = c4;
-            ageMin = 55;
-            ageMax = 64;
+        if (v < c.get(0)) {
+            index = 0;
+        } else if (v > c.get(0) && v <= c.get(1)) {
+            index = 1;
+        } else if (v > c.get(1) && v <= c.get(2)) {
+            index = 2;
+        } else if (v > c.get(2) && v <= c.get(3)) {
+            index = 3;
         } else {
-            rMin = c4;
-            rMax = c5;
-            ageMin = 65;
-            ageMax = 90;
+            index = 4;
         }
 
-        double distance = (v - rMin) / (rMax - rMin);
+        final double rMin = c.getOrDefault(index - 1, 0d);
+        final double rMax = c.get(index);
+        final int ageMin = populationAges.get(index).getMin();
+        final int ageMax = populationAges.get(index).getMax();
+
+        final double distance = (v - rMin) / (rMax - rMin);
 
         return (int) Math.round((ageMax - ageMin) * distance + ageMin);
+
     }
 
+
+    private static Map<Integer, Double> createCumulative(Map<Integer, Double> populationDistribution) {
+
+        List<Double> data = new ArrayList<>();
+
+        Map<Integer, Double> cumulative = new HashMap<>();
+
+        for (Map.Entry<Integer, Double> entry : populationDistribution.entrySet()) {
+            data.add(entry.getKey(), populationDistribution.get(entry.getKey()));
+        }
+
+        for (int i = 0; i < data.size(); i++) {
+            double sum = 0d;
+            if (i < data.size() - 1) {
+                sum += data.get(i);
+                for (int j = 0; j < i; j++) {
+                    sum += data.get(j);
+                }
+            } else if (i == data.size() - 1) {
+                sum = 1d;
+            }
+            cumulative.put(i, sum);
+        }
+
+        return cumulative;
+    }
 
     public static Map<VirusStatus, Integer> getSEIRCounts(Map<Integer, Person> population) {
 

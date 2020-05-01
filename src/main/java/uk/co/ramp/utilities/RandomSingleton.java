@@ -1,4 +1,4 @@
-package uk.co.ramp;
+package uk.co.ramp.utilities;
 
 import java.util.HashMap;
 import java.util.Map;

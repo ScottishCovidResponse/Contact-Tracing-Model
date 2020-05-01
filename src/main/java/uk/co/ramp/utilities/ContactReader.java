@@ -1,9 +1,11 @@
-package uk.co.ramp.contact;
+package uk.co.ramp.utilities;
 
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVRecord;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import uk.co.ramp.contact.ContactException;
+import uk.co.ramp.contact.ContactRecord;
 
 import java.io.File;
 import java.io.FileReader;
