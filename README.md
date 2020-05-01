@@ -1,19 +1,19 @@
 # Contact-Tracing-Model
 Derived from the FMD model and contact data from Sibylle.
 
-##Background
+## Background
 
 This model has been derived from discussions ongoing as part of the RAMP collaborations to support modelling of the COVID-19 pandemic. 
 This model uses SEIR compartments and a network of contact data to spread the infection.  
 
-##Running Pre-requisites
-###Java SDK
+## Running Pre-requisites
+### Java SDK
 Please ensure you have a Java SDK installed. I recommend Java 11 as it is the current LTS version.
 
-###Gradle
+### Gradle
 To compile, run or test this model, Gradle must be installed. This manages the libraries utilised and simplifies the build process.
 
-####For MacOS:
+#### For MacOS:
 I recommend using [homebrew](www.brew.sh). 
 
 To install homebrew:
@@ -26,25 +26,25 @@ To install Gradle:
 brew install gradle
 ```
 
-####For Debian, Ubuntu, Mint:
+#### For Debian, Ubuntu, Mint:
 ```shell script
 sudo apt install gradle
 ``` 
 
-####For RedHat, Centos, Fedora:
+#### For RedHat, Centos, Fedora:
 ```shell script
 yum install gradle
 ```
 
-####For Windows:
+#### For Windows:
 
 Follow instructions [here](https://gradle.org/install/).
 
-##Inputs
+## Inputs
 
 There are two input files that are user editable for starters. They are JSON files that contain:
 
-###General Settings
+### General Settings
 
 ```json
 {
@@ -62,7 +62,7 @@ There are two input files that are user editable for starters. They are JSON fil
 * **timeLimit**: The max time it can run, regardless of contact data provided.
 * **steadyState**: if the model continues when to a steady state when it has run out of contact data. 
 
-###Population Demographics
+### Population Demographics
 ```json
 {
   "populationDistribution": {
@@ -106,7 +106,7 @@ NB this is hardcoded to 5 bins, starting at index 0.
 
 The data has been taken from the index mundi data found [here](https://www.indexmundi.com/united_kingdom/demographics_profile.html)
 
-##Outputs
+## Outputs
 
 Besides the fairly coarse console output, a CSV file called "SEIR.csv" is output that contains the SEIR numbers for each day. 
 
@@ -121,7 +121,7 @@ Day,S,E,I,R
 89,3030,4,22,6944
 ```
 
-##Build/Test/Run Guide
+## Build/Test/Run Guide
 
 To compile the project without running tests:
 ```shell script
@@ -138,7 +138,7 @@ To run the project:
 gradle run
 ```
 
-##Version History
+## Version History
 
 0.1 - the initial implementation of an SEIR model
 
