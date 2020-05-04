@@ -28,10 +28,15 @@ public class ContactRunner {
 
     public static void main(String[] args) throws IOException {
         ContactRunner contactRunner = new ContactRunner();
-        contactRunner.run();
+
+        Optional<Integer> sid = Optional.empty();
+        if (args.length == 1) {
+            sid = Optional.of(Integer.parseInt(args[0]));
+        }
+        contactRunner.run(sid);
     }
 
-    private void run() throws IOException {
+    private void run(Optional<Integer> sidCmd) throws IOException {
 
         StandardProperties properties = StandardPropertiesReader.read(new File("runSettings.json"));
         PopulationProperties populationProperties = PopulationPropertiesReader.read(new File("population.json"));
@@ -40,6 +45,12 @@ public class ContactRunner {
         int timeLimit = properties.getTimeLimit();
         int infected = properties.getInfected();
         int sid = properties.getSid();
+
+        if (sidCmd.isPresent()) {
+            LOGGER.warn("SID from input file has been overridden by the command line variable {}", sidCmd.get());
+            sid = sidCmd.get();
+        }
+
 
         Map<Integer, Person> population = PopulationGenerator.generate(populationSize, populationProperties, sid);
         Map<Integer, List<ContactRecord>> contactRecords = ContactReader.read(populationSize, timeLimit);

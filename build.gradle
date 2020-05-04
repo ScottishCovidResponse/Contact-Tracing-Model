@@ -53,3 +53,11 @@ sonarqube {
         property "sonar.host.url", "http://10.0.1.11:9000"
     }
 }
+
+task copyFilesToInstall ( type: Copy){
+    from "contacts.csv", "population.json", "runSettings.json"
+    into "$buildDir/install/ContactTracing/bin/"
+
+}
+
+tasks.getByName("installDist").finalizedBy(copyFilesToInstall)
