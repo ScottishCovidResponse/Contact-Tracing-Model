@@ -27,7 +27,7 @@ public class ContactReader {
     public static Map<Integer, List<ContactRecord>> read(int personLimit, int dayLimit) {
 
         Iterable<CSVRecord> records;
-        File file = new File(ContactReader.class.getResource("/contacts.csv").getFile());
+        File file = new File("contacts.csv");
         try {
             Reader in = new FileReader(file);
             records = CSVFormat.EXCEL.withFirstRecordAsHeader().parse(in);
