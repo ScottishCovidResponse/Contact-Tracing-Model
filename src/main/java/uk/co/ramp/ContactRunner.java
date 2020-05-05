@@ -25,6 +25,7 @@ public class ContactRunner {
 
     private static final Logger LOGGER = LogManager.getLogger(ContactRunner.class);
     private final Map<Integer, SeirRecord> records = new HashMap<>();
+    private int sid;
 
     public static void main(String[] args) throws IOException {
         ContactRunner contactRunner = new ContactRunner();
@@ -44,11 +45,13 @@ public class ContactRunner {
         int populationSize = properties.getPopulationSize();
         int timeLimit = properties.getTimeLimit();
         int infected = properties.getInfected();
-        int sid = properties.getSid();
+        int sidTemp = properties.getSid();
 
         if (sidCmd.isPresent()) {
             LOGGER.warn("SID from input file has been overridden by the command line variable {}", sidCmd.get());
             sid = sidCmd.get();
+        } else {
+            sid = sidTemp;
         }
 
 
@@ -67,9 +70,7 @@ public class ContactRunner {
         // print initial conditions
         printSEIR(population, 0);
 
-
         runToCompletion(properties, population, contactRecords);
-
 
         Output.printSeirCSV(records);
 
@@ -80,6 +81,7 @@ public class ContactRunner {
         int maxContact = contactRecords.keySet().stream().max(Comparator.naturalOrder()).orElseThrow(RuntimeException::new);
         int runTime;
         boolean steadyState = properties.isSteadyState();
+        double randomInfectionRate = properties.getRandomInfectionRate();
 
         if (timeLimit <= maxContact) {
             LOGGER.info("Not all contact data will be used");
@@ -91,19 +93,20 @@ public class ContactRunner {
 
         }
 
-        runContactData(runTime, population, contactRecords);
+        runContactData(runTime, population, contactRecords, randomInfectionRate);
 
         if (steadyState) {
-            runToSteadyState(timeLimit, population);
+            runToSteadyState(runTime, timeLimit, population);
         }
 
 
     }
 
-    private void runToSteadyState(int timeLimit, Map<Integer, Person> population) {
-        for (int time = 0; time <= timeLimit; time++) {
+    private void runToSteadyState(int runTime, int timeLimit, Map<Integer, Person> population) {
+        for (int time = runTime; time <= timeLimit; time++) {
 
-            updatePopulationState(time, population);
+            // set random infection rate to zero in steady state mode
+            updatePopulationState(time, population, 0d);
             printSEIR(population, time);
 
             Map<VirusStatus, Integer> seirCounts = PopulationGenerator.getSEIRCounts(population);
@@ -117,10 +120,10 @@ public class ContactRunner {
     }
 
 
-    private void runContactData(int maxContact, Map<Integer, Person> population, Map<Integer, List<ContactRecord>> contactRecords) {
+    private void runContactData(int maxContact, Map<Integer, Person> population, Map<Integer, List<ContactRecord>> contactRecords, double randomInfectionRate) {
         for (int time = 0; time <= maxContact; time++) {
 
-            updatePopulationState(time, population);
+            updatePopulationState(time, population, randomInfectionRate);
             List<ContactRecord> todaysContacts = contactRecords.get(time);
             printSEIR(population, time);
 
@@ -137,9 +140,14 @@ public class ContactRunner {
     }
 
 
-    private void updatePopulationState(int time, Map<Integer, Person> population) {
+    private void updatePopulationState(int time, Map<Integer, Person> population, double randomInfectionRate) {
         for (Person p : population.values()) {
             p.checkTime(time);
+            if (randomInfectionRate > 0d && time > 0) {
+
+                boolean var = RandomSingleton.getInstance(sid).nextDouble() <= randomInfectionRate;
+                if (var) p.randomExposure(time);
+            }
         }
     }
 
@@ -157,16 +165,21 @@ public class ContactRunner {
     private void printSEIR(Map<Integer, Person> population, int time) {
         Map<VirusStatus, Integer> seirCounts = PopulationGenerator.getSEIRCounts(population);
 
-        records.put(time, new SeirRecord(time, seirCounts));
-
         LOGGER.info("Conditions @ time: {}", time);
-
         LOGGER.info("{}  {}", SUSCEPTIBLE, seirCounts.get(SUSCEPTIBLE));
         LOGGER.info("{}      {}", EXPOSED, seirCounts.get(EXPOSED));
         LOGGER.info("{}     {}", INFECTED, seirCounts.get(INFECTED));
         LOGGER.info("{}    {}", RECOVERED, seirCounts.get(RECOVERED));
 
         LOGGER.info("");
+
+        SeirRecord seirRecord = new SeirRecord(time, seirCounts.get(SUSCEPTIBLE), seirCounts.get(EXPOSED), seirCounts.get(INFECTED), seirCounts.get(RECOVERED));
+        System.out.println(seirRecord.toString());
+
+        records.put(time, seirRecord);
+        seirRecord = null;
+
+
     }
 
     private Person getMostSevere(Person personA, Person personB) {

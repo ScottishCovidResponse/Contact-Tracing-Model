@@ -3,6 +3,7 @@ package uk.co.ramp.record;
 import uk.co.ramp.people.VirusStatus;
 
 import java.util.Map;
+import java.util.Objects;
 
 import static uk.co.ramp.people.VirusStatus.*;
 
@@ -53,5 +54,33 @@ public class SeirRecord {
 
     public int getR() {
         return r;
+    }
+
+    @Override
+    public String toString() {
+        return "SeirRecord{" +
+                "time=" + time +
+                ", s=" + s +
+                ", e=" + e +
+                ", i=" + i +
+                ", r=" + r +
+                '}';
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        SeirRecord that = (SeirRecord) o;
+        return time == that.time &&
+                s == that.s &&
+                e == that.e &&
+                i == that.i &&
+                r == that.r;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(time, s, e, i, r);
     }
 }

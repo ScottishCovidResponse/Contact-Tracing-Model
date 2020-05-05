@@ -91,4 +91,13 @@ public class Person {
         }
 
     }
+
+    public void randomExposure(int t) {
+
+        if (status == SUSCEPTIBLE) {
+            LOGGER.info("Person with id: {} has been randomly exposed", getId());
+            updateStatus(EXPOSED, t);
+        }
+
+    }
 }
