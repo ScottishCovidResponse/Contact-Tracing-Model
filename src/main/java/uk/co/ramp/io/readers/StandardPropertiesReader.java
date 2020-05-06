@@ -21,15 +21,12 @@ public class StandardPropertiesReader {
 
     public static void create() throws IOException {
 
-        StandardProperties properties = new StandardProperties(10000, 100, 1000, 0.01, 0, true);
-        Writer w = new FileWriter("runSettings.json");
-        Gson gson = new GsonBuilder().setPrettyPrinting().create();
+        StandardProperties properties = new StandardProperties(10000, 100, 1000, 0, true);
 
-        gson.toJson(properties, w);
-
-        w.flush();
-        w.close();
-
+        try (Writer w = new FileWriter("runSettings.json")) {
+            Gson gson = new GsonBuilder().setPrettyPrinting().create();
+            gson.toJson(properties, w);
+        }
     }
 
 

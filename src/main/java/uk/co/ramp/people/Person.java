@@ -2,6 +2,12 @@ package uk.co.ramp.people;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import uk.co.ramp.ContactRunner;
+import uk.co.ramp.io.DiseaseProperties;
+import uk.co.ramp.io.ProgressionDistribution;
+import uk.co.ramp.utilities.ExponentialDistributor;
+
+import java.util.Random;
 
 import static uk.co.ramp.people.VirusStatus.*;
 
@@ -58,17 +64,35 @@ public class Person {
         this.status = status;
     }
 
+    public static void main(String[] args) {
+
+        Random r = new Random();
+
+
+        for (int i = 0; i < 1000; i++) {
+
+            System.out.println(r.nextGaussian());
+
+        }
+
+
+    }
+
     public void updateStatus(VirusStatus newStatus, int currentTime) {
+
+        DiseaseProperties properties = ContactRunner.getDiseaseProperties();
+
         if (newStatus == EXPOSED) {
             setStatus(newStatus);
-            nextStatusChange = currentTime + 3;
+            nextStatusChange = currentTime + getDistributionValue(properties.getMeanTimeToInfected(), properties.getProgressionDistribution());
         } else if (newStatus == INFECTED) {
-            nextStatusChange = currentTime + 7;
+            nextStatusChange = currentTime + getDistributionValue(properties.getMeanTimeToRecovered(), properties.getProgressionDistribution());
             setStatus(INFECTED);
         } else if (newStatus == RECOVERED) {
             setStatus(RECOVERED);
         }
     }
+
 
     public int getNextStatusChange() {
         return nextStatusChange;
@@ -100,4 +124,36 @@ public class Person {
         }
 
     }
+
+    int getDistributionValue(double mean, ProgressionDistribution p) {
+
+        Random rng = ContactRunner.getRng();
+
+
+        int value = (int) mean;
+        double sample;
+        switch (p) {
+            case GAUSSIAN:
+                //TODO
+                sample = rng.nextGaussian() + mean;
+                break;
+            case LINEAR:
+                //TODO
+                sample = rng.nextDouble() * 2d * mean;
+                break;
+            case EXPONENTIAL:
+                sample = ExponentialDistributor.exponential(rng.nextDouble(), mean);
+                break;
+            case FLAT:
+            default:
+                return value;
+        }
+
+
+        value = (int) sample;
+
+        return Math.min(Math.max(value, 1), 14);
+    }
+
+
 }

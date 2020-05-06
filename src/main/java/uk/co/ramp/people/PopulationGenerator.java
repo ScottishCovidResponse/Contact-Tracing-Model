@@ -1,6 +1,7 @@
 package uk.co.ramp.people;
 
 import uk.co.ramp.io.PopulationProperties;
+import uk.co.ramp.io.StandardProperties;
 import uk.co.ramp.utilities.MinMax;
 import uk.co.ramp.utilities.RandomSingleton;
 
@@ -10,6 +11,10 @@ public class PopulationGenerator {
 
     private PopulationGenerator() {
         // hidden constructor
+    }
+
+    public static Map<Integer, Person> generate(StandardProperties runProperties, PopulationProperties properties) {
+        return generate(runProperties.getPopulationSize(), properties, runProperties.getSeed());
     }
 
     public static Map<Integer, Person> generate(int popSize, PopulationProperties properties, int sid) {

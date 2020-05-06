@@ -3,9 +3,11 @@ package uk.co.ramp;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import uk.co.ramp.contact.ContactRecord;
+import uk.co.ramp.io.DiseaseProperties;
 import uk.co.ramp.io.Output;
 import uk.co.ramp.io.PopulationProperties;
 import uk.co.ramp.io.StandardProperties;
+import uk.co.ramp.io.readers.DiseasePropertiesReader;
 import uk.co.ramp.io.readers.PopulationPropertiesReader;
 import uk.co.ramp.io.readers.StandardPropertiesReader;
 import uk.co.ramp.people.Person;
@@ -24,12 +26,20 @@ import static uk.co.ramp.people.VirusStatus.*;
 public class ContactRunner {
 
     private static final Logger LOGGER = LogManager.getLogger(ContactRunner.class);
+    private static Random rng;
     private final Map<Integer, SeirRecord> records = new HashMap<>();
-    private int sid;
+
+    private static PopulationProperties populationProperties;
+    private static StandardProperties runProperties;
+    private static DiseaseProperties diseaseProperties;
+
 
     public static void main(String[] args) throws IOException {
         ContactRunner contactRunner = new ContactRunner();
 
+        readInputs();
+
+        rng = RandomSingleton.getInstance(runProperties.getSeed());
         Optional<Integer> sid = Optional.empty();
         if (args.length == 1) {
             sid = Optional.of(Integer.parseInt(args[0]));
@@ -37,69 +47,18 @@ public class ContactRunner {
         contactRunner.run(sid);
     }
 
-    private void run(Optional<Integer> sidCmd) throws IOException {
-
-        StandardProperties properties = StandardPropertiesReader.read(new File("runSettings.json"));
-        PopulationProperties populationProperties = PopulationPropertiesReader.read(new File("population.json"));
-
-        int populationSize = properties.getPopulationSize();
-        int timeLimit = properties.getTimeLimit();
-        int infected = properties.getInfected();
-        int sidTemp = properties.getSid();
-
-        if (sidCmd.isPresent()) {
-            LOGGER.warn("SID from input file has been overridden by the command line variable {}", sidCmd.get());
-            sid = sidCmd.get();
-        } else {
-            sid = sidTemp;
-        }
-
-
-        Map<Integer, Person> population = PopulationGenerator.generate(populationSize, populationProperties, sid);
-        Map<Integer, List<ContactRecord>> contactRecords = ContactReader.read(populationSize, timeLimit);
-
-        Set<Integer> infectedIds = infectPopulation(infected, populationSize);
-
-        LOGGER.info(infectedIds);
-
-        for (Integer id : infectedIds) {
-            population.get(id).updateStatus(INFECTED, 0);
-            LOGGER.info("population.get(id).getNextStatusChange() = {}", population.get(id).getNextStatusChange());
-        }
-
-        // print initial conditions
-        printSEIR(population, 0);
-
-        runToCompletion(properties, population, contactRecords);
-
-        Output.printSeirCSV(records);
-
+    private static void readInputs() throws IOException {
+        runProperties = StandardPropertiesReader.read(new File("input/runSettings.json"));
+        populationProperties = PopulationPropertiesReader.read(new File("input/populationSettings.json"));
+        diseaseProperties = DiseasePropertiesReader.read(new File("input/diseaseSettings.json"));
     }
 
-    private void runToCompletion(StandardProperties properties, Map<Integer, Person> population, Map<Integer, List<ContactRecord>> contactRecords) {
-        int timeLimit = properties.getTimeLimit();
-        int maxContact = contactRecords.keySet().stream().max(Comparator.naturalOrder()).orElseThrow(RuntimeException::new);
-        int runTime;
-        boolean steadyState = properties.isSteadyState();
-        double randomInfectionRate = properties.getRandomInfectionRate();
+    public static DiseaseProperties getDiseaseProperties() {
+        return diseaseProperties;
+    }
 
-        if (timeLimit <= maxContact) {
-            LOGGER.info("Not all contact data will be used");
-            runTime = timeLimit;
-            steadyState = false;
-        } else {
-            LOGGER.info("Potential for steady state soln");
-            runTime = maxContact;
-
-        }
-
-        runContactData(runTime, population, contactRecords, randomInfectionRate);
-
-        if (steadyState) {
-            runToSteadyState(runTime, timeLimit, population);
-        }
-
-
+    public static StandardProperties getRunProperties() {
+        return runProperties;
     }
 
     private void runToSteadyState(int runTime, int timeLimit, Map<Integer, Person> population) {
@@ -139,27 +98,40 @@ public class ContactRunner {
         }
     }
 
-
-    private void updatePopulationState(int time, Map<Integer, Person> population, double randomInfectionRate) {
-        for (Person p : population.values()) {
-            p.checkTime(time);
-            if (randomInfectionRate > 0d && time > 0) {
-
-                boolean var = RandomSingleton.getInstance(sid).nextDouble() <= randomInfectionRate;
-                if (var) p.randomExposure(time);
-            }
-        }
+    public static Random getRng() {
+        return rng;
     }
 
-    private void evaluateExposures(Map<Integer, Person> population, ContactRecord c, int time) {
-        Person personA = getMostSevere(population.get(c.getTo()), population.get(c.getFrom()));
-        Person personB = personA == population.get(c.getTo()) ? population.get(c.getFrom()) : population.get(c.getTo());
+    private void run(Optional<Integer> sidCmd) throws IOException {
 
-        boolean dangerMix = personA.getStatus() == INFECTED && personB.getStatus() == SUSCEPTIBLE;
+        // readInputs();
 
-        if (dangerMix && RandomSingleton.getInstance(0).nextDouble() < c.getWeight() / 30d) {
-            personB.updateStatus(EXPOSED, time);
+        if (sidCmd.isPresent()) {
+            int seed = runProperties.getSeed();
+            LOGGER.warn("The seed from input file will be modified from {} to {}", sidCmd.get(), seed + sidCmd.get());
+            seed += sidCmd.get();
+            runProperties.setSeed(seed);
         }
+
+
+        Map<Integer, Person> population = PopulationGenerator.generate(runProperties, populationProperties);
+        Map<Integer, List<ContactRecord>> contactRecords = ContactReader.read(runProperties);
+        Set<Integer> infectedIds = infectPopulation();
+
+        LOGGER.info(infectedIds);
+
+        for (Integer id : infectedIds) {
+            population.get(id).updateStatus(INFECTED, 0);
+            LOGGER.info("population.get(id).getNextStatusChange() = {}", population.get(id).getNextStatusChange());
+        }
+
+        // print initial conditions
+        printSEIR(population, 0);
+
+        runToCompletion(runProperties, population, contactRecords);
+
+        Output.printSeirCSV(records);
+
     }
 
     private void printSEIR(Map<Integer, Person> population, int time) {
@@ -174,11 +146,8 @@ public class ContactRunner {
         LOGGER.info("");
 
         SeirRecord seirRecord = new SeirRecord(time, seirCounts.get(SUSCEPTIBLE), seirCounts.get(EXPOSED), seirCounts.get(INFECTED), seirCounts.get(RECOVERED));
-        System.out.println(seirRecord.toString());
 
         records.put(time, seirRecord);
-        seirRecord = null;
-
 
     }
 
@@ -189,11 +158,61 @@ public class ContactRunner {
         return a.compareTo(b) > 0 ? personA : personB;
     }
 
-    private Set<Integer> infectPopulation(int infected, int populationSize) {
+    private void runToCompletion(StandardProperties properties, Map<Integer, Person> population, Map<Integer, List<ContactRecord>> contactRecords) {
+        int timeLimit = properties.getTimeLimit();
+        int maxContact = contactRecords.keySet().stream().max(Comparator.naturalOrder()).orElseThrow(RuntimeException::new);
+        int runTime;
+        boolean steadyState = properties.isSteadyState();
+        double randomInfectionRate = diseaseProperties.getRandomInfectionRate();
+
+        if (timeLimit <= maxContact) {
+            LOGGER.info("Not all contact data will be used");
+            runTime = timeLimit;
+            steadyState = false;
+        } else {
+            LOGGER.info("Potential for steady state soln");
+            runTime = maxContact;
+
+        }
+
+        runContactData(runTime, population, contactRecords, randomInfectionRate);
+
+        if (steadyState) {
+            runToSteadyState(runTime, timeLimit, population);
+        }
+
+
+    }
+
+    private void updatePopulationState(int time, Map<Integer, Person> population, double randomInfectionRate) {
+
+        for (Person p : population.values()) {
+            p.checkTime(time);
+            if (randomInfectionRate > 0d && time > 0) {
+
+                boolean var = rng.nextDouble() <= randomInfectionRate;
+                if (var) p.randomExposure(time);
+            }
+        }
+    }
+
+    private void evaluateExposures(Map<Integer, Person> population, ContactRecord c, int time) {
+        Person personA = getMostSevere(population.get(c.getTo()), population.get(c.getFrom()));
+        Person personB = personA == population.get(c.getTo()) ? population.get(c.getFrom()) : population.get(c.getTo());
+
+        boolean dangerMix = personA.getStatus() == INFECTED && personB.getStatus() == SUSCEPTIBLE;
+
+
+        if (dangerMix && rng.nextDouble() < c.getWeight() / 30d) {
+            personB.updateStatus(EXPOSED, time);
+        }
+    }
+
+    private Set<Integer> infectPopulation() {
 
         Set<Integer> infectedIds = new HashSet<>();
-        while (infectedIds.size() < infected) {
-            infectedIds.add(RandomSingleton.getInstance(0).nextInt(populationSize));
+        while (infectedIds.size() < runProperties.getInfected()) {
+            infectedIds.add(rng.nextInt(runProperties.getPopulationSize()));
         }
         return infectedIds;
 

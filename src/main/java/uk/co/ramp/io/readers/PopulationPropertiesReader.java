@@ -35,25 +35,18 @@ public class PopulationPropertiesReader {
         populationDistribution.put(3, 0.1222);
         populationDistribution.put(4, 0.1819);
 
-
         populationAges.put(0, new MinMax(0, 14));
         populationAges.put(1, new MinMax(15, 24));
         populationAges.put(2, new MinMax(25, 54));
         populationAges.put(3, new MinMax(55, 64));
         populationAges.put(4, new MinMax(65, 90));
 
-
         PopulationProperties wrapper = new PopulationProperties(populationDistribution, populationAges, 0.99);
 
-        Writer w = new FileWriter("population.json");
-        Gson gson = new GsonBuilder().setPrettyPrinting().create();
-
-        gson.toJson(wrapper, w);
-
-        w.flush();
-        w.close();
-
+        try (Writer w = new FileWriter("population.json")) {
+            Gson gson = new GsonBuilder().setPrettyPrinting().create();
+            gson.toJson(wrapper, w);
+        }
     }
-
 
 }

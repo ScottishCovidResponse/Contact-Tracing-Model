@@ -5,17 +5,19 @@ public class StandardProperties {
     private final int populationSize;
     private final int timeLimit;
     private final int infected;
-    private final double randomInfectionRate;
-    private final int sid;
+    private int seed;
     private final boolean steadyState;
 
-    public StandardProperties(int populationSize, int timeLimit, int infected, double randomInfectionRate, int sid, boolean steadyState) {
+    public StandardProperties(int populationSize, int timeLimit, int infected, int seed, boolean steadyState) {
         this.populationSize = populationSize;
         this.timeLimit = timeLimit;
         this.infected = infected;
-        this.sid = sid;
+        this.seed = seed;
         this.steadyState = steadyState;
-        this.randomInfectionRate = randomInfectionRate;
+    }
+
+    public int getSeed() {
+        return seed;
     }
 
     public int getPopulationSize() {
@@ -30,12 +32,8 @@ public class StandardProperties {
         return infected;
     }
 
-    public int getSid() {
-        return sid;
-    }
-
-    public double getRandomInfectionRate() {
-        return randomInfectionRate;
+    public void setSeed(int seed) {
+        this.seed = seed;
     }
 
     @Override
@@ -44,8 +42,8 @@ public class StandardProperties {
                 "populationSize=" + populationSize +
                 ", timeLimit=" + timeLimit +
                 ", infected=" + infected +
-                ", randomInfectionRate=" + randomInfectionRate +
-                ", sid=" + sid +
+
+                ", sid=" + seed +
                 ", steadyState=" + steadyState +
                 '}';
     }

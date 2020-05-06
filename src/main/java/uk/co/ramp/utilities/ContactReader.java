@@ -6,6 +6,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import uk.co.ramp.contact.ContactException;
 import uk.co.ramp.contact.ContactRecord;
+import uk.co.ramp.io.StandardProperties;
 
 import java.io.File;
 import java.io.FileReader;
@@ -24,16 +25,21 @@ public class ContactReader {
         // hidden constructor
     }
 
+    public static Map<Integer, List<ContactRecord>> read(StandardProperties runProperties) {
+        return read(runProperties.getPopulationSize(), runProperties.getTimeLimit());
+    }
+
+
     public static Map<Integer, List<ContactRecord>> read(int personLimit, int dayLimit) {
 
         Iterable<CSVRecord> records;
-        File file = new File("contacts.csv");
+        File file = new File("input/contacts.csv");
         try {
             Reader in = new FileReader(file);
             records = CSVFormat.EXCEL.withFirstRecordAsHeader().parse(in);
         } catch (IOException e) {
             LOGGER.fatal("An error occurred parsing this file.");
-            throw new ContactException("An error occured reading the file " + e.getMessage());
+            throw new ContactException("An error occurred reading the file " + e.getMessage());
         }
         double maxWeight = 0d;
         Map<Integer, List<ContactRecord>> dailyRecord = new HashMap<>();
