@@ -137,13 +137,11 @@ public class ContactRunner {
     private void printSEIR(Map<Integer, Person> population, int time) {
         Map<VirusStatus, Integer> seirCounts = PopulationGenerator.getSEIRCounts(population);
 
-        LOGGER.info("Conditions @ time: {}", time);
-        LOGGER.info("{}  {}", SUSCEPTIBLE, seirCounts.get(SUSCEPTIBLE));
-        LOGGER.info("{}      {}", EXPOSED, seirCounts.get(EXPOSED));
-        LOGGER.info("{}     {}", INFECTED, seirCounts.get(INFECTED));
-        LOGGER.info("{}    {}", RECOVERED, seirCounts.get(RECOVERED));
-
-        LOGGER.info("");
+        LOGGER.debug("Conditions @ time: {}", time);
+        LOGGER.debug("{}  {}", SUSCEPTIBLE, seirCounts.get(SUSCEPTIBLE));
+        LOGGER.debug("{}      {}", EXPOSED, seirCounts.get(EXPOSED));
+        LOGGER.debug("{}     {}", INFECTED, seirCounts.get(INFECTED));
+        LOGGER.debug("{}    {}", RECOVERED, seirCounts.get(RECOVERED));
 
         SeirRecord seirRecord = new SeirRecord(time, seirCounts.get(SUSCEPTIBLE), seirCounts.get(EXPOSED), seirCounts.get(INFECTED), seirCounts.get(RECOVERED));
 
@@ -202,9 +200,8 @@ public class ContactRunner {
 
         boolean dangerMix = personA.getStatus() == INFECTED && personB.getStatus() == SUSCEPTIBLE;
 
-
-        if (dangerMix && rng.nextDouble() < c.getWeight() / 30d) {
-            personB.updateStatus(EXPOSED, time);
+        if (dangerMix && rng.nextDouble() < c.getWeight() / diseaseProperties.getExposureTuning()) {
+            personB.updateStatus(EXPOSED, time, personA.getId());
         }
     }
 

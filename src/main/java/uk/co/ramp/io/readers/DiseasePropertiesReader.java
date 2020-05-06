@@ -22,7 +22,7 @@ public class DiseasePropertiesReader {
 
     public static void create() throws IOException {
 
-        DiseaseProperties wrapper = new DiseaseProperties(3, 7, 0.01, ProgressionDistribution.FLAT);
+        DiseaseProperties wrapper = new DiseaseProperties(3, 7, 0.01, 160, ProgressionDistribution.FLAT);
 
         try (Writer w = new FileWriter("input/diseaseSettings.json")) {
             Gson gson = new GsonBuilder().setPrettyPrinting().create();

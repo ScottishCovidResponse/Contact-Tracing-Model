@@ -1,6 +1,7 @@
 {
   "meanTimeToInfected": 3.0,
+  "exposureTuning": 45,
   "meanTimeToRecovered": 7.0,
-  "randomInfectionRate": 0.01,
+  "randomInfectionRate": 0.001,
   "progressionDistribution": "EXPONENTIAL"
 }

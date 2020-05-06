@@ -22,6 +22,7 @@ public class Person {
     private final double compliance;
     private final double health;
     private VirusStatus status;
+    private int exposedBy;
 
     private int nextStatusChange = -1;
 
@@ -64,18 +65,9 @@ public class Person {
         this.status = status;
     }
 
-    public static void main(String[] args) {
-
-        Random r = new Random();
-
-
-        for (int i = 0; i < 1000; i++) {
-
-            System.out.println(r.nextGaussian());
-
-        }
-
-
+    public void updateStatus(VirusStatus newStatus, int currentTime, int exposedBy) {
+        this.exposedBy = exposedBy;
+        updateStatus(newStatus, currentTime);
     }
 
     public void updateStatus(VirusStatus newStatus, int currentTime) {
@@ -93,7 +85,6 @@ public class Person {
         }
     }
 
-
     public int getNextStatusChange() {
         return nextStatusChange;
     }
@@ -101,7 +92,7 @@ public class Person {
     public void checkTime(int time) {
 
         if (nextStatusChange == time) {
-            LOGGER.info("Changing status for id: {}", id);
+            LOGGER.debug("Changing status for id: {}", id);
 
             nextStatusChange = -1;
 
@@ -117,12 +108,11 @@ public class Person {
     }
 
     public void randomExposure(int t) {
-
+        exposedBy = -1;
         if (status == SUSCEPTIBLE) {
-            LOGGER.info("Person with id: {} has been randomly exposed", getId());
+            LOGGER.info("Person with id: {} has been randomly exposed at time {}", getId(), t);
             updateStatus(EXPOSED, t);
         }
-
     }
 
     int getDistributionValue(double mean, ProgressionDistribution p) {
@@ -134,11 +124,9 @@ public class Person {
         double sample;
         switch (p) {
             case GAUSSIAN:
-                //TODO
                 sample = rng.nextGaussian() + mean;
                 break;
             case LINEAR:
-                //TODO
                 sample = rng.nextDouble() * 2d * mean;
                 break;
             case EXPONENTIAL:
