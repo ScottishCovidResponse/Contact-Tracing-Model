@@ -1,8 +1,0 @@
-{
-  "populationSize": 10000,
-  "timeLimit": 100,
-  "infected": 1000,
-  "randomInfectionRate": 0.0,
-  "sid": 0,
-  "steadyState": true
-}
