@@ -1,4 +1,7 @@
 # Contact-Tracing-Model
+
+![Java CI with Gradle](https://github.com/ScottishCovidResponse/Contact-Tracing-Model/workflows/Java%20CI%20with%20Gradle/badge.svg)
+
 Derived from the FMD model and contact data from Sibylle.
 
 ## Background
