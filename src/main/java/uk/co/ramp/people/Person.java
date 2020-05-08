@@ -34,6 +34,7 @@ public class Person {
         this.compliance = compliance;
         this.health = health;
         this.status = SUSCEPTIBLE;
+        this.exposedBy = -1;
     }
 
 
@@ -61,6 +62,10 @@ public class Person {
         return status;
     }
 
+    public int getExposedBy() {
+        return exposedBy;
+    }
+
     private void setStatus(VirusStatus status) {
         this.status = status;
     }
@@ -82,6 +87,7 @@ public class Person {
             setStatus(INFECTED);
         } else if (newStatus == RECOVERED) {
             setStatus(RECOVERED);
+            nextStatusChange = -1;
         }
     }
 
