@@ -55,12 +55,30 @@ public class SeirRecordTest {
     @Test
     public void testTestEquals() {
 
+        // self equal
+        Assert.assertEquals(testRecord, testRecord);
+
         // identical
         SeirRecord compareRecord = new SeirRecord(time, s, e, i, r);
         Assert.assertEquals(testRecord, compareRecord);
 
         Assert.assertNotEquals(testRecord, testRecord.toString());
         Assert.assertNotEquals(testRecord, null);
+
+        compareRecord = new SeirRecord(-1, s, e, i, r);
+        Assert.assertNotEquals(testRecord, compareRecord);
+
+        compareRecord = new SeirRecord(time, -1, e, i, r);
+        Assert.assertNotEquals(testRecord, compareRecord);
+
+        compareRecord = new SeirRecord(time, s, -1, i, r);
+        Assert.assertNotEquals(testRecord, compareRecord);
+
+        compareRecord = new SeirRecord(time, s, e, -1, r);
+        Assert.assertNotEquals(testRecord, compareRecord);
+
+        compareRecord = new SeirRecord(time, s, e, i, -1);
+        Assert.assertNotEquals(testRecord, compareRecord);
 
     }
 

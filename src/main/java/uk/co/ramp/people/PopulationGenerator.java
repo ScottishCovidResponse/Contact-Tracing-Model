@@ -1,5 +1,6 @@
 package uk.co.ramp.people;
 
+import org.apache.commons.math3.random.RandomDataGenerator;
 import uk.co.ramp.io.PopulationProperties;
 import uk.co.ramp.io.StandardProperties;
 import uk.co.ramp.utilities.MinMax;
@@ -18,16 +19,16 @@ public class PopulationGenerator {
     }
 
     public static Map<Integer, Person> generate(int popSize, PopulationProperties properties, int sid) {
-        Random r = RandomSingleton.getInstance(sid);
+        RandomDataGenerator r = RandomSingleton.getInstance(sid);
         Map<Integer, Double> cumulative = createCumulative(properties.getPopulationDistribution());
         Map<Integer, Person> population = new HashMap<>();
         for (int i = 0; i < popSize; i++) {
 
-            int age = findAge(r.nextDouble(), cumulative, properties.getPopulationAges());
+            int age = findAge(r.nextUniform(0, 1), cumulative, properties.getPopulationAges());
 
-            Gender g = r.nextDouble() > properties.getGenderBalance() / 2d ? Gender.FEMALE : Gender.MALE;
-            double compliance = r.nextGaussian();
-            double health = r.nextGaussian();
+            Gender g = r.nextUniform(0, 1) > properties.getGenderBalance() / 2d ? Gender.FEMALE : Gender.MALE;
+            double compliance = r.nextGaussian(0.5, 0.5);
+            double health = r.nextGaussian(0.5, 0.5);
 
             population.put(i, new Person(i, age, g, compliance, health));
 

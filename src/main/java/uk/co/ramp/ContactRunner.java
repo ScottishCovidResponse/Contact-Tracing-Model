@@ -1,5 +1,6 @@
 package uk.co.ramp;
 
+import org.apache.commons.math3.random.RandomDataGenerator;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import uk.co.ramp.contact.ContactRecord;
@@ -26,7 +27,7 @@ import static uk.co.ramp.people.VirusStatus.*;
 public class ContactRunner {
 
     private static final Logger LOGGER = LogManager.getLogger(ContactRunner.class);
-    private static Random rng;
+    private static RandomDataGenerator rng;
     private final Map<Integer, SeirRecord> records = new HashMap<>();
 
     private static PopulationProperties populationProperties;
@@ -98,7 +99,7 @@ public class ContactRunner {
         }
     }
 
-    public static Random getRng() {
+    public static RandomDataGenerator getRng() {
         return rng;
     }
 
@@ -188,7 +189,7 @@ public class ContactRunner {
             p.checkTime(time);
             if (randomInfectionRate > 0d && time > 0) {
 
-                boolean var = rng.nextDouble() <= randomInfectionRate;
+                boolean var = rng.nextUniform(0, 1) <= randomInfectionRate;
                 if (var) p.randomExposure(time);
             }
         }
@@ -200,7 +201,7 @@ public class ContactRunner {
 
         boolean dangerMix = personA.getStatus() == INFECTED && personB.getStatus() == SUSCEPTIBLE;
 
-        if (dangerMix && rng.nextDouble() < c.getWeight() / diseaseProperties.getExposureTuning()) {
+        if (dangerMix && rng.nextUniform(0, 1) < c.getWeight() / diseaseProperties.getExposureTuning()) {
             personB.updateStatus(EXPOSED, time, personA.getId());
         }
     }
@@ -209,7 +210,7 @@ public class ContactRunner {
 
         Set<Integer> infectedIds = new HashSet<>();
         while (infectedIds.size() < runProperties.getInfected()) {
-            infectedIds.add(rng.nextInt(runProperties.getPopulationSize()));
+            infectedIds.add(rng.nextInt(0, runProperties.getPopulationSize()));
         }
         return infectedIds;
 
