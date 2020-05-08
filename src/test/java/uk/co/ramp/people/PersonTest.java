@@ -187,7 +187,7 @@ public class PersonTest {
             Assert.assertThat(appender.getOutput(), containsString(message));
             throw e;
         }
-        s
+
     }
 
     @Test
