@@ -57,7 +57,9 @@ sonarqube {
 task copyFilesToInstall ( type: Copy){
     from "contacts.csv", "populationSettings.json", "runSettings.json"
     into "$buildDir/install/ContactTracing/bin/"
-
 }
 
 tasks.getByName("installDist").finalizedBy(copyFilesToInstall)
+
+tasks.getByName("sonarqube").mustRunAfter("jacocoTestReport")
+tasks.getByName("sonarqube").dependsOn(tasks.getByName("jacocoTestReport"))
