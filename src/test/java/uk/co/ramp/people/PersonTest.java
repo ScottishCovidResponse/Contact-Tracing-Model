@@ -6,10 +6,10 @@ import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.internal.util.reflection.FieldSetter;
 import org.powermock.core.classloader.annotations.PowerMockIgnore;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
-import org.powermock.reflect.Whitebox;
 import uk.co.ramp.ContactRunner;
 import uk.co.ramp.LogAppender;
 import uk.co.ramp.io.DiseaseProperties;
@@ -18,6 +18,7 @@ import uk.co.ramp.io.ProgressionDistribution;
 import java.util.ArrayList;
 import java.util.List;
 
+import static java.lang.Math.*;
 import static org.hamcrest.CoreMatchers.containsString;
 import static org.powermock.api.mockito.PowerMockito.mockStatic;
 import static org.powermock.api.mockito.PowerMockito.when;
@@ -117,7 +118,7 @@ public class PersonTest {
     }
 
     @Test(expected = InvalidStatusTransitionException.class)
-    public void checkTime() {
+    public void checkTime() throws NoSuchFieldException {
 
         int time = rnd.nextInt(0, 100);
         int flatTransition = (int) diseaseProperties.getMeanTimeToInfected();
@@ -136,9 +137,8 @@ public class PersonTest {
         Assert.assertEquals(RECOVERED, person.getStatus());
         Assert.assertEquals(-1, person.getNextStatusChange());
 
-
         person.updateStatus(SUSCEPTIBLE, ++time);
-        Whitebox.setInternalState(person, "nextStatusChange", time);
+        FieldSetter.setField(person, person.getClass().getDeclaredField("nextStatusChange"), time);
 
         try {
             person.checkTime(time);
@@ -194,17 +194,21 @@ public class PersonTest {
     public void getGaussianDistributionValue() {
         int n = 10000;
         double mean = 7;
-        List<Integer> results = new ArrayList<>();
+
+        RandomDataGenerator randomGenerator = new RandomDataGenerator();
+
+        List<Integer> results1 = new ArrayList<>();
+        List<Double> results2 = new ArrayList<>();
         for (int i = 0; i < n; i++) {
-            results.add(person.getDistributionValue(mean, ProgressionDistribution.GAUSSIAN));
+            results1.add(person.getDistributionValue(mean, ProgressionDistribution.GAUSSIAN));
+            results2.add(min(randomGenerator.nextGaussian(mean, mean / 2d), 14));
         }
 
-        int out = results.stream().mapToInt(Integer::intValue).sum();
+        int out = results1.stream().mapToInt(Integer::intValue).sum();
+        int out2 = results2.stream().mapToInt(i -> (int) round(max(1, min(14, i)))).sum();
 
-        System.out.println(out / (double) n);
-        System.out.println(Math.sqrt(2d / (double) n));
-
-        Assert.assertEquals(mean, out / (double) n, 0.01 * mean);
+        // TODO: this is a little weak... need to speak to Louise/Sibyll regarding number capping.
+        Assert.assertEquals(out2 / (double) n, out / (double) n, 0.01 * mean);
 
 
     }
@@ -233,11 +237,11 @@ public class PersonTest {
         List<Double> results2 = new ArrayList<>();
         for (int i = 0; i < n; i++) {
             results.add(person.getDistributionValue(mean, ProgressionDistribution.EXPONENTIAL));
-            results2.add(Math.min(randomGenerator.nextExponential(mean), 14));
+            results2.add(min(randomGenerator.nextExponential(mean), 14));
         }
 
         int out = results.stream().mapToInt(Integer::intValue).sum();
-        int out2 = results2.stream().mapToInt(i -> (int) Math.round(i)).sum();
+        int out2 = results2.stream().mapToInt(i -> (int) round(i)).sum();
 
 
         // TODO: this is a little weak... need to speak to Louise/Sibyll regarding number capping.
