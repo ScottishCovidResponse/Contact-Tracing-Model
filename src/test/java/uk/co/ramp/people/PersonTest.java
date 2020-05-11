@@ -250,4 +250,19 @@ public class PersonTest {
     }
 
 
+    @Test
+    public void virusRanking() {
+
+        Assert.assertTrue(SUSCEPTIBLE.getVal() < EXPOSED.getVal());
+        Assert.assertTrue(SUSCEPTIBLE.getVal() < INFECTED.getVal());
+        Assert.assertTrue(SUSCEPTIBLE.getVal() < RECOVERED.getVal());
+
+        Assert.assertTrue(EXPOSED.getVal() < INFECTED.getVal());
+        Assert.assertTrue(EXPOSED.getVal() > RECOVERED.getVal());
+
+        Assert.assertTrue(INFECTED.getVal() > RECOVERED.getVal());
+
+    }
+
+
 }

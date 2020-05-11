@@ -15,17 +15,12 @@ public class PopulationGenerator {
     }
 
     public static Map<Integer, Person> generate(StandardProperties runProperties, PopulationProperties properties) {
-        return generate(runProperties.getPopulationSize(), properties, runProperties.getSeed());
-    }
-
-    public static Map<Integer, Person> generate(int popSize, PopulationProperties properties, int sid) {
-        RandomDataGenerator r = RandomSingleton.getInstance(sid);
+        RandomDataGenerator r = RandomSingleton.getInstance(runProperties.getSeed());
         Map<Integer, Double> cumulative = createCumulative(properties.getPopulationDistribution());
         Map<Integer, Person> population = new HashMap<>();
-        for (int i = 0; i < popSize; i++) {
+        for (int i = 0; i < runProperties.getPopulationSize(); i++) {
 
             int age = findAge(r.nextUniform(0, 1), cumulative, properties.getPopulationAges());
-
             Gender g = r.nextUniform(0, 1) > properties.getGenderBalance() / 2d ? Gender.FEMALE : Gender.MALE;
             double compliance = r.nextGaussian(0.5, 0.5);
             double health = r.nextGaussian(0.5, 0.5);
@@ -37,7 +32,7 @@ public class PopulationGenerator {
         return population;
     }
 
-    private static int findAge(double v, Map<Integer, Double> c, Map<Integer, MinMax> populationAges) {
+    static int findAge(double v, Map<Integer, Double> c, Map<Integer, MinMax> populationAges) {
 
         int index;
 
@@ -65,7 +60,7 @@ public class PopulationGenerator {
     }
 
 
-    private static Map<Integer, Double> createCumulative(Map<Integer, Double> populationDistribution) {
+    static Map<Integer, Double> createCumulative(Map<Integer, Double> populationDistribution) {
 
         List<Double> data = new ArrayList<>();
 
