@@ -5,28 +5,22 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.mockito.Mockito;
 import org.mockito.internal.util.reflection.FieldSetter;
-import org.powermock.core.classloader.annotations.PowerMockIgnore;
-import org.powermock.core.classloader.annotations.PrepareForTest;
-import org.powermock.modules.junit4.PowerMockRunner;
 import uk.co.ramp.ContactRunner;
 import uk.co.ramp.LogAppender;
 import uk.co.ramp.io.DiseaseProperties;
+import uk.co.ramp.io.PopulationProperties;
 import uk.co.ramp.io.ProgressionDistribution;
+import uk.co.ramp.io.StandardProperties;
 
 import java.util.ArrayList;
 import java.util.List;
 
 import static java.lang.Math.*;
 import static org.hamcrest.CoreMatchers.containsString;
-import static org.powermock.api.mockito.PowerMockito.mockStatic;
-import static org.powermock.api.mockito.PowerMockito.when;
 import static uk.co.ramp.people.VirusStatus.*;
 
-@RunWith(PowerMockRunner.class)
-@PrepareForTest(fullyQualifiedNames = "uk.co.ramp.ContactRunner")
-@PowerMockIgnore("javax.management.*")
 public class PersonTest {
 
     private final static double DELTA = 1e-6;
@@ -45,10 +39,13 @@ public class PersonTest {
     @Before
     public void setUp() throws Exception {
 
-        mockStatic(ContactRunner.class);
-        diseaseProperties = new DiseaseProperties(3, 7, 0, 90, ProgressionDistribution.FLAT);
-        when(ContactRunner.getDiseaseProperties()).thenReturn(diseaseProperties);
-        when(ContactRunner.getRng()).thenReturn(rnd);
+
+        StandardProperties a = new StandardProperties(1000, 200, 10, 0, true);
+        diseaseProperties = new DiseaseProperties(3, 7, 0.01, 50, ProgressionDistribution.FLAT);
+        PopulationProperties c = Mockito.mock(PopulationProperties.class);
+        ContactRunner contactRunner = new ContactRunner(a, diseaseProperties, c);
+
+
         id = rnd.nextInt(0, 100);
         age = rnd.nextInt(0, 100);
         gender = rnd.nextUniform(0, 1) > 0.5 ? Gender.FEMALE : Gender.MALE;
@@ -128,6 +125,7 @@ public class PersonTest {
         person.checkTime(time);
 
         flatTransition = (int) diseaseProperties.getMeanTimeToRecovered();
+
         Assert.assertEquals(INFECTED, person.getStatus());
         Assert.assertEquals(time + flatTransition, person.getNextStatusChange());
 
@@ -208,7 +206,7 @@ public class PersonTest {
         int out2 = results2.stream().mapToInt(i -> (int) round(max(1, min(14, i)))).sum();
 
         // TODO: this is a little weak... need to speak to Louise/Sibyll regarding number capping.
-        Assert.assertEquals(out2 / (double) n, out / (double) n, 0.01 * mean);
+        Assert.assertEquals(out2 / (double) n, out / (double) n, 0.05 * mean);
 
 
     }

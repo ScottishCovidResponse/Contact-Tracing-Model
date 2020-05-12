@@ -34,12 +34,23 @@ public class ContactRunner {
     private static StandardProperties runProperties;
     private static DiseaseProperties diseaseProperties;
 
+    public ContactRunner() {
+    }
+
+    // for testing
+    public ContactRunner(StandardProperties standardProperties, DiseaseProperties diseaseProps, PopulationProperties populationProps) {
+
+        runProperties = standardProperties;
+        diseaseProperties = diseaseProps;
+        populationProperties = populationProps;
+
+        rng = new RandomDataGenerator();
+    }
 
     public static void main(String[] args) throws IOException {
-        ContactRunner contactRunner = new ContactRunner();
 
         readInputs();
-
+        ContactRunner contactRunner = new ContactRunner();
         rng = RandomSingleton.getInstance(runProperties.getSeed());
         Optional<Integer> sid = Optional.empty();
         if (args.length == 1) {
@@ -47,6 +58,7 @@ public class ContactRunner {
         }
         contactRunner.run(sid);
     }
+
 
     private static void readInputs() throws IOException {
         runProperties = StandardPropertiesReader.read(new File("input/runSettings.json"));
@@ -115,7 +127,7 @@ public class ContactRunner {
         }
 
 
-        Map<Integer, Person> population = PopulationGenerator.generate(runProperties, populationProperties);
+        Map<Integer, Person> population = new PopulationGenerator(runProperties, populationProperties).generate();
         Map<Integer, List<ContactRecord>> contactRecords = ContactReader.read(runProperties);
         Set<Integer> infectedIds = infectPopulation();
 
@@ -187,7 +199,7 @@ public class ContactRunner {
 
         for (Person p : population.values()) {
             p.checkTime(time);
-            if (randomInfectionRate > 0d && time > 0) {
+            if (p.getStatus() == SUSCEPTIBLE && randomInfectionRate > 0d && time > 0) {
 
                 boolean var = rng.nextUniform(0, 1) <= randomInfectionRate;
                 if (var) p.randomExposure(time);

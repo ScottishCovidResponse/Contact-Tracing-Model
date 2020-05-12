@@ -10,11 +10,15 @@ import java.util.*;
 
 public class PopulationGenerator {
 
-    private PopulationGenerator() {
-        // hidden constructor
+    private final StandardProperties runProperties;
+    private final PopulationProperties properties;
+
+    public PopulationGenerator(final StandardProperties runProperties, final PopulationProperties properties) {
+        this.runProperties = runProperties;
+        this.properties = properties;
     }
 
-    public static Map<Integer, Person> generate(StandardProperties runProperties, PopulationProperties properties) {
+    public Map<Integer, Person> generate() {
         RandomDataGenerator r = RandomSingleton.getInstance(runProperties.getSeed());
         Map<Integer, Double> cumulative = createCumulative(properties.getPopulationDistribution());
         Map<Integer, Person> population = new HashMap<>();
@@ -32,7 +36,7 @@ public class PopulationGenerator {
         return population;
     }
 
-    static int findAge(double v, Map<Integer, Double> c, Map<Integer, MinMax> populationAges) {
+    int findAge(double v, Map<Integer, Double> c, Map<Integer, MinMax> populationAges) {
 
         int index;
 
@@ -60,7 +64,7 @@ public class PopulationGenerator {
     }
 
 
-    static Map<Integer, Double> createCumulative(Map<Integer, Double> populationDistribution) {
+    Map<Integer, Double> createCumulative(Map<Integer, Double> populationDistribution) {
 
         List<Double> data = new ArrayList<>();
 

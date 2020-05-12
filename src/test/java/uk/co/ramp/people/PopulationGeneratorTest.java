@@ -1,13 +1,9 @@
 package uk.co.ramp.people;
 
 import org.junit.Assert;
+import org.junit.Before;
 import org.junit.Test;
-import org.junit.runner.RunWith;
 import org.mockito.Mockito;
-import org.powermock.api.mockito.PowerMockito;
-import org.powermock.core.classloader.annotations.PowerMockIgnore;
-import org.powermock.core.classloader.annotations.PrepareForTest;
-import org.powermock.modules.junit4.PowerMockRunner;
 import uk.co.ramp.io.PopulationProperties;
 import uk.co.ramp.io.StandardProperties;
 import uk.co.ramp.utilities.MinMax;
@@ -16,17 +12,21 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Random;
 
-import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.when;
-import static org.powermock.api.mockito.PowerMockito.mockStatic;
 import static uk.co.ramp.people.VirusStatus.*;
 
-@RunWith(PowerMockRunner.class)
-@PrepareForTest(PopulationGenerator.class)
-@PowerMockIgnore("javax.management.*")
+
 public class PopulationGeneratorTest {
 
     private static final double DELTA = 1e-6;
+    private PopulationGenerator populationGenerator;
+
+    @Before
+    public void setup() {
+        PopulationProperties populationProperties = Mockito.mock(PopulationProperties.class);
+        StandardProperties properties = Mockito.mock(StandardProperties.class);
+        populationGenerator = new PopulationGenerator(properties, populationProperties);
+    }
 
     @Test
     public void getSEIRCounts() {
@@ -96,7 +96,7 @@ public class PopulationGeneratorTest {
 
         }
 
-        Map<Integer, Double> result = PopulationGenerator.createCumulative(var);
+        Map<Integer, Double> result = populationGenerator.createCumulative(var);
 
         for (int i = 0; i < bins; i++) {
             Assert.assertEquals(cumulative.get(i), result.get(i), DELTA);
@@ -119,7 +119,7 @@ public class PopulationGeneratorTest {
 
         for (int i = 0; i < 100; i++) {
             double a = rnd.nextDouble();
-            int age = PopulationGenerator.findAge(a, b, c);
+            int age = populationGenerator.findAge(a, b, c);
             Assert.assertTrue(age <= minMax.getMax());
             Assert.assertTrue(age >= minMax.getMin());
         }
@@ -130,7 +130,7 @@ public class PopulationGeneratorTest {
 
         for (int i = 0; i < 200; i++) {
             double a = rnd.nextDouble();
-            int age = PopulationGenerator.findAge(a, b, c);
+            int age = populationGenerator.findAge(a, b, c);
             if (a > 0.5) {
                 Assert.assertTrue(age <= c.get(1).getMax());
                 Assert.assertTrue(age >= c.get(1).getMin());
@@ -148,24 +148,12 @@ public class PopulationGeneratorTest {
 
         Random rnd = new Random();
 
-        Map<Integer, Double> b = new HashMap<>();
-        Map<Integer, MinMax> c = new HashMap<>();
-
-        c.put(0, new MinMax(0, 20));
-        c.put(1, new MinMax(20, 39));
-        c.put(2, new MinMax(40, 59));
-        c.put(3, new MinMax(60, 79));
-        c.put(4, new MinMax(80, 99));
-        b.put(0, 0.2d);
-        b.put(1, 0.4d);
-        b.put(2, 0.6d);
-        b.put(3, 0.8d);
-        b.put(4, 1d);
-
+        Map<Integer, Double> b = generateAgeDistribution();
+        Map<Integer, MinMax> c = generateAgeRanges();
 
         for (int i = 0; i < 200; i++) {
             double a = rnd.nextDouble();
-            int age = PopulationGenerator.findAge(a, b, c);
+            int age = populationGenerator.findAge(a, b, c);
             if (a <= 0.2d) {
                 Assert.assertTrue(age <= c.get(0).getMax());
                 Assert.assertTrue(age >= c.get(0).getMin());
@@ -186,19 +174,39 @@ public class PopulationGeneratorTest {
         }
     }
 
+    private Map<Integer, Double> generateAgeDistribution() {
+        Map<Integer, Double> b = new HashMap<>();
+        b.put(0, 0.2d);
+        b.put(1, 0.4d);
+        b.put(2, 0.6d);
+        b.put(3, 0.8d);
+        b.put(4, 1d);
+        return b;
+    }
+
+    private Map<Integer, MinMax> generateAgeRanges() {
+        Map<Integer, MinMax> c = new HashMap<>();
+        c.put(0, new MinMax(0, 20));
+        c.put(1, new MinMax(20, 39));
+        c.put(2, new MinMax(40, 59));
+        c.put(3, new MinMax(60, 79));
+        c.put(4, new MinMax(80, 99));
+        return c;
+    }
+
 
     @Test
     public void testGeneratePopulation() {
 
-        mockStatic(PopulationGenerator.class);
-        PowerMockito.when(PopulationGenerator.findAge(anyDouble(), anyMap(), anyMap())).thenReturn(50);
-        PowerMockito.when(PopulationGenerator.generate(any(), any())).thenCallRealMethod();
+//        mockStatic(PopulationGenerator.class);
+//        PowerMockito.when(PopulationGenerator.findAge(anyDouble(), anyMap(), anyMap())).thenReturn(50);
+//        PowerMockito.when(PopulationGenerator.generate(any(), any())).thenCallRealMethod();
+//
+//        System.out.println(PopulationGenerator.findAge(0d, new HashMap<>(), new HashMap<>()));
 
-        System.out.println(PopulationGenerator.findAge(0d, new HashMap<>(), new HashMap<>()));
 
-
-        Map<Integer, Double> populationDistribution = new HashMap<>();
-        Map<Integer, MinMax> populationAges = new HashMap<>();
+        Map<Integer, Double> populationDistribution = generateAgeDistribution();
+        Map<Integer, MinMax> populationAges = generateAgeRanges();
         double genderBalance = 1.d;
         PopulationProperties b = new PopulationProperties(populationDistribution, populationAges, genderBalance);
 
@@ -210,7 +218,9 @@ public class PopulationGeneratorTest {
 
         StandardProperties a = new StandardProperties(populationSize, timeLimit, infected, seed, steadyState);
 
-        Map<Integer, Person> result = PopulationGenerator.generate(a, b);
+        populationGenerator = new PopulationGenerator(a, b);
+
+        Map<Integer, Person> result = populationGenerator.generate();
 
         int men = 0;
         int women = 0;
@@ -219,7 +229,6 @@ public class PopulationGeneratorTest {
         for (Person p : result.values()) {
             compliance += p.getCompliance();
             health += p.getHealth();
-            Assert.assertEquals(50, p.getAge());
 
             if (p.getGender() == Gender.FEMALE) {
                 women++;

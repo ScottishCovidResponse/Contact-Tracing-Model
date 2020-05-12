@@ -42,7 +42,6 @@ public class StandardProperties {
                 "populationSize=" + populationSize +
                 ", timeLimit=" + timeLimit +
                 ", infected=" + infected +
-
                 ", sid=" + seed +
                 ", steadyState=" + steadyState +
                 '}';
