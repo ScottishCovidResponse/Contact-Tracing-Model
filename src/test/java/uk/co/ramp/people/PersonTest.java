@@ -151,7 +151,7 @@ public class PersonTest {
     public void notNow() {
         int time = rnd.nextInt(0, 100);
         int flatTransition = (int) diseaseProperties.getMeanTimeToInfected();
-
+        Assert.assertNotEquals(10, flatTransition);
         person.updateStatus(EXPOSED, time - flatTransition);
         person.checkTime(time - 10);
 

@@ -47,13 +47,13 @@ public class SeirRecordTest {
     }
 
     @Test
-    public void testTestToString() {
+    public void testToString() {
         String expected = String.format("SeirRecord{time=%d, s=%d, e=%d, i=%d, r=%d}", time, s, e, i, r);
         Assert.assertEquals(expected, testRecord.toString());
     }
 
     @Test
-    public void testTestEquals() {
+    public void testEquals() {
 
         // self equal
         Assert.assertEquals(testRecord, testRecord);
@@ -83,7 +83,7 @@ public class SeirRecordTest {
     }
 
     @Test
-    public void testTestHashCode() {
+    public void testHashCode() {
         SeirRecord seirRecord = useSecondContructor();
         int hash1 = testRecord.hashCode();
         int hash2 = seirRecord.hashCode();
@@ -92,8 +92,6 @@ public class SeirRecordTest {
         Assert.assertEquals(hash1, hash2);
 
         seirRecord = new SeirRecord(time, s, e, i, 0);
-
-        hash1 = testRecord.hashCode();
         hash2 = seirRecord.hashCode();
 
         Assert.assertNotEquals(hash1, hash2);
