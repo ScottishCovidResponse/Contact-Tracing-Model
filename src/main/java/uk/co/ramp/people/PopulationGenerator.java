@@ -18,11 +18,6 @@ public class PopulationGenerator {
         this.properties = properties;
     }
 
-    public PopulationGenerator(CodeProperties codeProperties) {
-        properties = codeProperties.getPopulationProperties();
-        runProperties = codeProperties.getStandardProperties();
-    }
-
     public Map<Integer, Person> generate() {
         RandomDataGenerator r = RandomSingleton.getInstance(runProperties.getSeed());
         Map<Integer, Double> cumulative = createCumulative(properties.getPopulationDistribution());

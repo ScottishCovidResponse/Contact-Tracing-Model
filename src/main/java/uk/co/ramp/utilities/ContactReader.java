@@ -31,9 +31,6 @@ public class ContactReader {
         return read(runProperties.getPopulationSize(), runProperties.getTimeLimit());
     }
 
-    public static Map<Integer, List<ContactRecord>> read(CodeProperties codeProperties) {
-        return read(codeProperties.getStandardProperties().getPopulationSize(), codeProperties.getStandardProperties().getTimeLimit());
-    }
 
     public static Map<Integer, List<ContactRecord>> read(int personLimit, int dayLimit) {
 
