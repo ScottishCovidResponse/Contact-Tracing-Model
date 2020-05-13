@@ -67,20 +67,26 @@ public class PopulationGeneratorTest {
 
     }
 
-    //        PopulationGenerator.createCumulative();
     @Test
     public void testCreateCumulative() {
-
 
         Random rnd = new Random();
         Map<Integer, Double> var = new HashMap<>();
         Map<Integer, Double> cumulative = new HashMap<>();
+
+        // create a random number of bins, between 5 and 10
         int bins = rnd.nextInt(5) + 5;
         double sum = 0d;
+
+
         for (int i = 0; i < bins; i++) {
+
+            // add a small value on to the end of the last bin
             double sample = rnd.nextDouble() * 0.2;
             sum += sample;
 
+            // if we overflow 1, end here with 1
+            // or put 1 in the last place.
             if (sum > 1d) {
                 var.put(i, sample);
                 cumulative.put(i, 1d);
@@ -98,6 +104,7 @@ public class PopulationGeneratorTest {
 
         Map<Integer, Double> result = populationGenerator.createCumulative(var);
 
+        // Assert the two methods produce the same result.
         for (int i = 0; i < bins; i++) {
             Assert.assertEquals(cumulative.get(i), result.get(i), DELTA);
         }
@@ -197,13 +204,6 @@ public class PopulationGeneratorTest {
 
     @Test
     public void testGeneratePopulation() {
-
-//        mockStatic(PopulationGenerator.class);
-//        PowerMockito.when(PopulationGenerator.findAge(anyDouble(), anyMap(), anyMap())).thenReturn(50);
-//        PowerMockito.when(PopulationGenerator.generate(any(), any())).thenCallRealMethod();
-//
-//        System.out.println(PopulationGenerator.findAge(0d, new HashMap<>(), new HashMap<>()));
-
 
         Map<Integer, Double> populationDistribution = generateAgeDistribution();
         Map<Integer, MinMax> populationAges = generateAgeRanges();

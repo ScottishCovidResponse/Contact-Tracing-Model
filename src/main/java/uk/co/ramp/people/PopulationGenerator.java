@@ -63,25 +63,22 @@ public class PopulationGenerator {
 
     }
 
-
+    // the population data is provided in non-cumulative form. This creates a cumulative distribution
     Map<Integer, Double> createCumulative(Map<Integer, Double> populationDistribution) {
 
         List<Double> data = new ArrayList<>();
-
         Map<Integer, Double> cumulative = new HashMap<>();
 
+        // extract the data in ascending order
         for (Map.Entry<Integer, Double> entry : populationDistribution.entrySet()) {
             data.add(entry.getKey(), populationDistribution.get(entry.getKey()));
         }
 
+        // loop over the data
+        double sum = 0d;
         for (int i = 0; i < data.size(); i++) {
-            double sum = 0d;
-            if (i < data.size() - 1) {
-                sum += data.get(i);
-                for (int j = 0; j < i; j++) {
-                    sum += data.get(j);
-                }
-            } else if (i == data.size() - 1) {
+            sum += data.get(i);
+            if (i == data.size() - 1) {
                 sum = 1d;
             }
             cumulative.put(i, sum);
