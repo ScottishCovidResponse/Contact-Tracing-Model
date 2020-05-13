@@ -21,7 +21,6 @@ import java.io.File;
 import java.io.IOException;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 
 public class ContactRunner {
 
@@ -32,58 +31,30 @@ public class ContactRunner {
     private static StandardProperties runProperties;
     private static DiseaseProperties diseaseProperties;
 
-    public ContactRunner() {
-
-    }
-
-    // for testing
-    public ContactRunner(StandardProperties standardProperties, DiseaseProperties diseaseProps, PopulationProperties populationProps) {
-
-        runProperties = standardProperties;
-        diseaseProperties = diseaseProps;
-        populationProperties = populationProps;
-
-        rng = new RandomDataGenerator();
-    }
-
     public static void main(String[] args) throws IOException {
 
         readInputs();
         ContactRunner contactRunner = new ContactRunner();
         rng = RandomSingleton.getInstance(runProperties.getSeed());
 
-        Optional<Integer> sid = Optional.empty();
+        // if a cmd line arg is an is, parse it as a string
+        int sid = 0;
         if (args.length == 1) {
-            sid = Optional.of(Integer.parseInt(args[0]));
+            sid = Integer.parseInt(args[0]);
         }
 
-        if (sid.isPresent()) {
+        if (sid != 0) {
             int seed = runProperties.getSeed();
-            LOGGER.warn("The seed from input file will be modified from {} to {}", sid.get(), seed + sid.get());
-            seed += sid.get();
+            LOGGER.warn("The seed from input file will be modified from {} to {}", sid, seed + sid);
+            seed += sid;
             runProperties.setSeed(seed);
         }
 
         contactRunner.run();
     }
 
-    public static RandomDataGenerator getRng() {
-        return rng;
-    }
-
-
-    private static void readInputs() throws IOException {
-        runProperties = StandardPropertiesReader.read(new File("input/runSettings.json"));
-        populationProperties = PopulationPropertiesReader.read(new File("input/populationSettings.json"));
-        diseaseProperties = DiseasePropertiesReader.read(new File("input/diseaseSettings.json"));
-    }
-
-    public static DiseaseProperties getDiseaseProperties() {
-        return diseaseProperties;
-    }
 
     public void run() {
-
         Map<Integer, Person> population = new PopulationGenerator(runProperties, populationProperties).generate();
         Map<Integer, List<ContactRecord>> contactRecords = ContactReader.read(runProperties);
 
@@ -94,5 +65,18 @@ public class ContactRunner {
 
     }
 
+    private static void readInputs() throws IOException {
+        runProperties = StandardPropertiesReader.read(new File("input/runSettings.json"));
+        populationProperties = PopulationPropertiesReader.read(new File("input/populationSettings.json"));
+        diseaseProperties = DiseasePropertiesReader.read(new File("input/diseaseSettings.json"));
+    }
+
+    public static RandomDataGenerator getRng() {
+        return rng;
+    }
+
+    public static DiseaseProperties getDiseaseProperties() {
+        return diseaseProperties;
+    }
 
 }

@@ -45,7 +45,8 @@ public class Infection {
     private void generateInitialInfection() {
         Set<Integer> infectedIds = infectPopulation();
         for (Integer id : infectedIds) {
-            population.get(id).updateStatus(INFECTED, 0);
+            EvaluateCase evaluateCase = new EvaluateCase(population.get(id), diseaseProperties, rng);
+            evaluateCase.updateStatus(EXPOSED, 0);
             LOGGER.info("population.get(id).getNextStatusChange() = {}", population.get(id).getNextStatusChange());
         }
     }
@@ -81,7 +82,7 @@ public class Infection {
 
             updatePopulationState(time, population, randomInfectionRate);
             List<ContactRecord> todaysContacts = contactRecords.get(time);
-            printSEIR(population, time);
+            logStepResults(population, time);
 
             for (ContactRecord contacts : todaysContacts) {
 
@@ -101,7 +102,7 @@ public class Infection {
 
             // set random infection rate to zero in steady state mode
             updatePopulationState(time, population, 0d);
-            printSEIR(population, time);
+            logStepResults(population, time);
 
             Map<VirusStatus, Integer> seirCounts = PopulationGenerator.getSEIRCounts(population);
 
@@ -123,11 +124,12 @@ public class Infection {
     private void updatePopulationState(int time, Map<Integer, Person> population, double randomInfectionRate) {
 
         for (Person p : population.values()) {
-            p.checkTime(time);
+            EvaluateCase e = new EvaluateCase(p, diseaseProperties, rng);
+            e.checkTime(time);
             if (p.getStatus() == SUSCEPTIBLE && randomInfectionRate > 0d && time > 0) {
 
                 boolean var = rng.nextUniform(0, 1) <= randomInfectionRate;
-                if (var) p.randomExposure(time);
+                if (var) e.randomExposure(time);
             }
         }
     }
@@ -143,10 +145,11 @@ public class Infection {
         Person personA = getMostSevere(population.get(c.getTo()), population.get(c.getFrom()));
         Person personB = personA == population.get(c.getTo()) ? population.get(c.getFrom()) : population.get(c.getTo());
 
-        boolean dangerMix = (personA.getStatus() == INFECTED || personA.getStatus() == INFECTED_SYMP || personA.getStatus() == EXPOSED_2) && personB.getStatus() == SUSCEPTIBLE;
+        boolean dangerMix = personA.isInfectious() && personB.getStatus() == SUSCEPTIBLE;
 
         if (dangerMix && rng.nextUniform(0, 1) < c.getWeight() / diseaseProperties.getExposureTuning()) {
-            personB.updateStatus(EXPOSED, time, personA.getId());
+            EvaluateCase e = new EvaluateCase(personB, diseaseProperties, rng);
+            e.updateStatus(EXPOSED, time, personA.getId());
         }
     }
 
@@ -161,7 +164,7 @@ public class Infection {
 
     }
 
-    private void printSEIR(Map<Integer, Person> population, int time) {
+    private void logStepResults(Map<Integer, Person> population, int time) {
         Map<VirusStatus, Integer> seirCounts = PopulationGenerator.getSEIRCounts(population);
 
         LOGGER.debug("Conditions @ time: {}", time);
