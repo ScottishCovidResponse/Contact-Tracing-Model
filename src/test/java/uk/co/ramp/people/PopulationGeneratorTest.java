@@ -110,33 +110,33 @@ public class PopulationGeneratorTest {
 
         Random rnd = new Random();
 
-        Map<Integer, Double> b = new HashMap<>();
-        Map<Integer, MinMax> c = new HashMap<>();
+        Map<Integer, Double> populationDistribution = new HashMap<>();
+        Map<Integer, MinMax> ageRanges = new HashMap<>();
 
         MinMax minMax = new MinMax(0, 10);
-        c.put(0, minMax);
-        b.put(0, 1d);
+        ageRanges.put(0, minMax);
+        populationDistribution.put(0, 1d);
 
         for (int i = 0; i < 100; i++) {
             double a = rnd.nextDouble();
-            int age = populationGenerator.findAge(a, b, c);
+            int age = populationGenerator.findAge(a, populationDistribution, ageRanges);
             Assert.assertTrue(age <= minMax.getMax());
             Assert.assertTrue(age >= minMax.getMin());
         }
 
-        c.put(1, new MinMax(11, 20));
-        b.put(0, 0.5d);
-        b.put(1, 1d);
+        ageRanges.put(1, new MinMax(11, 20));
+        populationDistribution.put(0, 0.5d);
+        populationDistribution.put(1, 1d);
 
         for (int i = 0; i < 200; i++) {
-            double a = rnd.nextDouble();
-            int age = populationGenerator.findAge(a, b, c);
-            if (a > 0.5) {
-                Assert.assertTrue(age <= c.get(1).getMax());
-                Assert.assertTrue(age >= c.get(1).getMin());
+            double sample = rnd.nextDouble();
+            int age = populationGenerator.findAge(sample, populationDistribution, ageRanges);
+            if (sample > 0.5) {
+                Assert.assertTrue(age <= ageRanges.get(1).getMax());
+                Assert.assertTrue(age >= ageRanges.get(1).getMin());
             } else {
-                Assert.assertTrue(age <= c.get(0).getMax());
-                Assert.assertTrue(age >= c.get(0).getMin());
+                Assert.assertTrue(age <= ageRanges.get(0).getMax());
+                Assert.assertTrue(age >= ageRanges.get(0).getMin());
 
             }
         }
@@ -148,67 +148,60 @@ public class PopulationGeneratorTest {
 
         Random rnd = new Random();
 
-        Map<Integer, Double> b = generateAgeDistribution();
-        Map<Integer, MinMax> c = generateAgeRanges();
+        Map<Integer, Double> ageDistribution = generateAgeDistribution();
+        Map<Integer, MinMax> ageRanges = generateAgeRanges();
 
         for (int i = 0; i < 200; i++) {
             double a = rnd.nextDouble();
-            int age = populationGenerator.findAge(a, b, c);
+            int age = populationGenerator.findAge(a, ageDistribution, ageRanges);
             if (a <= 0.2d) {
-                Assert.assertTrue(age <= c.get(0).getMax());
-                Assert.assertTrue(age >= c.get(0).getMin());
+                Assert.assertTrue(age <= ageRanges.get(0).getMax());
+                Assert.assertTrue(age >= ageRanges.get(0).getMin());
             } else if (a > 0.2d && a < 0.4d) {
-                Assert.assertTrue(age <= c.get(1).getMax());
-                Assert.assertTrue(age >= c.get(1).getMin());
+                Assert.assertTrue(age <= ageRanges.get(1).getMax());
+                Assert.assertTrue(age >= ageRanges.get(1).getMin());
             } else if (a > 0.4d && a < 0.6d) {
-                Assert.assertTrue(age <= c.get(2).getMax());
-                Assert.assertTrue(age >= c.get(2).getMin());
+                Assert.assertTrue(age <= ageRanges.get(2).getMax());
+                Assert.assertTrue(age >= ageRanges.get(2).getMin());
             } else if (a > 0.6d && a < 0.8d) {
-                Assert.assertTrue(age <= c.get(3).getMax());
-                Assert.assertTrue(age >= c.get(3).getMin());
+                Assert.assertTrue(age <= ageRanges.get(3).getMax());
+                Assert.assertTrue(age >= ageRanges.get(3).getMin());
             } else if (a > 0.8d) {
-                Assert.assertTrue(age <= c.get(4).getMax());
-                Assert.assertTrue(age >= c.get(4).getMin());
+                Assert.assertTrue(age <= ageRanges.get(4).getMax());
+                Assert.assertTrue(age >= ageRanges.get(4).getMin());
 
             }
         }
     }
 
     private Map<Integer, Double> generateAgeDistribution() {
-        Map<Integer, Double> b = new HashMap<>();
-        b.put(0, 0.2d);
-        b.put(1, 0.4d);
-        b.put(2, 0.6d);
-        b.put(3, 0.8d);
-        b.put(4, 1d);
-        return b;
+        Map<Integer, Double> ageDistribution = new HashMap<>();
+        ageDistribution.put(0, 0.2d);
+        ageDistribution.put(1, 0.4d);
+        ageDistribution.put(2, 0.6d);
+        ageDistribution.put(3, 0.8d);
+        ageDistribution.put(4, 1d);
+        return ageDistribution;
     }
 
     private Map<Integer, MinMax> generateAgeRanges() {
-        Map<Integer, MinMax> c = new HashMap<>();
-        c.put(0, new MinMax(0, 20));
-        c.put(1, new MinMax(20, 39));
-        c.put(2, new MinMax(40, 59));
-        c.put(3, new MinMax(60, 79));
-        c.put(4, new MinMax(80, 99));
-        return c;
+        Map<Integer, MinMax> ageRanges = new HashMap<>();
+        ageRanges.put(0, new MinMax(0, 20));
+        ageRanges.put(1, new MinMax(20, 39));
+        ageRanges.put(2, new MinMax(40, 59));
+        ageRanges.put(3, new MinMax(60, 79));
+        ageRanges.put(4, new MinMax(80, 99));
+        return ageRanges;
     }
 
 
     @Test
     public void testGeneratePopulation() {
 
-//        mockStatic(PopulationGenerator.class);
-//        PowerMockito.when(PopulationGenerator.findAge(anyDouble(), anyMap(), anyMap())).thenReturn(50);
-//        PowerMockito.when(PopulationGenerator.generate(any(), any())).thenCallRealMethod();
-//
-//        System.out.println(PopulationGenerator.findAge(0d, new HashMap<>(), new HashMap<>()));
-
-
         Map<Integer, Double> populationDistribution = generateAgeDistribution();
         Map<Integer, MinMax> populationAges = generateAgeRanges();
         double genderBalance = 1.d;
-        PopulationProperties b = new PopulationProperties(populationDistribution, populationAges, genderBalance);
+        PopulationProperties populationProperties = new PopulationProperties(populationDistribution, populationAges, genderBalance);
 
         int populationSize = 10000;
         int timeLimit = 0;
@@ -218,7 +211,7 @@ public class PopulationGeneratorTest {
 
         StandardProperties a = new StandardProperties(populationSize, timeLimit, infected, seed, steadyState);
 
-        populationGenerator = new PopulationGenerator(a, b);
+        populationGenerator = new PopulationGenerator(a, populationProperties);
 
         Map<Integer, Person> result = populationGenerator.generate();
 

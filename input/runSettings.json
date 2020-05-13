@@ -1,5 +1,5 @@
 {
-  "populationSize": 10000,
+  "populationSize": 100000,
   "timeLimit": 1000,
   "infected": 1000,
   "seed": 0,

@@ -21,11 +21,11 @@ public class Output {
 
         try {
             FileWriter out = new FileWriter("SEIR.csv");
-            String[] headers = {"Day", "S", "E", "I", "R"};
+            String[] headers = {"Day", "S", "E1", "E2", "I_A", "I_S", "R", "D"};
             try (CSVPrinter printer = new CSVPrinter(out, CSVFormat.DEFAULT.withHeader(headers))) {
                 records.forEach((day, record) -> {
                     try {
-                        printer.printRecord(day, record.getS(), record.getE(), record.getI(), record.getR());
+                        printer.printRecord(day, record.getS(), record.getE1(), record.getE2(), record.getiAsymp(), record.getiSymp(), record.getR(), record.getD());
                     } catch (IOException e) {
                         LOGGER.error(e);
                     }

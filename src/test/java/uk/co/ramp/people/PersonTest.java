@@ -41,7 +41,7 @@ public class PersonTest {
 
 
         StandardProperties a = new StandardProperties(1000, 200, 10, 0, true);
-        diseaseProperties = new DiseaseProperties(3, 7, 0.01, 50, ProgressionDistribution.FLAT);
+        diseaseProperties = new DiseaseProperties(3, 2, 7, 0.01, 50, ProgressionDistribution.FLAT);
         PopulationProperties c = Mockito.mock(PopulationProperties.class);
         ContactRunner contactRunner = new ContactRunner(a, diseaseProperties, c);
 
@@ -118,11 +118,17 @@ public class PersonTest {
     public void checkTime() throws NoSuchFieldException {
 
         int time = rnd.nextInt(0, 100);
-        int flatTransition = (int) diseaseProperties.getMeanTimeToInfected();
+        int flatTransition = (int) diseaseProperties.getMeanTimeToInfectious();
 
         person.updateStatus(EXPOSED, time - flatTransition);
-
         person.checkTime(time);
+
+        flatTransition = (int) diseaseProperties.getMeanTimeToInfected();
+        Assert.assertEquals(EXPOSED_2, person.getStatus());
+        Assert.assertEquals(time + flatTransition, person.getNextStatusChange());
+
+
+        person.updateStatus(EXPOSED, time - flatTransition);
 
         flatTransition = (int) diseaseProperties.getMeanTimeToRecovered();
 

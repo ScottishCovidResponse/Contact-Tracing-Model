@@ -64,8 +64,8 @@ public class Person {
         return exposedBy;
     }
 
-    private void setStatus(VirusStatus status) {
-        this.status = status;
+    private void setStatus(VirusStatus next) {
+        status = status.transitionTo(next);
     }
 
     public void updateStatus(VirusStatus newStatus, int currentTime, int exposedBy) {
@@ -79,10 +79,23 @@ public class Person {
 
         if (newStatus == EXPOSED) {
             setStatus(newStatus);
+            nextStatusChange = currentTime + getDistributionValue(properties.getMeanTimeToInfectious(), properties.getProgressionDistribution());
+        } else if (newStatus == EXPOSED_2) {
+            setStatus(newStatus);
             nextStatusChange = currentTime + getDistributionValue(properties.getMeanTimeToInfected(), properties.getProgressionDistribution());
         } else if (newStatus == INFECTED) {
             nextStatusChange = currentTime + getDistributionValue(properties.getMeanTimeToRecovered(), properties.getProgressionDistribution());
-            setStatus(INFECTED);
+            if (currentTime > 0) {
+                setStatus(INFECTED);
+            } else {
+                status = INFECTED;
+            }
+        } else if (newStatus == INFECTED_SYMP) {
+            nextStatusChange = currentTime + getDistributionValue(properties.getMeanTimeToRecovered(), properties.getProgressionDistribution());
+            setStatus(newStatus);
+        } else if (newStatus == DEAD) {
+            setStatus(newStatus);
+            nextStatusChange = -1;
         } else if (newStatus == RECOVERED) {
             setStatus(RECOVERED);
             nextStatusChange = -1;
@@ -99,17 +112,36 @@ public class Person {
             LOGGER.debug("Changing status for id: {}", id);
 
             nextStatusChange = -1;
-
-            if (status == EXPOSED) {
-                updateStatus(INFECTED, time);
-            } else if (status == INFECTED) {
-                updateStatus(RECOVERED, time);
-            } else {
-
-                String message = String.format("Changing status from %s for person.id %d is not a valid transition", status, id);
-                LOGGER.error(message);
-                throw new InvalidStatusTransitionException(message);
+            switch (status) {
+                case EXPOSED:
+                    updateStatus(EXPOSED_2, time);
+                    break;
+                case EXPOSED_2:
+                    if (health > 0.5) {
+                        updateStatus(INFECTED, time);
+                    } else {
+                        updateStatus(INFECTED_SYMP, time);
+                    }
+                    break;
+                case INFECTED:
+                    updateStatus(RECOVERED, time);
+                    break;
+                case INFECTED_SYMP:
+                    if (health > 0.3) {
+                        updateStatus(RECOVERED, time);
+                    } else {
+                        updateStatus(DEAD, time);
+                    }
+                    break;
+                case SUSCEPTIBLE:
+                case RECOVERED:
+                case DEAD:
+                    break;
             }
+
+        } else if (nextStatusChange != -1 && nextStatusChange < time) {
+            System.out.println("Something has been missed");
+            throw new RuntimeException("Something has been missed");
         }
 
     }
@@ -150,6 +182,5 @@ public class Person {
 
         return Math.min(Math.max(value, 1), 14);
     }
-
 
 }

@@ -18,6 +18,11 @@ public class PopulationGenerator {
         this.properties = properties;
     }
 
+    public PopulationGenerator(CodeProperties codeProperties) {
+        properties = codeProperties.getPopulationProperties();
+        runProperties = codeProperties.getStandardProperties();
+    }
+
     public Map<Integer, Person> generate() {
         RandomDataGenerator r = RandomSingleton.getInstance(runProperties.getSeed());
         Map<Integer, Double> cumulative = createCumulative(properties.getPopulationDistribution());
@@ -93,9 +98,12 @@ public class PopulationGenerator {
     public static Map<VirusStatus, Integer> getSEIRCounts(Map<Integer, Person> population) {
 
         int s = 0;
-        int e = 0;
-        int i = 0;
+        int e1 = 0;
+        int e2 = 0;
+        int i_a = 0;
+        int i_s = 0;
         int r = 0;
+        int d = 0;
 
 
         for (Person p : population.values()) {
@@ -104,10 +112,19 @@ public class PopulationGenerator {
                     s++;
                     break;
                 case EXPOSED:
-                    e++;
+                    e1++;
+                    break;
+                case EXPOSED_2:
+                    e2++;
                     break;
                 case INFECTED:
-                    i++;
+                    i_a++;
+                    break;
+                case INFECTED_SYMP:
+                    i_s++;
+                    break;
+                case DEAD:
+                    d++;
                     break;
                 case RECOVERED:
                     r++;
@@ -119,9 +136,13 @@ public class PopulationGenerator {
         Map<VirusStatus, Integer> counts = new EnumMap<>(VirusStatus.class);
 
         counts.put(VirusStatus.SUSCEPTIBLE, s);
-        counts.put(VirusStatus.EXPOSED, e);
-        counts.put(VirusStatus.INFECTED, i);
+        counts.put(VirusStatus.EXPOSED, e1);
+        counts.put(VirusStatus.EXPOSED_2, e2);
+        counts.put(VirusStatus.INFECTED, i_a);
+        counts.put(VirusStatus.INFECTED_SYMP, i_s);
         counts.put(VirusStatus.RECOVERED, r);
+        counts.put(VirusStatus.DEAD, d);
+
 
         return counts;
     }

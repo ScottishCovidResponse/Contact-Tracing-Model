@@ -26,16 +26,26 @@ import static uk.co.ramp.people.VirusStatus.*;
 
 public class ContactRunner {
 
+
     private static final Logger LOGGER = LogManager.getLogger(ContactRunner.class);
     private static RandomDataGenerator rng;
     private final Map<Integer, SeirRecord> records = new HashMap<>();
 
+//    private CodeProperties codeProperties;
+
     private static PopulationProperties populationProperties;
     private static StandardProperties runProperties;
     private static DiseaseProperties diseaseProperties;
+//
+//    @Autowired
+//    public ContactRunner(CodeProperties codeProperties) {
+//        this.codeProperties = codeProperties;
+//    }
 
     public ContactRunner() {
+
     }
+
 
     // for testing
     public ContactRunner(StandardProperties standardProperties, DiseaseProperties diseaseProps, PopulationProperties populationProps) {
@@ -59,63 +69,7 @@ public class ContactRunner {
         contactRunner.run(sid);
     }
 
-
-    private static void readInputs() throws IOException {
-        runProperties = StandardPropertiesReader.read(new File("input/runSettings.json"));
-        populationProperties = PopulationPropertiesReader.read(new File("input/populationSettings.json"));
-        diseaseProperties = DiseasePropertiesReader.read(new File("input/diseaseSettings.json"));
-    }
-
-    public static DiseaseProperties getDiseaseProperties() {
-        return diseaseProperties;
-    }
-
-    public static StandardProperties getRunProperties() {
-        return runProperties;
-    }
-
-    private void runToSteadyState(int runTime, int timeLimit, Map<Integer, Person> population) {
-        for (int time = runTime; time <= timeLimit; time++) {
-
-            // set random infection rate to zero in steady state mode
-            updatePopulationState(time, population, 0d);
-            printSEIR(population, time);
-
-            Map<VirusStatus, Integer> seirCounts = PopulationGenerator.getSEIRCounts(population);
-
-            if (seirCounts.get(EXPOSED) == 0 && seirCounts.get(INFECTED) == 0) {
-                LOGGER.info("Steady state solution reached at t={} ", time);
-                LOGGER.info("Exiting early.");
-                return;
-            }
-        }
-    }
-
-
-    private void runContactData(int maxContact, Map<Integer, Person> population, Map<Integer, List<ContactRecord>> contactRecords, double randomInfectionRate) {
-        for (int time = 0; time <= maxContact; time++) {
-
-            updatePopulationState(time, population, randomInfectionRate);
-            List<ContactRecord> todaysContacts = contactRecords.get(time);
-            printSEIR(population, time);
-
-            for (ContactRecord contacts : todaysContacts) {
-
-                Person potentialSpreader = population.get(contacts.getTo());
-                Person victim = population.get(contacts.getFrom());
-
-                if (potentialSpreader.getStatus() != victim.getStatus()) {
-                    evaluateExposures(population, contacts, time);
-                }
-            }
-        }
-    }
-
-    public static RandomDataGenerator getRng() {
-        return rng;
-    }
-
-    private void run(Optional<Integer> sidCmd) throws IOException {
+    public void run(Optional<Integer> sidCmd) throws IOException {
 
         // readInputs();
 
@@ -147,16 +101,83 @@ public class ContactRunner {
 
     }
 
+
+    private static void readInputs() throws IOException {
+        runProperties = StandardPropertiesReader.read(new File("input/runSettings.json"));
+        populationProperties = PopulationPropertiesReader.read(new File("input/populationSettings.json"));
+        diseaseProperties = DiseasePropertiesReader.read(new File("input/diseaseSettings.json"));
+    }
+
+    public static DiseaseProperties getDiseaseProperties() {
+        return diseaseProperties;
+    }
+
+    public static StandardProperties getRunProperties() {
+        return runProperties;
+    }
+
+    private void runToSteadyState(int runTime, int timeLimit, Map<Integer, Person> population) {
+        for (int time = runTime; time <= timeLimit; time++) {
+
+            // set random infection rate to zero in steady state mode
+            updatePopulationState(time, population, 0d);
+            printSEIR(population, time);
+
+            Map<VirusStatus, Integer> seirCounts = PopulationGenerator.getSEIRCounts(population);
+
+
+            boolean exitCondition = seirCounts.get(EXPOSED) == 0 &&
+                    seirCounts.get(EXPOSED_2) == 0 &&
+                    seirCounts.get(INFECTED) == 0 &&
+                    seirCounts.get(INFECTED_SYMP) == 0;
+
+
+            if (exitCondition) {
+                LOGGER.info("Steady state solution reached at t={} ", time);
+                LOGGER.info("Exiting early.");
+                return;
+            }
+        }
+    }
+
+
+    private void runContactData(int maxContact, Map<Integer, Person> population, Map<Integer, List<ContactRecord>> contactRecords, double randomInfectionRate) {
+        for (int time = 0; time <= maxContact; time++) {
+
+            updatePopulationState(time, population, randomInfectionRate);
+            List<ContactRecord> todaysContacts = contactRecords.get(time);
+            printSEIR(population, time);
+
+            for (ContactRecord contacts : todaysContacts) {
+
+                Person potentialSpreader = population.get(contacts.getTo());
+                Person victim = population.get(contacts.getFrom());
+
+                if (potentialSpreader.getStatus() != victim.getStatus()) {
+                    evaluateExposures(population, contacts, time);
+                }
+            }
+        }
+    }
+
+    public static RandomDataGenerator getRng() {
+        return rng;
+    }
+
+
     private void printSEIR(Map<Integer, Person> population, int time) {
         Map<VirusStatus, Integer> seirCounts = PopulationGenerator.getSEIRCounts(population);
 
         LOGGER.debug("Conditions @ time: {}", time);
-        LOGGER.debug("{}  {}", SUSCEPTIBLE, seirCounts.get(SUSCEPTIBLE));
-        LOGGER.debug("{}      {}", EXPOSED, seirCounts.get(EXPOSED));
-        LOGGER.debug("{}     {}", INFECTED, seirCounts.get(INFECTED));
-        LOGGER.debug("{}    {}", RECOVERED, seirCounts.get(RECOVERED));
+        LOGGER.debug("{}    {}", SUSCEPTIBLE, seirCounts.get(SUSCEPTIBLE));
+        LOGGER.debug("{}        {}", EXPOSED, seirCounts.get(EXPOSED));
+        LOGGER.debug("{}      {}", EXPOSED_2, seirCounts.get(EXPOSED_2));
+        LOGGER.debug("{}       {}", INFECTED, seirCounts.get(INFECTED));
+        LOGGER.debug("{}  {}", INFECTED_SYMP, seirCounts.get(INFECTED_SYMP));
+        LOGGER.debug("{}      {}", RECOVERED, seirCounts.get(RECOVERED));
+        LOGGER.debug("{}           {}", DEAD, seirCounts.get(DEAD));
 
-        SeirRecord seirRecord = new SeirRecord(time, seirCounts.get(SUSCEPTIBLE), seirCounts.get(EXPOSED), seirCounts.get(INFECTED), seirCounts.get(RECOVERED));
+        SeirRecord seirRecord = new SeirRecord(time, seirCounts);
 
         records.put(time, seirRecord);
 
@@ -211,7 +232,7 @@ public class ContactRunner {
         Person personA = getMostSevere(population.get(c.getTo()), population.get(c.getFrom()));
         Person personB = personA == population.get(c.getTo()) ? population.get(c.getFrom()) : population.get(c.getTo());
 
-        boolean dangerMix = personA.getStatus() == INFECTED && personB.getStatus() == SUSCEPTIBLE;
+        boolean dangerMix = (personA.getStatus() == INFECTED || personA.getStatus() == INFECTED_SYMP || personA.getStatus() == EXPOSED_2) && personB.getStatus() == SUSCEPTIBLE;
 
         if (dangerMix && rng.nextUniform(0, 1) < c.getWeight() / diseaseProperties.getExposureTuning()) {
             personB.updateStatus(EXPOSED, time, personA.getId());

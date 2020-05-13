@@ -11,28 +11,23 @@ public class SeirRecord {
 
     private final int time;
     private final int s;
-    private final int e;
-    private final int i;
+    private final int e1;
+    private final int e2;
+    private final int iAsymp;
+    private final int iSymp;
     private final int r;
+    private final int d;
 
     public SeirRecord(int time, Map<VirusStatus, Integer> seirCounts) {
 
         this.time = time;
         this.s = seirCounts.get(SUSCEPTIBLE);
-        this.e = seirCounts.get(EXPOSED);
-        this.i = seirCounts.get(INFECTED);
+        this.e1 = seirCounts.get(EXPOSED);
+        this.e2 = seirCounts.get(EXPOSED_2);
+        this.iAsymp = seirCounts.get(INFECTED);
+        this.iSymp = seirCounts.get(INFECTED_SYMP);
         this.r = seirCounts.get(RECOVERED);
-
-    }
-
-
-    public SeirRecord(final int time, final int s, final int e, final int i, final int r) {
-
-        this.time = time;
-        this.s = s;
-        this.e = e;
-        this.i = i;
-        this.r = r;
+        this.d = seirCounts.get(DEAD);
 
     }
 
@@ -44,16 +39,29 @@ public class SeirRecord {
         return s;
     }
 
-    public int getE() {
-        return e;
+    public int getE1() {
+        return e1;
     }
 
-    public int getI() {
-        return i;
+    public int getE2() {
+        return e2;
+    }
+
+    public int getiAsymp() {
+        return iAsymp;
+    }
+
+    public int getiSymp() {
+        return iSymp;
     }
 
     public int getR() {
         return r;
+    }
+
+
+    public int getD() {
+        return d;
     }
 
     @Override
@@ -61,11 +69,15 @@ public class SeirRecord {
         return "SeirRecord{" +
                 "time=" + time +
                 ", s=" + s +
-                ", e=" + e +
-                ", i=" + i +
+                ", e1=" + e1 +
+                ", e2=" + e2 +
+                ", iAsymp=" + iAsymp +
+                ", iSymp=" + iSymp +
                 ", r=" + r +
+                ", d=" + d +
                 '}';
     }
+
 
     @Override
     public boolean equals(Object o) {
@@ -74,13 +86,16 @@ public class SeirRecord {
         SeirRecord that = (SeirRecord) o;
         return time == that.time &&
                 s == that.s &&
-                e == that.e &&
-                i == that.i &&
-                r == that.r;
+                e1 == that.e1 &&
+                e2 == that.e2 &&
+                iAsymp == that.iAsymp &&
+                iSymp == that.iSymp &&
+                r == that.r &&
+                d == that.d;
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(time, s, e, i, r);
+        return Objects.hash(time, s, e1, e2, iAsymp, iSymp, r, d);
     }
 }
