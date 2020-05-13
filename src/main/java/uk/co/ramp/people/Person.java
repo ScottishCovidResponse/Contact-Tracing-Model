@@ -73,39 +73,51 @@ public class Person {
         updateStatus(newStatus, currentTime);
     }
 
-    public void updateStatus(VirusStatus newStatus, int currentTime) {
-
-        DiseaseProperties properties = ContactRunner.getDiseaseProperties();
-
-        if (newStatus == EXPOSED) {
-            setStatus(newStatus);
-            nextStatusChange = currentTime + getDistributionValue(properties.getMeanTimeToInfectious(), properties.getProgressionDistribution());
-        } else if (newStatus == EXPOSED_2) {
-            setStatus(newStatus);
-            nextStatusChange = currentTime + getDistributionValue(properties.getMeanTimeToInfected(), properties.getProgressionDistribution());
-        } else if (newStatus == INFECTED) {
-            nextStatusChange = currentTime + getDistributionValue(properties.getMeanTimeToRecovered(), properties.getProgressionDistribution());
-            if (currentTime > 0) {
-                setStatus(INFECTED);
-            } else {
-                status = INFECTED;
-            }
-        } else if (newStatus == INFECTED_SYMP) {
-            nextStatusChange = currentTime + getDistributionValue(properties.getMeanTimeToRecovered(), properties.getProgressionDistribution());
-            setStatus(newStatus);
-        } else if (newStatus == DEAD) {
-            setStatus(newStatus);
-            nextStatusChange = -1;
-        } else if (newStatus == RECOVERED) {
-            setStatus(RECOVERED);
-            nextStatusChange = -1;
-        }
-    }
 
     public int getNextStatusChange() {
         return nextStatusChange;
     }
 
+
+    // TODO move out of this class
+    public void updateStatus(VirusStatus newStatus, int currentTime) {
+
+        DiseaseProperties properties = ContactRunner.getDiseaseProperties();
+
+        switch (newStatus) {
+            case EXPOSED:
+                setStatus(newStatus);
+                nextStatusChange = currentTime + getDistributionValue(properties.getMeanTimeToInfectious(), properties.getProgressionDistribution());
+                break;
+            case EXPOSED_2:
+                setStatus(newStatus);
+                nextStatusChange = currentTime + getDistributionValue(properties.getMeanTimeToInfected(), properties.getProgressionDistribution());
+                break;
+            case INFECTED:
+                nextStatusChange = currentTime + getDistributionValue(properties.getMeanTimeToRecovered(), properties.getProgressionDistribution());
+                if (currentTime > 0) {
+                    setStatus(INFECTED);
+                } else {
+                    status = INFECTED;
+                }
+                break;
+            case INFECTED_SYMP:
+                nextStatusChange = currentTime + getDistributionValue(properties.getMeanTimeToRecovered(), properties.getProgressionDistribution());
+                setStatus(newStatus);
+                break;
+            case DEAD:
+                setStatus(newStatus);
+                nextStatusChange = -1;
+                break;
+            case RECOVERED:
+                setStatus(RECOVERED);
+                nextStatusChange = -1;
+                break;
+        }
+    }
+
+
+    // TODO move out of this class
     public void checkTime(int time) {
 
         if (nextStatusChange == time) {
@@ -146,6 +158,8 @@ public class Person {
 
     }
 
+
+    // TODO move out of this class
     public void randomExposure(int t) {
         exposedBy = -1;
         if (status == SUSCEPTIBLE) {
@@ -158,6 +172,8 @@ public class Person {
         }
     }
 
+
+    // TODO move out of this class
     int getDistributionValue(double mean, ProgressionDistribution p) {
         RandomDataGenerator rnd = ContactRunner.getRng();
 
