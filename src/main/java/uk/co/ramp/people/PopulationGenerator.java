@@ -1,5 +1,6 @@
 package uk.co.ramp.people;
 
+import org.apache.commons.math3.random.RandomDataGenerator;
 import uk.co.ramp.io.PopulationProperties;
 import uk.co.ramp.io.StandardProperties;
 import uk.co.ramp.utilities.MinMax;
@@ -9,25 +10,24 @@ import java.util.*;
 
 public class PopulationGenerator {
 
-    private PopulationGenerator() {
-        // hidden constructor
+    private final StandardProperties runProperties;
+    private final PopulationProperties properties;
+
+    public PopulationGenerator(final StandardProperties runProperties, final PopulationProperties properties) {
+        this.runProperties = runProperties;
+        this.properties = properties;
     }
 
-    public static Map<Integer, Person> generate(StandardProperties runProperties, PopulationProperties properties) {
-        return generate(runProperties.getPopulationSize(), properties, runProperties.getSeed());
-    }
-
-    public static Map<Integer, Person> generate(int popSize, PopulationProperties properties, int sid) {
-        Random r = RandomSingleton.getInstance(sid);
+    public Map<Integer, Person> generate() {
+        RandomDataGenerator r = RandomSingleton.getInstance(runProperties.getSeed());
         Map<Integer, Double> cumulative = createCumulative(properties.getPopulationDistribution());
         Map<Integer, Person> population = new HashMap<>();
-        for (int i = 0; i < popSize; i++) {
+        for (int i = 0; i < runProperties.getPopulationSize(); i++) {
 
-            int age = findAge(r.nextDouble(), cumulative, properties.getPopulationAges());
-
-            Gender g = r.nextDouble() > properties.getGenderBalance() / 2d ? Gender.FEMALE : Gender.MALE;
-            double compliance = r.nextGaussian();
-            double health = r.nextGaussian();
+            int age = findAge(r.nextUniform(0, 1), cumulative, properties.getPopulationAges());
+            Gender g = r.nextUniform(0, 1) > properties.getGenderBalance() / 2d ? Gender.FEMALE : Gender.MALE;
+            double compliance = r.nextGaussian(0.5, 0.5);
+            double health = r.nextGaussian(0.5, 0.5);
 
             population.put(i, new Person(i, age, g, compliance, health));
 
@@ -36,7 +36,7 @@ public class PopulationGenerator {
         return population;
     }
 
-    private static int findAge(double v, Map<Integer, Double> c, Map<Integer, MinMax> populationAges) {
+    int findAge(double v, Map<Integer, Double> c, Map<Integer, MinMax> populationAges) {
 
         int index;
 
@@ -63,25 +63,22 @@ public class PopulationGenerator {
 
     }
 
-
-    private static Map<Integer, Double> createCumulative(Map<Integer, Double> populationDistribution) {
+    // the population data is provided in non-cumulative form. This creates a cumulative distribution
+    Map<Integer, Double> createCumulative(Map<Integer, Double> populationDistribution) {
 
         List<Double> data = new ArrayList<>();
-
         Map<Integer, Double> cumulative = new HashMap<>();
 
+        // extract the data in ascending order
         for (Map.Entry<Integer, Double> entry : populationDistribution.entrySet()) {
             data.add(entry.getKey(), populationDistribution.get(entry.getKey()));
         }
 
+        // loop over the data
+        double sum = 0d;
         for (int i = 0; i < data.size(); i++) {
-            double sum = 0d;
-            if (i < data.size() - 1) {
-                sum += data.get(i);
-                for (int j = 0; j < i; j++) {
-                    sum += data.get(j);
-                }
-            } else if (i == data.size() - 1) {
+            sum += data.get(i);
+            if (i == data.size() - 1) {
                 sum = 1d;
             }
             cumulative.put(i, sum);
