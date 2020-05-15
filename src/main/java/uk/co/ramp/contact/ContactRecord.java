@@ -1,32 +1,18 @@
 package uk.co.ramp.contact;
 
-public class ContactRecord {
+import com.fasterxml.jackson.annotation.JsonPropertyOrder;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import org.immutables.value.Value.Immutable;
 
-    private final int time;
-    private final int from;
-    private final int to;
-    private final double weight;
-
-    public ContactRecord(int time, int from, int to, double weight) {
-        this.time = time;
-        this.from = from;
-        this.to = to;
-        this.weight = weight;
-    }
-
-    public int getTime() {
-        return time;
-    }
-
-    public int getFrom() {
-        return from;
-    }
-
-    public int getTo() {
-        return to;
-    }
-
-    public double getWeight() {
-        return weight;
-    }
+@Immutable
+@JsonSerialize
+@JsonDeserialize
+@JsonPropertyOrder({"time", "from", "to", "weight"})
+@SuppressWarnings("immutables:from")
+public interface ContactRecord {
+    int time();
+    int from();
+    int to();
+    double weight();
 }

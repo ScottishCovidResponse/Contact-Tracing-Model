@@ -10,6 +10,8 @@ import org.mockito.internal.util.reflection.FieldSetter;
 import uk.co.ramp.ContactRunner;
 import uk.co.ramp.LogAppender;
 import uk.co.ramp.io.DiseaseProperties;
+import uk.co.ramp.io.ImmutableDiseaseProperties;
+import uk.co.ramp.io.ImmutableStandardProperties;
 import uk.co.ramp.io.PopulationProperties;
 import uk.co.ramp.io.ProgressionDistribution;
 import uk.co.ramp.io.StandardProperties;
@@ -19,6 +21,7 @@ import java.util.List;
 
 import static java.lang.Math.*;
 import static org.hamcrest.CoreMatchers.containsString;
+import static uk.co.ramp.io.ProgressionDistribution.FLAT;
 import static uk.co.ramp.people.VirusStatus.*;
 
 public class PersonTest {
@@ -40,8 +43,20 @@ public class PersonTest {
     public void setUp() throws Exception {
 
 
-        StandardProperties a = new StandardProperties(1000, 200, 10, 0, true);
-        diseaseProperties = new DiseaseProperties(3, 7, 0.01, 50, ProgressionDistribution.FLAT);
+        StandardProperties a = ImmutableStandardProperties.builder()
+                .populationSize(1000)
+                .timeLimit(200)
+                .infected(10)
+                .seed(0)
+                .steadyState(true)
+                .build();
+        diseaseProperties = ImmutableDiseaseProperties.builder()
+                .exposureTuning(90)
+                .meanTimeToInfected(3)
+                .meanTimeToRecovered(7)
+                .progressionDistribution(FLAT)
+                .randomInfectionRate(0)
+                .build();
         PopulationProperties c = Mockito.mock(PopulationProperties.class);
         ContactRunner contactRunner = new ContactRunner(a, diseaseProperties, c);
 
@@ -118,13 +133,13 @@ public class PersonTest {
     public void checkTime() throws NoSuchFieldException {
 
         int time = rnd.nextInt(0, 100);
-        int flatTransition = (int) diseaseProperties.getMeanTimeToInfected();
+        int flatTransition = (int) diseaseProperties.meanTimeToInfected();
 
         person.updateStatus(EXPOSED, time - flatTransition);
 
         person.checkTime(time);
 
-        flatTransition = (int) diseaseProperties.getMeanTimeToRecovered();
+        flatTransition = (int) diseaseProperties.meanTimeToRecovered();
 
         Assert.assertEquals(INFECTED, person.getStatus());
         Assert.assertEquals(time + flatTransition, person.getNextStatusChange());
@@ -150,7 +165,7 @@ public class PersonTest {
     @Test
     public void notNow() {
         int time = rnd.nextInt(0, 100);
-        int flatTransition = (int) diseaseProperties.getMeanTimeToInfected();
+        int flatTransition = (int) diseaseProperties.meanTimeToInfected();
         Assert.assertNotEquals(10, flatTransition);
         person.updateStatus(EXPOSED, time - flatTransition);
         person.checkTime(time - 10);

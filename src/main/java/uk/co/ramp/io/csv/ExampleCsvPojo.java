@@ -1,18 +1,17 @@
-package uk.co.ramp.record;
+package uk.co.ramp.io.csv;
 
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
-import org.immutables.value.Value.Immutable;
+
+import static org.immutables.value.Value.Immutable;
 
 @Immutable
 @JsonSerialize
 @JsonDeserialize
-@JsonPropertyOrder({"time", "s", "e", "i", "r"})
-public interface SeirRecord {
-    int time();
-    int s();
-    int e();
-    int i();
-    int r();
+@JsonPropertyOrder({"a", "b", "c"})
+public interface ExampleCsvPojo {
+    int a();
+    int b();
+    int c();
 }

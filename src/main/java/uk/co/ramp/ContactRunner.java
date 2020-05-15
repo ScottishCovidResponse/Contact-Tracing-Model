@@ -3,10 +3,12 @@ package uk.co.ramp;
 import org.apache.commons.math3.random.RandomDataGenerator;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import uk.co.ramp.contact.ContactException;
 import uk.co.ramp.contact.ContactRecord;
 import uk.co.ramp.io.DiseaseProperties;
-import uk.co.ramp.io.Output;
+import uk.co.ramp.io.ImmutableStandardProperties;
 import uk.co.ramp.io.PopulationProperties;
+import uk.co.ramp.io.SeirWriter;
 import uk.co.ramp.io.StandardProperties;
 import uk.co.ramp.io.readers.DiseasePropertiesReader;
 import uk.co.ramp.io.readers.PopulationPropertiesReader;
@@ -14,15 +16,30 @@ import uk.co.ramp.io.readers.StandardPropertiesReader;
 import uk.co.ramp.people.Person;
 import uk.co.ramp.people.PopulationGenerator;
 import uk.co.ramp.people.VirusStatus;
+import uk.co.ramp.record.ImmutableSeirRecord;
 import uk.co.ramp.record.SeirRecord;
 import uk.co.ramp.utilities.ContactReader;
 import uk.co.ramp.utilities.RandomSingleton;
 
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
 import java.io.File;
+import java.io.FileReader;
+import java.io.FileWriter;
 import java.io.IOException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.Set;
 
-import static uk.co.ramp.people.VirusStatus.*;
+import static uk.co.ramp.people.VirusStatus.EXPOSED;
+import static uk.co.ramp.people.VirusStatus.INFECTED;
+import static uk.co.ramp.people.VirusStatus.RECOVERED;
+import static uk.co.ramp.people.VirusStatus.SUSCEPTIBLE;
 
 public class ContactRunner {
 
@@ -51,7 +68,7 @@ public class ContactRunner {
 
         readInputs();
         ContactRunner contactRunner = new ContactRunner();
-        rng = RandomSingleton.getInstance(runProperties.getSeed());
+        rng = RandomSingleton.getInstance(runProperties.seed());
         Optional<Integer> sid = Optional.empty();
         if (args.length == 1) {
             sid = Optional.of(Integer.parseInt(args[0]));
@@ -61,9 +78,20 @@ public class ContactRunner {
 
 
     private static void readInputs() throws IOException {
-        runProperties = StandardPropertiesReader.read(new File("input/runSettings.json"));
-        populationProperties = PopulationPropertiesReader.read(new File("input/populationSettings.json"));
-        diseaseProperties = DiseasePropertiesReader.read(new File("input/diseaseSettings.json"));
+        try (FileReader fr = new FileReader(new File("input/runSettings.json"));
+             BufferedReader br = new BufferedReader(fr)) {
+            runProperties = new StandardPropertiesReader().read(br);
+        }
+
+        try (FileReader fr = new FileReader(new File("input/populationSettings.json"));
+             BufferedReader br = new BufferedReader(fr)) {
+            populationProperties = new PopulationPropertiesReader().read(br);
+        }
+
+        try (FileReader fr = new FileReader(new File("input/diseaseSettings.json"));
+             BufferedReader br = new BufferedReader(fr)) {
+            diseaseProperties = new DiseasePropertiesReader().read(br);
+        }
     }
 
     public static DiseaseProperties getDiseaseProperties() {
@@ -101,8 +129,8 @@ public class ContactRunner {
 
             for (ContactRecord contacts : todaysContacts) {
 
-                Person potentialSpreader = population.get(contacts.getTo());
-                Person victim = population.get(contacts.getFrom());
+                Person potentialSpreader = population.get(contacts.to());
+                Person victim = population.get(contacts.from());
 
                 if (potentialSpreader.getStatus() != victim.getStatus()) {
                     evaluateExposures(population, contacts, time);
@@ -120,15 +148,15 @@ public class ContactRunner {
         // readInputs();
 
         if (sidCmd.isPresent()) {
-            int seed = runProperties.getSeed();
+            int seed = runProperties.seed();
             LOGGER.warn("The seed from input file will be modified from {} to {}", sidCmd.get(), seed + sidCmd.get());
             seed += sidCmd.get();
-            runProperties.setSeed(seed);
+            runProperties = ImmutableStandardProperties.copyOf(runProperties).withSeed(seed);
         }
 
 
         Map<Integer, Person> population = new PopulationGenerator(runProperties, populationProperties).generate();
-        Map<Integer, List<ContactRecord>> contactRecords = ContactReader.read(runProperties);
+        Map<Integer, List<ContactRecord>> contactRecords = readContacts(new File("input/contacts.csv"), runProperties);
         Set<Integer> infectedIds = infectPopulation();
 
         LOGGER.info(infectedIds);
@@ -143,8 +171,27 @@ public class ContactRunner {
 
         runToCompletion(runProperties, population, contactRecords);
 
-        Output.printSeirCSV(records);
+        writeSEIR(new ArrayList<>(records.values()), new File("SEIR.csv"));
+    }
 
+    Map<Integer, List<ContactRecord>> readContacts(File file, StandardProperties runProperties) {
+        try (FileReader fr = new FileReader(file);
+             BufferedReader br = new BufferedReader(fr)) {
+            return new ContactReader().read(br, runProperties);
+        } catch (IOException e) {
+            LOGGER.fatal("Could not read contacts");
+            throw new ContactException(e.getMessage());
+        }
+    }
+
+    void writeSEIR(List<SeirRecord> seirRecords, File file) {
+        try (FileWriter fw = new FileWriter(file);
+             BufferedWriter bw = new BufferedWriter(fw)) {
+            new SeirWriter().write(bw, seirRecords);
+        } catch (IOException e) {
+            LOGGER.fatal("Could not write SEIR");
+            throw new RuntimeException(e.getMessage());
+        }
     }
 
     private void printSEIR(Map<Integer, Person> population, int time) {
@@ -156,7 +203,13 @@ public class ContactRunner {
         LOGGER.debug("{}     {}", INFECTED, seirCounts.get(INFECTED));
         LOGGER.debug("{}    {}", RECOVERED, seirCounts.get(RECOVERED));
 
-        SeirRecord seirRecord = new SeirRecord(time, seirCounts.get(SUSCEPTIBLE), seirCounts.get(EXPOSED), seirCounts.get(INFECTED), seirCounts.get(RECOVERED));
+        SeirRecord seirRecord = ImmutableSeirRecord.builder()
+                .time(time)
+                .s(seirCounts.get(SUSCEPTIBLE))
+                .e(seirCounts.get(EXPOSED))
+                .i(seirCounts.get(INFECTED))
+                .r(seirCounts.get(RECOVERED))
+                .build();
 
         records.put(time, seirRecord);
 
@@ -170,11 +223,11 @@ public class ContactRunner {
     }
 
     private void runToCompletion(StandardProperties properties, Map<Integer, Person> population, Map<Integer, List<ContactRecord>> contactRecords) {
-        int timeLimit = properties.getTimeLimit();
+        int timeLimit = properties.timeLimit();
         int maxContact = contactRecords.keySet().stream().max(Comparator.naturalOrder()).orElseThrow(RuntimeException::new);
         int runTime;
-        boolean steadyState = properties.isSteadyState();
-        double randomInfectionRate = diseaseProperties.getRandomInfectionRate();
+        boolean steadyState = properties.steadyState();
+        double randomInfectionRate = diseaseProperties.randomInfectionRate();
 
         if (timeLimit <= maxContact) {
             LOGGER.info("Not all contact data will be used");
@@ -208,12 +261,12 @@ public class ContactRunner {
     }
 
     private void evaluateExposures(Map<Integer, Person> population, ContactRecord c, int time) {
-        Person personA = getMostSevere(population.get(c.getTo()), population.get(c.getFrom()));
-        Person personB = personA == population.get(c.getTo()) ? population.get(c.getFrom()) : population.get(c.getTo());
+        Person personA = getMostSevere(population.get(c.to()), population.get(c.from()));
+        Person personB = personA == population.get(c.to()) ? population.get(c.from()) : population.get(c.to());
 
         boolean dangerMix = personA.getStatus() == INFECTED && personB.getStatus() == SUSCEPTIBLE;
 
-        if (dangerMix && rng.nextUniform(0, 1) < c.getWeight() / diseaseProperties.getExposureTuning()) {
+        if (dangerMix && rng.nextUniform(0, 1) < c.weight() / diseaseProperties.exposureTuning()) {
             personB.updateStatus(EXPOSED, time, personA.getId());
         }
     }
@@ -221,8 +274,8 @@ public class ContactRunner {
     private Set<Integer> infectPopulation() {
 
         Set<Integer> infectedIds = new HashSet<>();
-        while (infectedIds.size() < runProperties.getInfected()) {
-            infectedIds.add(rng.nextInt(0, runProperties.getPopulationSize()));
+        while (infectedIds.size() < runProperties.infected()) {
+            infectedIds.add(rng.nextInt(0, runProperties.populationSize()));
         }
         return infectedIds;
 
