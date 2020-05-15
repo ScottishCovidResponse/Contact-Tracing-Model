@@ -3,6 +3,8 @@ package uk.co.ramp;
 import org.apache.commons.math3.random.RandomDataGenerator;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 import uk.co.ramp.contact.ContactRecord;
 import uk.co.ramp.io.DiseaseProperties;
 import uk.co.ramp.io.StandardProperties;
@@ -15,24 +17,44 @@ import java.util.*;
 
 import static uk.co.ramp.people.VirusStatus.*;
 
-public class Infection {
+@Service
+public class Outbreak {
 
-    private static final Logger LOGGER = LogManager.getLogger(Infection.class);
+    private static final Logger LOGGER = LogManager.getLogger(Outbreak.class);
 
-    private final StandardProperties properties;
-    private final DiseaseProperties diseaseProperties;
-    private final RandomDataGenerator rng;
-    private final Map<Integer, Person> population;
-    private final Map<Integer, List<ContactRecord>> contactRecords;
+    private StandardProperties properties;
+    private DiseaseProperties diseaseProperties;
+    private RandomDataGenerator rng;
+
+
+    private Map<Integer, Person> population;
+    private Map<Integer, List<ContactRecord>> contactRecords;
     private final Map<Integer, SeirRecord> records = new HashMap<>();
 
-    public Infection(Map<Integer, Person> population, Map<Integer, List<ContactRecord>> contactRecords, StandardProperties runProperties, DiseaseProperties diseaseProperties, RandomDataGenerator rng) {
-        this.properties = runProperties;
-        this.diseaseProperties = diseaseProperties;
-        this.rng = rng;
+    public void setPopulation(Map<Integer, Person> population) {
         this.population = population;
+    }
+
+    public void setContactRecords(Map<Integer, List<ContactRecord>> contactRecords) {
         this.contactRecords = contactRecords;
     }
+
+
+    @Autowired
+    public void setDiseaseProperties(DiseaseProperties diseaseProperties) {
+        this.diseaseProperties = diseaseProperties;
+    }
+
+    @Autowired
+    public void setStandardProperties(StandardProperties standardProperties) {
+        this.properties = standardProperties;
+    }
+
+    @Autowired
+    public void setRandomDataGenerator(RandomDataGenerator randomDataGenerator) {
+        this.rng = randomDataGenerator;
+    }
+
 
     public Map<Integer, SeirRecord> propagate() {
 
@@ -45,6 +67,7 @@ public class Infection {
     private void generateInitialInfection() {
         Set<Integer> infectedIds = infectPopulation();
         for (Integer id : infectedIds) {
+
             EvaluateCase evaluateCase = new EvaluateCase(population.get(id), diseaseProperties, rng);
             evaluateCase.updateStatus(EXPOSED, 0);
             LOGGER.info("population.get(id).getNextStatusChange() = {}", population.get(id).getNextStatusChange());

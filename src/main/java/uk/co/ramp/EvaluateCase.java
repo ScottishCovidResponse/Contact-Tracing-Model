@@ -29,35 +29,31 @@ public class EvaluateCase {
         updateStatus(newStatus, currentTime);
     }
 
-
-    // TODO move out of this class
     public void updateStatus(VirusStatus newStatus, int currentTime) {
 
-        int nextStatusChange;
+        ProgressionDistribution progressionDistribution = properties.getProgressionDistribution();
+        int timeToNextChange;
+
         switch (newStatus) {
             case EXPOSED:
-                nextStatusChange = currentTime + getDistributionValue(properties.getMeanTimeToInfectious(), properties.getProgressionDistribution());
+                timeToNextChange = getDistributionValue(properties.getMeanTimeToInfectious(), progressionDistribution);
                 break;
             case EXPOSED_2:
-                nextStatusChange = currentTime + getDistributionValue(properties.getMeanTimeToInfected(), properties.getProgressionDistribution());
+                timeToNextChange = getDistributionValue(properties.getMeanTimeToInfected(), progressionDistribution);
                 break;
             case INFECTED:
-                nextStatusChange = currentTime + getDistributionValue(properties.getMeanTimeToRecovered(), properties.getProgressionDistribution());
-                break;
             case INFECTED_SYMP:
-                nextStatusChange = currentTime + getDistributionValue(properties.getMeanTimeToRecovered(), properties.getProgressionDistribution());
+                timeToNextChange = getDistributionValue(properties.getMeanTimeToRecovered(), progressionDistribution);
                 break;
             default:
-                nextStatusChange = -1;
+                timeToNextChange = -1;
         }
 
         p.setStatus(newStatus);
-        p.setNextStatusChange(nextStatusChange);
+        p.setNextStatusChange(currentTime + timeToNextChange);
 
     }
 
-
-    // TODO move out of this class
     public void checkTime(int time) {
 
         if (p.getNextStatusChange() == time) {
@@ -69,21 +65,15 @@ public class EvaluateCase {
                     updateStatus(EXPOSED_2, time);
                     break;
                 case EXPOSED_2:
-                    if (p.getHealth() > 0.5) {
-                        updateStatus(INFECTED, time);
-                    } else {
-                        updateStatus(INFECTED_SYMP, time);
-                    }
+                    VirusStatus status = determineInfection(p);
+                    updateStatus(status, time);
                     break;
                 case INFECTED:
                     updateStatus(RECOVERED, time);
                     break;
                 case INFECTED_SYMP:
-                    if (p.getHealth() > 0.3) {
-                        updateStatus(RECOVERED, time);
-                    } else {
-                        updateStatus(DEAD, time);
-                    }
+                    status = determineOutcome(p);
+                    updateStatus(status, time);
                     break;
                 case SUSCEPTIBLE:
                 case RECOVERED:
@@ -98,8 +88,14 @@ public class EvaluateCase {
 
     }
 
+    private VirusStatus determineOutcome(Person p) {
+        return p.getHealth() > 0.3 ? RECOVERED : DEAD;
+    }
 
-    // TODO move out of this class
+    private VirusStatus determineInfection(Person p) {
+        return p.getHealth() > 0.5 ? INFECTED : INFECTED_SYMP;
+    }
+
     public void randomExposure(int t) {
         p.setExposedBy(-1);
         if (p.getStatus() == SUSCEPTIBLE) {
@@ -112,8 +108,6 @@ public class EvaluateCase {
         }
     }
 
-
-    // TODO move out of this class
     int getDistributionValue(double mean, ProgressionDistribution p) {
 
         int value = (int) Math.round(mean);
