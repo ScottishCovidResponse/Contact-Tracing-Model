@@ -1,15 +1,13 @@
 package uk.co.ramp.utilities;
 
-import org.apache.commons.csv.CSVFormat;
-import org.apache.commons.csv.CSVRecord;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import uk.co.ramp.contact.ContactException;
 import uk.co.ramp.contact.ContactRecord;
-import uk.co.ramp.io.StandardProperties;
+import uk.co.ramp.contact.ImmutableContactRecord;
 
-import java.io.File;
-import java.io.FileReader;
+import uk.co.ramp.io.StandardProperties;
+import uk.co.ramp.io.csv.CsvReader;
+
 import java.io.IOException;
 import java.io.Reader;
 import java.util.ArrayList;
@@ -17,46 +15,30 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-
 public class ContactReader {
-
     private static final Logger LOGGER = LogManager.getLogger(ContactReader.class);
 
-
-    private ContactReader() {
-        // hidden constructor
-    }
-
-    public static Map<Integer, List<ContactRecord>> read(StandardProperties runProperties) {
-        return read(runProperties.getPopulationSize(), runProperties.getTimeLimit());
+    public Map<Integer, List<ContactRecord>> read(Reader reader, StandardProperties runProperties) throws IOException {
+        return read(reader, runProperties.populationSize(), runProperties.timeLimit());
     }
 
 
-    public static Map<Integer, List<ContactRecord>> read(int personLimit, int dayLimit) {
-
-        Iterable<CSVRecord> records;
-        File file = new File("input/contacts.csv");
-        try {
-            Reader in = new FileReader(file);
-            records = CSVFormat.EXCEL.withFirstRecordAsHeader().parse(in);
-        } catch (IOException e) {
-            LOGGER.fatal("An error occurred parsing this file.");
-            throw new ContactException("An error occurred reading the file " + e.getMessage());
-        }
+    private Map<Integer, List<ContactRecord>> read(Reader reader, int personLimit, int dayLimit) throws IOException {
+        List<ImmutableContactRecord> contactRecords = new CsvReader().read(reader, ImmutableContactRecord.class);
         double maxWeight = 0d;
         Map<Integer, List<ContactRecord>> dailyRecord = new HashMap<>();
-        for (CSVRecord record : records) {
+        for (ContactRecord record : contactRecords) {
 
-            int day = Integer.parseInt(record.get(0)) - 1;
-            int from = Integer.parseInt(record.get(1)) - 1;
-            int to = Integer.parseInt(record.get(2)) - 1;
-            double weight = Double.parseDouble(record.get(3));
+            int day = record.time() - 1;
+            int from = record.from() - 1;
+            int to = record.to() - 1;
+            double weight = record.weight();
 
             // TODO remove these when no longer developing
             if (day > dayLimit) break;
             if (from >= personLimit || to >= personLimit) continue;
 
-            ContactRecord c = new ContactRecord(day, from, to, weight);
+            ContactRecord c = ImmutableContactRecord.builder().time(day).from(from).to(to).weight(weight).build();
             dailyRecord.putIfAbsent(day, new ArrayList<>());
             dailyRecord.get(day).add(c);
 

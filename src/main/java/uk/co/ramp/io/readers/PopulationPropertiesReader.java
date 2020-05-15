@@ -2,51 +2,43 @@ package uk.co.ramp.io.readers;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import com.google.gson.TypeAdapterFactory;
+import uk.co.ramp.io.ImmutablePopulationProperties;
 import uk.co.ramp.io.PopulationProperties;
-import uk.co.ramp.utilities.MinMax;
+import uk.co.ramp.utilities.ImmutableMinMax;
 
-import java.io.*;
-import java.util.HashMap;
-import java.util.Map;
+import java.io.Reader;
+import java.io.Writer;
+import java.util.ServiceLoader;
 
 public class PopulationPropertiesReader {
 
-    private PopulationPropertiesReader() {
-        //hidden constructor
+    public PopulationProperties read(Reader reader) {
+        GsonBuilder gsonBuilder = new GsonBuilder();
+        ServiceLoader.load(TypeAdapterFactory.class).forEach(gsonBuilder::registerTypeAdapterFactory);
+        return gsonBuilder.setPrettyPrinting().create().fromJson(reader, PopulationProperties.class);
     }
 
-    public static PopulationProperties read(File file) throws IOException {
-        Gson gson = new GsonBuilder().setPrettyPrinting().create();
-        try (Reader fileReader = new FileReader(file)) {
-            return gson.fromJson(fileReader, PopulationProperties.class);
-        }
-    }
-
-    public static void create() throws IOException {
+    public void create(Writer writer) {
 
         // index and proportion
-        Map<Integer, Double> populationDistribution = new HashMap<>();
-        Map<Integer, MinMax> populationAges = new HashMap<>();
-
         // data taken from census
-        populationDistribution.put(0, 0.1759);
-        populationDistribution.put(1, 0.1171);
-        populationDistribution.put(2, 0.4029);
-        populationDistribution.put(3, 0.1222);
-        populationDistribution.put(4, 0.1819);
+        PopulationProperties wrapper = ImmutablePopulationProperties.builder()
+                .putPopulationDistribution(0, 0.1759)
+                .putPopulationDistribution(1, 0.1171)
+                .putPopulationDistribution(2, 0.4029)
+                .putPopulationDistribution(3, 0.1222)
+                .putPopulationDistribution(4, 0.1819)
+                .putPopulationAges(0, ImmutableMinMax.of(0, 14))
+                .putPopulationAges(1, ImmutableMinMax.of(15, 24))
+                .putPopulationAges(2, ImmutableMinMax.of(25, 54))
+                .putPopulationAges(3, ImmutableMinMax.of(55, 64))
+                .putPopulationAges(4, ImmutableMinMax.of(65, 90))
+                .genderBalance(0.99)
+                .build();
 
-        populationAges.put(0, new MinMax(0, 14));
-        populationAges.put(1, new MinMax(15, 24));
-        populationAges.put(2, new MinMax(25, 54));
-        populationAges.put(3, new MinMax(55, 64));
-        populationAges.put(4, new MinMax(65, 90));
-
-        PopulationProperties wrapper = new PopulationProperties(populationDistribution, populationAges, 0.99);
-
-        try (Writer w = new FileWriter("population.json")) {
-            Gson gson = new GsonBuilder().setPrettyPrinting().create();
-            gson.toJson(wrapper, w);
-        }
+        Gson gson = new GsonBuilder().setPrettyPrinting().create();
+        gson.toJson(wrapper, writer);
     }
 
 }

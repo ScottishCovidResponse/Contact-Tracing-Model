@@ -14,7 +14,7 @@ import static uk.co.ramp.io.ProgressionDistribution.FLAT;
 
 public class DiseasePropertiesReader {
 
-    public static DiseaseProperties read(Reader reader) {
+    public DiseaseProperties read(Reader reader) {
         GsonBuilder gsonBuilder = new GsonBuilder();
         ServiceLoader.load(TypeAdapterFactory.class).forEach(gsonBuilder::registerTypeAdapterFactory);
         return gsonBuilder.setPrettyPrinting().create().fromJson(reader, DiseaseProperties.class);
@@ -23,11 +23,7 @@ public class DiseasePropertiesReader {
     public void create(Writer writer) {
         DiseaseProperties wrapper = ImmutableDiseaseProperties.builder()
                 .meanTimeToInfected(3)
-                .maxTimeToInfectious(4)
-                .meanTimeToFinalState(7)
-                .maxTimeToFinalState(14)
-                .maxTimeToInfectious(14)
-                .maxTimeToInfected(14)
+                .meanTimeToRecovered(7)
                 .randomInfectionRate(0.01)
                 .exposureTuning(160)
                 .progressionDistribution(FLAT)
@@ -36,4 +32,6 @@ public class DiseasePropertiesReader {
         Gson gson = new GsonBuilder().setPrettyPrinting().create();
         gson.toJson(wrapper, writer);
     }
+
+
 }
