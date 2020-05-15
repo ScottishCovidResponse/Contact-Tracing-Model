@@ -15,6 +15,7 @@ import uk.co.ramp.io.readers.StandardPropertiesReader;
 import uk.co.ramp.utilities.RandomSingleton;
 
 import java.io.File;
+import java.io.FileReader;
 import java.io.IOException;
 import java.util.Optional;
 
@@ -46,7 +47,7 @@ public class AppConfig {
 
     @Bean
     public DiseaseProperties diseaseProperties() throws IOException {
-        return DiseasePropertiesReader.read(new File("input/diseaseSettings.json"));
+        return DiseasePropertiesReader.read(new FileReader(new File("input/diseaseSettings.json")));
     }
 
     @Bean

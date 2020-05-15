@@ -31,26 +31,37 @@ public class EvaluateCase {
 
     public void updateStatus(VirusStatus newStatus, int currentTime) {
 
-        ProgressionDistribution progressionDistribution = properties.getProgressionDistribution();
+        ProgressionDistribution progressionDistribution = properties.progressionDistribution();
         int timeToNextChange;
-
+        double mean;
+        double max;
         switch (newStatus) {
             case EXPOSED:
-                timeToNextChange = getDistributionValue(properties.getMeanTimeToInfectious(), progressionDistribution);
+                mean = properties.meanTimeToInfectious();
+                max = properties.maxTimeToInfectious();
                 break;
             case EXPOSED_2:
-                timeToNextChange = getDistributionValue(properties.getMeanTimeToInfected(), progressionDistribution);
+                mean = properties.meanTimeToInfected();
+                max = properties.maxTimeToInfected();
                 break;
             case INFECTED:
             case INFECTED_SYMP:
-                timeToNextChange = getDistributionValue(properties.getMeanTimeToRecovered(), progressionDistribution);
+                mean = properties.meanTimeToFinalState();
+                max = properties.maxTimeToFinalState();
                 break;
             default:
-                timeToNextChange = -1;
+                mean = 0;
+                max = 0;
+        }
+
+        if (newStatus != DEAD && newStatus != RECOVERED) {
+            timeToNextChange = getDistributionValue(mean, max, progressionDistribution);
+            p.setNextStatusChange(currentTime + timeToNextChange);
+        } else {
+            p.setNextStatusChange(-1);
         }
 
         p.setStatus(newStatus);
-        p.setNextStatusChange(currentTime + timeToNextChange);
 
     }
 
@@ -83,6 +94,8 @@ public class EvaluateCase {
 
         } else if (p.getNextStatusChange() != -1 && p.getNextStatusChange() < time) {
             System.out.println("Something has been missed");
+            System.out.println(p.toString());
+            System.out.println(time);
             throw new RuntimeException("Something has been missed");
         }
 
@@ -99,7 +112,7 @@ public class EvaluateCase {
     public void randomExposure(int t) {
         p.setExposedBy(-1);
         if (p.getStatus() == SUSCEPTIBLE) {
-            LOGGER.info("Person with id: {} has been randomly exposed at time {}", p.getId(), t);
+            LOGGER.trace("Person with id: {} has been randomly exposed at time {}", p.getId(), t);
             updateStatus(EXPOSED, t);
         } else {
             String message = String.format("The person with id: %d should not be able to transition from %s to %s", p.getId(), p.getStatus(), EXPOSED);
@@ -108,7 +121,7 @@ public class EvaluateCase {
         }
     }
 
-    int getDistributionValue(double mean, ProgressionDistribution p) {
+    int getDistributionValue(double mean, double max, ProgressionDistribution p) {
 
         int value = (int) Math.round(mean);
         double sample;

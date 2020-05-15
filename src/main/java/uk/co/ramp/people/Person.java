@@ -81,4 +81,17 @@ public class Person {
         return getStatus() == INFECTED || getStatus() == INFECTED_SYMP || getStatus() == EXPOSED_2;
     }
 
+    @Override
+    public String toString() {
+        return "Person{" +
+                "id=" + id +
+                ", age=" + age +
+                ", gender=" + gender +
+                ", compliance=" + compliance +
+                ", health=" + health +
+                ", status=" + status +
+                ", exposedBy=" + exposedBy +
+                ", nextStatusChange=" + nextStatusChange +
+                '}';
+    }
 }

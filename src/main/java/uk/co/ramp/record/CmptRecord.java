@@ -7,7 +7,7 @@ import java.util.Objects;
 
 import static uk.co.ramp.people.VirusStatus.*;
 
-public class SeirRecord {
+public class CmptRecord {
 
     private final int time;
     private final int s;
@@ -18,7 +18,7 @@ public class SeirRecord {
     private final int r;
     private final int d;
 
-    public SeirRecord(int time, Map<VirusStatus, Integer> seirCounts) {
+    public CmptRecord(int time, Map<VirusStatus, Integer> seirCounts) {
 
         this.time = time;
         this.s = seirCounts.get(SUSCEPTIBLE);
@@ -83,7 +83,7 @@ public class SeirRecord {
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-        SeirRecord that = (SeirRecord) o;
+        CmptRecord that = (CmptRecord) o;
         return time == that.time &&
                 s == that.s &&
                 e1 == that.e1 &&

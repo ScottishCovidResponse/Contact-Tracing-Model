@@ -9,7 +9,7 @@ apply plugin: 'idea'
 apply plugin: 'org.sonarqube'
 
 version = "1.0-SNAPSHOT"
-mainClassName = 'uk.co.ramp.ContactRunner'
+mainClassName = 'uk.co.ramp.Framework'
 
 repositories {
     mavenCentral()

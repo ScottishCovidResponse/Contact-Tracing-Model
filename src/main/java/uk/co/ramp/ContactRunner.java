@@ -12,7 +12,7 @@ import uk.co.ramp.io.PopulationProperties;
 import uk.co.ramp.io.StandardProperties;
 import uk.co.ramp.people.Person;
 import uk.co.ramp.people.PopulationGenerator;
-import uk.co.ramp.record.SeirRecord;
+import uk.co.ramp.record.CmptRecord;
 import uk.co.ramp.utilities.ContactReader;
 
 import java.util.List;
@@ -47,7 +47,7 @@ public class ContactRunner implements ApplicationContextAware {
         infection.setContactRecords(contactRecords);
         infection.setPopulation(population);
 
-        Map<Integer, SeirRecord> records = infection.propagate();
+        Map<Integer, CmptRecord> records = infection.propagate();
         Output.printSeirCSV(records);
 
     }

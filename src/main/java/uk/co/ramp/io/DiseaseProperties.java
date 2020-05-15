@@ -1,45 +1,28 @@
 package uk.co.ramp.io;
 
-public class DiseaseProperties {
+import org.immutables.gson.Gson.TypeAdapters;
+import org.immutables.value.Value.Immutable;
 
-    private final double meanTimeToInfectious;
-    private final double meanTimeToInfected;
-    private final double meanTimeToRecovered;
-    private final double randomInfectionRate;
-    private final double exposureTuning;
-    private final ProgressionDistribution progressionDistribution;
+@TypeAdapters
+@Immutable
+public interface DiseaseProperties {
 
+    double meanTimeToInfectious();
 
-    public DiseaseProperties(double meanTimeToInfectious, double meanTimeToInfected, double meanTimeToRecovered, double randomInfectionRate, double exposureTuning, ProgressionDistribution progressionDistribution) {
-        this.meanTimeToInfectious = meanTimeToInfectious;
-        this.meanTimeToInfected = meanTimeToInfected;
-        this.meanTimeToRecovered = meanTimeToRecovered;
-        this.progressionDistribution = progressionDistribution;
-        this.randomInfectionRate = randomInfectionRate;
-        this.exposureTuning = exposureTuning;
-    }
+    double meanTimeToInfected();
 
-    public double getMeanTimeToInfectious() {
-        return meanTimeToInfectious;
-    }
+    double meanTimeToFinalState();
 
-    public double getMeanTimeToInfected() {
-        return meanTimeToInfected;
-    }
+    double maxTimeToInfectious();
 
-    public double getMeanTimeToRecovered() {
-        return meanTimeToRecovered;
-    }
+    double maxTimeToInfected();
 
-    public double getRandomInfectionRate() {
-        return randomInfectionRate;
-    }
+    double maxTimeToFinalState();
 
-    public double getExposureTuning() {
-        return exposureTuning;
-    }
+    double randomInfectionRate();
 
-    public ProgressionDistribution getProgressionDistribution() {
-        return progressionDistribution;
-    }
+    double exposureTuning();
+
+    ProgressionDistribution progressionDistribution();
+
 }

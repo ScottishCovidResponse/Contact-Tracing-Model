@@ -11,7 +11,7 @@ import uk.co.ramp.io.StandardProperties;
 import uk.co.ramp.people.Person;
 import uk.co.ramp.people.PopulationGenerator;
 import uk.co.ramp.people.VirusStatus;
-import uk.co.ramp.record.SeirRecord;
+import uk.co.ramp.record.CmptRecord;
 
 import java.util.*;
 
@@ -29,7 +29,7 @@ public class Outbreak {
 
     private Map<Integer, Person> population;
     private Map<Integer, List<ContactRecord>> contactRecords;
-    private final Map<Integer, SeirRecord> records = new HashMap<>();
+    private final Map<Integer, CmptRecord> records = new HashMap<>();
 
     public void setPopulation(Map<Integer, Person> population) {
         this.population = population;
@@ -56,7 +56,7 @@ public class Outbreak {
     }
 
 
-    public Map<Integer, SeirRecord> propagate() {
+    public Map<Integer, CmptRecord> propagate() {
 
         generateInitialInfection();
         runToCompletion();
@@ -70,7 +70,7 @@ public class Outbreak {
 
             EvaluateCase evaluateCase = new EvaluateCase(population.get(id), diseaseProperties, rng);
             evaluateCase.updateStatus(EXPOSED, 0);
-            LOGGER.info("population.get(id).getNextStatusChange() = {}", population.get(id).getNextStatusChange());
+
         }
     }
 
@@ -79,7 +79,7 @@ public class Outbreak {
         int maxContact = contactRecords.keySet().stream().max(Comparator.naturalOrder()).orElseThrow(RuntimeException::new);
         int runTime;
         boolean steadyState = properties.isSteadyState();
-        double randomInfectionRate = diseaseProperties.getRandomInfectionRate();
+        double randomInfectionRate = diseaseProperties.randomInfectionRate();
 
         if (timeLimit <= maxContact) {
             LOGGER.info("Not all contact data will be used");
@@ -88,7 +88,6 @@ public class Outbreak {
         } else {
             LOGGER.info("Potential for steady state soln");
             runTime = maxContact;
-
         }
 
         runContactData(runTime, population, contactRecords, randomInfectionRate);
@@ -150,7 +149,6 @@ public class Outbreak {
             EvaluateCase e = new EvaluateCase(p, diseaseProperties, rng);
             e.checkTime(time);
             if (p.getStatus() == SUSCEPTIBLE && randomInfectionRate > 0d && time > 0) {
-
                 boolean var = rng.nextUniform(0, 1) <= randomInfectionRate;
                 if (var) e.randomExposure(time);
             }
@@ -170,7 +168,7 @@ public class Outbreak {
 
         boolean dangerMix = personA.isInfectious() && personB.getStatus() == SUSCEPTIBLE;
 
-        if (dangerMix && rng.nextUniform(0, 1) < c.getWeight() / diseaseProperties.getExposureTuning()) {
+        if (dangerMix && rng.nextUniform(0, 1) < c.getWeight() / diseaseProperties.exposureTuning()) {
             EvaluateCase e = new EvaluateCase(personB, diseaseProperties, rng);
             e.updateStatus(EXPOSED, time, personA.getId());
         }
@@ -188,20 +186,22 @@ public class Outbreak {
     }
 
     private void logStepResults(Map<Integer, Person> population, int time) {
-        Map<VirusStatus, Integer> seirCounts = PopulationGenerator.getSEIRCounts(population);
+        Map<VirusStatus, Integer> stats = PopulationGenerator.getSEIRCounts(population);
 
-        LOGGER.debug("Conditions @ time: {}", time);
-        LOGGER.debug("{}    {}", SUSCEPTIBLE, seirCounts.get(SUSCEPTIBLE));
-        LOGGER.debug("{}        {}", EXPOSED, seirCounts.get(EXPOSED));
-        LOGGER.debug("{}      {}", EXPOSED_2, seirCounts.get(EXPOSED_2));
-        LOGGER.debug("{}       {}", INFECTED, seirCounts.get(INFECTED));
-        LOGGER.debug("{}  {}", INFECTED_SYMP, seirCounts.get(INFECTED_SYMP));
-        LOGGER.debug("{}      {}", RECOVERED, seirCounts.get(RECOVERED));
-        LOGGER.debug("{}           {}", DEAD, seirCounts.get(DEAD));
+        if (time == 0) {
+            LOGGER.info("|   Time  |    S    |    E1   |    E2   |   Ia    |    Is   |    R    |    D    |");
 
-        SeirRecord seirRecord = new SeirRecord(time, seirCounts);
+        }
 
-        records.put(time, seirRecord);
+        String s = String.format("| %7d | %7d | %7d | %7d | %7d | %7d | %7d | %7d |",
+                time, stats.get(SUSCEPTIBLE), stats.get(EXPOSED), stats.get(EXPOSED_2),
+                stats.get(INFECTED), stats.get(INFECTED_SYMP), stats.get(RECOVERED), stats.get(DEAD));
+
+        LOGGER.info(s);
+
+        CmptRecord cmptRecord = new CmptRecord(time, stats);
+
+        records.put(time, cmptRecord);
 
     }
 

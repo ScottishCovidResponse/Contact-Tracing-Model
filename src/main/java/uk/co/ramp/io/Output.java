@@ -4,7 +4,7 @@ import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVPrinter;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import uk.co.ramp.record.SeirRecord;
+import uk.co.ramp.record.CmptRecord;
 
 import java.io.FileWriter;
 import java.io.IOException;
@@ -17,7 +17,7 @@ public class Output {
         //hidden constructor
     }
 
-    public static void printSeirCSV(Map<Integer, SeirRecord> records) {
+    public static void printSeirCSV(Map<Integer, CmptRecord> records) {
 
         try {
             FileWriter out = new FileWriter("SEIR.csv");
