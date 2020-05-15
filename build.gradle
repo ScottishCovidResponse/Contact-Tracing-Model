@@ -29,6 +29,7 @@ dependencies {
     compile "org.immutables:value-annotations:2.8.8"
     compile "org.immutables:gson:2.8.8"
     annotationProcessor "org.immutables:value:2.8.8"
+    testAnnotationProcessor "org.immutables:value:2.8.8"
 }
 
 jacoco {

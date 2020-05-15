@@ -1,8 +1,6 @@
-package uk.co.ramp.io;
+package uk.co.ramp.io.csv;
 
 import org.junit.Test;
-import uk.co.ramp.io.csv.CsvReader;
-import uk.co.ramp.io.csv.ImmutableExampleCsvPojo;
 
 import java.io.IOException;
 import java.io.Reader;
