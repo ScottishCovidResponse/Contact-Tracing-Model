@@ -12,6 +12,7 @@ import uk.co.ramp.people.Person;
 import uk.co.ramp.people.PopulationGenerator;
 import uk.co.ramp.people.VirusStatus;
 import uk.co.ramp.record.CmptRecord;
+import uk.co.ramp.record.ImmutableCmptRecord;
 
 import java.util.*;
 
@@ -75,10 +76,10 @@ public class Outbreak {
     }
 
     private void runToCompletion() {
-        int timeLimit = properties.getTimeLimit();
+        int timeLimit = properties.timeLimit();
         int maxContact = contactRecords.keySet().stream().max(Comparator.naturalOrder()).orElseThrow(RuntimeException::new);
         int runTime;
-        boolean steadyState = properties.isSteadyState();
+        boolean steadyState = properties.steadyState();
         double randomInfectionRate = diseaseProperties.randomInfectionRate();
 
         if (timeLimit <= maxContact) {
@@ -108,8 +109,8 @@ public class Outbreak {
 
             for (ContactRecord contacts : todaysContacts) {
 
-                Person potentialSpreader = population.get(contacts.getTo());
-                Person victim = population.get(contacts.getFrom());
+                Person potentialSpreader = population.get(contacts.to());
+                Person victim = population.get(contacts.from());
 
                 if (potentialSpreader.getStatus() != victim.getStatus()) {
                     evaluateExposures(population, contacts, time);
@@ -163,12 +164,12 @@ public class Outbreak {
     }
 
     private void evaluateExposures(Map<Integer, Person> population, ContactRecord c, int time) {
-        Person personA = getMostSevere(population.get(c.getTo()), population.get(c.getFrom()));
-        Person personB = personA == population.get(c.getTo()) ? population.get(c.getFrom()) : population.get(c.getTo());
+        Person personA = getMostSevere(population.get(c.to()), population.get(c.from()));
+        Person personB = personA == population.get(c.to()) ? population.get(c.from()) : population.get(c.to());
 
         boolean dangerMix = personA.isInfectious() && personB.getStatus() == SUSCEPTIBLE;
 
-        if (dangerMix && rng.nextUniform(0, 1) < c.getWeight() / diseaseProperties.exposureTuning()) {
+        if (dangerMix && rng.nextUniform(0, 1) < c.weight() / diseaseProperties.exposureTuning()) {
             EvaluateCase e = new EvaluateCase(personB, diseaseProperties, rng);
             e.updateStatus(EXPOSED, time, personA.getId());
         }
@@ -178,8 +179,8 @@ public class Outbreak {
     private Set<Integer> infectPopulation() {
 
         Set<Integer> infectedIds = new HashSet<>();
-        while (infectedIds.size() < properties.getInfected()) {
-            infectedIds.add(rng.nextInt(0, properties.getPopulationSize()));
+        while (infectedIds.size() < properties.infected()) {
+            infectedIds.add(rng.nextInt(0, properties.populationSize()));
         }
         return infectedIds;
 
@@ -190,19 +191,31 @@ public class Outbreak {
 
         if (time == 0) {
             LOGGER.info("|   Time  |    S    |    E1   |    E2   |   Ia    |    Is   |    R    |    D    |");
-
         }
 
+        CmptRecord cmptRecord = ImmutableCmptRecord.builder().time(time).
+                s(stats.get(SUSCEPTIBLE)).
+                e1(stats.get(EXPOSED)).
+                e2(stats.get(EXPOSED_2)).
+                ia(stats.get(INFECTED)).
+                is(stats.get(INFECTED_SYMP)).
+                r(stats.get(RECOVERED)).
+                d(stats.get(DEAD)).build();
+
+
         String s = String.format("| %7d | %7d | %7d | %7d | %7d | %7d | %7d | %7d |",
-                time, stats.get(SUSCEPTIBLE), stats.get(EXPOSED), stats.get(EXPOSED_2),
-                stats.get(INFECTED), stats.get(INFECTED_SYMP), stats.get(RECOVERED), stats.get(DEAD));
+                cmptRecord.time(),
+                cmptRecord.s(),
+                cmptRecord.e1(),
+                cmptRecord.e2(),
+                cmptRecord.ia(),
+                cmptRecord.is(),
+                cmptRecord.r(),
+                cmptRecord.d());
 
         LOGGER.info(s);
 
-        CmptRecord cmptRecord = new CmptRecord(time, stats);
-
         records.put(time, cmptRecord);
-
     }
 
 }

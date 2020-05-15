@@ -5,20 +5,20 @@ import org.junit.Test;
 import uk.co.ramp.io.DiseaseProperties;
 import uk.co.ramp.io.ImmutableDiseaseProperties;
 
-import java.io.BufferedReader;
-import java.io.BufferedWriter;
-import java.io.IOException;
-import java.io.StringReader;
-import java.io.StringWriter;
+import java.io.*;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static uk.co.ramp.io.ProgressionDistribution.FLAT;
 
 public class DiseasePropertiesReaderTest {
     private static final String mockDiseaseSettings = "{ " +
-            "  'meanTimeToInfected': 3.0, " +
+            "   'meanTimeToInfectious': 3.0, " +
+            "   'meanTimeToInfected': 3.0, " +
+            "   'meanTimeToFinalState': 7.0, " +
+            "   'maxTimeToInfectious': 14.0, " +
+            "   'maxTimeToInfected': 14.0, " +
+            "   'maxTimeToFinalState': 14.0, " +
             "   'exposureTuning': 160, " +
-            "   'meanTimeToRecovered': 7.0, " +
             "   'randomInfectionRate': 0.01, " +
             "   'progressionDistribution':  'FLAT' }";
 
@@ -31,8 +31,12 @@ public class DiseasePropertiesReaderTest {
 
         var expectedDiseaseProperties = ImmutableDiseaseProperties.builder()
                 .exposureTuning(160)
+                .meanTimeToInfectious(3.0)
                 .meanTimeToInfected(3.0)
-                .meanTimeToRecovered(7.0)
+                .meanTimeToFinalState(7.0)
+                .maxTimeToInfectious(14.0)
+                .maxTimeToInfected(14.0)
+                .maxTimeToFinalState(14.0)
                 .randomInfectionRate(0.01)
                 .progressionDistribution(FLAT)
                 .build();

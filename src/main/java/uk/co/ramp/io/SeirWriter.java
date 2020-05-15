@@ -1,8 +1,8 @@
 package uk.co.ramp.io;
 
 import uk.co.ramp.io.csv.CsvWriter;
-import uk.co.ramp.record.ImmutableSeirRecord;
-import uk.co.ramp.record.SeirRecord;
+import uk.co.ramp.record.CmptRecord;
+import uk.co.ramp.record.ImmutableCmptRecord;
 
 import java.io.IOException;
 import java.io.Writer;
@@ -10,10 +10,10 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 public class SeirWriter {
-    public void write(Writer writer, List<SeirRecord> records) throws IOException {
-        List<ImmutableSeirRecord> wrappedImmutableRecords = records.stream()
-                .map(r -> ImmutableSeirRecord.builder().from(r).build())
+    public void write(Writer writer, List<CmptRecord> records) throws IOException {
+        List<ImmutableCmptRecord> wrappedImmutableRecords = records.stream()
+                .map(r -> ImmutableCmptRecord.builder().from(r).build())
                 .collect(Collectors.toList());
-        new CsvWriter().write(writer, wrappedImmutableRecords, ImmutableSeirRecord.class);
+        new CsvWriter().write(writer, wrappedImmutableRecords, ImmutableCmptRecord.class);
     }
 }

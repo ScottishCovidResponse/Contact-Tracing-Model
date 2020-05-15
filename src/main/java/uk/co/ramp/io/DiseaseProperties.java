@@ -6,9 +6,21 @@ import org.immutables.value.Value.Immutable;
 @TypeAdapters
 @Immutable
 public interface DiseaseProperties {
+    double meanTimeToInfectious();
+
+    double maxTimeToInfectious();
+
     double meanTimeToInfected();
-    double meanTimeToRecovered();
+
+    double maxTimeToInfected();
+
+    double meanTimeToFinalState();
+
+    double maxTimeToFinalState();
+
     double randomInfectionRate();
+
     double exposureTuning();
+
     ProgressionDistribution progressionDistribution();
 }

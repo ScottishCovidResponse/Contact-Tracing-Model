@@ -1,101 +1,46 @@
 package uk.co.ramp.record;
 
+import com.fasterxml.jackson.annotation.JsonPropertyOrder;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import org.immutables.value.Value;
 import uk.co.ramp.people.VirusStatus;
 
 import java.util.Map;
-import java.util.Objects;
 
 import static uk.co.ramp.people.VirusStatus.*;
 
-public class CmptRecord {
+@Value.Immutable
+@JsonSerialize
+@JsonDeserialize
+@JsonPropertyOrder({"time", "s", "e1", "e2", "ia", "is", "r", "d"})
+public interface CmptRecord {
 
-    private final int time;
-    private final int s;
-    private final int e1;
-    private final int e2;
-    private final int iAsymp;
-    private final int iSymp;
-    private final int r;
-    private final int d;
-
-    public CmptRecord(int time, Map<VirusStatus, Integer> seirCounts) {
-
-        this.time = time;
-        this.s = seirCounts.get(SUSCEPTIBLE);
-        this.e1 = seirCounts.get(EXPOSED);
-        this.e2 = seirCounts.get(EXPOSED_2);
-        this.iAsymp = seirCounts.get(INFECTED);
-        this.iSymp = seirCounts.get(INFECTED_SYMP);
-        this.r = seirCounts.get(RECOVERED);
-        this.d = seirCounts.get(DEAD);
-
+    static CmptRecord of(int time, Map<VirusStatus, Integer> counts) {
+        return ImmutableCmptRecord.builder().
+                time(time).
+                s(counts.get(SUSCEPTIBLE)).
+                e1(counts.get(EXPOSED)).
+                e2(counts.get(EXPOSED_2)).
+                ia(counts.get(INFECTED)).
+                is(counts.get(INFECTED_SYMP)).
+                r(counts.get(RECOVERED)).
+                d(counts.get(DEAD)).build();
     }
 
-    public int getTime() {
-        return time;
-    }
+    int time();
 
-    public int getS() {
-        return s;
-    }
+    int s();
 
-    public int getE1() {
-        return e1;
-    }
+    int e1();
 
-    public int getE2() {
-        return e2;
-    }
+    int e2();
 
-    public int getiAsymp() {
-        return iAsymp;
-    }
+    int ia();
 
-    public int getiSymp() {
-        return iSymp;
-    }
+    int is();
 
-    public int getR() {
-        return r;
-    }
+    int r();
 
-
-    public int getD() {
-        return d;
-    }
-
-    @Override
-    public String toString() {
-        return "SeirRecord{" +
-                "time=" + time +
-                ", s=" + s +
-                ", e1=" + e1 +
-                ", e2=" + e2 +
-                ", iAsymp=" + iAsymp +
-                ", iSymp=" + iSymp +
-                ", r=" + r +
-                ", d=" + d +
-                '}';
-    }
-
-
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        CmptRecord that = (CmptRecord) o;
-        return time == that.time &&
-                s == that.s &&
-                e1 == that.e1 &&
-                e2 == that.e2 &&
-                iAsymp == that.iAsymp &&
-                iSymp == that.iSymp &&
-                r == that.r &&
-                d == that.d;
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(time, s, e1, e2, iAsymp, iSymp, r, d);
-    }
+    int d();
 }

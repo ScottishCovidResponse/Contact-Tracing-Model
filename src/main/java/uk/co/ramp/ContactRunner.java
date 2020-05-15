@@ -7,14 +7,16 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 import org.springframework.stereotype.Service;
 import uk.co.ramp.contact.ContactRecord;
-import uk.co.ramp.io.Output;
 import uk.co.ramp.io.PopulationProperties;
+import uk.co.ramp.io.SeirWriter;
 import uk.co.ramp.io.StandardProperties;
 import uk.co.ramp.people.Person;
 import uk.co.ramp.people.PopulationGenerator;
 import uk.co.ramp.record.CmptRecord;
 import uk.co.ramp.utilities.ContactReader;
 
+import java.io.*;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -36,20 +38,33 @@ public class ContactRunner implements ApplicationContextAware {
         this.runProperties = runProperties;
     }
 
-    public void run() {
+    public void run() throws IOException {
 
         Map<Integer, Person> population = new PopulationGenerator(runProperties, populationProperties).generate();
-        Map<Integer, List<ContactRecord>> contactRecords = ContactReader.read(runProperties);
+        try (Reader reader = new FileReader("input/contacts.csv")) {
+            Map<Integer, List<ContactRecord>> contactRecords = new ContactReader().read(reader, runProperties);
 
-        LOGGER.info("Generated Population and Parsed Contact data");
+            LOGGER.info("Generated Population and Parsed Contact data");
 
-        Outbreak infection = ctx.getBean(Outbreak.class);
-        infection.setContactRecords(contactRecords);
-        infection.setPopulation(population);
+            Outbreak infection = ctx.getBean(Outbreak.class);
+            infection.setContactRecords(contactRecords);
+            infection.setPopulation(population);
 
-        Map<Integer, CmptRecord> records = infection.propagate();
-        Output.printSeirCSV(records);
+            Map<Integer, CmptRecord> records = infection.propagate();
 
+            writeSEIR(new ArrayList<>(records.values()), new File("SEIR.csv"));
+        }
+
+    }
+
+    void writeSEIR(List<CmptRecord> seirRecords, File file) {
+        try (FileWriter fw = new FileWriter(file);
+             BufferedWriter bw = new BufferedWriter(fw)) {
+            new SeirWriter().write(bw, seirRecords);
+        } catch (IOException e) {
+            LOGGER.fatal("Could not write SEIR");
+            throw new RuntimeException(e.getMessage());
+        }
     }
 
     @Override

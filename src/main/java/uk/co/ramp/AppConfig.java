@@ -17,6 +17,7 @@ import uk.co.ramp.utilities.RandomSingleton;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
+import java.io.Reader;
 import java.util.Optional;
 
 @SpringBootConfiguration
@@ -42,17 +43,23 @@ public class AppConfig {
 
     @Bean
     public StandardProperties standardProperties() throws IOException {
-        return StandardPropertiesReader.read(new File("input/runSettings.json"));
+        try (Reader reader = new FileReader(new File("input/runSettings.json"))) {
+            return new StandardPropertiesReader().read(reader);
+        }
     }
 
     @Bean
     public DiseaseProperties diseaseProperties() throws IOException {
-        return DiseasePropertiesReader.read(new FileReader(new File("input/diseaseSettings.json")));
+        try (Reader reader = new FileReader(new File("input/diseaseSettings.json"))) {
+            return new DiseasePropertiesReader().read(reader);
+        }
     }
 
     @Bean
     public PopulationProperties populationProperties() throws IOException {
-        return PopulationPropertiesReader.read(new File("input/populationSettings.json"));
+        try (Reader reader = new FileReader(new File("input/populationSettings.json"))) {
+            return new PopulationPropertiesReader().read(reader);
+        }
     }
 
     @Bean
@@ -60,11 +67,11 @@ public class AppConfig {
         int arg = 0;
         if (argumentValue.isPresent() && argumentValue.get().length > 0) {
             arg = Integer.parseInt(argumentValue.get()[0]);
-            LOGGER.info("Additional Seed information provided, the seed will be {}", standardProperties().getSeed() + arg);
+            LOGGER.info("Additional Seed information provided, the seed will be {}", standardProperties().seed() + arg);
         } else {
-            LOGGER.info("Additional Seed information not provided, defaulting to {}", standardProperties().getSeed());
+            LOGGER.info("Additional Seed information not provided, defaulting to {}", standardProperties().seed());
         }
-        return RandomSingleton.getInstance(standardProperties().getSeed() + arg);
+        return RandomSingleton.getInstance(standardProperties().seed() + arg);
     }
 
 

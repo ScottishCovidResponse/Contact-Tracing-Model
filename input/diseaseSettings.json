@@ -1,8 +1,11 @@
 {
   "meanTimeToInfectious": 5.0,
   "meanTimeToInfected": 2.0,
+  "meanTimeToFinalState": 8.0,
+  "maxTimeToInfectious": 14.0,
+  "maxTimeToInfected": 14.0,
+  "maxTimeToFinalState": 14.0,
   "exposureTuning": 30,
-  "meanTimeToRecovered": 8.0,
   "randomInfectionRate": 0.01,
   "progressionDistribution": "LINEAR"
 }

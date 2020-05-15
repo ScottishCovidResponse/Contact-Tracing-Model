@@ -43,7 +43,7 @@ public class CmptRecordTest {
         counts.put(INFECTED_SYMP, i2);
         counts.put(RECOVERED, r);
         counts.put(DEAD, d);
-        testRecord = new CmptRecord(time, counts);
+        testRecord = CmptRecord.of(time, counts);
 
     }
 
@@ -52,20 +52,20 @@ public class CmptRecordTest {
 
         CmptRecord cmptRecord = useSecondContructor();
 
-        Assert.assertEquals(time, cmptRecord.getTime());
-        Assert.assertEquals((int) counts.get(SUSCEPTIBLE), cmptRecord.getS());
-        Assert.assertEquals((int) counts.get(EXPOSED), cmptRecord.getE1());
-        Assert.assertEquals((int) counts.get(EXPOSED_2), cmptRecord.getE2());
-        Assert.assertEquals((int) counts.get(INFECTED), cmptRecord.getiAsymp());
-        Assert.assertEquals((int) counts.get(INFECTED_SYMP), cmptRecord.getiSymp());
-        Assert.assertEquals((int) counts.get(RECOVERED), cmptRecord.getR());
-        Assert.assertEquals((int) counts.get(DEAD), cmptRecord.getD());
+        Assert.assertEquals(time, cmptRecord.time());
+        Assert.assertEquals((int) counts.get(SUSCEPTIBLE), cmptRecord.s());
+        Assert.assertEquals((int) counts.get(EXPOSED), cmptRecord.e1());
+        Assert.assertEquals((int) counts.get(EXPOSED_2), cmptRecord.e2());
+        Assert.assertEquals((int) counts.get(INFECTED), cmptRecord.ia());
+        Assert.assertEquals((int) counts.get(INFECTED_SYMP), cmptRecord.is());
+        Assert.assertEquals((int) counts.get(RECOVERED), cmptRecord.r());
+        Assert.assertEquals((int) counts.get(DEAD), cmptRecord.d());
 
     }
 
     @Test
     public void testToString() {
-        String expected = String.format("SeirRecord{time=%d, s=%d, e1=%d, e2=%d, iAsymp=%d, iSymp=%d, r=%d, d=%d}", time, s, e1, e2, i1, i2, r, d);
+        String expected = String.format("CmptRecord{time=%d, s=%d, e1=%d, e2=%d, ia=%d, is=%d, r=%d, d=%d}", time, s, e1, e2, i1, i2, r, d);
         Assert.assertEquals(expected, testRecord.toString());
 
 
@@ -78,32 +78,32 @@ public class CmptRecordTest {
         Assert.assertEquals(testRecord, testRecord);
 
         // identical
-        CmptRecord compareRecord = new CmptRecord(time, counts);
+        CmptRecord compareRecord = CmptRecord.of(time, counts);
         Assert.assertEquals(testRecord, compareRecord);
 
         Assert.assertNotEquals(testRecord, testRecord.toString());
         Assert.assertNotEquals(testRecord, null);
 
-        compareRecord = new CmptRecord(-1, counts);
+        compareRecord = CmptRecord.of(-1, counts);
         Assert.assertNotEquals(testRecord, compareRecord);
 
         counts.put(SUSCEPTIBLE, -1);
-        compareRecord = new CmptRecord(time, counts);
+        compareRecord = CmptRecord.of(time, counts);
         Assert.assertNotEquals(testRecord, compareRecord);
 
         counts.put(SUSCEPTIBLE, s);
         counts.put(EXPOSED, -1);
-        compareRecord = new CmptRecord(time, counts);
+        compareRecord = CmptRecord.of(time, counts);
         Assert.assertNotEquals(testRecord, compareRecord);
 
         counts.put(EXPOSED, e1);
         counts.put(INFECTED, -1);
-        compareRecord = new CmptRecord(time, counts);
+        compareRecord = CmptRecord.of(time, counts);
         Assert.assertNotEquals(testRecord, compareRecord);
 
         counts.put(INFECTED, i1);
         counts.put(RECOVERED, -1);
-        compareRecord = new CmptRecord(time, counts);
+        compareRecord = CmptRecord.of(time, counts);
         Assert.assertNotEquals(testRecord, compareRecord);
 
     }
@@ -118,7 +118,7 @@ public class CmptRecordTest {
         Assert.assertEquals(hash1, hash2);
 
         counts.put(RECOVERED, 0);
-        cmptRecord = new CmptRecord(time, counts);
+        cmptRecord = CmptRecord.of(time, counts);
         hash2 = cmptRecord.hashCode();
 
         Assert.assertNotEquals(hash1, hash2);
@@ -135,6 +135,6 @@ public class CmptRecordTest {
         seirCounts.put(RECOVERED, r);
         seirCounts.put(DEAD, d);
 
-        return new CmptRecord(time, seirCounts);
+        return CmptRecord.of(time, seirCounts);
     }
 }
