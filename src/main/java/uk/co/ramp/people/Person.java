@@ -79,9 +79,9 @@ public class Person {
 
         if (newStatus == EXPOSED) {
             setStatus(newStatus);
-            nextStatusChange = currentTime + getDistributionValue(properties.getMeanTimeToInfected(), properties.getProgressionDistribution());
+            nextStatusChange = currentTime + getDistributionValue(properties.meanTimeToInfected(), properties.progressionDistribution());
         } else if (newStatus == INFECTED) {
-            nextStatusChange = currentTime + getDistributionValue(properties.getMeanTimeToRecovered(), properties.getProgressionDistribution());
+            nextStatusChange = currentTime + getDistributionValue(properties.meanTimeToRecovered(), properties.progressionDistribution());
             setStatus(INFECTED);
         } else if (newStatus == RECOVERED) {
             setStatus(RECOVERED);

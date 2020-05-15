@@ -1,21 +1,18 @@
 package uk.co.ramp.utilities;
 
-public class MinMax {
+import org.immutables.gson.Gson.TypeAdapters;
+import org.immutables.value.Value.Immutable;
 
-    private final int min;
-    private final int max;
+@TypeAdapters
+@Immutable
+public abstract class MinMax {
+    public abstract int min();
+    public abstract int max();
 
-    public MinMax(int a, int b) {
-        min = Math.min(a, b);
-        max = Math.max(a, b);
-    }
-
-
-    public int getMin() {
-        return min;
-    }
-
-    public int getMax() {
-        return max;
+    public static MinMax of(int a, int b) {
+        return ImmutableMinMax.builder()
+                .min(Math.min(a, b))
+                .max(Math.max(a, b))
+                .build();
     }
 }

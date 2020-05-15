@@ -19,13 +19,13 @@ public class PopulationGenerator {
     }
 
     public Map<Integer, Person> generate() {
-        RandomDataGenerator r = RandomSingleton.getInstance(runProperties.getSeed());
-        Map<Integer, Double> cumulative = createCumulative(properties.getPopulationDistribution());
+        RandomDataGenerator r = RandomSingleton.getInstance(runProperties.seed());
+        Map<Integer, Double> cumulative = createCumulative(properties.populationDistribution());
         Map<Integer, Person> population = new HashMap<>();
-        for (int i = 0; i < runProperties.getPopulationSize(); i++) {
+        for (int i = 0; i < runProperties.populationSize(); i++) {
 
-            int age = findAge(r.nextUniform(0, 1), cumulative, properties.getPopulationAges());
-            Gender g = r.nextUniform(0, 1) > properties.getGenderBalance() / 2d ? Gender.FEMALE : Gender.MALE;
+            int age = findAge(r.nextUniform(0, 1), cumulative, properties.populationAges());
+            Gender g = r.nextUniform(0, 1) > properties.genderBalance() / 2d ? Gender.FEMALE : Gender.MALE;
             double compliance = r.nextGaussian(0.5, 0.5);
             double health = r.nextGaussian(0.5, 0.5);
 
@@ -54,8 +54,8 @@ public class PopulationGenerator {
 
         final double rMin = c.getOrDefault(index - 1, 0d);
         final double rMax = c.get(index);
-        final int ageMin = populationAges.get(index).getMin();
-        final int ageMax = populationAges.get(index).getMax();
+        final int ageMin = populationAges.get(index).min();
+        final int ageMax = populationAges.get(index).max();
 
         final double distance = (v - rMin) / (rMax - rMin);
 
