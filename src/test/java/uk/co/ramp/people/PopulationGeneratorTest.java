@@ -93,6 +93,7 @@ public class PopulationGeneratorTest {
             if (sum > 1d) {
                 var.put(i, sample);
                 cumulative.put(i, 1d);
+                bins=i;
                 break;
             } else if (i == bins - 1) {
                 var.put(i, 1 - sum);
