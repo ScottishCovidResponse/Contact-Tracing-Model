@@ -25,7 +25,7 @@ public class PopulationGenerator {
         this.dataGenerator = dataGenerator;
     }
 
-    public static Map<VirusStatus, Integer> getCmptCounts(Map<Integer, Person> population) {
+    public static Map<VirusStatus, Integer> getCmptCounts(Map<Integer, Case> population) {
 
         Map<VirusStatus, Integer> counts = new EnumMap<>(VirusStatus.class);
         counts.put(SUSCEPTIBLE, 0);
@@ -36,7 +36,7 @@ public class PopulationGenerator {
         counts.put(RECOVERED, 0);
         counts.put(DEAD, 0);
 
-        for (Person p : population.values()) {
+        for (Case p : population.values()) {
             counts.merge(p.status(), 1, Integer::sum);
         }
 
@@ -94,9 +94,9 @@ public class PopulationGenerator {
         return cumulative;
     }
 
-    public Map<Integer, Person> generate() {
+    public Map<Integer, Case> generate() {
         Map<Integer, Double> cumulative = createCumulative(properties.populationDistribution());
-        Map<Integer, Person> population = new HashMap<>();
+        Map<Integer, Case> population = new HashMap<>();
 
         for (int i = 0; i < runProperties.populationSize(); i++) {
 
@@ -105,15 +105,14 @@ public class PopulationGenerator {
             double compliance = dataGenerator.nextUniform(0, 1);
             double health = dataGenerator.nextUniform(0, 1);
 
-            population.put(i, ModifiablePerson.create().
-                    setId(i).
-                    setStatus(SUSCEPTIBLE).
-                    setAge(age).
-                    setGender(gender).
-                    setCompliance(compliance).
-                    setExposedBy(-1).
-                    setNextStatusChange(-1).
-                    setHealth(health));
+            population.put(i,
+                    new Case(ImmutableHuman.builder().
+                            id(i).
+                            age(age).
+                            compliance(compliance).
+                            gender(gender).
+                            health(health).
+                            build()));
 
         }
 

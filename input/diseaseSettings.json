@@ -5,6 +5,9 @@
   "maxTimeToInfectious": 14.0,
   "maxTimeToInfected": 14.0,
   "maxTimeToFinalState": 14.0,
+  "meanTestTime": 2.0,
+  "maxTestTime": 5.0,
+  "testAccuracy": 0.95,
   "exposureTuning": 30,
   "randomInfectionRate": 0.01,
   "progressionDistribution": "LINEAR"

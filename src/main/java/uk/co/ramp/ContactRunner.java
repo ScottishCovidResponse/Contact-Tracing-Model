@@ -9,7 +9,7 @@ import org.springframework.stereotype.Service;
 import uk.co.ramp.contact.ContactRecord;
 import uk.co.ramp.io.SeirWriter;
 import uk.co.ramp.io.StandardProperties;
-import uk.co.ramp.people.Person;
+import uk.co.ramp.people.Case;
 import uk.co.ramp.people.PopulationGenerator;
 import uk.co.ramp.record.CmptRecord;
 import uk.co.ramp.utilities.ContactReader;
@@ -37,7 +37,7 @@ public class ContactRunner implements ApplicationContextAware {
 
     public void run() throws IOException {
 
-        Map<Integer, Person> population = ctx.getBean(PopulationGenerator.class).generate();
+        Map<Integer, Case> population = ctx.getBean(PopulationGenerator.class).generate();
         try (Reader reader = new FileReader(runProperties.contactsFile())) {
             Map<Integer, List<ContactRecord>> contactRecords = new ContactReader().read(reader, runProperties);
 

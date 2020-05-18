@@ -13,7 +13,6 @@ public enum VirusStatus {
     INFECTED_SYMP(5, List.of(RECOVERED, DEAD)),
     INFECTED(4, List.of(RECOVERED)),
     EXPOSED_2(3, List.of(INFECTED, INFECTED_SYMP)),
-    // TODO remove infected from here
     EXPOSED(2, List.of(EXPOSED_2)),
     SUSCEPTIBLE(0, List.of(EXPOSED));
 

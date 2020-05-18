@@ -8,7 +8,7 @@ import org.springframework.stereotype.Service;
 import uk.co.ramp.contact.ContactRecord;
 import uk.co.ramp.io.DiseaseProperties;
 import uk.co.ramp.io.StandardProperties;
-import uk.co.ramp.people.Person;
+import uk.co.ramp.people.Case;
 import uk.co.ramp.people.PopulationGenerator;
 import uk.co.ramp.people.VirusStatus;
 import uk.co.ramp.record.CmptRecord;
@@ -27,10 +27,11 @@ public class Outbreak {
     private DiseaseProperties diseaseProperties;
     private RandomDataGenerator rng;
 
-    private Map<Integer, Person> population;
+    private Map<Integer, Case> population;
     private Map<Integer, List<ContactRecord>> contactRecords;
     private final Map<Integer, CmptRecord> records = new HashMap<>();
-    public void setPopulation(Map<Integer, Person> population) {
+
+    public void setPopulation(Map<Integer, Case> population) {
         this.population = population;
     }
 
@@ -68,7 +69,7 @@ public class Outbreak {
         for (Integer id : infectedIds) {
 
             EvaluateCase evaluateCase = new EvaluateCase(population.get(id), diseaseProperties, rng);
-            evaluateCase.updateStatus(EXPOSED, 0);
+            evaluateCase.updateVirusStatus(EXPOSED, 0);
 
         }
     }
@@ -98,7 +99,7 @@ public class Outbreak {
 
     }
 
-    private void runContactData(int maxContact, Map<Integer, Person> population, Map<Integer, List<ContactRecord>> contactRecords, double randomInfectionRate) {
+    private void runContactData(int maxContact, Map<Integer, Case> population, Map<Integer, List<ContactRecord>> contactRecords, double randomInfectionRate) {
         for (int time = 0; time <= maxContact; time++) {
 
             updatePopulationState(time, population, randomInfectionRate);
@@ -107,8 +108,8 @@ public class Outbreak {
 
             for (ContactRecord contacts : todaysContacts) {
 
-                Person potentialSpreader = population.get(contacts.to());
-                Person victim = population.get(contacts.from());
+                Case potentialSpreader = population.get(contacts.to());
+                Case victim = population.get(contacts.from());
 
                 if (potentialSpreader.status() != victim.status()) {
                     evaluateExposures(population, contacts, time);
@@ -118,7 +119,7 @@ public class Outbreak {
     }
 
 
-    private void runToSteadyState(int runTime, int timeLimit, Map<Integer, Person> population) {
+    private void runToSteadyState(int runTime, int timeLimit, Map<Integer, Case> population) {
         for (int time = runTime; time <= timeLimit; time++) {
 
             // set random infection rate to zero in steady state mode
@@ -142,9 +143,9 @@ public class Outbreak {
         }
     }
 
-    private void updatePopulationState(int time, Map<Integer, Person> population, double randomInfectionRate) {
+    private void updatePopulationState(int time, Map<Integer, Case> population, double randomInfectionRate) {
 
-        for (Person p : population.values()) {
+        for (Case p : population.values()) {
             EvaluateCase e = new EvaluateCase(p, diseaseProperties, rng);
             e.checkTime(time);
             if (p.status() == SUSCEPTIBLE && randomInfectionRate > 0d && time > 0) {
@@ -154,22 +155,25 @@ public class Outbreak {
         }
     }
 
-    private Person getMostSevere(Person personA, Person personB) {
+    private Case getMostSevere(Case personA, Case personB) {
         VirusStatus a = personA.status();
         VirusStatus b = personB.status();
 
         return a.compareTo(b) > 0 ? personA : personB;
     }
 
-    private void evaluateExposures(Map<Integer, Person> population, ContactRecord c, int time) {
-        Person personA = getMostSevere(population.get(c.to()), population.get(c.from()));
-        Person personB = personA == population.get(c.to()) ? population.get(c.from()) : population.get(c.to());
+    private void evaluateExposures(Map<Integer, Case> population, ContactRecord c, int time) {
+        Case personA = getMostSevere(population.get(c.to()), population.get(c.from()));
+        Case personB = personA == population.get(c.to()) ? population.get(c.from()) : population.get(c.to());
+
+        personA.addContact(c);
+        personB.addContact(c);
 
         boolean dangerMix = personA.isInfectious() && personB.status() == SUSCEPTIBLE;
 
         if (dangerMix && rng.nextUniform(0, 1) < c.weight() / diseaseProperties.exposureTuning()) {
             EvaluateCase e = new EvaluateCase(personB, diseaseProperties, rng);
-            e.updateStatus(EXPOSED, time, personA.id());
+            e.updateVirusStatus(EXPOSED, time, personA.id());
         }
     }
 
@@ -184,7 +188,7 @@ public class Outbreak {
 
     }
 
-    private void logStepResults(Map<Integer, Person> population, int time) {
+    private void logStepResults(Map<Integer, Case> population, int time) {
         Map<VirusStatus, Integer> stats = PopulationGenerator.getCmptCounts(population);
 
         if (time == 0) {

@@ -18,6 +18,12 @@ public interface DiseaseProperties {
 
     double maxTimeToFinalState();
 
+    double meanTestTime();
+
+    double maxTestTime();
+
+    double testAccuracy();
+
     double randomInfectionRate();
 
     double exposureTuning();

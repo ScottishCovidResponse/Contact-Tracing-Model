@@ -41,7 +41,7 @@ public class PopulationGeneratorTest {
         int i = rand.nextInt(100);
         int r = rand.nextInt(100);
 
-        Map<Integer, Person> var = new HashMap<>();
+        Map<Integer, Case> var = new HashMap<>();
         int start = 0;
         int end = s;
         VirusStatus v = SUSCEPTIBLE;
@@ -238,13 +238,13 @@ public class PopulationGeneratorTest {
 
         populationGenerator = new PopulationGenerator(properties, populationProperties, dataGenerator);
 
-        Map<Integer, Person> result = populationGenerator.generate();
+        Map<Integer, Case> result = populationGenerator.generate();
 
         int men = 0;
         int women = 0;
         double compliance = 0d;
         double health = 0d;
-        for (Person p : result.values()) {
+        for (Case p : result.values()) {
             compliance += p.compliance();
             health += p.health();
 
@@ -268,12 +268,13 @@ public class PopulationGeneratorTest {
     }
 
 
-    private void createPeople(Map<Integer, Person> var, int start, int end, VirusStatus v) {
+    private void createPeople(Map<Integer, Case> var, int start, int end, VirusStatus v) {
         for (int p = start; p < end; p++) {
 
-            Person person = Mockito.mock(Person.class);
-            when(person.status()).thenReturn(v);
-            var.put(p, person);
+//            Human person = Mockito.mock(Human.class);
+            Case c = Mockito.mock(Case.class);
+            when(c.status()).thenReturn(v);
+            var.put(p, c);
 
 
         }
