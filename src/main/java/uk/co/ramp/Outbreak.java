@@ -16,6 +16,8 @@ import uk.co.ramp.record.ImmutableCmptRecord;
 
 import java.util.*;
 
+import static uk.co.ramp.people.AlertStatus.ALERTED;
+import static uk.co.ramp.people.AlertStatus.NONE;
 import static uk.co.ramp.people.VirusStatus.*;
 
 @Service
@@ -90,21 +92,27 @@ public class Outbreak {
             runTime = maxContact;
         }
 
-        runContactData(runTime, population, contactRecords, randomInfectionRate);
+        boolean complete = runContactData(runTime, population, contactRecords, randomInfectionRate);
 
-        if (steadyState) {
+        if (steadyState && !complete) {
             runToSteadyState(runTime, timeLimit, population);
         }
 
 
     }
 
-    private void runContactData(int maxContact, Map<Integer, Case> population, Map<Integer, List<ContactRecord>> contactRecords, double randomInfectionRate) {
+    private boolean runContactData(int maxContact, Map<Integer, Case> population, Map<Integer, List<ContactRecord>> contactRecords, double randomInfectionRate) {
         for (int time = 0; time <= maxContact; time++) {
 
             updatePopulationState(time, population, randomInfectionRate);
             List<ContactRecord> todaysContacts = contactRecords.get(time);
-            logStepResults(population, time);
+            int activeCases = logStepResults(population, time);
+
+            if (activeCases == 0 && randomInfectionRate == 0d) {
+                LOGGER.info("There are no active cases and the random infection rate is zero.");
+                LOGGER.info("Exiting as solution is stable.");
+                return true;
+            }
 
             for (ContactRecord contacts : todaysContacts) {
 
@@ -115,7 +123,9 @@ public class Outbreak {
                     evaluateExposures(population, contacts, time);
                 }
             }
+
         }
+        return false;
     }
 
 
@@ -147,12 +157,27 @@ public class Outbreak {
 
         for (Case p : population.values()) {
             EvaluateCase e = new EvaluateCase(p, diseaseProperties, rng);
-            e.checkTime(time);
+            Set<Integer> alerts = e.checkTime(time);
+
+            if (alerts.size() > 0) alertPopulation(alerts, population, time);
+
             if (p.status() == SUSCEPTIBLE && randomInfectionRate > 0d && time > 0) {
                 boolean var = rng.nextUniform(0, 1) <= randomInfectionRate;
                 if (var) e.randomExposure(time);
             }
         }
+    }
+
+    private void alertPopulation(Set<Integer> alerts, Map<Integer, Case> population, int time) {
+
+        for (Integer id : alerts) {
+            Case potentialInfected = population.get(id);
+            if (potentialInfected.alertStatus() == NONE && potentialInfected.status() != DEAD) {
+                potentialInfected.setNextAlertStatusChange(time + 1);
+                potentialInfected.setAlertStatus(ALERTED);
+            }
+        }
+
     }
 
     private Case getMostSevere(Case personA, Case personB) {
@@ -182,13 +207,13 @@ public class Outbreak {
 
         Set<Integer> infectedIds = new HashSet<>();
         while (infectedIds.size() < properties.infected()) {
-            infectedIds.add(rng.nextInt(0, properties.populationSize()));
+            infectedIds.add(rng.nextInt(0, properties.populationSize() - 1));
         }
         return infectedIds;
 
     }
 
-    private void logStepResults(Map<Integer, Case> population, int time) {
+    private int logStepResults(Map<Integer, Case> population, int time) {
         Map<VirusStatus, Integer> stats = PopulationGenerator.getCmptCounts(population);
 
         if (time == 0) {
@@ -205,6 +230,8 @@ public class Outbreak {
                 d(stats.get(DEAD)).build();
 
 
+        int activeCases = stats.get(EXPOSED) + stats.get(EXPOSED_2) + stats.get(INFECTED) + stats.get(INFECTED_SYMP);
+
         String s = String.format("| %7d | %7d | %7d | %7d | %7d | %7d | %7d | %7d |",
                 cmptRecord.time(),
                 cmptRecord.s(),
@@ -218,6 +245,10 @@ public class Outbreak {
         LOGGER.info(s);
 
         records.put(time, cmptRecord);
+
+        return activeCases;
+
+
     }
 
 }

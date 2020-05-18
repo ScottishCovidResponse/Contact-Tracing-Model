@@ -3,11 +3,15 @@ package uk.co.ramp;
 import org.apache.commons.math3.random.RandomDataGenerator;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import uk.co.ramp.contact.ContactRecord;
 import uk.co.ramp.io.DiseaseProperties;
 import uk.co.ramp.people.AlertStatus;
 import uk.co.ramp.people.Case;
 import uk.co.ramp.people.InvalidStatusTransitionException;
 import uk.co.ramp.people.VirusStatus;
+
+import java.util.HashSet;
+import java.util.Set;
 
 import static uk.co.ramp.people.AlertStatus.*;
 import static uk.co.ramp.people.VirusStatus.*;
@@ -67,46 +71,15 @@ public class EvaluateCase {
 
     }
 
-    public void checkTime(int time) {
-
+    public Set<Integer> checkTime(int time) {
+        Set<Integer> alerts = new HashSet<>();
         if (p.nextVirusStatusChange() == time) checkVirusStatus(time);
-        if (p.nextAlertStatusChange() == time) checkAlertStatus(time);
+        if (p.nextAlertStatusChange() == time) alerts = checkAlertStatus(time);
+
+        return alerts;
 
 
     }
-
-    private void checkAlertStatus(int time) {
-        LOGGER.debug("Changing alert status for id: {}", p.id());
-
-        p.setNextAlertStatusChange(-1);
-        switch (p.alertStatus()) {
-
-            case TESTED_POSITIVE:
-                LOGGER.warn("user has tested positive");
-                alertAllContacts();
-                break;
-            case TESTED:
-                LOGGER.warn("user has been tested");
-                updateAlertStatus(TESTED_POSITIVE, time);
-                break;
-            case REQUESTED_TEST:
-                LOGGER.warn("user has requested test");
-                updateAlertStatus(TESTED, time);
-                break;
-            case ALERTED:
-                LOGGER.warn("user has been alerted");
-                break;
-            case NONE:
-                break;
-        }
-
-
-    }
-
-    private void alertAllContacts() {
-        //TODO
-    }
-
 
     private void checkVirusStatus(int time) {
 
@@ -134,24 +107,79 @@ public class EvaluateCase {
             case DEAD:
                 break;
         }
+    }
+
+
+    private Set<Integer> checkAlertStatus(int time) {
+        LOGGER.debug("Changing alert status for id: {}", p.id());
+
+        p.setNextAlertStatusChange(-1);
+        switch (p.alertStatus()) {
+
+            case TESTED_POSITIVE:
+                LOGGER.warn("user {} has tested positive", p.id());
+                return alertAllContacts();
+            case TESTED:
+                // TODO: maybe include flag for has had virus?
+                // TODO: should a recovered person test +ve?
+                if (p.isInfectious() || p.status() == DEAD) {
+                    LOGGER.warn("user {} has tested positive", p.id());
+                    updateAlertStatus(TESTED_POSITIVE, time);
+                } else {
+                    LOGGER.warn("user {} has tested negative", p.id());
+                    updateAlertStatus(NONE, time);
+                }
+
+                break;
+            case REQUESTED_TEST:
+                LOGGER.warn("user {} has requested test", p.id());
+                updateAlertStatus(TESTED, time);
+                break;
+            case ALERTED:
+                LOGGER.warn("user {} has been alerted", p.id());
+                updateAlertStatus(REQUESTED_TEST, time);
+                break;
+            case NONE:
+                break;
+        }
+
+        return new HashSet<>();
+    }
+
+    private Set<Integer> alertAllContacts() {
+        //TODO
+        Set<Integer> contactIds = new HashSet<>();
+        for (ContactRecord r : p.contactRecords()) {
+            contactIds.add(r.from());
+            contactIds.add(r.to());
+        }
+
+        contactIds.remove(p.id());
+
+        System.out.println(contactIds);
+        return contactIds;
 
 
     }
+
 
     private void updateAlertStatus(final AlertStatus newStatus, final int currentTime) {
 
         int time = getDistributionValue(properties.meanTestTime(), properties.maxTestTime());
+        AlertStatus oldstatus = p.alertStatus();
         p.setAlertStatus(newStatus);
         p.setNextAlertStatusChange(currentTime + time);
-        LOGGER.warn("id: {} alertStatus: {} at t: {}", p.id(), newStatus, currentTime);
+        LOGGER.warn("id: {} alertStatus: {} -> {} at t={}. Current Virus status: {}", p.id(), oldstatus, newStatus, currentTime, p.status());
 
     }
 
     private VirusStatus determineOutcome(Case p) {
+        //TODO add real logic
         return p.health() > 0.3 ? RECOVERED : DEAD;
     }
 
     private VirusStatus determineInfection(Case p) {
+        //TODO add real logic
         return p.health() > 0.5 ? INFECTED : INFECTED_SYMP;
     }
 

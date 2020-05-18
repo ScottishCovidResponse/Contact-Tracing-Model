@@ -1,8 +1,8 @@
 {
-  "populationSize": 100000,
+  "populationSize": 50,
   "timeLimit": 1000,
-  "infected": 1000,
-  "seed": 0,
+  "infected": 12,
+  "seed": 123,
   "steadyState": true,
   "contactsFile": "input/contacts.csv"
 }

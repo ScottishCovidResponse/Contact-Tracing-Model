@@ -20,11 +20,12 @@ public class Case {
 
     public Case(final Human human) {
         this.human = human;
+        status = SUSCEPTIBLE;
+        alertStatus = NONE;
+        contactRecords = new HashSet<>();
         exposedBy = -1;
         nextVirusStatusChange = -1;
-        status = SUSCEPTIBLE;
-        contactRecords = new HashSet<>();
-        alertStatus = NONE;
+        nextAlertStatusChange = -1;
     }
 
     public int nextAlertStatusChange() {
@@ -41,6 +42,10 @@ public class Case {
 
     public void setAlertStatus(AlertStatus alertStatus) {
         this.alertStatus = alertStatus;
+    }
+
+    public Set<ContactRecord> contactRecords() {
+        return contactRecords;
     }
 
     public double health() {
