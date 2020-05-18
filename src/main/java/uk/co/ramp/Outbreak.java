@@ -67,9 +67,10 @@ public class Outbreak {
         Set<Integer> infectedIds = infectPopulation();
         for (Integer id : infectedIds) {
 
-            EvaluateCase evaluateCase = new EvaluateCase(population.get(id), diseaseProperties, rng);
-            evaluateCase.updateStatus(EXPOSED, 0);
-
+            EvaluateCase evaluateCase = new EvaluateCase(diseaseProperties, rng);
+            Person originalPerson = population.get(id);
+            Person updatedPerson = evaluateCase.updateStatus(originalPerson, EXPOSED, 0);
+            population.put(id, updatedPerson);
         }
     }
 
@@ -144,13 +145,17 @@ public class Outbreak {
 
     private void updatePopulationState(int time, Map<Integer, Person> population, double randomInfectionRate) {
 
-        for (Person p : population.values()) {
-            EvaluateCase e = new EvaluateCase(p, diseaseProperties, rng);
-            e.checkTime(time);
+        for (Map.Entry<Integer, Person> entry : population.entrySet()) {
+            Person p = entry.getValue();
+            EvaluateCase e = new EvaluateCase(diseaseProperties, rng);
+            p = e.checkTime(p, time);
             if (p.status() == SUSCEPTIBLE && randomInfectionRate > 0d && time > 0) {
                 boolean var = rng.nextUniform(0, 1) <= randomInfectionRate;
-                if (var) e.randomExposure(time);
+                if (var) {
+                    p = e.randomExposure(p, time);
+                }
             }
+            entry.setValue(p);
         }
     }
 
@@ -164,12 +169,14 @@ public class Outbreak {
     private void evaluateExposures(Map<Integer, Person> population, ContactRecord c, int time) {
         Person personA = getMostSevere(population.get(c.to()), population.get(c.from()));
         Person personB = personA == population.get(c.to()) ? population.get(c.from()) : population.get(c.to());
+        int personBKey = personA == population.get(c.to()) ? c.from() : c.to();
 
         boolean dangerMix = personA.isInfectious() && personB.status() == SUSCEPTIBLE;
 
         if (dangerMix && rng.nextUniform(0, 1) < c.weight() / diseaseProperties.exposureTuning()) {
-            EvaluateCase e = new EvaluateCase(personB, diseaseProperties, rng);
-            e.updateStatus(EXPOSED, time, personA.id());
+            EvaluateCase e = new EvaluateCase(diseaseProperties, rng);
+            Person updatedPersonB = e.updateStatus(personB, EXPOSED, time, personA.id());
+            population.put(personBKey, updatedPersonB);
         }
     }
 

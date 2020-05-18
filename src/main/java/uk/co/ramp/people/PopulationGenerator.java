@@ -105,15 +105,17 @@ public class PopulationGenerator {
             double compliance = dataGenerator.nextUniform(0, 1);
             double health = dataGenerator.nextUniform(0, 1);
 
-            population.put(i, ModifiablePerson.create().
-                    setId(i).
-                    setStatus(SUSCEPTIBLE).
-                    setAge(age).
-                    setGender(gender).
-                    setCompliance(compliance).
-                    setExposedBy(-1).
-                    setNextStatusChange(-1).
-                    setHealth(health));
+            Person person = ImmutablePerson.builder()
+                    .id(i)
+                    .status(SUSCEPTIBLE)
+                    .age(age)
+                    .gender(gender)
+                    .compliance(compliance)
+                    .exposedBy(-1)
+                    .nextStatusChange(-1)
+                    .health(health)
+                    .build();
+            population.put(i, person);
 
         }
 

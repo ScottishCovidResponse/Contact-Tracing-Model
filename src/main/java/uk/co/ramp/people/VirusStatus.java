@@ -34,14 +34,8 @@ public enum VirusStatus {
         return validTransitions;
     }
 
-    public VirusStatus transitionTo(final VirusStatus next) {
-
-        if (!validTransitions.contains(next)) {
-            String message = String.format("It is not valid to transition between statuses %s -> %s", this, next);
-            LOGGER.error(message);
-            throw new InvalidStatusTransitionException(message);
-        }
-        return next;
+    public boolean isValidTransition(final VirusStatus next) {
+        return validTransitions.contains(next);
     }
 
 }

@@ -6,7 +6,7 @@ import org.apache.logging.log4j.Logger;
 import uk.co.ramp.io.DiseaseProperties;
 import uk.co.ramp.io.ProgressionDistribution;
 import uk.co.ramp.people.InvalidStatusTransitionException;
-import uk.co.ramp.people.ModifiablePerson;
+import uk.co.ramp.people.ImmutablePerson;
 import uk.co.ramp.people.Person;
 import uk.co.ramp.people.VirusStatus;
 
@@ -14,23 +14,21 @@ import static uk.co.ramp.people.VirusStatus.*;
 
 public class EvaluateCase {
     private static final Logger LOGGER = LogManager.getLogger(EvaluateCase.class);
-    private final ModifiablePerson p;
     private final DiseaseProperties properties;
     private final RandomDataGenerator rng;
 
-    public EvaluateCase(Person p, DiseaseProperties diseaseProperties, RandomDataGenerator randomDataGenerator) {
-        this.p = (ModifiablePerson) p;
+    public EvaluateCase(DiseaseProperties diseaseProperties, RandomDataGenerator randomDataGenerator) {
         this.properties = diseaseProperties;
         this.rng = randomDataGenerator;
     }
 
 
-    public void updateStatus(VirusStatus newStatus, int currentTime, int exposedBy) {
-        p.setExposedBy(exposedBy);
-        updateStatus(newStatus, currentTime);
+    public Person updateStatus(Person p, VirusStatus newStatus, int currentTime, int exposedBy) {
+        p = ImmutablePerson.copyOf(p).withExposedBy(exposedBy);
+        return updateStatus(p, newStatus, currentTime);
     }
 
-    public void updateStatus(VirusStatus newStatus, int currentTime) {
+    public Person updateStatus(Person p, VirusStatus newStatus, int currentTime) {
 
         ProgressionDistribution progressionDistribution = properties.progressionDistribution();
         int timeToNextChange;
@@ -57,36 +55,37 @@ public class EvaluateCase {
 
         if (newStatus != DEAD && newStatus != RECOVERED) {
             timeToNextChange = getDistributionValue(mean, max, progressionDistribution);
-            p.setNextStatusChange(currentTime + timeToNextChange);
+            p = ImmutablePerson.copyOf(p).withNextStatusChange(currentTime + timeToNextChange);
         } else {
-            p.setNextStatusChange(-1);
+            p = ImmutablePerson.copyOf(p).withNextStatusChange(-1);
         }
 
-        p.setStatus(newStatus);
-
+        if (p.status().isValidTransition(newStatus)) {
+            return ImmutablePerson.copyOf(p).withStatus(newStatus);
+        } else {
+            String errorMsg = String.format("It is not valid to transition between statuses %s -> %s", p.status(), newStatus);
+            LOGGER.error(errorMsg);
+            throw new InvalidStatusTransitionException(errorMsg);
+        }
     }
 
-    public void checkTime(int time) {
+    public Person checkTime(Person p, int time) {
 
         if (p.nextStatusChange() == time) {
             LOGGER.debug("Changing status for id: {}", p.id());
 
-            p.setNextStatusChange(-1);
+            p = ImmutablePerson.copyOf(p).withNextStatusChange(-1);
             switch (p.status()) {
                 case EXPOSED:
-                    updateStatus(EXPOSED_2, time);
-                    break;
+                    return updateStatus(p, EXPOSED_2, time);
                 case EXPOSED_2:
                     VirusStatus status = determineInfection(p);
-                    updateStatus(status, time);
-                    break;
+                    return updateStatus(p, status, time);
                 case INFECTED:
-                    updateStatus(RECOVERED, time);
-                    break;
+                    return updateStatus(p, RECOVERED, time);
                 case INFECTED_SYMP:
                     status = determineOutcome(p);
-                    updateStatus(status, time);
-                    break;
+                    return updateStatus(p, status, time);
                 case SUSCEPTIBLE:
                 case RECOVERED:
                 case DEAD:
@@ -96,7 +95,7 @@ public class EvaluateCase {
         } else if (p.nextStatusChange() != -1 && p.nextStatusChange() < time) {
             throw new RuntimeException("Something has been missed");
         }
-
+        return p;
     }
 
     private VirusStatus determineOutcome(Person p) {
@@ -107,11 +106,11 @@ public class EvaluateCase {
         return p.health() > 0.5 ? INFECTED : INFECTED_SYMP;
     }
 
-    public void randomExposure(int t) {
-        p.setExposedBy(-1);
+    public Person randomExposure(Person p, int t) {
+        p = ImmutablePerson.copyOf(p).withExposedBy(-1);
         if (p.status() == SUSCEPTIBLE) {
             LOGGER.trace("Person with id: {} has been randomly exposed at time {}", p.id(), t);
-            updateStatus(EXPOSED, t);
+            return updateStatus(p, EXPOSED, t);
         } else {
             String message = String.format("The person with id: %d should not be able to transition from %s to %s", p.id(), p.status(), EXPOSED);
             LOGGER.error(message);
