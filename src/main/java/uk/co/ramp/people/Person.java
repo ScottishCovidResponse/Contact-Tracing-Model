@@ -1,97 +1,46 @@
 package uk.co.ramp.people;
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import com.google.common.base.Preconditions;
+import org.immutables.gson.Gson;
+import org.immutables.value.Value;
 
 import static uk.co.ramp.people.VirusStatus.*;
 
-public class Person {
+@Gson.TypeAdapters
+@Value.Modifiable
+//@Value.Style(defaultAsDefault = true)
+public interface Person {
 
-    private static final Logger LOGGER = LogManager.getLogger(Person.class);
+    int id();
 
-    // key characteristics
-    private final int id;
-    private final int age;
-    private final Gender gender;
-    private final double compliance;
-    private final double health;
-    private VirusStatus status;
-    private int exposedBy;
+    int age();
 
-    private int nextStatusChange = -1;
+    Gender gender();
 
+    double compliance();
 
-    public Person(final int id, int age, Gender gender, double compliance, double health) {
-        this.id = id;
-        this.age = age;
-        this.gender = gender;
-        this.compliance = compliance;
-        this.health = health;
-        this.status = SUSCEPTIBLE;
-        this.exposedBy = -1;
+    double health();
+
+    VirusStatus status();
+
+    int exposedBy();
+
+    int nextStatusChange();
+
+    default boolean isInfectious() {
+        return status() == INFECTED || status() == INFECTED_SYMP || status() == EXPOSED_2;
     }
 
 
-    public int getId() {
-        return id;
-    }
-
-    public int getAge() {
-        return age;
-    }
-
-    public Gender getGender() {
-        return gender;
-    }
-
-    public double getCompliance() {
-        return compliance;
-    }
-
-    public double getHealth() {
-        return health;
-    }
-
-    public VirusStatus getStatus() {
-        return status;
-    }
-
-    public int getExposedBy() {
-        return exposedBy;
-    }
-
-    public void setStatus(VirusStatus next) {
-        status = status.transitionTo(next);
-    }
-
-    public void setExposedBy(int exposedBy) {
-        this.exposedBy = exposedBy;
+    default ModifiablePerson setStatus(VirusStatus next) {
+        if (status().getValidTransitions().contains(next)) {
+            System.out.println("This");
+        } else {
+            System.out.println("That");
+        }
+        Preconditions.checkState(status().getValidTransitions().contains(next), "Invalid transition");
+        return (ModifiablePerson) this;
     }
 
 
-    public int getNextStatusChange() {
-        return nextStatusChange;
-    }
-
-    public void setNextStatusChange(int nextStatusChange) {
-        this.nextStatusChange = nextStatusChange;
-    }
-
-    public boolean isInfectious() {
-        return getStatus() == INFECTED || getStatus() == INFECTED_SYMP || getStatus() == EXPOSED_2;
-    }
-
-    @Override
-    public String toString() {
-        return "Person{" +
-                "id=" + id +
-                ", age=" + age +
-                ", gender=" + gender +
-                ", compliance=" + compliance +
-                ", health=" + health +
-                ", status=" + status +
-                ", exposedBy=" + exposedBy +
-                ", nextStatusChange=" + nextStatusChange +
-                '}';
-    }
 }

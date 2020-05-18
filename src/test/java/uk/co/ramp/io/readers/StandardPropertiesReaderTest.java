@@ -5,11 +5,7 @@ import org.junit.Before;
 import org.junit.Test;
 import uk.co.ramp.io.StandardProperties;
 
-import java.io.BufferedReader;
-import java.io.BufferedWriter;
-import java.io.IOException;
-import java.io.StringReader;
-import java.io.StringWriter;
+import java.io.*;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -19,13 +15,14 @@ public class StandardPropertiesReaderTest {
             "  'timeLimit': 100," +
             "  'infected': 1000," +
             "  'seed': 0," +
-            "  'steadyState': true" +
+            "  'steadyState': true," +
+            "  'contactsFile': \"input/contacts.csv\"" +
             "}";
 
     private StandardPropertiesReader standardPropertiesReader;
 
     @Before
-    public void setUp(){
+    public void setUp() {
         standardPropertiesReader = new StandardPropertiesReader();
     }
 
@@ -36,6 +33,7 @@ public class StandardPropertiesReaderTest {
 
         assertThat(standardProperties.infected()).isEqualTo(1000);
         assertThat(standardProperties.populationSize()).isEqualTo(10000);
+        assertThat(standardProperties.contactsFile()).isEqualTo("input/contacts.csv");
         assertThat(standardProperties.seed()).isZero();
         assertThat(standardProperties.timeLimit()).isEqualTo(100);
         assertThat(standardProperties.steadyState()).isTrue();

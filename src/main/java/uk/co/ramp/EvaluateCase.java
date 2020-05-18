@@ -6,6 +6,7 @@ import org.apache.logging.log4j.Logger;
 import uk.co.ramp.io.DiseaseProperties;
 import uk.co.ramp.io.ProgressionDistribution;
 import uk.co.ramp.people.InvalidStatusTransitionException;
+import uk.co.ramp.people.ModifiablePerson;
 import uk.co.ramp.people.Person;
 import uk.co.ramp.people.VirusStatus;
 
@@ -13,12 +14,12 @@ import static uk.co.ramp.people.VirusStatus.*;
 
 public class EvaluateCase {
     private static final Logger LOGGER = LogManager.getLogger(EvaluateCase.class);
-    private final Person p;
+    private final ModifiablePerson p;
     private final DiseaseProperties properties;
     private final RandomDataGenerator rng;
 
     public EvaluateCase(Person p, DiseaseProperties diseaseProperties, RandomDataGenerator randomDataGenerator) {
-        this.p = p;
+        this.p = (ModifiablePerson) p;
         this.properties = diseaseProperties;
         this.rng = randomDataGenerator;
     }
@@ -67,11 +68,11 @@ public class EvaluateCase {
 
     public void checkTime(int time) {
 
-        if (p.getNextStatusChange() == time) {
-            LOGGER.debug("Changing status for id: {}", p.getId());
+        if (p.nextStatusChange() == time) {
+            LOGGER.debug("Changing status for id: {}", p.id());
 
             p.setNextStatusChange(-1);
-            switch (p.getStatus()) {
+            switch (p.status()) {
                 case EXPOSED:
                     updateStatus(EXPOSED_2, time);
                     break;
@@ -92,30 +93,27 @@ public class EvaluateCase {
                     break;
             }
 
-        } else if (p.getNextStatusChange() != -1 && p.getNextStatusChange() < time) {
-            System.out.println("Something has been missed");
-            System.out.println(p.toString());
-            System.out.println(time);
+        } else if (p.nextStatusChange() != -1 && p.nextStatusChange() < time) {
             throw new RuntimeException("Something has been missed");
         }
 
     }
 
     private VirusStatus determineOutcome(Person p) {
-        return p.getHealth() > 0.3 ? RECOVERED : DEAD;
+        return p.health() > 0.3 ? RECOVERED : DEAD;
     }
 
     private VirusStatus determineInfection(Person p) {
-        return p.getHealth() > 0.5 ? INFECTED : INFECTED_SYMP;
+        return p.health() > 0.5 ? INFECTED : INFECTED_SYMP;
     }
 
     public void randomExposure(int t) {
         p.setExposedBy(-1);
-        if (p.getStatus() == SUSCEPTIBLE) {
-            LOGGER.trace("Person with id: {} has been randomly exposed at time {}", p.getId(), t);
+        if (p.status() == SUSCEPTIBLE) {
+            LOGGER.trace("Person with id: {} has been randomly exposed at time {}", p.id(), t);
             updateStatus(EXPOSED, t);
         } else {
-            String message = String.format("The person with id: %d should not be able to transition from %s to %s", p.getId(), p.getStatus(), EXPOSED);
+            String message = String.format("The person with id: %d should not be able to transition from %s to %s", p.id(), p.status(), EXPOSED);
             LOGGER.error(message);
             throw new InvalidStatusTransitionException(message);
         }
@@ -142,7 +140,7 @@ public class EvaluateCase {
 
         value = (int) Math.round(sample);
 
-        return Math.min(Math.max(value, 1), 14);
+        return Math.min(Math.max(value, 1), (int) max);
     }
 
 

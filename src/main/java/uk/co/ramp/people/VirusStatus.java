@@ -4,24 +4,24 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import java.util.Collections;
-import java.util.Set;
+import java.util.List;
 
 public enum VirusStatus {
 
-    DEAD(-1, Collections.emptySet()),
-    RECOVERED(1, Collections.emptySet()),
-    INFECTED_SYMP(5, Set.of(RECOVERED, DEAD)),
-    INFECTED(4, Set.of(RECOVERED)),
-    EXPOSED_2(3, Set.of(INFECTED, INFECTED_SYMP)),
+    DEAD(-1, Collections.emptyList()),
+    RECOVERED(1, Collections.emptyList()),
+    INFECTED_SYMP(5, List.of(RECOVERED, DEAD)),
+    INFECTED(4, List.of(RECOVERED)),
+    EXPOSED_2(3, List.of(INFECTED, INFECTED_SYMP)),
     // TODO remove infected from here
-    EXPOSED(2, Set.of(EXPOSED_2)),
-    SUSCEPTIBLE(0, Set.of(EXPOSED));
+    EXPOSED(2, List.of(EXPOSED_2)),
+    SUSCEPTIBLE(0, List.of(EXPOSED));
 
     private final int val;
     private static final Logger LOGGER = LogManager.getLogger(VirusStatus.class);
-    private final Set<VirusStatus> validTransitions;
+    private final List<VirusStatus> validTransitions;
 
-    VirusStatus(int i, final Set<VirusStatus> validTransitions) {
+    VirusStatus(int i, final List<VirusStatus> validTransitions) {
         this.val = i;
         this.validTransitions = validTransitions;
     }
@@ -30,8 +30,11 @@ public enum VirusStatus {
         return val;
     }
 
-    public VirusStatus transitionTo(final VirusStatus next) {
+    public List<VirusStatus> getValidTransitions() {
+        return validTransitions;
+    }
 
+    public VirusStatus transitionTo(final VirusStatus next) {
 
         if (!validTransitions.contains(next)) {
             String message = String.format("It is not valid to transition between statuses %s -> %s", this, next);

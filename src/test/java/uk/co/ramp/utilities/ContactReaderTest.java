@@ -25,6 +25,7 @@ public class ContactReaderTest {
             .infected(1000)
             .seed(0)
             .steadyState(true)
+            .contactsFile("input/contacts.csv")
             .build();
 
     private final ContactRecord record1 = ImmutableContactRecord.builder()

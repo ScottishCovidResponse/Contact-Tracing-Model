@@ -1,5 +1,6 @@
 package uk.co.ramp.people;
 
+import org.apache.commons.math3.random.RandomDataGenerator;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -28,7 +29,7 @@ public class PopulationGeneratorTest {
     public void setup() {
         PopulationProperties populationProperties = Mockito.mock(PopulationProperties.class);
         StandardProperties properties = Mockito.mock(StandardProperties.class);
-        populationGenerator = new PopulationGenerator(properties, populationProperties);
+        populationGenerator = new PopulationGenerator(properties, populationProperties, new RandomDataGenerator());
     }
 
     @Test
@@ -61,7 +62,7 @@ public class PopulationGeneratorTest {
         v = RECOVERED;
         createPeople(var, start, end, v);
 
-        Map<VirusStatus, Integer> result = PopulationGenerator.getSEIRCounts(var);
+        Map<VirusStatus, Integer> result = PopulationGenerator.getCmptCounts(var);
 
         Assert.assertEquals(s, result.get(SUSCEPTIBLE).intValue());
         Assert.assertEquals(e, result.get(EXPOSED).intValue());
@@ -93,6 +94,7 @@ public class PopulationGeneratorTest {
             if (sum > 1d) {
                 var.put(i, sample);
                 cumulative.put(i, 1d);
+                bins = i;
                 break;
             } else if (i == bins - 1) {
                 var.put(i, 1 - sum);
@@ -211,7 +213,7 @@ public class PopulationGeneratorTest {
         Map<Integer, Double> populationDistribution = generateAgeDistribution();
         Map<Integer, MinMax> populationAges = generateAgeRanges();
         double genderBalance = 1.d;
-        PopulationProperties b = ImmutablePopulationProperties.builder()
+        PopulationProperties populationProperties = ImmutablePopulationProperties.builder()
                 .populationDistribution(populationDistribution)
                 .populationAges(populationAges)
                 .genderBalance(genderBalance)
@@ -223,15 +225,18 @@ public class PopulationGeneratorTest {
         int seed = 10;
         boolean steadyState = true;
 
-        StandardProperties a = ImmutableStandardProperties.builder()
+        StandardProperties properties = ImmutableStandardProperties.builder()
                 .populationSize(populationSize)
                 .timeLimit(timeLimit)
                 .infected(infected)
                 .seed(seed)
                 .steadyState(steadyState)
+                .contactsFile("input/contacts.csv")
                 .build();
 
-        populationGenerator = new PopulationGenerator(a, b);
+        RandomDataGenerator dataGenerator = new RandomDataGenerator();
+
+        populationGenerator = new PopulationGenerator(properties, populationProperties, dataGenerator);
 
         Map<Integer, Person> result = populationGenerator.generate();
 
@@ -240,10 +245,10 @@ public class PopulationGeneratorTest {
         double compliance = 0d;
         double health = 0d;
         for (Person p : result.values()) {
-            compliance += p.getCompliance();
-            health += p.getHealth();
+            compliance += p.compliance();
+            health += p.health();
 
-            if (p.getGender() == Gender.FEMALE) {
+            if (p.gender() == Gender.FEMALE) {
                 women++;
             } else {
                 men++;
@@ -267,7 +272,7 @@ public class PopulationGeneratorTest {
         for (int p = start; p < end; p++) {
 
             Person person = Mockito.mock(Person.class);
-            when(person.getStatus()).thenReturn(v);
+            when(person.status()).thenReturn(v);
             var.put(p, person);
 
 

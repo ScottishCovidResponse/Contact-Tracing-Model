@@ -3,5 +3,6 @@
   "timeLimit": 1000,
   "infected": 1000,
   "seed": 0,
-  "steadyState": true
+  "steadyState": true,
+  "contactsFile": "input/contacts.csv"
 }

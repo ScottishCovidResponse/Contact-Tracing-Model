@@ -11,4 +11,6 @@ public interface StandardProperties {
     int infected();
     int seed();
     boolean steadyState();
+
+    String contactsFile();
 }

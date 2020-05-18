@@ -7,7 +7,6 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 import org.springframework.stereotype.Service;
 import uk.co.ramp.contact.ContactRecord;
-import uk.co.ramp.io.PopulationProperties;
 import uk.co.ramp.io.SeirWriter;
 import uk.co.ramp.io.StandardProperties;
 import uk.co.ramp.people.Person;
@@ -25,7 +24,6 @@ public class ContactRunner implements ApplicationContextAware {
 
     private static final Logger LOGGER = LogManager.getLogger(ContactRunner.class);
 
-    private PopulationProperties populationProperties;
     private StandardProperties runProperties;
     private ApplicationContext ctx;
 
@@ -33,15 +31,14 @@ public class ContactRunner implements ApplicationContextAware {
     }
 
     @Autowired
-    public ContactRunner(PopulationProperties populationProperties, StandardProperties runProperties) {
-        this.populationProperties = populationProperties;
+    public ContactRunner(StandardProperties runProperties) {
         this.runProperties = runProperties;
     }
 
     public void run() throws IOException {
 
-        Map<Integer, Person> population = new PopulationGenerator(runProperties, populationProperties).generate();
-        try (Reader reader = new FileReader("input/contacts.csv")) {
+        Map<Integer, Person> population = ctx.getBean(PopulationGenerator.class).generate();
+        try (Reader reader = new FileReader(runProperties.contactsFile())) {
             Map<Integer, List<ContactRecord>> contactRecords = new ContactReader().read(reader, runProperties);
 
             LOGGER.info("Generated Population and Parsed Contact data");
@@ -57,10 +54,10 @@ public class ContactRunner implements ApplicationContextAware {
 
     }
 
-    void writeSEIR(List<CmptRecord> seirRecords, File file) {
+    void writeSEIR(List<CmptRecord> cmptRecords, File file) {
         try (FileWriter fw = new FileWriter(file);
              BufferedWriter bw = new BufferedWriter(fw)) {
-            new SeirWriter().write(bw, seirRecords);
+            new SeirWriter().write(bw, cmptRecords);
         } catch (IOException e) {
             LOGGER.fatal("Could not write SEIR");
             throw new RuntimeException(e.getMessage());

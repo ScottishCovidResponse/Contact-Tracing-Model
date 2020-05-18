@@ -26,6 +26,7 @@ public class StandardPropertiesReader {
                 .infected(1000)
                 .seed(0)
                 .steadyState(true)
+                .contactsFile("input/contacts.csv")
                 .build();
 
         Gson gson = new GsonBuilder().setPrettyPrinting().create();
