@@ -50,7 +50,7 @@ public class EvaluateCaseTest {
 
         DiseaseProperties diseaseProperties = mock(DiseaseProperties.class);
         when(diseaseProperties.progressionDistribution()).thenReturn(ProgressionDistribution.FLAT);
-        RandomDataGenerator randomDataGenerator = new RandomDataGenerator();
+        RandomDataGenerator randomDataGenerator = mock(RandomDataGenerator.class);
         evaluateCase = new EvaluateCase(diseaseProperties, randomDataGenerator);
 
         validTransitions = ImmutableMap.<VirusStatus, Set<VirusStatus>>builder()
