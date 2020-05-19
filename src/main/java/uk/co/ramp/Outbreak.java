@@ -119,6 +119,17 @@ public class Outbreak {
                 Case potentialSpreader = population.get(contacts.to());
                 Case victim = population.get(contacts.from());
 
+                if (potentialSpreader.alertStatus() != NONE && victim.alertStatus() != NONE) {
+                    if (contacts.weight() < diseaseProperties.exposureThreshold()) {
+
+                        // TODO: Apply behavioural logic here. Use compliance value
+
+                        LOGGER.warn(potentialSpreader.alertStatus() + "   " + victim.alertStatus() + "  " + contacts.weight());
+                        LOGGER.warn("Skipping contact due to threshold");
+                        continue;
+                    }
+                }
+
                 if (potentialSpreader.status() != victim.status()) {
                     evaluateExposures(population, contacts, time);
                 }
@@ -181,10 +192,10 @@ public class Outbreak {
     }
 
     private Case getMostSevere(Case personA, Case personB) {
-        VirusStatus a = personA.status();
-        VirusStatus b = personB.status();
+        int a = personA.status().getVal();
+        int b = personB.status().getVal();
 
-        return a.compareTo(b) > 0 ? personA : personB;
+        return a > b ? personA : personB;
     }
 
     private void evaluateExposures(Map<Integer, Case> population, ContactRecord c, int time) {
@@ -197,6 +208,7 @@ public class Outbreak {
         boolean dangerMix = personA.isInfectious() && personB.status() == SUSCEPTIBLE;
 
         if (dangerMix && rng.nextUniform(0, 1) < c.weight() / diseaseProperties.exposureTuning()) {
+            LOGGER.warn("       DANGER MIX");
             EvaluateCase e = new EvaluateCase(personB, diseaseProperties, rng);
             e.updateVirusStatus(EXPOSED, time, personA.id());
         }

@@ -9,6 +9,7 @@
   "maxTestTime": 3.0,
   "testAccuracy": 0.95,
   "exposureTuning": 30,
-  "randomInfectionRate": 0.01,
-  "progressionDistribution": "LINEAR"
+  "exposureThreshold": 2000,
+  "randomInfectionRate": 0.00,
+  "progressionDistribution": "EXPONENTIAL"
 }

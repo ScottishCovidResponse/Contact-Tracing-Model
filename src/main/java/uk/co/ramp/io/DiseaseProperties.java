@@ -28,5 +28,7 @@ public interface DiseaseProperties {
 
     double exposureTuning();
 
+    double exposureThreshold();
+
     ProgressionDistribution progressionDistribution();
 }

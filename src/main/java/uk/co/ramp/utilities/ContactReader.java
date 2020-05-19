@@ -3,9 +3,7 @@ package uk.co.ramp.utilities;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import uk.co.ramp.contact.ContactRecord;
-import uk.co.ramp.contact.ContactRecord2;
 import uk.co.ramp.contact.ImmutableContactRecord;
-import uk.co.ramp.contact.ImmutableContactRecord2;
 import uk.co.ramp.io.StandardProperties;
 import uk.co.ramp.io.csv.CsvReader;
 
@@ -25,14 +23,14 @@ public class ContactReader {
 
 
     private Map<Integer, List<ContactRecord>> read(Reader reader, int personLimit, int dayLimit) throws IOException {
-        List<ImmutableContactRecord2> contactRecords = new CsvReader().read(reader, ImmutableContactRecord2.class);
+        List<ImmutableContactRecord> contactRecords = new CsvReader().read(reader, ImmutableContactRecord.class);
         double maxWeight = 0d;
         Map<Integer, List<ContactRecord>> dailyRecord = new HashMap<>();
-        for (ContactRecord2 record : contactRecords) {
+        for (ContactRecord record : contactRecords) {
 
             int day = record.time() - 1;
-            int from = (int) record.from() - 1;
-            int to = (int) record.to() - 1;
+            int from = record.from() - 1;
+            int to = record.to() - 1;
             double weight = record.weight();
 
             // TODO remove these when no longer developing
