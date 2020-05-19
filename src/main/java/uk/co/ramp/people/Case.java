@@ -15,6 +15,7 @@ public class Case {
     private VirusStatus status;
     private AlertStatus alertStatus;
     private int exposedBy;
+    private int exposedTime;
     private int nextVirusStatusChange;
     private int nextAlertStatusChange;
 
@@ -23,9 +24,18 @@ public class Case {
         status = SUSCEPTIBLE;
         alertStatus = NONE;
         contactRecords = new HashSet<>();
-        exposedBy = -1;
+        exposedBy = -9;
+        exposedTime = -1;
         nextVirusStatusChange = -1;
         nextAlertStatusChange = -1;
+    }
+
+    public int exposedTime() {
+        return exposedTime;
+    }
+
+    public void setExposedTime(int exposedTime) {
+        this.exposedTime = exposedTime;
     }
 
     public int nextAlertStatusChange() {
@@ -41,7 +51,7 @@ public class Case {
     }
 
     public void setAlertStatus(AlertStatus alertStatus) {
-        this.alertStatus = alertStatus;
+        this.alertStatus = this.alertStatus.transitionTo(alertStatus);
     }
 
     public Set<ContactRecord> contactRecords() {

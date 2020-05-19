@@ -8,8 +8,8 @@
   "meanTestTime": 1.0,
   "maxTestTime": 3.0,
   "testAccuracy": 0.95,
-  "exposureTuning": 30,
-  "exposureThreshold": 2000,
-  "randomInfectionRate": 0.00,
+  "exposureTuning": 100,
+  "exposureThreshold": 50,
+  "randomInfectionRate": 0.0005,
   "progressionDistribution": "EXPONENTIAL"
 }

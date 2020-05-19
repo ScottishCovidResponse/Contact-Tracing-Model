@@ -29,6 +29,10 @@ public class DiseasePropertiesReader {
                 .maxTimeToInfected(14)
                 .maxTimeToFinalState(14)
                 .randomInfectionRate(0.01)
+                .meanTestTime(1)
+                .maxTestTime(3)
+                .testAccuracy(0.95)
+                .exposureThreshold(10)
                 .exposureTuning(160)
                 .progressionDistribution(FLAT)
                 .build();

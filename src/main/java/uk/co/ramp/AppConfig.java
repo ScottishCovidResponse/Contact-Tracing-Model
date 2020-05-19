@@ -64,7 +64,7 @@ public class AppConfig {
 
     @Bean
     public RandomDataGenerator randomDataGenerator(@Value("${cmdLineArgument:#{null}}") Optional<String[]> argumentValue) throws IOException {
-        int arg = 0;
+        long arg = 0;
         if (argumentValue.isPresent() && argumentValue.get().length > 0) {
             arg = Integer.parseInt(argumentValue.get()[0]);
             LOGGER.info("Additional Seed information provided, the seed will be {}", standardProperties().seed() + arg);

@@ -9,7 +9,7 @@ import java.io.Writer;
 import java.util.List;
 import java.util.stream.Collectors;
 
-public class SeirWriter {
+public class CompartmentWriter {
     public void write(Writer writer, List<CmptRecord> records) throws IOException {
         List<ImmutableCmptRecord> wrappedImmutableRecords = records.stream()
                 .map(r -> ImmutableCmptRecord.builder().from(r).build())

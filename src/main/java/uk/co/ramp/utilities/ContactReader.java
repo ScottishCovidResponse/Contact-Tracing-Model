@@ -18,23 +18,23 @@ public class ContactReader {
     private static final Logger LOGGER = LogManager.getLogger(ContactReader.class);
 
     public Map<Integer, List<ContactRecord>> read(Reader reader, StandardProperties runProperties) throws IOException {
-        return read(reader, runProperties.populationSize(), runProperties.timeLimit());
+        return read(reader, runProperties.populationSize());
     }
 
 
-    private Map<Integer, List<ContactRecord>> read(Reader reader, int personLimit, int dayLimit) throws IOException {
+    private Map<Integer, List<ContactRecord>> read(Reader reader, int personLimit) throws IOException {
         List<ImmutableContactRecord> contactRecords = new CsvReader().read(reader, ImmutableContactRecord.class);
         double maxWeight = 0d;
         Map<Integer, List<ContactRecord>> dailyRecord = new HashMap<>();
         for (ContactRecord record : contactRecords) {
 
+            // we want these as zero indexed.
             int day = record.time() - 1;
             int from = record.from() - 1;
             int to = record.to() - 1;
             double weight = record.weight();
 
-            // TODO remove these when no longer developing
-            if (day > dayLimit) break;
+            // This saves time/memory when running a small simulation from a larger contact set.
             if (from >= personLimit || to >= personLimit) continue;
 
             ContactRecord c = ImmutableContactRecord.builder().time(day).from(from).to(to).weight(weight).build();

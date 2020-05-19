@@ -7,8 +7,9 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 import org.springframework.stereotype.Service;
 import uk.co.ramp.contact.ContactRecord;
-import uk.co.ramp.io.SeirWriter;
+import uk.co.ramp.io.CompartmentWriter;
 import uk.co.ramp.io.StandardProperties;
+import uk.co.ramp.io.csv.CsvException;
 import uk.co.ramp.people.Case;
 import uk.co.ramp.people.PopulationGenerator;
 import uk.co.ramp.record.CmptRecord;
@@ -49,18 +50,18 @@ public class ContactRunner implements ApplicationContextAware {
 
             Map<Integer, CmptRecord> records = infection.propagate();
 
-            writeSEIR(new ArrayList<>(records.values()), new File("SEIR.csv"));
+            writeCompartments(new ArrayList<>(records.values()), new File("Compartments.csv"));
         }
 
     }
 
-    void writeSEIR(List<CmptRecord> cmptRecords, File file) {
+    void writeCompartments(List<CmptRecord> cmptRecords, File file) {
         try (FileWriter fw = new FileWriter(file);
              BufferedWriter bw = new BufferedWriter(fw)) {
-            new SeirWriter().write(bw, cmptRecords);
+            new CompartmentWriter().write(bw, cmptRecords);
         } catch (IOException e) {
-            LOGGER.fatal("Could not write SEIR");
-            throw new RuntimeException(e.getMessage());
+            LOGGER.fatal("Could not write Compartments");
+            throw new CsvException(e.getMessage());
         }
     }
 

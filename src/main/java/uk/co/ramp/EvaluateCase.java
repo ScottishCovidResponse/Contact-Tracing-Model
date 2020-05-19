@@ -33,6 +33,7 @@ public class EvaluateCase {
 
     public void updateVirusStatus(VirusStatus newStatus, int currentTime, int exposedBy) {
         p.setExposedBy(exposedBy);
+        p.setExposedTime(currentTime);
         updateVirusStatus(newStatus, currentTime);
     }
 
@@ -83,7 +84,7 @@ public class EvaluateCase {
 
     private void checkVirusStatus(int time) {
 
-        LOGGER.debug("Changing virus status for id: {}", p.id());
+        LOGGER.trace("Changing virus status for id: {}", p.id());
 
         p.setNextVirusStatusChange(-1);
         switch (p.status()) {
@@ -111,32 +112,32 @@ public class EvaluateCase {
 
 
     private Set<Integer> checkAlertStatus(int time) {
-        LOGGER.debug("Changing alert status for id: {}", p.id());
+        LOGGER.trace("Changing alert status for id: {}", p.id());
 
         p.setNextAlertStatusChange(-1);
         switch (p.alertStatus()) {
 
             case TESTED_POSITIVE:
-                LOGGER.warn("user {} has tested positive", p.id());
+                LOGGER.trace("user {} has tested positive", p.id());
                 return alertAllContacts();
             case TESTED:
                 // TODO: maybe include flag for has had virus?
                 // TODO: should a recovered person test +ve?
                 if (p.isInfectious() || p.status() == DEAD) {
-                    LOGGER.warn("user {} has tested positive", p.id());
+                    LOGGER.trace("user {} has tested positive", p.id());
                     updateAlertStatus(TESTED_POSITIVE, time);
                 } else {
-                    LOGGER.warn("user {} has tested negative", p.id());
+                    LOGGER.trace("user {} has tested negative", p.id());
                     updateAlertStatus(NONE, time);
                 }
 
                 break;
             case REQUESTED_TEST:
-                LOGGER.warn("user {} has requested test", p.id());
+                LOGGER.trace("user {} has requested test", p.id());
                 updateAlertStatus(TESTED, time);
                 break;
             case ALERTED:
-                LOGGER.warn("user {} has been alerted", p.id());
+                LOGGER.trace("user {} has been alerted", p.id());
                 updateAlertStatus(REQUESTED_TEST, time);
                 break;
             case NONE:
@@ -147,18 +148,18 @@ public class EvaluateCase {
     }
 
     private Set<Integer> alertAllContacts() {
-        //TODO
+
         Set<Integer> contactIds = new HashSet<>();
+        // add all ids
         for (ContactRecord r : p.contactRecords()) {
             contactIds.add(r.from());
             contactIds.add(r.to());
         }
 
+        // remove self
         contactIds.remove(p.id());
 
-        System.out.println(contactIds);
         return contactIds;
-
 
     }
 
@@ -169,7 +170,7 @@ public class EvaluateCase {
         AlertStatus oldstatus = p.alertStatus();
         p.setAlertStatus(newStatus);
         p.setNextAlertStatusChange(currentTime + time);
-        LOGGER.warn("id: {} alertStatus: {} -> {} at t={}. Current Virus status: {}", p.id(), oldstatus, newStatus, currentTime, p.status());
+        LOGGER.trace("id: {} alertStatus: {} -> {} at t={}. Current Virus status: {}", p.id(), oldstatus, newStatus, currentTime, p.status());
 
     }
 
@@ -184,7 +185,8 @@ public class EvaluateCase {
     }
 
     public void randomExposure(int t) {
-        p.setExposedBy(-1);
+        p.setExposedBy(-2);
+        p.setExposedTime(t);
         if (p.status() == SUSCEPTIBLE) {
             LOGGER.trace("Person with id: {} has been randomly exposed at time {}", p.id(), t);
             updateVirusStatus(EXPOSED, t);

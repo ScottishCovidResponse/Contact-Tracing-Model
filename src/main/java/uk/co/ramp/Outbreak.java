@@ -14,6 +14,10 @@ import uk.co.ramp.people.VirusStatus;
 import uk.co.ramp.record.CmptRecord;
 import uk.co.ramp.record.ImmutableCmptRecord;
 
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.io.Writer;
 import java.util.*;
 
 import static uk.co.ramp.people.AlertStatus.ALERTED;
@@ -76,6 +80,8 @@ public class Outbreak {
         }
     }
 
+    int tab = 0;
+
     private void runToCompletion() {
         int timeLimit = properties.timeLimit();
         int maxContact = contactRecords.keySet().stream().max(Comparator.naturalOrder()).orElseThrow(RuntimeException::new);
@@ -98,8 +104,70 @@ public class Outbreak {
             runToSteadyState(runTime, timeLimit, population);
         }
 
+        outputInfectionData(population);
+
 
     }
+
+    private void outputInfectionData(Map<Integer, Case> population) {
+        List<Case> infections = new ArrayList<>();
+        for (Case c : population.values()) {
+            if (c.status() != SUSCEPTIBLE) {
+                infections.add(c);
+            }
+        }
+
+        infections.sort(Comparator.comparingInt(Case::exposedTime));
+
+        Map<Integer, Set<Integer>> infectors = new HashMap<>();
+
+        for (Case c : infections) {
+            infectors.putIfAbsent(c.exposedBy(), new HashSet<>());
+
+            Set<Integer> var = infectors.get(c.exposedBy());
+
+            var.add(c.id());
+            infectors.put(c.exposedBy(), var);
+        }
+
+        // initial infectees
+        Set<Integer> infectees = infectors.get(-9);
+
+        // randomly infected
+        infectees.addAll(infectors.getOrDefault(-2, Collections.emptySet()));
+
+        List<Integer> target = new ArrayList<>(infectees);
+
+        try (Writer writer = new FileWriter(new File("infectionMap.txt"))) {
+            recurseSet(target, infectors, writer);
+        } catch (IOException e) {
+            LOGGER.error(e.getMessage());
+            // TODO: handle properly
+        }
+
+    }
+
+    private void recurseSet(List<Integer> target, Map<Integer, Set<Integer>> infectors, Writer writer) throws IOException {
+
+        tab++;
+        for (int seed : target) {
+            if (infectors.containsKey(seed)) {
+                List<Integer> newSeeds = new ArrayList<>(infectors.get(seed));
+                String spacer = "   ".repeat(tab - 1);
+                if (tab == 1) {
+                    writer.write("\n");
+                    writer.write(seed + "  ->  " + newSeeds + "\n");
+                } else {
+                    writer.write(spacer + "   ->  " + seed + "   ->  " + newSeeds + "\n");
+                }
+
+                recurseSet(newSeeds, infectors, writer);
+            }
+        }
+
+        tab--;
+    }
+
 
     private boolean runContactData(int maxContact, Map<Integer, Case> population, Map<Integer, List<ContactRecord>> contactRecords, double randomInfectionRate) {
         for (int time = 0; time <= maxContact; time++) {
@@ -115,28 +183,33 @@ public class Outbreak {
             }
 
             for (ContactRecord contacts : todaysContacts) {
-
-                Case potentialSpreader = population.get(contacts.to());
-                Case victim = population.get(contacts.from());
-
-                if (potentialSpreader.alertStatus() != NONE && victim.alertStatus() != NONE) {
-                    if (contacts.weight() < diseaseProperties.exposureThreshold()) {
-
-                        // TODO: Apply behavioural logic here. Use compliance value
-
-                        LOGGER.warn(potentialSpreader.alertStatus() + "   " + victim.alertStatus() + "  " + contacts.weight());
-                        LOGGER.warn("Skipping contact due to threshold");
-                        continue;
-                    }
-                }
-
-                if (potentialSpreader.status() != victim.status()) {
-                    evaluateExposures(population, contacts, time);
-                }
+                evaluateContact(population, time, contacts);
             }
 
         }
         return false;
+    }
+
+    private void evaluateContact(Map<Integer, Case> population, int time, ContactRecord contacts) {
+        Case potentialSpreader = population.get(contacts.to());
+        Case victim = population.get(contacts.from());
+
+        boolean conditionA = potentialSpreader.alertStatus() != NONE && victim.alertStatus() != NONE;
+        boolean conditionB = contacts.weight() < diseaseProperties.exposureThreshold();
+
+
+        if (conditionA && conditionB) {
+
+            // TODO: Apply behavioural logic here. Use compliance value?
+            LOGGER.trace("spreader: {}   victim: {}   weight: {} ", potentialSpreader.alertStatus(), victim.alertStatus(), contacts.weight());
+            LOGGER.trace("Skipping contact due to threshold");
+            return;
+        }
+
+
+        if (potentialSpreader.status() != victim.status()) {
+            evaluateExposures(population, contacts, time);
+        }
     }
 
 
@@ -147,13 +220,13 @@ public class Outbreak {
             updatePopulationState(time, population, 0d);
             logStepResults(population, time);
 
-            Map<VirusStatus, Integer> seirCounts = PopulationGenerator.getCmptCounts(population);
+            Map<VirusStatus, Integer> compartmentCounts = PopulationGenerator.getCmptCounts(population);
 
 
-            boolean exitCondition = seirCounts.get(EXPOSED) == 0 &&
-                    seirCounts.get(EXPOSED_2) == 0 &&
-                    seirCounts.get(INFECTED) == 0 &&
-                    seirCounts.get(INFECTED_SYMP) == 0;
+            boolean exitCondition = compartmentCounts.get(EXPOSED) == 0 &&
+                    compartmentCounts.get(EXPOSED_2) == 0 &&
+                    compartmentCounts.get(INFECTED) == 0 &&
+                    compartmentCounts.get(INFECTED_SYMP) == 0;
 
 
             if (exitCondition) {
@@ -170,7 +243,7 @@ public class Outbreak {
             EvaluateCase e = new EvaluateCase(p, diseaseProperties, rng);
             Set<Integer> alerts = e.checkTime(time);
 
-            if (alerts.size() > 0) alertPopulation(alerts, population, time);
+            if (alerts.isEmpty()) alertPopulation(alerts, population, time);
 
             if (p.status() == SUSCEPTIBLE && randomInfectionRate > 0d && time > 0) {
                 boolean var = rng.nextUniform(0, 1) <= randomInfectionRate;
@@ -208,7 +281,7 @@ public class Outbreak {
         boolean dangerMix = personA.isInfectious() && personB.status() == SUSCEPTIBLE;
 
         if (dangerMix && rng.nextUniform(0, 1) < c.weight() / diseaseProperties.exposureTuning()) {
-            LOGGER.warn("       DANGER MIX");
+            LOGGER.trace("       DANGER MIX");
             EvaluateCase e = new EvaluateCase(personB, diseaseProperties, rng);
             e.updateVirusStatus(EXPOSED, time, personA.id());
         }

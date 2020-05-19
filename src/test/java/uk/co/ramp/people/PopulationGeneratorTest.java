@@ -33,7 +33,7 @@ public class PopulationGeneratorTest {
     }
 
     @Test
-    public void getSEIRCounts() {
+    public void getCompartmentCounts() {
 
         Random rand = new Random();
         int s = rand.nextInt(100);
@@ -261,8 +261,8 @@ public class PopulationGeneratorTest {
 
         Assert.assertEquals(populationSize, men + women);
 
-        Assert.assertEquals(0.5, men / (double) populationSize, 1d / Math.sqrt(populationSize));
-        Assert.assertEquals(0.5, women / (double) populationSize, 1d / Math.sqrt(populationSize));
+        Assert.assertEquals(0.5, men / (double) populationSize, 0.15);
+        Assert.assertEquals(0.5, women / (double) populationSize, 0.15);
 
 
     }

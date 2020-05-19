@@ -51,18 +51,6 @@ public class ContactReaderTest {
         assertThat(dailyContactRecords.get(0)).containsExactly(record1, record2);
     }
 
-    @Test
-    public void testDayLimit() throws IOException {
-        String csvOverDayLimit = "" +
-                "\"time\",\"from\",\"to\",\"weight\"\n" +
-                "1,9,10,6.7\n" +
-                "102,8,9,8.2\n";
-        StringReader stringReader = new StringReader(csvOverDayLimit);
-
-        Map<Integer, List<ContactRecord>> dailyContactRecords = new ContactReader().read(stringReader, properties);
-
-        assertThat(dailyContactRecords).containsOnlyKeys(0);
-    }
 
     @Test
     public void testPersonLimit() throws IOException {

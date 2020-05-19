@@ -13,7 +13,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 public class CmptWriterTest {
 
-    private final List<CmptRecord> seirRecordList = List.of(
+    private final List<CmptRecord> compartmentRecordList = List.of(
             ImmutableCmptRecord.builder()
                     .time(0)
                     .s(1)
@@ -39,7 +39,7 @@ public class CmptWriterTest {
     @Test
     public void write() throws IOException {
         StringWriter stringWriter = new StringWriter();
-        new SeirWriter().write(stringWriter, seirRecordList);
+        new CompartmentWriter().write(stringWriter, compartmentRecordList);
 
         String expectedCsvString = "\"time\",\"s\",\"e1\",\"e2\",\"ia\",\"is\",\"r\",\"d\"\n" +
                 "0,1,2,3,4,5,6,7\n" +

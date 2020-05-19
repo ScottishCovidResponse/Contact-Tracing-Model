@@ -19,6 +19,10 @@ public class DiseasePropertiesReaderTest {
             "   'maxTimeToInfected': 14.0, " +
             "   'maxTimeToFinalState': 14.0, " +
             "   'exposureTuning': 160, " +
+            "   'meanTestTime': 1, " +
+            "   'maxTestTime': 3, " +
+            "   'testAccuracy': 0.95, " +
+            "   'exposureThreshold': 10, " +
             "   'randomInfectionRate': 0.01, " +
             "   'progressionDistribution':  'FLAT' }";
 
@@ -38,6 +42,10 @@ public class DiseasePropertiesReaderTest {
                 .maxTimeToInfected(14.0)
                 .maxTimeToFinalState(14.0)
                 .randomInfectionRate(0.01)
+                .meanTestTime(1)
+                .maxTestTime(3)
+                .testAccuracy(0.95)
+                .exposureThreshold(10)
                 .progressionDistribution(FLAT)
                 .build();
         assertThat(actualDiseaseProperties).isEqualTo(expectedDiseaseProperties);

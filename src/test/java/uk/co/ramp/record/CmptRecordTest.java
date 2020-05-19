@@ -126,15 +126,15 @@ public class CmptRecordTest {
     }
 
     private CmptRecord useSecondContructor() {
-        Map<VirusStatus, Integer> seirCounts = new HashMap<>();
-        seirCounts.put(SUSCEPTIBLE, s);
-        seirCounts.put(EXPOSED, e1);
-        seirCounts.put(EXPOSED_2, e2);
-        seirCounts.put(INFECTED, i1);
-        seirCounts.put(INFECTED_SYMP, i2);
-        seirCounts.put(RECOVERED, r);
-        seirCounts.put(DEAD, d);
+        Map<VirusStatus, Integer> compartmentCounts = new HashMap<>();
+        compartmentCounts.put(SUSCEPTIBLE, s);
+        compartmentCounts.put(EXPOSED, e1);
+        compartmentCounts.put(EXPOSED_2, e2);
+        compartmentCounts.put(INFECTED, i1);
+        compartmentCounts.put(INFECTED_SYMP, i2);
+        compartmentCounts.put(RECOVERED, r);
+        compartmentCounts.put(DEAD, d);
 
-        return CmptRecord.of(time, seirCounts);
+        return CmptRecord.of(time, compartmentCounts);
     }
 }
