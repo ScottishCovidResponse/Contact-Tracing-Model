@@ -25,6 +25,11 @@ import java.util.Optional;
 @SpringBootConfiguration
 public class AppConfig {
 
+    private static final String RUN_SETTINGS_LOCATION = "input/runSettings.json";
+    private static final String DISEASE_SETTINGS_LOCATION = "input/diseaseSettings.json";
+    private static final String POPULATION_SETTINGS_LOCATION = "input/populationSettings.json";
+
+
     private static final Logger LOGGER = LogManager.getLogger(AppConfig.class);
 
     public CommandLineRunner commandLineRunner(ApplicationContext ctx) {
@@ -43,21 +48,21 @@ public class AppConfig {
 
     @Bean
     public StandardProperties standardProperties() throws IOException {
-        try (Reader reader = new FileReader(new File("input/runSettings.json"))) {
+        try (Reader reader = new FileReader(new File(RUN_SETTINGS_LOCATION))) {
             return new StandardPropertiesReader().read(reader);
         }
     }
 
     @Bean
     public DiseaseProperties diseaseProperties() throws IOException {
-        try (Reader reader = new FileReader(new File("input/diseaseSettings.json"))) {
+        try (Reader reader = new FileReader(new File(DISEASE_SETTINGS_LOCATION))) {
             return new DiseasePropertiesReader().read(reader);
         }
     }
 
     @Bean
     public PopulationProperties populationProperties() throws IOException {
-        try (Reader reader = new FileReader(new File("input/populationSettings.json"))) {
+        try (Reader reader = new FileReader(new File(POPULATION_SETTINGS_LOCATION))) {
             return new PopulationPropertiesReader().read(reader);
         }
     }

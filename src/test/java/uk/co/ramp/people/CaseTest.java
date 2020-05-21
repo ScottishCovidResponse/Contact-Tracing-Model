@@ -3,6 +3,7 @@ package uk.co.ramp.people;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
+import uk.co.ramp.TestUtils;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -13,6 +14,8 @@ import static org.hamcrest.core.StringContains.containsString;
 public class CaseTest {
 
     private Case person;
+    private final Random random = TestUtils.getRandom();
+
 
     @Before
     public void setup() {
@@ -22,14 +25,14 @@ public class CaseTest {
 
     @Test
     public void validTransitions() {
-        Random r = new Random();
+
 
         for (int i = 0; i < 100; i++) {
             while (person.status() != VirusStatus.DEAD && person.status() != VirusStatus.RECOVERED) {
                 VirusStatus currentStatus = person.status();
                 List<VirusStatus> validOptions = currentStatus.getValidTransitions();
                 int size = validOptions.size();
-                VirusStatus next = validOptions.get(r.nextInt(size));
+                VirusStatus next = validOptions.get(random.nextInt(size));
                 person.setStatus(next);
 
                 Assert.assertEquals(next, person.status());
@@ -39,8 +42,6 @@ public class CaseTest {
 
     @Test
     public void invalidTransitions() {
-        Random r = new Random();
-
 
         for (int i = 0; i < 10; i++) {
 
@@ -49,7 +50,7 @@ public class CaseTest {
             List<VirusStatus> invalidOptions = new ArrayList<>(List.of(VirusStatus.values()));
             validOptions.forEach(invalidOptions::remove);
             int size = invalidOptions.size();
-            VirusStatus next = invalidOptions.get(r.nextInt(size));
+            VirusStatus next = invalidOptions.get(random.nextInt(size));
 
             try {
                 person.setStatus(next);

@@ -11,7 +11,7 @@ import java.util.Map;
 public enum AlertStatus {
 
     TESTED_POSITIVE,
-    TESTED,
+    AWAITING_RESULT,
     REQUESTED_TEST,
     ALERTED,
     NONE;
@@ -24,9 +24,9 @@ public enum AlertStatus {
         validTransitions = new EnumMap<>(AlertStatus.class);
         validTransitions.put(NONE, List.of(ALERTED, REQUESTED_TEST));
         validTransitions.put(ALERTED, List.of(REQUESTED_TEST));
-        validTransitions.put(REQUESTED_TEST, List.of(TESTED));
+        validTransitions.put(REQUESTED_TEST, List.of(AWAITING_RESULT));
         //TODO: get clarification here
-        validTransitions.put(TESTED, List.of(TESTED_POSITIVE, ALERTED, NONE));
+        validTransitions.put(AWAITING_RESULT, List.of(TESTED_POSITIVE, ALERTED, NONE));
         validTransitions.put(TESTED_POSITIVE, Collections.emptyList());
     }
 

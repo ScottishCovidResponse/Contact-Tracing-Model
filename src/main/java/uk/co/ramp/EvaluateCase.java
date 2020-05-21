@@ -72,17 +72,17 @@ public class EvaluateCase {
 
     }
 
-    public Set<Integer> checkTime(int time) {
+    public Set<Integer> checkActionsAtTimestep(int time) {
         Set<Integer> alerts = new HashSet<>();
-        if (p.nextVirusStatusChange() == time) checkVirusStatus(time);
-        if (p.nextAlertStatusChange() == time) alerts = checkAlertStatus(time);
+        if (p.nextVirusStatusChange() == time) checkUpdateVirusStatus(time);
+        if (p.nextAlertStatusChange() == time) alerts = checkUpdateAlertStatus(time);
 
         return alerts;
 
 
     }
 
-    private void checkVirusStatus(int time) {
+    private void checkUpdateVirusStatus(int time) {
 
         LOGGER.trace("Changing virus status for id: {}", p.id());
 
@@ -111,7 +111,7 @@ public class EvaluateCase {
     }
 
 
-    private Set<Integer> checkAlertStatus(int time) {
+    private Set<Integer> checkUpdateAlertStatus(int time) {
         LOGGER.trace("Changing alert status for id: {}", p.id());
 
         p.setNextAlertStatusChange(-1);
@@ -120,7 +120,7 @@ public class EvaluateCase {
             case TESTED_POSITIVE:
                 LOGGER.trace("user {} has tested positive", p.id());
                 return alertAllContacts();
-            case TESTED:
+            case AWAITING_RESULT:
                 // TODO: maybe include flag for has had virus?
                 // TODO: should a recovered person test +ve?
                 if (p.isInfectious() || p.status() == DEAD) {
@@ -134,7 +134,7 @@ public class EvaluateCase {
                 break;
             case REQUESTED_TEST:
                 LOGGER.trace("user {} has requested test", p.id());
-                updateAlertStatus(TESTED, time);
+                updateAlertStatus(AWAITING_RESULT, time);
                 break;
             case ALERTED:
                 LOGGER.trace("user {} has been alerted", p.id());

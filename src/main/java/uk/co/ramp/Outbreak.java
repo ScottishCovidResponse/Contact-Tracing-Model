@@ -7,6 +7,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import uk.co.ramp.contact.ContactRecord;
 import uk.co.ramp.io.DiseaseProperties;
+import uk.co.ramp.io.InfectionMapException;
 import uk.co.ramp.io.StandardProperties;
 import uk.co.ramp.people.Case;
 import uk.co.ramp.people.PopulationGenerator;
@@ -28,11 +29,12 @@ import static uk.co.ramp.people.VirusStatus.*;
 public class Outbreak {
 
     private static final Logger LOGGER = LogManager.getLogger(Outbreak.class);
+    public static final String INFECTION_MAP = "infectionMap.txt";
 
     private StandardProperties properties;
     private DiseaseProperties diseaseProperties;
     private RandomDataGenerator rng;
-
+    private int tab = 0;
     private Map<Integer, Case> population;
     private Map<Integer, List<ContactRecord>> contactRecords;
     private final Map<Integer, CmptRecord> records = new HashMap<>();
@@ -80,7 +82,7 @@ public class Outbreak {
         }
     }
 
-    int tab = 0;
+
 
     private void runToCompletion() {
         int timeLimit = properties.timeLimit();
@@ -131,18 +133,20 @@ public class Outbreak {
         }
 
         // initial infectees
-        Set<Integer> infectees = infectors.get(-9);
+        Set<Integer> infectees = infectors.get(Case.getDefault());
 
         // randomly infected
-        infectees.addAll(infectors.getOrDefault(-2, Collections.emptySet()));
+        infectees.addAll(infectors.getOrDefault(Case.getRandomInfection(), Collections.emptySet()));
 
         List<Integer> target = new ArrayList<>(infectees);
 
-        try (Writer writer = new FileWriter(new File("infectionMap.txt"))) {
+        try (Writer writer = new FileWriter(new File(INFECTION_MAP))) {
             recurseSet(target, infectors, writer);
         } catch (IOException e) {
-            LOGGER.error(e.getMessage());
-            // TODO: handle properly
+            String message = "An error occurred while writing the map file: " + e.getMessage();
+            LOGGER.error(message);
+            throw new InfectionMapException(message);
+
         }
 
     }
@@ -241,7 +245,7 @@ public class Outbreak {
 
         for (Case p : population.values()) {
             EvaluateCase e = new EvaluateCase(p, diseaseProperties, rng);
-            Set<Integer> alerts = e.checkTime(time);
+            Set<Integer> alerts = e.checkActionsAtTimestep(time);
 
             if (alerts.isEmpty()) alertPopulation(alerts, population, time);
 

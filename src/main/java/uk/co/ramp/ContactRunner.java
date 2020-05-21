@@ -24,6 +24,7 @@ import java.util.Map;
 public class ContactRunner implements ApplicationContextAware {
 
     private static final Logger LOGGER = LogManager.getLogger(ContactRunner.class);
+    public static final String COMPARTMENTS_CSV = "Compartments.csv";
 
     private StandardProperties runProperties;
     private ApplicationContext ctx;
@@ -50,7 +51,7 @@ public class ContactRunner implements ApplicationContextAware {
 
             Map<Integer, CmptRecord> records = infection.propagate();
 
-            writeCompartments(new ArrayList<>(records.values()), new File("Compartments.csv"));
+            writeCompartments(new ArrayList<>(records.values()), new File(COMPARTMENTS_CSV));
         }
 
     }

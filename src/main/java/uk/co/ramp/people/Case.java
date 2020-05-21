@@ -19,15 +19,26 @@ public class Case {
     private int nextVirusStatusChange;
     private int nextAlertStatusChange;
 
+    private static final int DEFAULT = -9;
+    private static final int RANDOM_INFECTION = -2;
+
     public Case(final Human human) {
         this.human = human;
         status = SUSCEPTIBLE;
         alertStatus = NONE;
         contactRecords = new HashSet<>();
-        exposedBy = -9;
+        exposedBy = DEFAULT;
         exposedTime = -1;
         nextVirusStatusChange = -1;
         nextAlertStatusChange = -1;
+    }
+
+    public static int getDefault() {
+        return DEFAULT;
+    }
+
+    public static int getRandomInfection() {
+        return RANDOM_INFECTION;
     }
 
     public int exposedTime() {
