@@ -19,7 +19,8 @@ public class Case {
     private int nextVirusStatusChange;
     private int nextAlertStatusChange;
 
-    private static final int DEFAULT = -9;
+    private static final int DEFAULT = -1;
+    private static final int INITIAL = -3;
     private static final int RANDOM_INFECTION = -2;
 
     public Case(final Human human) {
@@ -39,6 +40,10 @@ public class Case {
 
     public static int getRandomInfection() {
         return RANDOM_INFECTION;
+    }
+
+    public static int getInitial() {
+        return INITIAL;
     }
 
     public int exposedTime() {

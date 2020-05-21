@@ -77,7 +77,7 @@ public class Outbreak {
         for (Integer id : infectedIds) {
 
             EvaluateCase evaluateCase = new EvaluateCase(population.get(id), diseaseProperties, rng);
-            evaluateCase.updateVirusStatus(EXPOSED, 0);
+            evaluateCase.updateVirusStatus(EXPOSED, 0, Case.getInitial());
 
         }
     }
@@ -133,7 +133,7 @@ public class Outbreak {
         }
 
         // initial infectees
-        Set<Integer> infectees = infectors.get(Case.getDefault());
+        Set<Integer> infectees = infectors.get(Case.getInitial());
 
         // randomly infected
         infectees.addAll(infectors.getOrDefault(Case.getRandomInfection(), Collections.emptySet()));

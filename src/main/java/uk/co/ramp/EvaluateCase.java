@@ -9,6 +9,7 @@ import uk.co.ramp.people.AlertStatus;
 import uk.co.ramp.people.Case;
 import uk.co.ramp.people.InvalidStatusTransitionException;
 import uk.co.ramp.people.VirusStatus;
+import uk.co.ramp.utilities.ForbiddenAccessException;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -27,9 +28,17 @@ public class EvaluateCase {
         this.p = p;
         this.properties = diseaseProperties;
         this.rng = randomDataGenerator;
-
     }
 
+    public void initialExposure(VirusStatus newStatus, int currentTime) {
+        if (currentTime == 0) {
+            updateVirusStatus(newStatus, Case.getDefault(), Case.getInitial());
+        } else {
+            String message = "Unable to set an initial exposure at t > 0";
+            LOGGER.error(message);
+            throw new ForbiddenAccessException(message);
+        }
+    }
 
     public void updateVirusStatus(VirusStatus newStatus, int currentTime, int exposedBy) {
         p.setExposedBy(exposedBy);
@@ -37,7 +46,7 @@ public class EvaluateCase {
         updateVirusStatus(newStatus, currentTime);
     }
 
-    public void updateVirusStatus(VirusStatus newStatus, int currentTime) {
+    private void updateVirusStatus(VirusStatus newStatus, int currentTime) {
 
         int timeToNextChange;
         double mean;
@@ -65,7 +74,7 @@ public class EvaluateCase {
             timeToNextChange = getDistributionValue(mean, max);
             p.setNextVirusStatusChange(currentTime + timeToNextChange);
         } else {
-            p.setNextVirusStatusChange(-1);
+            p.setNextVirusStatusChange(Case.getDefault());
         }
 
         p.setStatus(newStatus);
@@ -78,8 +87,6 @@ public class EvaluateCase {
         if (p.nextAlertStatusChange() == time) alerts = checkUpdateAlertStatus(time);
 
         return alerts;
-
-
     }
 
     private void checkUpdateVirusStatus(int time) {
