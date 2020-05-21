@@ -60,14 +60,9 @@ public class EvaluateCase {
                 mean = properties.meanTimeToInfected();
                 max = properties.maxTimeToInfected();
                 break;
-            case INFECTED:
-            case INFECTED_SYMP:
+            default:
                 mean = properties.meanTimeToFinalState();
                 max = properties.maxTimeToFinalState();
-                break;
-            default:
-                mean = 0;
-                max = 0;
         }
 
         if (newStatus != DEAD && newStatus != RECOVERED) {
@@ -91,8 +86,6 @@ public class EvaluateCase {
 
     private void checkUpdateVirusStatus(int time) {
 
-        LOGGER.trace("Changing virus status for id: {}", p.id());
-
         p.setNextVirusStatusChange(-1);
         switch (p.status()) {
             case EXPOSED:
@@ -101,13 +94,13 @@ public class EvaluateCase {
             case EXPOSED_2:
                 VirusStatus status = determineInfection(p);
                 updateVirusStatus(status, time);
+                if (status == INFECTED_SYMP) updateAlertStatus(REQUESTED_TEST, time);
                 break;
             case INFECTED:
                 updateVirusStatus(RECOVERED, time);
                 break;
             case INFECTED_SYMP:
                 status = determineOutcome(p);
-                updateAlertStatus(REQUESTED_TEST, time);
                 updateVirusStatus(status, time);
                 break;
             case SUSCEPTIBLE:
@@ -125,12 +118,13 @@ public class EvaluateCase {
         switch (p.alertStatus()) {
 
             case TESTED_POSITIVE:
+                // TODO: at present the patient doesn't move from here.. should they go to immune after some time?
                 LOGGER.trace("user {} has tested positive", p.id());
                 return alertAllContacts();
             case AWAITING_RESULT:
                 // TODO: maybe include flag for has had virus?
                 // TODO: should a recovered person test +ve?
-                if (p.isInfectious() || p.status() == DEAD) {
+                if (p.wasInfectious()) {
                     LOGGER.trace("user {} has tested positive", p.id());
                     updateAlertStatus(TESTED_POSITIVE, time);
                 } else {
@@ -140,14 +134,17 @@ public class EvaluateCase {
 
                 break;
             case REQUESTED_TEST:
-                LOGGER.trace("user {} has requested test", p.id());
+                LOGGER.trace("user {} is awaiting test result", p.id());
                 updateAlertStatus(AWAITING_RESULT, time);
+                p.setWasInfectious(p.isInfectious());
                 break;
             case ALERTED:
-                LOGGER.trace("user {} has been alerted", p.id());
                 updateAlertStatus(REQUESTED_TEST, time);
+                LOGGER.trace("user {} has requested a test. Current Status: {}-{}", p.id(), p.status(), p.alertStatus());
                 break;
             case NONE:
+                LOGGER.trace("user {} has been alerted. Current Status: {}-{}", p.id(), p.status(), p.alertStatus());
+                updateAlertStatus(ALERTED, time);
                 break;
         }
 
@@ -166,6 +163,7 @@ public class EvaluateCase {
         // remove self
         contactIds.remove(p.id());
 
+        LOGGER.trace("Alerting " + contactIds);
         return contactIds;
 
     }
@@ -183,12 +181,12 @@ public class EvaluateCase {
 
     private VirusStatus determineOutcome(Case p) {
         //TODO add real logic
-        return p.health() > 0.3 ? RECOVERED : DEAD;
+        return p.health() > rng.nextUniform(0, 1) ? RECOVERED : DEAD;
     }
 
     private VirusStatus determineInfection(Case p) {
         //TODO add real logic
-        return p.health() > 0.5 ? INFECTED : INFECTED_SYMP;
+        return p.health() > rng.nextUniform(0, 1) ? INFECTED : INFECTED_SYMP;
     }
 
     public void randomExposure(int t) {

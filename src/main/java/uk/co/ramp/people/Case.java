@@ -18,6 +18,7 @@ public class Case {
     private int exposedTime;
     private int nextVirusStatusChange;
     private int nextAlertStatusChange;
+    private boolean wasInfectious;
 
     private static final int DEFAULT = -1;
     private static final int INITIAL = -3;
@@ -32,6 +33,15 @@ public class Case {
         exposedTime = -1;
         nextVirusStatusChange = -1;
         nextAlertStatusChange = -1;
+        wasInfectious = false;
+    }
+
+    public boolean wasInfectious() {
+        return wasInfectious;
+    }
+
+    public void setWasInfectious(boolean wasInfectious) {
+        this.wasInfectious = wasInfectious;
     }
 
     public static int getDefault() {

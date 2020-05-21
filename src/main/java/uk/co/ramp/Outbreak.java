@@ -21,7 +21,6 @@ import java.io.IOException;
 import java.io.Writer;
 import java.util.*;
 
-import static uk.co.ramp.people.AlertStatus.ALERTED;
 import static uk.co.ramp.people.AlertStatus.NONE;
 import static uk.co.ramp.people.VirusStatus.*;
 
@@ -243,17 +242,19 @@ public class Outbreak {
 
     private void updatePopulationState(int time, Map<Integer, Case> population, double randomInfectionRate) {
 
+        Set<Integer> alerts = new HashSet<>();
+
         for (Case p : population.values()) {
             EvaluateCase e = new EvaluateCase(p, diseaseProperties, rng);
-            Set<Integer> alerts = e.checkActionsAtTimestep(time);
-
-            if (alerts.isEmpty()) alertPopulation(alerts, population, time);
+            alerts.addAll(e.checkActionsAtTimestep(time));
 
             if (p.status() == SUSCEPTIBLE && randomInfectionRate > 0d && time > 0) {
                 boolean var = rng.nextUniform(0, 1) <= randomInfectionRate;
                 if (var) e.randomExposure(time);
             }
         }
+
+        if (!alerts.isEmpty()) alertPopulation(alerts, population, time);
     }
 
     private void alertPopulation(Set<Integer> alerts, Map<Integer, Case> population, int time) {
@@ -262,7 +263,7 @@ public class Outbreak {
             Case potentialInfected = population.get(id);
             if (potentialInfected.alertStatus() == NONE && potentialInfected.status() != DEAD) {
                 potentialInfected.setNextAlertStatusChange(time + 1);
-                potentialInfected.setAlertStatus(ALERTED);
+                LOGGER.trace("ALERTED: {} - {} - {} ", id, potentialInfected.status(), potentialInfected.alertStatus());
             }
         }
 
