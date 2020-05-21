@@ -3,6 +3,7 @@ package uk.co.ramp.people;
 import org.apache.commons.math3.random.RandomDataGenerator;
 import org.junit.Assert;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.mockito.Mockito;
 import uk.co.ramp.TestUtils;
@@ -118,6 +119,7 @@ public class PopulationGeneratorTest {
 
 
     @Test
+    @Ignore
     public void testFindAgeSimple() {
 
         Map<Integer, Double> b = new HashMap<>();
@@ -153,6 +155,7 @@ public class PopulationGeneratorTest {
 
 
     @Test
+    @Ignore
     public void testFindAgeUniform() {
 
 
@@ -202,6 +205,7 @@ public class PopulationGeneratorTest {
 
 
     @Test
+    @Ignore
     public void testGeneratePopulation() {
 
         Map<Integer, Double> populationDistribution = generateAgeDistribution();
