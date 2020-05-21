@@ -2,6 +2,7 @@ package uk.co.ramp.utilities;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.springframework.stereotype.Service;
 import uk.co.ramp.contact.ContactRecord;
 import uk.co.ramp.contact.ImmutableContactRecord;
 import uk.co.ramp.io.StandardProperties;
@@ -14,6 +15,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+@Service
 public class ContactReader {
     private static final Logger LOGGER = LogManager.getLogger(ContactReader.class);
 

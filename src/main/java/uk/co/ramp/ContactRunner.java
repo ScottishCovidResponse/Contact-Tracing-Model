@@ -33,37 +33,8 @@ public class ContactRunner implements ApplicationContextAware {
     }
 
     @Autowired
-    public ContactRunner(StandardProperties runProperties) {
-        this.runProperties = runProperties;
-    }
-
-    public void run() throws IOException {
-
-        Map<Integer, Case> population = ctx.getBean(PopulationGenerator.class).generate();
-        try (Reader reader = new FileReader(runProperties.contactsFile())) {
-            Map<Integer, List<ContactRecord>> contactRecords = new ContactReader().read(reader, runProperties);
-
-            LOGGER.info("Generated Population and Parsed Contact data");
-
-            Outbreak infection = ctx.getBean(Outbreak.class);
-            infection.setContactRecords(contactRecords);
-            infection.setPopulation(population);
-
-            Map<Integer, CmptRecord> records = infection.propagate();
-
-            writeCompartments(new ArrayList<>(records.values()), new File(COMPARTMENTS_CSV));
-        }
-
-    }
-
-    void writeCompartments(List<CmptRecord> cmptRecords, File file) {
-        try (FileWriter fw = new FileWriter(file);
-             BufferedWriter bw = new BufferedWriter(fw)) {
-            new CompartmentWriter().write(bw, cmptRecords);
-        } catch (IOException e) {
-            LOGGER.fatal("Could not write Compartments");
-            throw new CsvException(e.getMessage());
-        }
+    public void setRunProperties(StandardProperties standardProperties) {
+        this.runProperties = standardProperties;
     }
 
     @Override
@@ -71,5 +42,43 @@ public class ContactRunner implements ApplicationContextAware {
     public void setApplicationContext(ApplicationContext applicationContext) {
         this.ctx = applicationContext;
     }
+
+    public void run() throws IOException {
+
+        Map<Integer, Case> population = ctx.getBean(PopulationGenerator.class).generate();
+        try (Reader reader = new FileReader(runProperties.contactsFile())) {
+
+            ContactReader contactReader = ctx.getBean(ContactReader.class);
+
+            Map<Integer, List<ContactRecord>> contactRecords = contactReader.read(reader, runProperties);
+
+            LOGGER.info("Generated Population and Parsed Contact data");
+
+            Outbreak infection = ctx.getBean(Outbreak.class);
+            infection.setContactRecords(contactRecords);
+            infection.setPopulation(population);
+
+            LOGGER.info("Initialised Outbreak");
+
+            Map<Integer, CmptRecord> records = infection.propagate();
+
+            LOGGER.info("Writing Compartment Records");
+            writeCompartments(new ArrayList<>(records.values()), new File(COMPARTMENTS_CSV));
+            LOGGER.info("Completed. Tidying up.");
+        }
+
+    }
+
+    void writeCompartments(List<CmptRecord> cmptRecords, File file) {
+        try (FileWriter fw = new FileWriter(file);
+             BufferedWriter bw = new BufferedWriter(fw)) {
+            ctx.getBean(CompartmentWriter.class).write(bw, cmptRecords);
+        } catch (IOException e) {
+            String message = "An IO error occured when trying to write to " + COMPARTMENTS_CSV + ". Please ensure the file is not locked or open.";
+            LOGGER.fatal(message);
+            throw new CsvException(message);
+        }
+    }
+
 
 }

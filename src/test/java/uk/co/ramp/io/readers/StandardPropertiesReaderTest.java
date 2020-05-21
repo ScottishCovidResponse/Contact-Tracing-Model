@@ -27,7 +27,7 @@ public class StandardPropertiesReaderTest {
     }
 
     @Test
-    public void testRead() {
+    public void testRead() throws IOException {
         var underlyingReader = new BufferedReader(new StringReader(mockStandardProperties));
         StandardProperties standardProperties = standardPropertiesReader.read(underlyingReader);
 

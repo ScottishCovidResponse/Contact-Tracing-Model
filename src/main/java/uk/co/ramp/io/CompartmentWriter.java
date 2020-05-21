@@ -1,5 +1,6 @@
 package uk.co.ramp.io;
 
+import org.springframework.stereotype.Service;
 import uk.co.ramp.io.csv.CsvWriter;
 import uk.co.ramp.record.CmptRecord;
 import uk.co.ramp.record.ImmutableCmptRecord;
@@ -9,6 +10,7 @@ import java.io.Writer;
 import java.util.List;
 import java.util.stream.Collectors;
 
+@Service
 public class CompartmentWriter {
     public void write(Writer writer, List<CmptRecord> records) throws IOException {
         List<ImmutableCmptRecord> wrappedImmutableRecords = records.stream()

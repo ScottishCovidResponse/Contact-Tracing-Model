@@ -4,9 +4,7 @@ import org.apache.commons.math3.random.RandomDataGenerator;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringBootConfiguration;
-import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
 import uk.co.ramp.io.DiseaseProperties;
 import uk.co.ramp.io.PopulationProperties;
@@ -15,11 +13,7 @@ import uk.co.ramp.io.readers.DiseasePropertiesReader;
 import uk.co.ramp.io.readers.PopulationPropertiesReader;
 import uk.co.ramp.io.readers.StandardPropertiesReader;
 
-import java.io.File;
-import java.io.FileReader;
-import java.io.IOException;
-import java.io.Reader;
-import java.util.Arrays;
+import java.io.*;
 import java.util.Optional;
 
 @SpringBootConfiguration
@@ -32,53 +26,71 @@ public class AppConfig {
 
     private static final Logger LOGGER = LogManager.getLogger(AppConfig.class);
 
-    public CommandLineRunner commandLineRunner(ApplicationContext ctx) {
-        return args -> {
-
-            LOGGER.trace("Let's inspect the beans provided by Spring Boot:");
-
-            String[] beanNames = ctx.getBeanDefinitionNames();
-            Arrays.sort(beanNames);
-            for (String beanName : beanNames) {
-                LOGGER.trace(beanName);
-            }
-        };
-    }
-
 
     @Bean
-    public StandardProperties standardProperties() throws IOException {
-        try (Reader reader = new FileReader(new File(RUN_SETTINGS_LOCATION))) {
+    public StandardProperties standardProperties() throws ConfigurationException {
+        try (Reader reader = getReader(RUN_SETTINGS_LOCATION)) {
             return new StandardPropertiesReader().read(reader);
+        } catch (IOException e) {
+            String message = "An error occurred while parsing the run properties at " + RUN_SETTINGS_LOCATION;
+            LOGGER.error(message);
+            throw new ConfigurationException(message, e);
         }
     }
 
     @Bean
-    public DiseaseProperties diseaseProperties() throws IOException {
-        try (Reader reader = new FileReader(new File(DISEASE_SETTINGS_LOCATION))) {
+    public DiseaseProperties diseaseProperties() throws ConfigurationException {
+        try (Reader reader = getReader(DISEASE_SETTINGS_LOCATION)) {
             return new DiseasePropertiesReader().read(reader);
+        } catch (IOException e) {
+            String message = "An error occurred while parsing the disease properties at " + DISEASE_SETTINGS_LOCATION;
+            LOGGER.error(message);
+            throw new ConfigurationException(message, e);
         }
     }
 
     @Bean
-    public PopulationProperties populationProperties() throws IOException {
-        try (Reader reader = new FileReader(new File(POPULATION_SETTINGS_LOCATION))) {
+    public PopulationProperties populationProperties() throws ConfigurationException {
+        try (Reader reader = getReader(POPULATION_SETTINGS_LOCATION)) {
             return new PopulationPropertiesReader().read(reader);
+        } catch (IOException e) {
+            String message = "An error occurred while parsing the population properties at " + POPULATION_SETTINGS_LOCATION;
+            LOGGER.error(message);
+            throw new ConfigurationException(message, e);
         }
     }
 
+    Reader getReader(String input) throws FileNotFoundException {
+        return new FileReader(new File(input));
+    }
+
+
     @Bean
-    public RandomDataGenerator randomDataGenerator(@Value("${cmdLineArgument:#{null}}") Optional<String[]> argumentValue) throws IOException {
+    public RandomDataGenerator randomDataGenerator(@Value("${cmdLineArgument:#{null}}") Optional<String[]> argumentValue) throws ConfigurationException {
         long arg = 0;
-        if (argumentValue.isPresent() && argumentValue.get().length > 0) {
-            arg = Integer.parseInt(argumentValue.get()[0]);
-            LOGGER.info("Additional Seed information provided, the seed will be {}", standardProperties().seed() + arg);
-        } else {
-            LOGGER.info("Additional Seed information not provided, defaulting to {}", standardProperties().seed());
+        try {
+            if (argumentValue.isPresent() && argumentValue.get().length > 0) {
+                arg = Integer.parseInt(argumentValue.get()[0]);
+                LOGGER.info("Additional Seed information provided, the seed will be {}", standardProperties().seed() + arg);
+            } else {
+                LOGGER.info("Additional Seed information not provided, defaulting to {}", standardProperties().seed());
+            }
+            RandomDataGenerator r = new RandomDataGenerator();
+            r.reSeed(standardProperties().seed() + arg);
+            return r;
+        } catch (NullPointerException | ConfigurationException e) {
+            String message = "An error occurred while creating the random generator. This is likely due to an error in Standard Properties";
+            LOGGER.error(message);
+            throw new ConfigurationException(message, e);
+        } catch (NumberFormatException e) {
+            String message = argumentValue
+                    .map(strings -> "An error occurred while creating the random generator. The command line arg, \"" + strings[0] + "\", could not be parsed as an integer.").
+                            orElse("An unknown NumberFormatException occurred while creating the random number generator.");
+            LOGGER.error(message);
+            throw new ConfigurationException(message, e);
+
         }
-        RandomDataGenerator r = new RandomDataGenerator();
-        r.reSeed(standardProperties().seed() + arg);
-        return r;
+
     }
 
 
