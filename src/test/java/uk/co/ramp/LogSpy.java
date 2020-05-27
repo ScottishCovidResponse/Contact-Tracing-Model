@@ -35,9 +35,7 @@ public final class LogSpy extends ExternalResource {
 
     public String getOutput() {
         StringBuilder sb = new StringBuilder();
-        for (ILoggingEvent e : appender.list) {
-            sb.append(e.getMessage());
-        }
+        appender.list.forEach(str -> sb.append(str).append("  "));
         return sb.toString();
     }
 }

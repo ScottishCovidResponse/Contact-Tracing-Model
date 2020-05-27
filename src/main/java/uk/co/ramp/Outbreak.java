@@ -7,18 +7,15 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import uk.co.ramp.contact.ContactRecord;
 import uk.co.ramp.io.DiseaseProperties;
-import uk.co.ramp.io.InfectionMapException;
+import uk.co.ramp.io.InfectionMap;
+import uk.co.ramp.io.LogDailyOutput;
 import uk.co.ramp.io.StandardProperties;
 import uk.co.ramp.people.Case;
 import uk.co.ramp.people.PopulationGenerator;
 import uk.co.ramp.people.VirusStatus;
 import uk.co.ramp.record.CmptRecord;
-import uk.co.ramp.record.ImmutableCmptRecord;
+import uk.co.ramp.utilities.UtilitiesBean;
 
-import java.io.File;
-import java.io.FileWriter;
-import java.io.IOException;
-import java.io.Writer;
 import java.util.*;
 
 import static uk.co.ramp.people.AlertStatus.NONE;
@@ -28,15 +25,18 @@ import static uk.co.ramp.people.VirusStatus.*;
 public class Outbreak {
 
     private static final Logger LOGGER = LogManager.getLogger(Outbreak.class);
-    public static final String INFECTION_MAP = "infectionMap.txt";
 
     private StandardProperties properties;
     private DiseaseProperties diseaseProperties;
     private RandomDataGenerator rng;
-    private int tab = 0;
+
     private Map<Integer, Case> population;
     private Map<Integer, List<ContactRecord>> contactRecords;
+    private final LogDailyOutput outputLog = new LogDailyOutput();
+
     private final Map<Integer, CmptRecord> records = new HashMap<>();
+    private UtilitiesBean utils;
+
 
     public void setPopulation(Map<Integer, Case> population) {
         this.population = population;
@@ -45,7 +45,6 @@ public class Outbreak {
     public void setContactRecords(Map<Integer, List<ContactRecord>> contactRecords) {
         this.contactRecords = contactRecords;
     }
-
 
     @Autowired
     public void setDiseaseProperties(DiseaseProperties diseaseProperties) {
@@ -62,17 +61,22 @@ public class Outbreak {
         this.rng = randomDataGenerator;
     }
 
+    @Autowired
+    public void setUtilitiesBean(UtilitiesBean utils) {
+        this.utils = utils;
+    }
 
     public Map<Integer, CmptRecord> propagate() {
 
         generateInitialInfection();
+        LOGGER.debug("Generated initial outbreak of {} cases", properties.infected());
         runToCompletion();
 
         return records;
     }
 
-    private void generateInitialInfection() {
-        Set<Integer> infectedIds = infectPopulation();
+    void generateInitialInfection() {
+        Set<Integer> infectedIds = chooseInitialInfected();
         for (Integer id : infectedIds) {
 
             EvaluateCase evaluateCase = new EvaluateCase(population.get(id), diseaseProperties, rng);
@@ -82,8 +86,7 @@ public class Outbreak {
     }
 
 
-
-    private void runToCompletion() {
+    void runToCompletion() {
         int timeLimit = properties.timeLimit();
         int maxContact = contactRecords.keySet().stream().max(Comparator.naturalOrder()).orElseThrow(RuntimeException::new);
         int runTime;
@@ -105,79 +108,18 @@ public class Outbreak {
             runToSteadyState(runTime, timeLimit, population);
         }
 
-        outputInfectionData(population);
-
-
-    }
-
-    private void outputInfectionData(Map<Integer, Case> population) {
-        List<Case> infections = new ArrayList<>();
-        for (Case c : population.values()) {
-            if (c.status() != SUSCEPTIBLE) {
-                infections.add(c);
-            }
-        }
-
-        infections.sort(Comparator.comparingInt(Case::exposedTime));
-
-        Map<Integer, Set<Integer>> infectors = new HashMap<>();
-
-        for (Case c : infections) {
-            infectors.putIfAbsent(c.exposedBy(), new HashSet<>());
-
-            Set<Integer> var = infectors.get(c.exposedBy());
-
-            var.add(c.id());
-            infectors.put(c.exposedBy(), var);
-        }
-
-        // initial infectees
-        Set<Integer> infectees = infectors.get(Case.getInitial());
-
-        // randomly infected
-        infectees.addAll(infectors.getOrDefault(Case.getRandomInfection(), Collections.emptySet()));
-
-        List<Integer> target = new ArrayList<>(infectees);
-
-        try (Writer writer = new FileWriter(new File(INFECTION_MAP))) {
-            recurseSet(target, infectors, writer);
-        } catch (IOException e) {
-            String message = "An error occurred while writing the map file: " + e.getMessage();
-            LOGGER.error(message);
-            throw new InfectionMapException(message);
-
-        }
+        // Output map of infections
+        new InfectionMap(population).outputMap();
 
     }
 
-    private void recurseSet(List<Integer> target, Map<Integer, Set<Integer>> infectors, Writer writer) throws IOException {
 
-        tab++;
-        for (int seed : target) {
-            if (infectors.containsKey(seed)) {
-                List<Integer> newSeeds = new ArrayList<>(infectors.get(seed));
-                String spacer = "   ".repeat(tab - 1);
-                if (tab == 1) {
-                    writer.write("\n");
-                    writer.write(seed + "  ->  " + newSeeds + "\n");
-                } else {
-                    writer.write(spacer + "   ->  " + seed + "   ->  " + newSeeds + "\n");
-                }
-
-                recurseSet(newSeeds, infectors, writer);
-            }
-        }
-
-        tab--;
-    }
-
-
-    private boolean runContactData(int maxContact, Map<Integer, Case> population, Map<Integer, List<ContactRecord>> contactRecords, double randomInfectionRate) {
+    boolean runContactData(int maxContact, Map<Integer, Case> population, Map<Integer, List<ContactRecord>> contactRecords, double randomInfectionRate) {
         for (int time = 0; time <= maxContact; time++) {
 
             updatePopulationState(time, population, randomInfectionRate);
             List<ContactRecord> todaysContacts = contactRecords.get(time);
-            int activeCases = logStepResults(population, time);
+            int activeCases = calculateDailyStatistics(population, time);
 
             if (activeCases == 0 && randomInfectionRate == 0d) {
                 LOGGER.info("There are no active cases and the random infection rate is zero.");
@@ -193,7 +135,7 @@ public class Outbreak {
         return false;
     }
 
-    private void evaluateContact(Map<Integer, Case> population, int time, ContactRecord contacts) {
+    void evaluateContact(Map<Integer, Case> population, int time, ContactRecord contacts) {
         Case potentialSpreader = population.get(contacts.to());
         Case victim = population.get(contacts.from());
 
@@ -216,12 +158,12 @@ public class Outbreak {
     }
 
 
-    private void runToSteadyState(int runTime, int timeLimit, Map<Integer, Case> population) {
+    void runToSteadyState(int runTime, int timeLimit, Map<Integer, Case> population) {
         for (int time = runTime; time <= timeLimit; time++) {
 
             // set random infection rate to zero in steady state mode
             updatePopulationState(time, population, 0d);
-            logStepResults(population, time);
+            calculateDailyStatistics(population, time);
 
             Map<VirusStatus, Integer> compartmentCounts = PopulationGenerator.getCmptCounts(population);
 
@@ -240,7 +182,7 @@ public class Outbreak {
         }
     }
 
-    private void updatePopulationState(int time, Map<Integer, Case> population, double randomInfectionRate) {
+    void updatePopulationState(int time, Map<Integer, Case> population, double randomInfectionRate) {
 
         Set<Integer> alerts = new HashSet<>();
 
@@ -257,7 +199,7 @@ public class Outbreak {
         if (!alerts.isEmpty()) alertPopulation(alerts, population, time);
     }
 
-    private void alertPopulation(Set<Integer> alerts, Map<Integer, Case> population, int time) {
+    void alertPopulation(Set<Integer> alerts, Map<Integer, Case> population, int time) {
 
         for (Integer id : alerts) {
             Case potentialInfected = population.get(id);
@@ -269,15 +211,9 @@ public class Outbreak {
 
     }
 
-    private Case getMostSevere(Case personA, Case personB) {
-        int a = personA.status().getVal();
-        int b = personB.status().getVal();
 
-        return a > b ? personA : personB;
-    }
-
-    private void evaluateExposures(Map<Integer, Case> population, ContactRecord c, int time) {
-        Case personA = getMostSevere(population.get(c.to()), population.get(c.from()));
+    void evaluateExposures(Map<Integer, Case> population, ContactRecord c, int time) {
+        Case personA = utils.getMostSevere(population.get(c.to()), population.get(c.from()));
         Case personB = personA == population.get(c.to()) ? population.get(c.from()) : population.get(c.to());
 
         personA.addContact(c);
@@ -293,7 +229,7 @@ public class Outbreak {
     }
 
 
-    private Set<Integer> infectPopulation() {
+    Set<Integer> chooseInitialInfected() {
 
         Set<Integer> infectedIds = new HashSet<>();
         while (infectedIds.size() < properties.infected()) {
@@ -303,41 +239,14 @@ public class Outbreak {
 
     }
 
-    private int logStepResults(Map<Integer, Case> population, int time) {
-        Map<VirusStatus, Integer> stats = PopulationGenerator.getCmptCounts(population);
-
-        if (time == 0) {
-            LOGGER.info("|   Time  |    S    |    E1   |    E2   |   Ia    |    Is   |    R    |    D    |");
-        }
-
-        CmptRecord cmptRecord = ImmutableCmptRecord.builder().time(time).
-                s(stats.get(SUSCEPTIBLE)).
-                e1(stats.get(EXPOSED)).
-                e2(stats.get(EXPOSED_2)).
-                ia(stats.get(INFECTED)).
-                is(stats.get(INFECTED_SYMP)).
-                r(stats.get(RECOVERED)).
-                d(stats.get(DEAD)).build();
-
-
+    int calculateDailyStatistics(Map<Integer, Case> population, int time) {
+        Map<VirusStatus, Integer> stats = utils.getCmptCounts(population);
         int activeCases = stats.get(EXPOSED) + stats.get(EXPOSED_2) + stats.get(INFECTED) + stats.get(INFECTED_SYMP);
 
-        String s = String.format("| %7d | %7d | %7d | %7d | %7d | %7d | %7d | %7d |",
-                cmptRecord.time(),
-                cmptRecord.s(),
-                cmptRecord.e1(),
-                cmptRecord.e2(),
-                cmptRecord.ia(),
-                cmptRecord.is(),
-                cmptRecord.r(),
-                cmptRecord.d());
-
-        LOGGER.info(s);
-
+        CmptRecord cmptRecord = outputLog.log(time, stats);
         records.put(time, cmptRecord);
 
         return activeCases;
-
 
     }
 

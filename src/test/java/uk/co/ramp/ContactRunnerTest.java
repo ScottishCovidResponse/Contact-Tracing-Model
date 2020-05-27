@@ -79,6 +79,15 @@ public class ContactRunnerTest {
 
         runner.run();
 
+
+        Assert.assertThat(logSpy.getOutput(), containsString("Generated Population and Parsed Contact data"));
+        Assert.assertThat(logSpy.getOutput(), containsString("Initialised Outbreak"));
+        Assert.assertThat(logSpy.getOutput(), containsString("Writing Compartment Records"));
+        Assert.assertThat(logSpy.getOutput(), containsString("Completed. Tidying up."));
+
+        System.out.println(logSpy.getOutput());
+
+
     }
 
     @Test(expected = CsvException.class)

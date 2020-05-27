@@ -12,6 +12,7 @@ import uk.co.ramp.io.StandardProperties;
 import uk.co.ramp.io.readers.DiseasePropertiesReader;
 import uk.co.ramp.io.readers.PopulationPropertiesReader;
 import uk.co.ramp.io.readers.StandardPropertiesReader;
+import uk.co.ramp.utilities.UtilitiesBean;
 
 import java.io.*;
 import java.util.Optional;
@@ -91,6 +92,11 @@ public class AppConfig {
 
         }
 
+    }
+
+    @Bean
+    public UtilitiesBean utilitiesBean() {
+        return new UtilitiesBean();
     }
 
 
