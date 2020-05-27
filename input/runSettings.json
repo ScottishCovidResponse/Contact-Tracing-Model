@@ -2,6 +2,7 @@
   "populationSize": 10000,
   "timeLimit": 1000,
   "infected": 1000,
-  "seed": 0,
-  "steadyState": true
+  "seed": 123,
+  "steadyState": true,
+  "contactsFile": "input/homogeneous_contacts.csv"
 }

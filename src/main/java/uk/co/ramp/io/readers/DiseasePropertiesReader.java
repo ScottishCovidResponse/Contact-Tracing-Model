@@ -22,9 +22,17 @@ public class DiseasePropertiesReader {
 
     public void create(Writer writer) {
         DiseaseProperties wrapper = ImmutableDiseaseProperties.builder()
+                .meanTimeToInfectious(3)
                 .meanTimeToInfected(3)
-                .meanTimeToRecovered(7)
+                .meanTimeToFinalState(7)
+                .maxTimeToInfectious(14)
+                .maxTimeToInfected(14)
+                .maxTimeToFinalState(14)
                 .randomInfectionRate(0.01)
+                .meanTestTime(1)
+                .maxTestTime(3)
+                .testAccuracy(0.95)
+                .exposureThreshold(10)
                 .exposureTuning(160)
                 .progressionDistribution(FLAT)
                 .build();

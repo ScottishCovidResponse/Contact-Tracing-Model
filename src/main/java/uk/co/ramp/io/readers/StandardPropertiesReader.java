@@ -6,13 +6,14 @@ import com.google.gson.TypeAdapterFactory;
 import uk.co.ramp.io.ImmutableStandardProperties;
 import uk.co.ramp.io.StandardProperties;
 
+import java.io.IOException;
 import java.io.Reader;
 import java.io.Writer;
 import java.util.ServiceLoader;
 
 public class StandardPropertiesReader {
 
-    public StandardProperties read(Reader reader) {
+    public StandardProperties read(Reader reader) throws IOException {
         GsonBuilder gsonBuilder = new GsonBuilder();
         ServiceLoader.load(TypeAdapterFactory.class).forEach(gsonBuilder::registerTypeAdapterFactory);
         return gsonBuilder.setPrettyPrinting().create().fromJson(reader, StandardProperties.class);
@@ -26,6 +27,7 @@ public class StandardPropertiesReader {
                 .infected(1000)
                 .seed(0)
                 .steadyState(true)
+                .contactsFile("input/contacts.csv")
                 .build();
 
         Gson gson = new GsonBuilder().setPrettyPrinting().create();

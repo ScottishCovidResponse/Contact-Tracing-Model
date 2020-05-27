@@ -1,66 +1,63 @@
 package uk.co.ramp.people;
 
+import org.apache.commons.math3.distribution.EnumeratedIntegerDistribution;
 import org.apache.commons.math3.random.RandomDataGenerator;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 import uk.co.ramp.io.PopulationProperties;
 import uk.co.ramp.io.StandardProperties;
 import uk.co.ramp.utilities.MinMax;
-import uk.co.ramp.utilities.RandomSingleton;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.function.Function;
+import java.util.stream.Collectors;
+import java.util.stream.DoubleStream;
+import java.util.stream.IntStream;
+import java.util.stream.Stream;
 
+@Service
 public class PopulationGenerator {
 
     private final StandardProperties runProperties;
     private final PopulationProperties properties;
+    RandomDataGenerator dataGenerator;
 
-    public PopulationGenerator(final StandardProperties runProperties, final PopulationProperties properties) {
+    @Autowired
+    public PopulationGenerator(final StandardProperties runProperties, final PopulationProperties properties, final RandomDataGenerator dataGenerator) {
         this.runProperties = runProperties;
         this.properties = properties;
+        this.dataGenerator = dataGenerator;
     }
 
-    public Map<Integer, Person> generate() {
-        RandomDataGenerator r = RandomSingleton.getInstance(runProperties.seed());
-        Map<Integer, Double> cumulative = createCumulative(properties.populationDistribution());
-        Map<Integer, Person> population = new HashMap<>();
-        for (int i = 0; i < runProperties.populationSize(); i++) {
+    public static Map<VirusStatus, Integer> getCmptCounts(Map<Integer, Case> population) {
 
-            int age = findAge(r.nextUniform(0, 1), cumulative, properties.populationAges());
-            Gender g = r.nextUniform(0, 1) > properties.genderBalance() / 2d ? Gender.FEMALE : Gender.MALE;
-            double compliance = r.nextGaussian(0.5, 0.5);
-            double health = r.nextGaussian(0.5, 0.5);
+        Map<VirusStatus, Integer> pop = population.values().stream()
+                .map(Case::status)
+                .collect(Collectors.groupingBy(Function.identity(), Collectors.summingInt(e -> 1)));
 
-            population.put(i, new Person(i, age, g, compliance, health));
+        Stream.of(VirusStatus.values()).forEach(vs -> pop.putIfAbsent(vs, 0));
 
-        }
+        return pop;
 
-        return population;
     }
 
-    int findAge(double v, Map<Integer, Double> c, Map<Integer, MinMax> populationAges) {
+    int findAge(Map<Integer, Double> populationDistribution, Map<Integer, MinMax> populationAges) {
+        int maxAge = populationAges.values().stream().mapToInt(MinMax::max).max().orElseThrow();
+        int[] outcomes = IntStream.rangeClosed(0, maxAge).toArray();
+        double[] probabilities = IntStream
+                .range(0, populationAges.size())
+                .mapToObj(idx -> IntStream
+                        .rangeClosed(populationAges.get(idx).min(), populationAges.get(idx).max())
+                        .mapToDouble(age -> populationDistribution.get(idx) / (populationAges.get(idx).max() - populationAges.get(idx).min() + 1))
+                        .toArray())
+                .flatMapToDouble(DoubleStream::of)
+                .toArray();
 
-        int index;
-
-        if (v < c.get(0)) {
-            index = 0;
-        } else if (v > c.get(0) && v <= c.get(1)) {
-            index = 1;
-        } else if (v > c.get(1) && v <= c.get(2)) {
-            index = 2;
-        } else if (v > c.get(2) && v <= c.get(3)) {
-            index = 3;
-        } else {
-            index = 4;
-        }
-
-        final double rMin = c.getOrDefault(index - 1, 0d);
-        final double rMax = c.get(index);
-        final int ageMin = populationAges.get(index).min();
-        final int ageMax = populationAges.get(index).max();
-
-        final double distance = (v - rMin) / (rMax - rMin);
-
-        return (int) Math.round((ageMax - ageMin) * distance + ageMin);
-
+        EnumeratedIntegerDistribution distribution = new EnumeratedIntegerDistribution(dataGenerator.getRandomGenerator(), outcomes, probabilities);
+        return distribution.sample();
     }
 
     // the population data is provided in non-cumulative form. This creates a cumulative distribution
@@ -87,39 +84,27 @@ public class PopulationGenerator {
         return cumulative;
     }
 
-    public static Map<VirusStatus, Integer> getSEIRCounts(Map<Integer, Person> population) {
+    public Map<Integer, Case> generate() {
+        Map<Integer, Case> population = new HashMap<>();
 
-        int s = 0;
-        int e = 0;
-        int i = 0;
-        int r = 0;
+        for (int i = 0; i < runProperties.populationSize(); i++) {
 
+            int age = findAge(properties.populationDistribution(), properties.populationAges());
+            Gender gender = dataGenerator.nextUniform(0, 1) > properties.genderBalance() / 2d ? Gender.FEMALE : Gender.MALE;
+            double compliance = dataGenerator.nextUniform(0, 1);
+            double health = dataGenerator.nextUniform(0, 1);
 
-        for (Person p : population.values()) {
-            switch (p.getStatus()) {
-                case SUSCEPTIBLE:
-                    s++;
-                    break;
-                case EXPOSED:
-                    e++;
-                    break;
-                case INFECTED:
-                    i++;
-                    break;
-                case RECOVERED:
-                    r++;
-                    break;
-            }
+            population.put(i,
+                    new Case(ImmutableHuman.builder().
+                            id(i).
+                            age(age).
+                            compliance(compliance).
+                            gender(gender).
+                            health(health).
+                            build()));
 
         }
 
-        Map<VirusStatus, Integer> counts = new EnumMap<>(VirusStatus.class);
-
-        counts.put(VirusStatus.SUSCEPTIBLE, s);
-        counts.put(VirusStatus.EXPOSED, e);
-        counts.put(VirusStatus.INFECTED, i);
-        counts.put(VirusStatus.RECOVERED, r);
-
-        return counts;
+        return population;
     }
 }

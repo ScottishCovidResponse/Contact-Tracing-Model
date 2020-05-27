@@ -1,7 +1,15 @@
 {
-  "meanTimeToInfected": 3.0,
-  "exposureTuning": 45,
-  "meanTimeToRecovered": 7.0,
-  "randomInfectionRate": 0.001,
+  "meanTimeToInfectious": 5.0,
+  "meanTimeToInfected": 5.0,
+  "meanTimeToFinalState": 8.0,
+  "maxTimeToInfectious": 14.0,
+  "maxTimeToInfected": 14.0,
+  "maxTimeToFinalState": 14.0,
+  "meanTestTime": 1.0,
+  "maxTestTime": 3.0,
+  "testAccuracy": 0.95,
+  "exposureTuning": 100,
+  "exposureThreshold": 50,
+  "randomInfectionRate": 0.0005,
   "progressionDistribution": "EXPONENTIAL"
 }
