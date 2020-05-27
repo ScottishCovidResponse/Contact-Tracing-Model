@@ -85,12 +85,11 @@ public class PopulationGenerator {
     }
 
     public Map<Integer, Case> generate() {
-        Map<Integer, Double> cumulative = createCumulative(properties.populationDistribution());
         Map<Integer, Case> population = new HashMap<>();
 
         for (int i = 0; i < runProperties.populationSize(); i++) {
 
-            int age = findAge(cumulative, properties.populationAges());
+            int age = findAge(properties.populationDistribution(), properties.populationAges());
             Gender gender = dataGenerator.nextUniform(0, 1) > properties.genderBalance() / 2d ? Gender.FEMALE : Gender.MALE;
             double compliance = dataGenerator.nextUniform(0, 1);
             double health = dataGenerator.nextUniform(0, 1);
