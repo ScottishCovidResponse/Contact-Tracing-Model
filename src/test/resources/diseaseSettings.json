@@ -1,0 +1,17 @@
+{
+  "meanTimeToInfectious": 2.0,
+  "meanTimeToInfected": 2.0,
+  "meanTimeToFinalState": 5.0,
+  "maxTimeToInfectious": 5.0,
+  "maxTimeToInfected": 4.0,
+  "maxTimeToFinalState": 7.0,
+  "meanTestTime": 1.0,
+  "maxTestTime": 1.0,
+  "testAccuracy": 0.95,
+  "exposureTuning": 5,
+  "exposureThreshold": 500,
+  "randomInfectionRate": 0.00,
+  "progressionDistribution": "FLAT"
+}
+
+

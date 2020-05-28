@@ -69,7 +69,7 @@ public class Outbreak {
     public Map<Integer, CmptRecord> propagate() {
 
         generateInitialInfection();
-        LOGGER.debug("Generated initial outbreak of {} cases", properties.infected());
+        LOGGER.info("Generated initial outbreak of {} cases", properties.infected());
         runToCompletion();
 
         return records;
@@ -94,7 +94,7 @@ public class Outbreak {
         double randomInfectionRate = diseaseProperties.randomInfectionRate();
 
         if (timeLimit <= maxContact) {
-            LOGGER.info("Not all contact data will be used");
+            LOGGER.warn("Not all contact data will be used");
             runTime = timeLimit;
             steadyState = false;
         } else {
@@ -102,10 +102,10 @@ public class Outbreak {
             runTime = maxContact;
         }
 
-        boolean complete = runContactData(runTime, population, contactRecords, randomInfectionRate);
+        boolean complete = runContactData(runTime, randomInfectionRate);
 
         if (steadyState && !complete) {
-            runToSteadyState(runTime, timeLimit, population);
+            runToSteadyState(runTime, timeLimit);
         }
 
         // Output map of infections
@@ -114,12 +114,12 @@ public class Outbreak {
     }
 
 
-    boolean runContactData(int maxContact, Map<Integer, Case> population, Map<Integer, List<ContactRecord>> contactRecords, double randomInfectionRate) {
+    boolean runContactData(int maxContact, double randomInfectionRate) {
         for (int time = 0; time <= maxContact; time++) {
 
-            updatePopulationState(time, population, randomInfectionRate);
+            updatePopulationState(time, randomInfectionRate);
             List<ContactRecord> todaysContacts = contactRecords.get(time);
-            int activeCases = calculateDailyStatistics(population, time);
+            int activeCases = calculateDailyStatistics(time);
 
             if (activeCases == 0 && randomInfectionRate == 0d) {
                 LOGGER.info("There are no active cases and the random infection rate is zero.");
@@ -128,18 +128,18 @@ public class Outbreak {
             }
 
             for (ContactRecord contacts : todaysContacts) {
-                evaluateContact(population, time, contacts);
+                evaluateContact(time, contacts);
             }
 
         }
         return false;
     }
 
-    void evaluateContact(Map<Integer, Case> population, int time, ContactRecord contacts) {
+    void evaluateContact(int time, ContactRecord contacts) {
         Case potentialSpreader = population.get(contacts.to());
         Case victim = population.get(contacts.from());
 
-        boolean conditionA = potentialSpreader.alertStatus() != NONE && victim.alertStatus() != NONE;
+        boolean conditionA = potentialSpreader.alertStatus() != NONE || victim.alertStatus() != NONE;
         boolean conditionB = contacts.weight() < diseaseProperties.exposureThreshold();
 
 
@@ -147,23 +147,23 @@ public class Outbreak {
 
             // TODO: Apply behavioural logic here. Use compliance value?
             LOGGER.trace("spreader: {}   victim: {}   weight: {} ", potentialSpreader.alertStatus(), victim.alertStatus(), contacts.weight());
-            LOGGER.trace("Skipping contact due to threshold");
+            LOGGER.info("Skipping contact due to threshold");
             return;
         }
 
 
         if (potentialSpreader.status() != victim.status()) {
-            evaluateExposures(population, contacts, time);
+            evaluateExposures(contacts, time);
         }
     }
 
 
-    void runToSteadyState(int runTime, int timeLimit, Map<Integer, Case> population) {
+    void runToSteadyState(int runTime, int timeLimit) {
         for (int time = runTime; time <= timeLimit; time++) {
 
             // set random infection rate to zero in steady state mode
-            updatePopulationState(time, population, 0d);
-            calculateDailyStatistics(population, time);
+            updatePopulationState(time, 0d);
+            calculateDailyStatistics(time);
 
             Map<VirusStatus, Integer> compartmentCounts = PopulationGenerator.getCmptCounts(population);
 
@@ -182,7 +182,7 @@ public class Outbreak {
         }
     }
 
-    void updatePopulationState(int time, Map<Integer, Case> population, double randomInfectionRate) {
+    void updatePopulationState(int time, double randomInfectionRate) {
 
         Set<Integer> alerts = new HashSet<>();
 
@@ -196,10 +196,10 @@ public class Outbreak {
             }
         }
 
-        if (!alerts.isEmpty()) alertPopulation(alerts, population, time);
+        if (!alerts.isEmpty()) alertPopulation(alerts, time);
     }
 
-    void alertPopulation(Set<Integer> alerts, Map<Integer, Case> population, int time) {
+    void alertPopulation(Set<Integer> alerts, int time) {
 
         for (Integer id : alerts) {
             Case potentialInfected = population.get(id);
@@ -212,7 +212,7 @@ public class Outbreak {
     }
 
 
-    void evaluateExposures(Map<Integer, Case> population, ContactRecord c, int time) {
+    void evaluateExposures(ContactRecord c, int time) {
         Case personA = utils.getMostSevere(population.get(c.to()), population.get(c.from()));
         Case personB = personA == population.get(c.to()) ? population.get(c.from()) : population.get(c.to());
 
@@ -239,7 +239,7 @@ public class Outbreak {
 
     }
 
-    int calculateDailyStatistics(Map<Integer, Case> population, int time) {
+    int calculateDailyStatistics(int time) {
         Map<VirusStatus, Integer> stats = utils.getCmptCounts(population);
         int activeCases = stats.get(EXPOSED) + stats.get(EXPOSED_2) + stats.get(INFECTED) + stats.get(INFECTED_SYMP);
 
