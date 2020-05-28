@@ -2,7 +2,10 @@ package uk.co.ramp;
 
 import org.apache.commons.math3.random.RandomDataGenerator;
 import org.apache.commons.math3.random.RandomGeneratorFactory;
-import org.junit.*;
+import org.junit.Assert;
+import org.junit.Before;
+import org.junit.Rule;
+import org.junit.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
 import org.springframework.test.util.ReflectionTestUtils;
@@ -15,7 +18,6 @@ import uk.co.ramp.people.AlertStatus;
 import uk.co.ramp.people.Case;
 import uk.co.ramp.people.Human;
 import uk.co.ramp.people.VirusStatus;
-import uk.co.ramp.record.CmptRecord;
 import uk.co.ramp.utilities.UtilitiesBean;
 
 import java.io.FileNotFoundException;
@@ -152,39 +154,6 @@ public class OutbreakTest {
 
         Assert.assertEquals(EXPOSED, interceptedStatus);
         Assert.assertEquals(personB, interceptedId);
-
-    }
-
-    @Test
-    @Ignore
-    public void propagate() {
-        Map<Integer, List<ContactRecord>> contactRecords = new HashMap<>();
-
-        Map<Integer, Case> population = new HashMap<>();
-        for (int i = 0; i < 100; i++) {
-            population.put(i, Mockito.mock(Case.class));
-        }
-
-
-        outbreak.setPopulation(population);
-
-        StandardProperties standardProperties = Mockito.mock(StandardProperties.class);
-        when(standardProperties.infected()).thenReturn(10);
-
-        for (int t = 0; t < 5; t++) {
-            List<ContactRecord> cr = new ArrayList<>();
-            for (int i = 0; i < 100; i++) {
-                cr.add(ImmutableContactRecord.builder().from(random.nextInt(5)).to(random.nextInt(5)).time(t).weight(50).build());
-            }
-
-            contactRecords.put(t, cr);
-        }
-
-
-        outbreak.setContactRecords(contactRecords);
-
-        Map<Integer, CmptRecord> var = outbreak.propagate();
-
 
     }
 
