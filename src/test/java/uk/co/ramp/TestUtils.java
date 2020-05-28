@@ -2,7 +2,9 @@ package uk.co.ramp;
 
 import org.apache.commons.math3.random.RandomDataGenerator;
 import uk.co.ramp.io.DiseaseProperties;
+import uk.co.ramp.io.PopulationProperties;
 import uk.co.ramp.io.readers.DiseasePropertiesReader;
+import uk.co.ramp.io.readers.PopulationPropertiesReader;
 
 import java.io.FileNotFoundException;
 import java.io.FileReader;
@@ -29,5 +31,9 @@ public class TestUtils {
 
     }
 
-
+    public static PopulationProperties populationProperties() throws FileNotFoundException {
+        String file = TestUtils.class.getResource("/populationSettings.json").getFile();
+        Reader reader = new FileReader(file);
+        return new PopulationPropertiesReader().read(reader);
+    }
 }

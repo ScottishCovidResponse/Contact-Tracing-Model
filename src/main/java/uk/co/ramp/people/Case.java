@@ -78,6 +78,10 @@ public class Case {
         return INITIAL;
     }
 
+    public int age() {
+        return getHuman().age();
+    }
+
     // Event statuses
 
     public int nextVirusStatusChange() {
@@ -150,4 +154,18 @@ public class Case {
     }
 
 
+    @Override
+    public String toString() {
+        return "Case{" +
+                "human=" + human +
+                ", contactRecords=" + contactRecords +
+                ", status=" + status +
+                ", alertStatus=" + alertStatus +
+                ", exposedBy=" + exposedBy +
+                ", exposedTime=" + exposedTime +
+                ", nextVirusStatusChange=" + nextVirusStatusChange +
+                ", nextAlertStatusChange=" + nextAlertStatusChange +
+                ", wasInfectiousWhenTested=" + wasInfectiousWhenTested +
+                '}';
+    }
 }

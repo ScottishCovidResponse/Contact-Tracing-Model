@@ -8,9 +8,7 @@ import uk.co.ramp.io.PopulationProperties;
 import uk.co.ramp.io.StandardProperties;
 import uk.co.ramp.utilities.MinMax;
 
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -21,14 +19,22 @@ import java.util.stream.Stream;
 @Service
 public class PopulationGenerator {
 
-    private final StandardProperties runProperties;
-    private final PopulationProperties properties;
-    RandomDataGenerator dataGenerator;
+    private StandardProperties runProperties;
+    private PopulationProperties properties;
+    private RandomDataGenerator dataGenerator;
 
     @Autowired
-    public PopulationGenerator(final StandardProperties runProperties, final PopulationProperties properties, final RandomDataGenerator dataGenerator) {
+    public void setRunProperties(StandardProperties runProperties) {
         this.runProperties = runProperties;
-        this.properties = properties;
+    }
+
+    @Autowired
+    public void setProperties(PopulationProperties populationProperties) {
+        this.properties = populationProperties;
+    }
+
+    @Autowired
+    public void setDataGenerator(RandomDataGenerator dataGenerator) {
         this.dataGenerator = dataGenerator;
     }
 
@@ -44,7 +50,11 @@ public class PopulationGenerator {
 
     }
 
-    int findAge(Map<Integer, Double> populationDistribution, Map<Integer, MinMax> populationAges) {
+    int findAge() {
+
+        Map<Integer, Double> populationDistribution = properties.populationDistribution();
+        Map<Integer, MinMax> populationAges = properties.populationAges();
+
         int maxAge = populationAges.values().stream().mapToInt(MinMax::max).max().orElseThrow();
         int[] outcomes = IntStream.rangeClosed(0, maxAge).toArray();
         double[] probabilities = IntStream
@@ -60,37 +70,12 @@ public class PopulationGenerator {
         return distribution.sample();
     }
 
-    // the population data is provided in non-cumulative form. This creates a cumulative distribution
-    Map<Integer, Double> createCumulative(Map<Integer, Double> populationDistribution) {
-
-        List<Double> data = new ArrayList<>();
-        Map<Integer, Double> cumulative = new HashMap<>();
-
-        // extract the data in ascending order
-        for (Map.Entry<Integer, Double> entry : populationDistribution.entrySet()) {
-            data.add(entry.getKey(), populationDistribution.get(entry.getKey()));
-        }
-
-        // loop over the data
-        double sum = 0d;
-        for (int i = 0; i < data.size(); i++) {
-            sum += data.get(i);
-            if (i == data.size() - 1) {
-                sum = 1d;
-            }
-            cumulative.put(i, sum);
-        }
-
-        return cumulative;
-    }
-
     public Map<Integer, Case> generate() {
-        Map<Integer, Double> cumulative = createCumulative(properties.populationDistribution());
         Map<Integer, Case> population = new HashMap<>();
 
         for (int i = 0; i < runProperties.populationSize(); i++) {
 
-            int age = findAge(cumulative, properties.populationAges());
+            int age = findAge();
             Gender gender = dataGenerator.nextUniform(0, 1) > properties.genderBalance() / 2d ? Gender.FEMALE : Gender.MALE;
             double compliance = dataGenerator.nextUniform(0, 1);
             double health = dataGenerator.nextUniform(0, 1);

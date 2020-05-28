@@ -30,6 +30,7 @@ public class EvaluateCaseTest {
         Human human = ImmutableHuman.builder().health(0.5).gender(Gender.MALE).age(50).compliance(0.5).id(0).build();
         aCase = new Case(human);
         DiseaseProperties d = appConfig.diseaseProperties();
+
         RandomDataGenerator r = appConfig.randomDataGenerator(Optional.empty());
 
 
@@ -135,5 +136,12 @@ public class EvaluateCaseTest {
 
     @Test
     public void getDistributionValue() {
+
+
+        for (int i = 0; i < 1000; i++) {
+            System.out.println(evaluateCase.getDistributionValue(5, 14));
+        }
+
+
     }
 }

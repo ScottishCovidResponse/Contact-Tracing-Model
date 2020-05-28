@@ -163,7 +163,7 @@ public class EvaluateCase {
         // remove self
         contactIds.remove(p.id());
 
-        LOGGER.trace("Alerting " + contactIds);
+        LOGGER.trace("Alerting {}", contactIds);
         return contactIds;
 
     }
