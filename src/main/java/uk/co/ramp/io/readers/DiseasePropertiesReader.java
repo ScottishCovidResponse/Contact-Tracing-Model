@@ -3,8 +3,8 @@ package uk.co.ramp.io.readers;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.TypeAdapterFactory;
-import uk.co.ramp.io.DiseaseProperties;
-import uk.co.ramp.io.ImmutableDiseaseProperties;
+import uk.co.ramp.io.types.DiseaseProperties;
+import uk.co.ramp.io.types.ImmutableDiseaseProperties;
 
 import java.io.Reader;
 import java.io.Writer;

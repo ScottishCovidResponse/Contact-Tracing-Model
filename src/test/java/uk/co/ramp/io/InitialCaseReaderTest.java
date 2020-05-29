@@ -9,6 +9,8 @@ import org.mockito.Mockito;
 import org.springframework.test.util.ReflectionTestUtils;
 import uk.co.ramp.LogSpy;
 import uk.co.ramp.TestUtils;
+import uk.co.ramp.io.types.InputFiles;
+import uk.co.ramp.io.types.StandardProperties;
 
 import java.io.IOException;
 import java.util.HashSet;

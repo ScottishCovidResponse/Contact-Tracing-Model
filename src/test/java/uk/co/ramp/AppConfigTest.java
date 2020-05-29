@@ -3,10 +3,10 @@ package uk.co.ramp;
 import org.apache.commons.math3.random.RandomDataGenerator;
 import org.junit.*;
 import org.mockito.Mockito;
-import uk.co.ramp.io.DiseaseProperties;
-import uk.co.ramp.io.InputFiles;
-import uk.co.ramp.io.PopulationProperties;
-import uk.co.ramp.io.StandardProperties;
+import uk.co.ramp.io.types.DiseaseProperties;
+import uk.co.ramp.io.types.InputFiles;
+import uk.co.ramp.io.types.PopulationProperties;
+import uk.co.ramp.io.types.StandardProperties;
 
 import java.io.File;
 import java.io.FileNotFoundException;

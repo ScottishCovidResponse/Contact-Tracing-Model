@@ -7,14 +7,15 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 import org.springframework.stereotype.Service;
 import uk.co.ramp.contact.ContactRecord;
+import uk.co.ramp.event.EventList;
 import uk.co.ramp.io.CompartmentWriter;
-import uk.co.ramp.io.InputFiles;
-import uk.co.ramp.io.StandardProperties;
+import uk.co.ramp.io.ContactReader;
 import uk.co.ramp.io.csv.CsvException;
+import uk.co.ramp.io.types.CmptRecord;
+import uk.co.ramp.io.types.InputFiles;
+import uk.co.ramp.io.types.StandardProperties;
 import uk.co.ramp.people.Case;
 import uk.co.ramp.people.PopulationGenerator;
-import uk.co.ramp.record.CmptRecord;
-import uk.co.ramp.utilities.ContactReader;
 
 import java.io.*;
 import java.util.ArrayList;
@@ -52,13 +53,16 @@ public class ContactRunner implements ApplicationContextAware {
         try (Reader reader = new FileReader(inputFiles.contactData())) {
 
             ContactReader contactReader = ctx.getBean(ContactReader.class);
+            EventList eventList = ctx.getBean(EventList.class);
 
             Map<Integer, List<ContactRecord>> contactRecords = contactReader.read(reader, runProperties);
+            Reader reader2 = new FileReader(inputFiles.contactData());
+            eventList.addEvents(contactReader.readEvents(reader2, runProperties));
+
 
             LOGGER.info("Generated Population and Parsed Contact data");
 
             Outbreak infection = ctx.getBean(Outbreak.class);
-            infection.setContactRecords(contactRecords);
             infection.setPopulation(population);
 
             LOGGER.info("Initialised Outbreak");

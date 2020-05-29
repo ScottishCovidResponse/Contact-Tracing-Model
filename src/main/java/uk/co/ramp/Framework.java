@@ -3,10 +3,11 @@ package uk.co.ramp;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
+import uk.co.ramp.event.EventList;
 import uk.co.ramp.io.CompartmentWriter;
+import uk.co.ramp.io.ContactReader;
 import uk.co.ramp.io.InitialCaseReader;
 import uk.co.ramp.people.PopulationGenerator;
-import uk.co.ramp.utilities.ContactReader;
 
 import java.io.IOException;
 
@@ -29,6 +30,7 @@ public class Framework {
                 PopulationGenerator.class,
                 ContactReader.class,
                 CompartmentWriter.class,
+                EventList.class,
                 InitialCaseReader.class);
 
     }

@@ -4,8 +4,8 @@ import org.apache.commons.math3.distribution.EnumeratedIntegerDistribution;
 import org.apache.commons.math3.random.RandomDataGenerator;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import uk.co.ramp.io.PopulationProperties;
-import uk.co.ramp.io.StandardProperties;
+import uk.co.ramp.io.types.PopulationProperties;
+import uk.co.ramp.io.types.StandardProperties;
 import uk.co.ramp.utilities.MinMax;
 
 import java.util.HashMap;

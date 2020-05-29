@@ -5,7 +5,7 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
-import uk.co.ramp.io.DiseaseProperties;
+import uk.co.ramp.io.types.DiseaseProperties;
 import uk.co.ramp.people.*;
 import uk.co.ramp.utilities.ForbiddenAccessException;
 

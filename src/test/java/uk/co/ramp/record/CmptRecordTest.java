@@ -4,6 +4,7 @@ package uk.co.ramp.record;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
+import uk.co.ramp.io.types.CmptRecord;
 import uk.co.ramp.people.VirusStatus;
 
 import java.util.HashMap;

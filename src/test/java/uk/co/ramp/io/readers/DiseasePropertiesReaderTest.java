@@ -2,8 +2,8 @@ package uk.co.ramp.io.readers;
 
 import com.google.gson.JsonParser;
 import org.junit.Test;
-import uk.co.ramp.io.DiseaseProperties;
 import uk.co.ramp.io.ImmutableDiseaseProperties;
+import uk.co.ramp.io.types.DiseaseProperties;
 
 import java.io.*;
 

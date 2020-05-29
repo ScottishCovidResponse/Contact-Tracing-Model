@@ -2,9 +2,9 @@ package uk.co.ramp.io;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import uk.co.ramp.io.types.CmptRecord;
+import uk.co.ramp.io.types.ImmutableCmptRecord;
 import uk.co.ramp.people.VirusStatus;
-import uk.co.ramp.record.CmptRecord;
-import uk.co.ramp.record.ImmutableCmptRecord;
 
 import java.util.Map;
 

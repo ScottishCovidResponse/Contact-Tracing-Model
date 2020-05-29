@@ -3,8 +3,8 @@ package uk.co.ramp.io.readers;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.TypeAdapterFactory;
-import uk.co.ramp.io.ImmutableInputFiles;
-import uk.co.ramp.io.InputFiles;
+import uk.co.ramp.io.types.ImmutableInputFiles;
+import uk.co.ramp.io.types.InputFiles;
 
 import java.io.IOException;
 import java.io.Reader;

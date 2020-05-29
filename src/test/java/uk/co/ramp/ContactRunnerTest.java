@@ -5,13 +5,13 @@ import org.mockito.Mockito;
 import org.springframework.context.ApplicationContext;
 import uk.co.ramp.contact.ContactRecord;
 import uk.co.ramp.io.CompartmentWriter;
-import uk.co.ramp.io.InputFiles;
-import uk.co.ramp.io.StandardProperties;
+import uk.co.ramp.io.ContactReader;
 import uk.co.ramp.io.csv.CsvException;
+import uk.co.ramp.io.types.CmptRecord;
+import uk.co.ramp.io.types.InputFiles;
+import uk.co.ramp.io.types.StandardProperties;
 import uk.co.ramp.people.Case;
 import uk.co.ramp.people.PopulationGenerator;
-import uk.co.ramp.record.CmptRecord;
-import uk.co.ramp.utilities.ContactReader;
 
 import java.io.File;
 import java.io.IOException;

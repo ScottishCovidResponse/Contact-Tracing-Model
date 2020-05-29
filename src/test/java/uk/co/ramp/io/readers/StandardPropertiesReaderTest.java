@@ -3,7 +3,7 @@ package uk.co.ramp.io.readers;
 import com.google.gson.JsonParser;
 import org.junit.Before;
 import org.junit.Test;
-import uk.co.ramp.io.StandardProperties;
+import uk.co.ramp.io.types.StandardProperties;
 
 import java.io.*;
 

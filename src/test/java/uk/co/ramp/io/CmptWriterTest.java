@@ -1,7 +1,7 @@
 package uk.co.ramp.io;
 
 import org.junit.Test;
-import uk.co.ramp.record.CmptRecord;
+import uk.co.ramp.io.types.CmptRecord;
 import uk.co.ramp.record.ImmutableCmptRecord;
 
 import java.io.IOException;

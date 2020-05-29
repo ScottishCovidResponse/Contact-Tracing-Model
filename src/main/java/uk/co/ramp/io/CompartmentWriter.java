@@ -2,8 +2,8 @@ package uk.co.ramp.io;
 
 import org.springframework.stereotype.Service;
 import uk.co.ramp.io.csv.CsvWriter;
-import uk.co.ramp.record.CmptRecord;
-import uk.co.ramp.record.ImmutableCmptRecord;
+import uk.co.ramp.io.types.CmptRecord;
+import uk.co.ramp.io.types.ImmutableCmptRecord;
 
 import java.io.IOException;
 import java.io.Writer;

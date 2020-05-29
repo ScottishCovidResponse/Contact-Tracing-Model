@@ -5,12 +5,18 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import uk.co.ramp.contact.ContactRecord;
-import uk.co.ramp.io.*;
+import uk.co.ramp.event.ContactEvent;
+import uk.co.ramp.event.Event;
+import uk.co.ramp.event.EventList;
+import uk.co.ramp.io.InfectionMap;
+import uk.co.ramp.io.InitialCaseReader;
+import uk.co.ramp.io.LogDailyOutput;
+import uk.co.ramp.io.types.CmptRecord;
+import uk.co.ramp.io.types.DiseaseProperties;
+import uk.co.ramp.io.types.StandardProperties;
 import uk.co.ramp.people.Case;
 import uk.co.ramp.people.PopulationGenerator;
 import uk.co.ramp.people.VirusStatus;
-import uk.co.ramp.record.CmptRecord;
 import uk.co.ramp.utilities.UtilitiesBean;
 
 import java.util.*;
@@ -28,8 +34,11 @@ public class Outbreak {
     private RandomDataGenerator rng;
     private InitialCaseReader initialCaseReader;
     private Map<Integer, Case> population;
-    private Map<Integer, List<ContactRecord>> contactRecords;
+    //    private Map<Integer, List<ContactRecord>> contactRecords;
+    private EventList eventList;
+
     private final LogDailyOutput outputLog = new LogDailyOutput();
+
 
     private final Map<Integer, CmptRecord> records = new HashMap<>();
     private UtilitiesBean utils;
@@ -39,8 +48,13 @@ public class Outbreak {
         this.population = population;
     }
 
-    public void setContactRecords(Map<Integer, List<ContactRecord>> contactRecords) {
-        this.contactRecords = contactRecords;
+//    public void setContactRecords(Map<Integer, List<ContactRecord>> contactRecords) {
+//        this.contactRecords = contactRecords;
+//    }
+
+    @Autowired
+    public void setEventList(EventList eventList) {
+        this.eventList = eventList;
     }
 
     @Autowired
@@ -93,7 +107,8 @@ public class Outbreak {
 
     void runToCompletion() {
         int timeLimit = properties.timeLimit();
-        int maxContact = contactRecords.keySet().stream().max(Comparator.naturalOrder()).orElseThrow(RuntimeException::new);
+        int maxContact = eventList.getMap().keySet().stream().max(Comparator.naturalOrder()).orElseThrow();
+
         int runTime;
         boolean steadyState = properties.steadyState();
         double randomInfectionRate = diseaseProperties.randomInfectionRate();
@@ -123,7 +138,7 @@ public class Outbreak {
         for (int time = 0; time <= maxContact; time++) {
 
             updatePopulationState(time, randomInfectionRate);
-            List<ContactRecord> todaysContacts = contactRecords.get(time);
+            List<Event> todaysContacts = eventList.getForTime(time);
             int activeCases = calculateDailyStatistics(time);
 
             if (activeCases == 0 && randomInfectionRate == 0d) {
@@ -132,15 +147,15 @@ public class Outbreak {
                 return true;
             }
 
-            for (ContactRecord contacts : todaysContacts) {
-                evaluateContact(time, contacts);
+            for (Event contacts : todaysContacts) {
+                if (contacts instanceof ContactEvent) evaluateContact(time, (ContactEvent) contacts);
             }
 
         }
         return false;
     }
 
-    void evaluateContact(int time, ContactRecord contacts) {
+    void evaluateContact(int time, ContactEvent contacts) {
         Case potentialSpreader = population.get(contacts.to());
         Case victim = population.get(contacts.from());
 
@@ -217,7 +232,7 @@ public class Outbreak {
     }
 
 
-    void evaluateExposures(ContactRecord c, int time) {
+    void evaluateExposures(ContactEvent c, int time) {
         Case personA = utils.getMostSevere(population.get(c.to()), population.get(c.from()));
         Case personB = personA == population.get(c.to()) ? population.get(c.from()) : population.get(c.to());
 

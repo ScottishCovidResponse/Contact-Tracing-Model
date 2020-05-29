@@ -3,8 +3,8 @@ package uk.co.ramp;
 import org.apache.commons.math3.random.RandomDataGenerator;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import uk.co.ramp.contact.ContactRecord;
-import uk.co.ramp.io.DiseaseProperties;
+import uk.co.ramp.event.ContactEvent;
+import uk.co.ramp.io.types.DiseaseProperties;
 import uk.co.ramp.people.AlertStatus;
 import uk.co.ramp.people.Case;
 import uk.co.ramp.people.InvalidStatusTransitionException;
@@ -155,7 +155,7 @@ public class EvaluateCase {
 
         Set<Integer> contactIds = new HashSet<>();
         // add all ids
-        for (ContactRecord r : p.contactRecords()) {
+        for (ContactEvent r : p.contactRecords()) {
             contactIds.add(r.from());
             contactIds.add(r.to());
         }

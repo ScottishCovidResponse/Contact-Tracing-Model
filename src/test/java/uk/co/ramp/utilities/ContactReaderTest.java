@@ -3,8 +3,9 @@ package uk.co.ramp.utilities;
 import org.junit.Test;
 import uk.co.ramp.contact.ContactRecord;
 import uk.co.ramp.contact.ImmutableContactRecord;
+import uk.co.ramp.io.ContactReader;
 import uk.co.ramp.io.ImmutableStandardProperties;
-import uk.co.ramp.io.StandardProperties;
+import uk.co.ramp.io.types.StandardProperties;
 
 import java.io.IOException;
 import java.io.StringReader;

@@ -4,7 +4,7 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import uk.co.ramp.TestUtils;
-import uk.co.ramp.io.StandardProperties;
+import uk.co.ramp.io.types.StandardProperties;
 
 import java.io.FileNotFoundException;
 import java.util.*;

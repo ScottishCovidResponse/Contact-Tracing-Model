@@ -1,7 +1,7 @@
 package uk.co.ramp.people;
 
 import com.google.common.base.Strings;
-import uk.co.ramp.contact.ContactRecord;
+import uk.co.ramp.event.ContactEvent;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -12,7 +12,7 @@ import static uk.co.ramp.people.VirusStatus.*;
 public class Case {
 
     private final Human human;
-    private final Set<ContactRecord> contactRecords;
+    private final Set<ContactEvent> contactRecords;
     private VirusStatus status;
     private AlertStatus alertStatus;
     private int exposedBy;
@@ -115,7 +115,7 @@ public class Case {
         this.nextAlertStatusChange = nextAlertStatusChange;
     }
 
-    public void addContact(ContactRecord record) {
+    public void addContact(ContactEvent record) {
         contactRecords.add(record);
     }
 
@@ -127,7 +127,7 @@ public class Case {
         this.alertStatus = this.alertStatus.transitionTo(alertStatus);
     }
 
-    public Set<ContactRecord> contactRecords() {
+    public Set<ContactEvent> contactRecords() {
         return contactRecords;
     }
 
