@@ -8,6 +8,7 @@ import org.springframework.context.ApplicationContextAware;
 import org.springframework.stereotype.Service;
 import uk.co.ramp.contact.ContactRecord;
 import uk.co.ramp.io.CompartmentWriter;
+import uk.co.ramp.io.InputFiles;
 import uk.co.ramp.io.StandardProperties;
 import uk.co.ramp.io.csv.CsvException;
 import uk.co.ramp.people.Case;
@@ -25,7 +26,7 @@ public class ContactRunner implements ApplicationContextAware {
 
     private static final Logger LOGGER = LogManager.getLogger(ContactRunner.class);
     public static final String COMPARTMENTS_CSV = "Compartments.csv";
-
+    private InputFiles inputFiles;
     private StandardProperties runProperties;
     private ApplicationContext ctx;
 
@@ -40,10 +41,15 @@ public class ContactRunner implements ApplicationContextAware {
         this.ctx = applicationContext;
     }
 
+    @Autowired
+    public void setInputFiles(InputFiles inputFiles) {
+        this.inputFiles = inputFiles;
+    }
+
     public void run() throws IOException {
 
         Map<Integer, Case> population = ctx.getBean(PopulationGenerator.class).generate();
-        try (Reader reader = new FileReader(runProperties.contactsFile())) {
+        try (Reader reader = new FileReader(inputFiles.contactData())) {
 
             ContactReader contactReader = ctx.getBean(ContactReader.class);
 

@@ -22,10 +22,9 @@ public class ContactReaderTest {
     private final StandardProperties properties = ImmutableStandardProperties.builder()
             .populationSize(10000)
             .timeLimit(100)
-            .infected(1000)
+            .initialExposures(1000)
             .seed(0)
             .steadyState(true)
-            .contactsFile("input/contacts.csv")
             .build();
 
     private final ContactRecord record1 = ImmutableContactRecord.builder()

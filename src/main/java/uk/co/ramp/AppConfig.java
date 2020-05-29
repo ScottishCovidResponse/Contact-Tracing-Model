@@ -7,9 +7,11 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.SpringBootConfiguration;
 import org.springframework.context.annotation.Bean;
 import uk.co.ramp.io.DiseaseProperties;
+import uk.co.ramp.io.InputFiles;
 import uk.co.ramp.io.PopulationProperties;
 import uk.co.ramp.io.StandardProperties;
 import uk.co.ramp.io.readers.DiseasePropertiesReader;
+import uk.co.ramp.io.readers.InputFilesReader;
 import uk.co.ramp.io.readers.PopulationPropertiesReader;
 import uk.co.ramp.io.readers.StandardPropertiesReader;
 import uk.co.ramp.utilities.UtilitiesBean;
@@ -20,20 +22,27 @@ import java.util.Optional;
 @SpringBootConfiguration
 public class AppConfig {
 
-    private static final String RUN_SETTINGS_LOCATION = "input/runSettings.json";
-    private static final String DISEASE_SETTINGS_LOCATION = "input/diseaseSettings.json";
-    private static final String POPULATION_SETTINGS_LOCATION = "input/populationSettings.json";
-
-
     private static final Logger LOGGER = LogManager.getLogger(AppConfig.class);
+    private static final String INPUT_FILE = "input/inputLocations.json";
 
+    @Bean
+    public InputFiles inputFiles() throws ConfigurationException {
+        try (Reader reader = getReader(INPUT_FILE)) {
+            return new InputFilesReader().read(reader);
+        } catch (IOException e) {
+            String message = "An error occurred while parsing the run properties at " + INPUT_FILE;
+            LOGGER.error(message);
+            throw new ConfigurationException(message, e);
+        }
+
+    }
 
     @Bean
     public StandardProperties standardProperties() throws ConfigurationException {
-        try (Reader reader = getReader(RUN_SETTINGS_LOCATION)) {
+        try (Reader reader = getReader(inputFiles().runSettings())) {
             return new StandardPropertiesReader().read(reader);
         } catch (IOException e) {
-            String message = "An error occurred while parsing the run properties at " + RUN_SETTINGS_LOCATION;
+            String message = "An error occurred while parsing the run properties at " + inputFiles().runSettings();
             LOGGER.error(message);
             throw new ConfigurationException(message, e);
         }
@@ -41,10 +50,10 @@ public class AppConfig {
 
     @Bean
     public DiseaseProperties diseaseProperties() throws ConfigurationException {
-        try (Reader reader = getReader(DISEASE_SETTINGS_LOCATION)) {
+        try (Reader reader = getReader(inputFiles().diseaseSettings())) {
             return new DiseasePropertiesReader().read(reader);
         } catch (IOException e) {
-            String message = "An error occurred while parsing the disease properties at " + DISEASE_SETTINGS_LOCATION;
+            String message = "An error occurred while parsing the disease properties at " + inputFiles().diseaseSettings();
             LOGGER.error(message);
             throw new ConfigurationException(message, e);
         }
@@ -52,19 +61,14 @@ public class AppConfig {
 
     @Bean
     public PopulationProperties populationProperties() throws ConfigurationException {
-        try (Reader reader = getReader(POPULATION_SETTINGS_LOCATION)) {
+        try (Reader reader = getReader(inputFiles().populationSettings())) {
             return new PopulationPropertiesReader().read(reader);
         } catch (IOException e) {
-            String message = "An error occurred while parsing the population properties at " + POPULATION_SETTINGS_LOCATION;
+            String message = "An error occurred while parsing the population properties at " + inputFiles().populationSettings();
             LOGGER.error(message);
             throw new ConfigurationException(message, e);
         }
     }
-
-    Reader getReader(String input) throws FileNotFoundException {
-        return new FileReader(new File(input));
-    }
-
 
     @Bean
     public RandomDataGenerator randomDataGenerator(@Value("${cmdLineArgument:#{null}}") Optional<String[]> argumentValue) throws ConfigurationException {
@@ -97,6 +101,10 @@ public class AppConfig {
     @Bean
     public UtilitiesBean utilitiesBean() {
         return new UtilitiesBean();
+    }
+
+    Reader getReader(String input) throws FileNotFoundException {
+        return new FileReader(new File(input));
     }
 
 

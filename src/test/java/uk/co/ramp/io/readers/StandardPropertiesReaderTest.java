@@ -13,10 +13,9 @@ public class StandardPropertiesReaderTest {
     private static final String mockStandardProperties = "{" +
             "  'populationSize': 10000," +
             "  'timeLimit': 100," +
-            "  'infected': 1000," +
+            "  'initialExposures': 1000," +
             "  'seed': 0," +
-            "  'steadyState': true," +
-            "  'contactsFile': \"input/contacts.csv\"" +
+            "  'steadyState': true" +
             "}";
 
     private StandardPropertiesReader standardPropertiesReader;
@@ -31,9 +30,8 @@ public class StandardPropertiesReaderTest {
         var underlyingReader = new BufferedReader(new StringReader(mockStandardProperties));
         StandardProperties standardProperties = standardPropertiesReader.read(underlyingReader);
 
-        assertThat(standardProperties.infected()).isEqualTo(1000);
+        assertThat(standardProperties.initialExposures()).isEqualTo(1000);
         assertThat(standardProperties.populationSize()).isEqualTo(10000);
-        assertThat(standardProperties.contactsFile()).isEqualTo("input/contacts.csv");
         assertThat(standardProperties.seed()).isZero();
         assertThat(standardProperties.timeLimit()).isEqualTo(100);
         assertThat(standardProperties.steadyState()).isTrue();
