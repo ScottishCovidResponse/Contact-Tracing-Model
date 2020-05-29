@@ -4,7 +4,7 @@ import org.junit.Test;
 import uk.co.ramp.contact.ContactRecord;
 import uk.co.ramp.contact.ImmutableContactRecord;
 import uk.co.ramp.io.ContactReader;
-import uk.co.ramp.io.ImmutableStandardProperties;
+import uk.co.ramp.io.types.ImmutableStandardProperties;
 import uk.co.ramp.io.types.StandardProperties;
 
 import java.io.IOException;
@@ -16,9 +16,9 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 public class ContactReaderTest {
     private final String csv = "" +
-            "\"time\",\"from\",\"to\",\"weight\"\n" +
-            "1,9,10,6.7\n" +
-            "1,8,9,8.2\n";
+            "\"time\",\"from\",\"to\",\"weight\",\"label\"\n" +
+            "0,8,9,6.7,\"label\"\n" +
+            "0,7,8,8.2,\"label\"\n";
 
     private final StandardProperties properties = ImmutableStandardProperties.builder()
             .populationSize(10000)
@@ -33,6 +33,7 @@ public class ContactReaderTest {
             .from(8)
             .to(9)
             .weight(6.7)
+            .label("label")
             .build();
 
     private final ContactRecord record2 = ImmutableContactRecord.builder()
@@ -40,6 +41,7 @@ public class ContactReaderTest {
             .from(7)
             .to(8)
             .weight(8.2)
+            .label("label")
             .build();
 
     @Test
@@ -55,9 +57,9 @@ public class ContactReaderTest {
     @Test
     public void testPersonLimit() throws IOException {
         String csvOverPersonLimit = "" +
-                "\"time\",\"from\",\"to\",\"weight\"\n" +
-                "1,10001,10002,6.7\n" +
-                "2,10000,10001,8.2\n";
+                "\"time\",\"from\",\"to\",\"weight\",\"label\"\n" +
+                "1,10001,10002,6.7,label\n" +
+                "2,10000,10001,8.2, label\n";
         StringReader stringReader = new StringReader(csvOverPersonLimit);
 
         Map<Integer, List<ContactRecord>> dailyContactRecords = new ContactReader().read(stringReader, properties);

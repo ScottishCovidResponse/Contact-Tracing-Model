@@ -1,10 +1,10 @@
 package uk.co.ramp;
 
 import org.apache.commons.math3.random.RandomDataGenerator;
-import uk.co.ramp.io.ImmutableStandardProperties;
 import uk.co.ramp.io.readers.DiseasePropertiesReader;
 import uk.co.ramp.io.readers.PopulationPropertiesReader;
 import uk.co.ramp.io.types.DiseaseProperties;
+import uk.co.ramp.io.types.ImmutableStandardProperties;
 import uk.co.ramp.io.types.PopulationProperties;
 import uk.co.ramp.io.types.StandardProperties;
 

@@ -6,8 +6,8 @@ import org.junit.Rule;
 import org.junit.Test;
 import uk.co.ramp.LogSpy;
 import uk.co.ramp.TestUtils;
-import uk.co.ramp.contact.ContactRecord;
-import uk.co.ramp.contact.ImmutableContactRecord;
+import uk.co.ramp.event.ContactEvent;
+import uk.co.ramp.event.ImmutableContactEvent;
 
 import java.util.*;
 
@@ -151,25 +151,25 @@ public class CaseTest {
     @Test
     public void contactRecords() {
 
-        Map<Integer, ContactRecord> contacts = new HashMap<>();
+        Map<Integer, ContactEvent> contacts = new HashMap<>();
 
         for (int i = 0; i < random.nextInt(100) + 20; i++) {
             int id = random.nextInt(100);
             int weight = random.nextInt(100);
             int time = random.nextInt(100);
 
-            ContactRecord cr = ImmutableContactRecord.builder().from(id).to(person.id()).weight(weight).time(time).build();
+            ContactEvent cr = ImmutableContactEvent.builder().from(id).to(person.id()).label("").weight(weight).time(time).build();
             if (!contacts.containsKey(id)) {
                 contacts.put(id, cr);
                 person.addContact(cr);
             }
         }
 
-        Set<ContactRecord> personRecords = person.contactRecords();
+        Set<ContactEvent> personRecords = person.contactRecords();
         Assert.assertEquals(contacts.size(), personRecords.size());
-        for (ContactRecord cr : personRecords) {
+        for (ContactEvent cr : personRecords) {
             int id = cr.from();
-            ContactRecord saved = contacts.get(id);
+            ContactEvent saved = contacts.get(id);
             Assert.assertEquals(saved, cr);
         }
 

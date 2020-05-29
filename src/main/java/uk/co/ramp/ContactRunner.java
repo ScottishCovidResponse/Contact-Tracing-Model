@@ -6,7 +6,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 import org.springframework.stereotype.Service;
-import uk.co.ramp.contact.ContactRecord;
 import uk.co.ramp.event.EventList;
 import uk.co.ramp.io.CompartmentWriter;
 import uk.co.ramp.io.ContactReader;
@@ -55,9 +54,9 @@ public class ContactRunner implements ApplicationContextAware {
             ContactReader contactReader = ctx.getBean(ContactReader.class);
             EventList eventList = ctx.getBean(EventList.class);
 
-            Map<Integer, List<ContactRecord>> contactRecords = contactReader.read(reader, runProperties);
-            Reader reader2 = new FileReader(inputFiles.contactData());
-            eventList.addEvents(contactReader.readEvents(reader2, runProperties));
+//            Map<Integer, List<ContactRecord>> contactRecords = contactReader.read(reader, runProperties);
+//            Reader reader2 = new FileReader(inputFiles.contactData());
+            eventList.addEvents(contactReader.readEvents(reader, runProperties));
 
 
             LOGGER.info("Generated Population and Parsed Contact data");

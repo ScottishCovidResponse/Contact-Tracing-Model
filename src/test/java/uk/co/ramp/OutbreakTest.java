@@ -8,8 +8,9 @@ import org.junit.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
 import org.springframework.test.util.ReflectionTestUtils;
-import uk.co.ramp.contact.ContactRecord;
-import uk.co.ramp.contact.ImmutableContactRecord;
+import uk.co.ramp.event.ContactEvent;
+import uk.co.ramp.event.EventList;
+import uk.co.ramp.event.ImmutableContactEvent;
 import uk.co.ramp.io.InitialCaseReader;
 import uk.co.ramp.io.ProgressionDistribution;
 import uk.co.ramp.io.types.DiseaseProperties;
@@ -113,7 +114,7 @@ public class OutbreakTest {
         Map<Integer, Case> population = mock(Map.class);
         when(population.get(personA)).thenReturn(caseA);
         when(population.get(personB)).thenReturn(caseB);
-        ContactRecord contact = ImmutableContactRecord.builder().from(personA).to(personB).time(time).weight(50).build();
+        ContactEvent contact = ImmutableContactEvent.builder().from(personA).label("").to(personB).time(time).weight(50).build();
 
         outbreak.setPopulation(population);
 
@@ -159,10 +160,10 @@ public class OutbreakTest {
             population.put(i, thisCase);
         }
 
-        Map<Integer, List<ContactRecord>> contacts = createContactRecords(200, population);
+        EventList contacts = createContactRecords(200, population);
 
         outbreak.setPopulation(population);
-        outbreak.setContactRecords(contacts);
+        outbreak.setEventList(contacts);
         outbreak.setStandardProperties(standardProperties);
         outbreak.setInitialCaseReader(initialCaseReader);
 
@@ -264,13 +265,14 @@ public class OutbreakTest {
         when(properties.populationSize()).thenReturn(popSize);
         when(properties.steadyState()).thenReturn(false);
 
-        Map<Integer, List<ContactRecord>> contacts = createContactRecords(500, population);
+
+        EventList contacts = createContactRecords(500, population);
 
         outbreak.setPopulation(population);
+        outbreak.setEventList(contacts);
         outbreak.setStandardProperties(properties);
         outbreak.setInitialCaseReader(initialCaseReader);
         outbreak.setDiseaseProperties(d);
-        outbreak.setContactRecords(contacts);
         outbreak.generateInitialInfection();
 
         long susceptible = population.values().stream().map(Case::status).filter(status -> status == SUSCEPTIBLE).count();
@@ -312,13 +314,14 @@ public class OutbreakTest {
         when(properties.populationSize()).thenReturn(popSize);
         when(properties.steadyState()).thenReturn(true);
 
-        Map<Integer, List<ContactRecord>> contacts = createContactRecords(5, population);
+        EventList contacts = createContactRecords(5, population);
 
         outbreak.setPopulation(population);
+        outbreak.setEventList(contacts);
         outbreak.setStandardProperties(properties);
         outbreak.setInitialCaseReader(initialCaseReader);
         outbreak.setDiseaseProperties(d);
-        outbreak.setContactRecords(contacts);
+
         outbreak.generateInitialInfection();
 
         long susceptible = population.values().stream().map(Case::status).filter(status -> status == SUSCEPTIBLE).count();
@@ -354,7 +357,7 @@ public class OutbreakTest {
         population.put(clearId, clear);
         outbreak.setPopulation(population);
 
-        ContactRecord contact = ImmutableContactRecord.builder().from(0).to(1).time(0).weight(100).build();
+        ContactEvent contact = ImmutableContactEvent.builder().from(0).to(1).label("").time(0).weight(100).build();
         int time = 0;
 
         outbreak.evaluateContact(time, contact);
@@ -389,7 +392,7 @@ public class OutbreakTest {
         population.put(clearId, clear);
         outbreak.setPopulation(population);
 
-        ContactRecord contact = ImmutableContactRecord.builder().from(0).to(1).time(0).weight(100).build();
+        ContactEvent contact = ImmutableContactEvent.builder().from(0).to(1).time(0).label("").weight(100).build();
         int time = 0;
         outbreak.evaluateContact(time, contact);
 
@@ -421,10 +424,10 @@ public class OutbreakTest {
             population.put(i, thisCase);
         }
 
-        Map<Integer, List<ContactRecord>> contacts = createContactRecords(days, population);
+        EventList contacts = createContactRecords(days, population);
 
         outbreak.setPopulation(population);
-        outbreak.setContactRecords(contacts);
+        outbreak.setEventList(contacts);
 
         outbreak.runContactData(days - 1, randomInfection);
 
@@ -455,10 +458,10 @@ public class OutbreakTest {
             population.put(i, thisCase);
         }
 
-        Map<Integer, List<ContactRecord>> contacts = createContactRecords(days, population);
+        EventList contacts = createContactRecords(days, population);
 
         outbreak.setPopulation(population);
-        outbreak.setContactRecords(contacts);
+        outbreak.setEventList(contacts);
 
         outbreak.runContactData(days - 1, randomInfection);
 
@@ -467,23 +470,26 @@ public class OutbreakTest {
 
     }
 
-    private Map<Integer, List<ContactRecord>> createContactRecords(int days, Map<Integer, Case> population) {
-        Map<Integer, List<ContactRecord>> contacts = new HashMap<>();
+    private EventList createContactRecords(int days, Map<Integer, Case> population) {
+        Map<Integer, List<ContactEvent>> contacts = new HashMap<>();
         for (int i = 0; i < days; i++) {
 
-            List<ContactRecord> dailyContacts = new ArrayList<>();
+            List<ContactEvent> dailyContacts = new ArrayList<>();
             for (int j = 0; j < random.nextInt(population.size()); j++) {
 
                 int personA = random.nextInt(population.size());
                 int personB = random.nextInt(population.size());
                 int weight = random.nextInt(100);
 
-                dailyContacts.add(ImmutableContactRecord.builder().from(personA).to(personB).weight(weight).time(i).build());
+                dailyContacts.add(ImmutableContactEvent.builder().from(personA).to(personB).label("").weight(weight).time(i).build());
 
             }
             contacts.put(i, dailyContacts);
         }
-        return contacts;
+        EventList eventList = new EventList();
+        eventList.addEvents(contacts);
+
+        return eventList;
     }
 
 

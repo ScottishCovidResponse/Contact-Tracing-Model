@@ -3,7 +3,8 @@ package uk.co.ramp;
 import org.junit.*;
 import org.mockito.Mockito;
 import org.springframework.context.ApplicationContext;
-import uk.co.ramp.contact.ContactRecord;
+import uk.co.ramp.event.ContactEvent;
+import uk.co.ramp.event.EventList;
 import uk.co.ramp.io.CompartmentWriter;
 import uk.co.ramp.io.ContactReader;
 import uk.co.ramp.io.csv.CsvException;
@@ -62,16 +63,17 @@ public class ContactRunnerTest {
 
         // empty map returns
         Map<Integer, Case> testData = new HashMap<>();
-        Map<Integer, List<ContactRecord>> testData2 = new HashMap<>();
+        Map<Integer, List<ContactEvent>> testData2 = new HashMap<>();
 
 
         // inner behaviour
-        when(reader.read(any(), any())).thenReturn(testData2);
+        when(reader.readEvents(any(), any())).thenReturn(testData2);
         when(populationGenerator.generate()).thenReturn(testData);
 
         // setting context
         when(applicationContext.getBean(PopulationGenerator.class)).thenReturn(populationGenerator);
         when(applicationContext.getBean(ContactReader.class)).thenReturn(reader);
+        when(applicationContext.getBean(EventList.class)).thenReturn(new EventList());
         when(applicationContext.getBean(Outbreak.class)).thenReturn(outbreak);
         when(applicationContext.getBean(CompartmentWriter.class)).thenReturn(compartmentWriter);
 
