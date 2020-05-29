@@ -153,19 +153,4 @@ public class Case {
         return Strings.padEnd(id() + "(" + exposedTime + ")", 12, ' ');
     }
 
-
-    @Override
-    public String toString() {
-        return "Case{" +
-                "human=" + human +
-                ", contactRecords=" + contactRecords +
-                ", status=" + status +
-                ", alertStatus=" + alertStatus +
-                ", exposedBy=" + exposedBy +
-                ", exposedTime=" + exposedTime +
-                ", nextVirusStatusChange=" + nextVirusStatusChange +
-                ", nextAlertStatusChange=" + nextAlertStatusChange +
-                ", wasInfectiousWhenTested=" + wasInfectiousWhenTested +
-                '}';
-    }
 }
