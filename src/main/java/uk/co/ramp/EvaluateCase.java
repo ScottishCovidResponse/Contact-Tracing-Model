@@ -129,7 +129,7 @@ public class EvaluateCase {
                     updateAlertStatus(TESTED_POSITIVE, time);
                 } else {
                     LOGGER.trace("user {} has tested negative", p.id());
-                    updateAlertStatus(NONE, time);
+                    updateAlertStatus(NONE, -1);
                 }
 
                 break;
@@ -172,10 +172,10 @@ public class EvaluateCase {
     private void updateAlertStatus(final AlertStatus newStatus, final int currentTime) {
 
         int time = getDistributionValue(properties.meanTestTime(), properties.maxTestTime());
-        AlertStatus oldstatus = p.alertStatus();
+        AlertStatus oldStatus = p.alertStatus();
         p.setAlertStatus(newStatus);
         p.setNextAlertStatusChange(currentTime + time);
-        LOGGER.trace("id: {} alertStatus: {} -> {} at t={}. Current Virus status: {}", p.id(), oldstatus, newStatus, currentTime, p.status());
+        LOGGER.trace("id: {} alertStatus: {} -> {} at t={}. Current Virus status: {}", p.id(), oldStatus, newStatus, currentTime, p.status());
 
     }
 
@@ -223,7 +223,12 @@ public class EvaluateCase {
 
         value = (int) Math.round(sample);
 
-        return Math.min(Math.max(value, 1), (int) max);
+        // recursing to avoid artificial peaks at 1 and max
+        if (value < 1 || value > max) {
+            value = getDistributionValue(mean, max);
+        }
+
+        return value;
     }
 
 
