@@ -53,7 +53,7 @@ sonarqube {
 }
 
 task copyFilesToInstall(type: Copy) {
-    from "contacts.csv", "populationSettings.json", "runSettings.json", "diseaseProperies.json"
+    from "contacts.csv", "populationSettings.json", "runSettings.json", "diseaseProperies.json", "isolationPolicies.json"
     into "$buildDir/install/ContactTracing/bin/"
 }
 

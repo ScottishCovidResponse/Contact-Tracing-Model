@@ -8,7 +8,7 @@ import uk.co.ramp.io.ImmutableDiseaseProperties;
 import java.io.*;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static uk.co.ramp.io.ProgressionDistribution.FLAT;
+import static uk.co.ramp.distribution.ProgressionDistribution.FLAT;
 
 public class DiseasePropertiesReaderTest {
     private static final String mockDiseaseSettings = "{ " +
