@@ -1,6 +1,9 @@
 package uk.co.ramp.event;
 
 import org.springframework.stereotype.Repository;
+import uk.co.ramp.event.types.ContactEvent;
+import uk.co.ramp.event.types.Event;
+import uk.co.ramp.event.types.ImmutableFormattedEvent;
 import uk.co.ramp.io.csv.CsvWriter;
 
 import java.io.FileWriter;

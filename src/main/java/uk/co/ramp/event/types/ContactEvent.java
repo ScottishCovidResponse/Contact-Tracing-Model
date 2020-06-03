@@ -1,4 +1,4 @@
-package uk.co.ramp.event;
+package uk.co.ramp.event.types;
 
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;

@@ -5,6 +5,8 @@ import com.google.gson.GsonBuilder;
 import com.google.gson.TypeAdapterFactory;
 import uk.co.ramp.io.types.DiseaseProperties;
 import uk.co.ramp.io.types.ImmutableDiseaseProperties;
+import uk.co.ramp.utilities.ImmutableMeanMax;
+import uk.co.ramp.utilities.MeanMax;
 
 import java.io.Reader;
 import java.io.Writer;
@@ -21,21 +23,24 @@ public class DiseasePropertiesReader {
     }
 
     public void create(Writer writer) {
-        DiseaseProperties wrapper = ImmutableDiseaseProperties.builder()
-                .meanTimeToInfectious(3)
-                .meanTimeToInfected(3)
-                .meanTimeToFinalState(7)
-                .maxTimeToInfectious(14)
-                .maxTimeToInfected(14)
-                .maxTimeToFinalState(14)
-                .randomInfectionRate(0.01)
-                .meanTestTime(1)
-                .maxTestTime(3)
-                .testAccuracy(0.95)
-                .exposureThreshold(10)
-                .exposureTuning(160)
-                .progressionDistribution(FLAT)
-                .build();
+
+        MeanMax meanMax = ImmutableMeanMax.builder().mean(5).max(8).build();
+
+        DiseaseProperties wrapper = ImmutableDiseaseProperties.builder().
+                timeLatent(meanMax).
+                timeRecoveryAsymp(meanMax).
+                timeRecoverySymp(meanMax).
+                timeRecoverySev(meanMax).
+                timeSymptomsOnset(meanMax).
+                timeDecline(meanMax).
+                timeDeath(meanMax).
+                timeTestAdministered(meanMax).
+                timeTestResult(meanMax).
+                testAccuracy(0.95).
+                exposureThreshold(10).
+                exposureTuning(160).
+                progressionDistribution(FLAT).
+                build();
 
         Gson gson = new GsonBuilder().setPrettyPrinting().create();
         gson.toJson(wrapper, writer);

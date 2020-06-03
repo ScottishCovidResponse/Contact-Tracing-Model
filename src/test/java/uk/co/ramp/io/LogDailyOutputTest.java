@@ -38,7 +38,7 @@ public class LogDailyOutputTest {
             map.put(v, random.nextInt(100));
         }
 
-        logger.log(time, map);
+        logger.log(time, map, previousActiveCases);
 
         int[] numbers = Arrays.stream(logSpy.getOutput().replace("[INFO]", "")
                 .replaceAll("(?m:\\||$)", "").trim().split("\\s+"))
@@ -68,7 +68,7 @@ public class LogDailyOutputTest {
             map.put(v, random.nextInt(100));
         }
 
-        logger.log(time, map);
+        logger.log(time, map, previousActiveCases);
         Assert.assertThat(logSpy.getOutput(), containsString("|   Time  |    S    |    E1   |    E2   |   Ia    |    Is   |    R    |    D    |"));
 
     }

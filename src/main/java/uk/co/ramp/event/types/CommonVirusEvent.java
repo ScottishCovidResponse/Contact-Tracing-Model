@@ -1,4 +1,4 @@
-package uk.co.ramp.event;
+package uk.co.ramp.event.types;
 
 import uk.co.ramp.people.VirusStatus;
 

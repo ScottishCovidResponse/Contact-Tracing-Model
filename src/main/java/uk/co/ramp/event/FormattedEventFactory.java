@@ -1,5 +1,6 @@
 package uk.co.ramp.event;
 
+import uk.co.ramp.event.types.*;
 import uk.co.ramp.people.Case;
 
 public class FormattedEventFactory {

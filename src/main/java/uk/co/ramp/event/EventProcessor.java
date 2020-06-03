@@ -6,11 +6,13 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import uk.co.ramp.event.types.*;
 import uk.co.ramp.io.types.DiseaseProperties;
 import uk.co.ramp.io.types.StandardProperties;
 import uk.co.ramp.people.AlertStatus;
 import uk.co.ramp.people.Case;
 import uk.co.ramp.people.VirusStatus;
+import uk.co.ramp.utilities.MeanMax;
 import uk.co.ramp.utilities.UtilitiesBean;
 
 import java.util.ArrayList;
@@ -158,7 +160,9 @@ public class EventProcessor {
 
             // will return self if at DEAD or RECOVERED
             if (event.newStatus() != nextStatus) {
-                int nextTime = timeInCompartment(nextStatus);
+
+
+                int nextTime = timeInCompartment(event.newStatus(), nextStatus);
 
                 VirusEvent subsequentEvent = ImmutableVirusEvent.builder().
                         id(event.id()).
@@ -186,7 +190,7 @@ public class EventProcessor {
                 population.get(event.id()).processEvent(event, time);
 
                 VirusStatus nextStatus = determineNextStatus(event);
-                int nextTime = timeInCompartment(nextStatus);
+                int nextTime = timeInCompartment(event.newStatus(), nextStatus);
 
                 VirusEvent subsequentEvent = ImmutableVirusEvent.builder().
                         id(event.id()).
@@ -229,9 +233,9 @@ public class EventProcessor {
     Optional<InfectionEvent> evaluateExposures(ContactEvent c, int time) {
         Case personA = utils.getMostSevere(population.get(c.to()), population.get(c.from()));
         Case personB = personA == population.get(c.to()) ? population.get(c.from()) : population.get(c.to());
-
-        personA.addContact(c);
-        personB.addContact(c);
+//
+//        personA.addContact(c);
+//        personB.addContact(c);
 
         boolean dangerMix = personA.isInfectious() && personB.status() == SUSCEPTIBLE;
 
@@ -306,35 +310,64 @@ public class EventProcessor {
     }
 
 
-    private int timeInCompartment(VirusStatus newStatus) {
-        double mean;
-        double max;
-        switch (newStatus) {
+    private int timeInCompartment(VirusStatus currentStatus, VirusStatus newStatus) {
+
+        MeanMax progressionData;
+        // TODO check when not exhausted
+        switch (currentStatus) {
             case EXPOSED:
-                mean = diseaseProperties.meanTimeToInfectious();
-                max = diseaseProperties.maxTimeToInfectious();
+                progressionData = diseaseProperties.timeLatent();
                 break;
             case PRESYMPTOMATIC:
-                mean = diseaseProperties.meanTimeToInfected();
-                max = diseaseProperties.maxTimeToInfected();
+                progressionData = diseaseProperties.timeSymptomsOnset();
+                break;
+            case ASYMPTOMATIC:
+                progressionData = diseaseProperties.timeRecoveryAsymp();
+                break;
+            case SYMPTOMATIC:
+                if (newStatus == SEVERELY_SYMPTOMATIC) {
+                    progressionData = diseaseProperties.timeDecline();
+                } else {
+                    progressionData = diseaseProperties.timeRecoverySymp();
+                }
+                break;
+            case SEVERELY_SYMPTOMATIC:
+                if (newStatus == RECOVERED) {
+                    progressionData = diseaseProperties.timeRecoverySev();
+                } else {
+                    progressionData = diseaseProperties.timeDeath();
+                }
                 break;
             default:
-                mean = diseaseProperties.meanTimeToFinalState();
-                max = diseaseProperties.maxTimeToFinalState();
+                progressionData = diseaseProperties.timeRecoverySymp();
         }
 
-        return getDistributionValue(mean, max);
+        return getDistributionValue(progressionData);
     }
 
     private int timeInStatus(AlertStatus newStatus) {
-
         // todo elaborate
-        double mean = diseaseProperties.meanTestTime();
-        double max = diseaseProperties.maxTestTime();
-        return getDistributionValue(mean, max);
+        switch (newStatus) {
+            case TESTED_POSITIVE:
+                break;
+            case TESTED_NEGATIVE:
+                break;
+            case AWAITING_RESULT:
+                break;
+            case REQUESTED_TEST:
+                break;
+            case ALERTED:
+                break;
+            case NONE:
+                break;
+        }
+        MeanMax progressionData = diseaseProperties.timeTestAdministered();
+        return getDistributionValue(progressionData);
     }
 
-    int getDistributionValue(double mean, double max) {
+    int getDistributionValue(MeanMax progressionData) {
+        double mean = progressionData.mean();
+        double max = progressionData.max();
 
         int value = (int) Math.round(mean);
         double sample;

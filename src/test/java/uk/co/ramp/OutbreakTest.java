@@ -8,9 +8,9 @@ import org.junit.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
 import org.springframework.test.util.ReflectionTestUtils;
-import uk.co.ramp.event.ContactEvent;
 import uk.co.ramp.event.EventList;
 import uk.co.ramp.event.ImmutableContactEvent;
+import uk.co.ramp.event.types.ContactEvent;
 import uk.co.ramp.io.InitialCaseReader;
 import uk.co.ramp.io.ProgressionDistribution;
 import uk.co.ramp.io.types.DiseaseProperties;
@@ -622,7 +622,7 @@ public class OutbreakTest {
 
         outbreak.setPopulation(population);
 
-        int activeCases = outbreak.calculateDailyStatistics(time);
+        int activeCases = outbreak.updateLogActiveCases(time);
         Assert.assertEquals(population.size(), activeCases + inactiveCases);
 
     }

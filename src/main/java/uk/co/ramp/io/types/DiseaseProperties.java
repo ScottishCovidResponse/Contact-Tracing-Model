@@ -3,25 +3,29 @@ package uk.co.ramp.io.types;
 import org.immutables.gson.Gson.TypeAdapters;
 import org.immutables.value.Value.Immutable;
 import uk.co.ramp.io.ProgressionDistribution;
+import uk.co.ramp.utilities.MeanMax;
 
 @TypeAdapters
 @Immutable
 public interface DiseaseProperties {
-    double meanTimeToInfectious();
 
-    double maxTimeToInfectious();
+    MeanMax timeLatent();
 
-    double meanTimeToInfected();
+    MeanMax timeRecoveryAsymp();
 
-    double maxTimeToInfected();
+    MeanMax timeRecoverySymp();
 
-    double meanTimeToFinalState();
+    MeanMax timeRecoverySev();
 
-    double maxTimeToFinalState();
+    MeanMax timeSymptomsOnset();
 
-    double meanTestTime();
+    MeanMax timeDecline();
 
-    double maxTestTime();
+    MeanMax timeDeath();
+
+    MeanMax timeTestAdministered();
+
+    MeanMax timeTestResult();
 
     double testAccuracy();
 

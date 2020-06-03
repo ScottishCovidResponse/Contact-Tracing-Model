@@ -6,8 +6,8 @@ import org.junit.Rule;
 import org.junit.Test;
 import uk.co.ramp.LogSpy;
 import uk.co.ramp.TestUtils;
-import uk.co.ramp.event.ContactEvent;
-import uk.co.ramp.event.ImmutableContactEvent;
+import uk.co.ramp.event.types.ContactEvent;
+import uk.co.ramp.event.types.ImmutableContactEvent;
 
 import java.util.*;
 

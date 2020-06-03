@@ -3,7 +3,7 @@
 //import org.apache.commons.math3.random.RandomDataGenerator;
 //import org.apache.logging.log4j.LogManager;
 //import org.apache.logging.log4j.Logger;
-//import uk.co.ramp.event.ContactEvent;
+//import uk.co.ramp.event.types.ContactEvent;
 //import uk.co.ramp.io.types.DiseaseProperties;
 //import uk.co.ramp.people.AlertStatus;
 //import uk.co.ramp.people.Case;

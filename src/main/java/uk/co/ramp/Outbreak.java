@@ -4,10 +4,10 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import uk.co.ramp.event.Event;
 import uk.co.ramp.event.EventList;
 import uk.co.ramp.event.EventProcessor;
-import uk.co.ramp.event.ImmutableInfectionEvent;
+import uk.co.ramp.event.types.Event;
+import uk.co.ramp.event.types.ImmutableInfectionEvent;
 import uk.co.ramp.io.InfectionMap;
 import uk.co.ramp.io.InitialCaseReader;
 import uk.co.ramp.io.LogDailyOutput;
@@ -36,10 +36,10 @@ public class Outbreak {
 
     private final LogDailyOutput outputLog = new LogDailyOutput();
 
+    private int activeCases = 0;
 
     private final Map<Integer, CmptRecord> records = new HashMap<>();
     private UtilitiesBean utils;
-
 
     public void setPopulation(Map<Integer, Case> population) {
         this.population = population;
@@ -107,14 +107,11 @@ public class Outbreak {
     void runToCompletion() {
         // the latest time to run to
         int timeLimit = properties.timeLimit();
-
         double randomInfectionRate = diseaseProperties.randomInfectionRate();
-
         runContactData(timeLimit, randomInfectionRate);
 
         new InfectionMap(population).outputMap();
         eventList.output();
-
     }
 
 
@@ -124,7 +121,7 @@ public class Outbreak {
 
             eventProcessor.setPopulation(population);
             eventProcessor.process(time, randomInfectionRate, lastContact);
-            int activeCases = calculateDailyStatistics(time);
+            updateLogActiveCases(time);
 
             // stop random infections after contacts end
             if (activeCases == 0 && lastContact < time) {
@@ -140,15 +137,13 @@ public class Outbreak {
         }
     }
 
-    int calculateDailyStatistics(int time) {
+    void updateLogActiveCases(int time) {
+        int previousActiveCases = activeCases;
         Map<VirusStatus, Integer> stats = utils.getCmptCounts(population);
-        int activeCases = stats.get(EXPOSED) + stats.get(PRESYMPTOMATIC) + stats.get(SYMPTOMATIC) + stats.get(SEVERELY_SYMPTOMATIC) + stats.get(ASYMPTOMATIC);
+        activeCases = stats.get(EXPOSED) + stats.get(ASYMPTOMATIC) + stats.get(PRESYMPTOMATIC) + stats.get(SYMPTOMATIC) + stats.get(SEVERELY_SYMPTOMATIC);
 
-        CmptRecord cmptRecord = outputLog.log(time, stats);
+        CmptRecord cmptRecord = outputLog.log(time, stats, activeCases - previousActiveCases);
         records.put(time, cmptRecord);
-
-        return activeCases;
-
     }
 
 }

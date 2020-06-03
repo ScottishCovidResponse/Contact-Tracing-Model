@@ -3,8 +3,8 @@ package uk.co.ramp.io;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.stereotype.Service;
-import uk.co.ramp.event.ContactEvent;
-import uk.co.ramp.event.ImmutableContactEvent;
+import uk.co.ramp.event.types.ContactEvent;
+import uk.co.ramp.event.types.ImmutableContactEvent;
 import uk.co.ramp.io.csv.CsvReader;
 import uk.co.ramp.io.types.StandardProperties;
 

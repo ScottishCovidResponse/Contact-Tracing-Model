@@ -3,6 +3,7 @@ package uk.co.ramp.event;
 import org.junit.Before;
 import org.junit.Test;
 import uk.co.ramp.TestUtils;
+import uk.co.ramp.event.types.ContactEvent;
 import uk.co.ramp.io.ContactReader;
 import uk.co.ramp.io.types.StandardProperties;
 

@@ -14,9 +14,9 @@ public class LogDailyOutput {
 
     private static final Logger LOGGER = LogManager.getLogger(LogDailyOutput.class);
 
-    public CmptRecord log(int time, Map<VirusStatus, Integer> stats) {
+    public CmptRecord log(int time, Map<VirusStatus, Integer> stats, int dActive) {
         if (time == 0) {
-            LOGGER.info("|   Time  |    S    |    E    |    A    |    P    |   Sym   |   Sev   |    R    |    D    |");
+            LOGGER.info("|   Time  |    S    |    E    |    A    |    P    |   Sym   |   Sev   |    R    |    D    |   dAct  |");
         }
 
         CmptRecord cmptRecord = ImmutableCmptRecord.builder().time(time).
@@ -29,7 +29,7 @@ public class LogDailyOutput {
                 r(stats.get(RECOVERED)).
                 d(stats.get(DEAD)).build();
 
-        String s = String.format("| %7d | %7d | %7d | %7d | %7d | %7d | %7d | %7d | %7d |",
+        String s = String.format("| %7d | %7d | %7d | %7d | %7d | %7d | %7d | %7d | %7d | %7d |",
                 cmptRecord.time(),
                 cmptRecord.s(),
                 cmptRecord.e(),
@@ -38,7 +38,8 @@ public class LogDailyOutput {
                 cmptRecord.sym(),
                 cmptRecord.sev(),
                 cmptRecord.r(),
-                cmptRecord.d());
+                cmptRecord.d(),
+                dActive);
 
         LOGGER.info(s);
         return cmptRecord;

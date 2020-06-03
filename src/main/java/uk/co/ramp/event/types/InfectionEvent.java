@@ -1,4 +1,4 @@
-package uk.co.ramp.event;
+package uk.co.ramp.event.types;
 
 import org.immutables.value.Value;
 
