@@ -116,7 +116,7 @@ public class EvaluateCaseTest {
     public void randomExposureWrongStatus() {
         int t = r.nextInt(10);
 
-        aCase.setStatus(EXPOSED);
+        aCase.setVirusStatus(EXPOSED);
         try {
             evaluateCase.randomExposure(t);
         } catch (InvalidStatusTransitionException e) {

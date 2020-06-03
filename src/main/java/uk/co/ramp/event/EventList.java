@@ -1,23 +1,26 @@
 package uk.co.ramp.event;
 
 import org.springframework.stereotype.Repository;
+import uk.co.ramp.io.csv.CsvWriter;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.io.Writer;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @Repository
 public class EventList {
 
-    Map<Integer, List<Event>> map = new HashMap<>();
+    private final Map<Integer, List<Event>> map = new HashMap<>();
+    private final Map<Integer, List<Event>> completedMap = new HashMap<>();
 
     //create
     public void addEvent(Event e) {
         map.computeIfAbsent(e.time(), k -> new ArrayList<>()).add(e);
     }
 
-    public void addEvents(List<ContactEvent> events) {
+    public void addEvents(List<Event> events) {
         events.forEach(this::addEvent);
     }
 
@@ -31,6 +34,11 @@ public class EventList {
         map.computeIfAbsent(time, k -> new ArrayList<>()).addAll(events);
     }
 
+    public void completed(Event e) {
+        completedMap.computeIfAbsent(e.time(), k -> new ArrayList<>()).add(e);
+    }
+
+
     //read
     public List<Event> getForTime(int time) {
         return map.getOrDefault(time, new ArrayList<>());
@@ -40,16 +48,22 @@ public class EventList {
         return map;
     }
 
-    //update
-    public void replace(int time, List<Event> events) {
-        map.replace(time, events);
+    public void output() {
+
+        List<Integer> timeStamps = new ArrayList<>(completedMap.keySet());
+        timeStamps.sort(Comparator.naturalOrder());
+        List<ImmutableFormattedEvent> finalList = timeStamps.stream().map(completedMap::get).flatMap(Collection::stream).map(FormattedEventFactory::create).filter(Objects::nonNull).collect(Collectors.toList());
+
+        try (Writer writer = new FileWriter("events.csv")) {
+            new CsvWriter().write(writer, finalList, ImmutableFormattedEvent.class);
+
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+//        for (FormattedEvent event : finalList ){
+//            System.out.println("event = " + event);
+//        }
+
+
     }
-
-
-    //delete
-    public void deleteTime(int time) {
-        map.remove(time);
-    }
-
-
 }

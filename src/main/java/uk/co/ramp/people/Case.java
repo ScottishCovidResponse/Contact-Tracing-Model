@@ -1,7 +1,7 @@
 package uk.co.ramp.people;
 
 import com.google.common.base.Strings;
-import uk.co.ramp.event.ContactEvent;
+import uk.co.ramp.event.*;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -13,7 +13,7 @@ public class Case {
 
     private final Human human;
     private final Set<ContactEvent> contactRecords;
-    private VirusStatus status;
+    private VirusStatus virusStatus;
     private AlertStatus alertStatus;
     private int exposedBy;
     private int exposedTime;
@@ -27,7 +27,7 @@ public class Case {
 
     public Case(final Human human) {
         this.human = human;
-        status = SUSCEPTIBLE;
+        virusStatus = SUSCEPTIBLE;
         alertStatus = NONE;
         contactRecords = new HashSet<>();
         exposedBy = DEFAULT;
@@ -63,7 +63,7 @@ public class Case {
     }
 
     public boolean isInfectious() {
-        return status == INFECTED || status == INFECTED_SYMP || status == EXPOSED_2;
+        return virusStatus == ASYMPTOMATIC || virusStatus == SYMPTOMATIC || virusStatus == PRESYMPTOMATIC;
     }
 
     public Human getHuman() {
@@ -71,7 +71,7 @@ public class Case {
     }
 
     public VirusStatus status() {
-        return status;
+        return virusStatus;
     }
 
     public static int getInitial() {
@@ -100,8 +100,8 @@ public class Case {
         this.wasInfectiousWhenTested = wasInfectiousWhenTested;
     }
 
-    public void setStatus(VirusStatus newStatus) {
-        this.status = this.status.transitionTo(newStatus);
+    protected void setVirusStatus(VirusStatus newStatus) {
+        this.virusStatus = this.virusStatus.transitionTo(newStatus);
     }
 
     public int nextAlertStatusChange() {
@@ -123,7 +123,7 @@ public class Case {
         return alertStatus;
     }
 
-    public void setAlertStatus(AlertStatus alertStatus) {
+    protected void setAlertStatus(AlertStatus alertStatus) {
         this.alertStatus = this.alertStatus.transitionTo(alertStatus);
     }
 
@@ -135,7 +135,7 @@ public class Case {
         return exposedBy;
     }
 
-    public void setExposedBy(int exposedBy) {
+    protected void setExposedBy(int exposedBy) {
         this.exposedBy = exposedBy;
     }
 
@@ -145,12 +145,48 @@ public class Case {
         return exposedTime;
     }
 
-    public void setExposedTime(int exposedTime) {
+    protected void setExposedTime(int exposedTime) {
         this.exposedTime = exposedTime;
     }
 
     public String getSource() {
         return Strings.padEnd(id() + "(" + exposedTime + ")", 12, ' ');
     }
+
+    protected void processInfectionEvent(InfectionEvent event, int time) {
+
+        setVirusStatus(event.newStatus());
+        setExposedTime(event.exposedTime());
+        setExposedBy(event.exposedBy());
+
+    }
+
+
+    protected void processVirusEvent(VirusEvent event, int time) {
+        setVirusStatus(event.newStatus());
+    }
+
+    public void processEvent(Event event, int time) {
+
+        if (event instanceof VirusEvent) {
+            processVirusEvent((VirusEvent) event, time);
+        } else if (event instanceof InfectionEvent) {
+            processInfectionEvent((InfectionEvent) event, time);
+
+        } else if (event instanceof AlertEvent) {
+
+            processAlertEvent((AlertEvent) event, time);
+
+        } else {
+            throw new RuntimeException("uncovered condition");
+        }
+
+
+    }
+
+    private void processAlertEvent(AlertEvent event, int time) {
+        setAlertStatus(event.newStatus());
+    }
+
 
 }

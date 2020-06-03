@@ -3,8 +3,8 @@ package uk.co.ramp;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.CommandLineRunner;
 import org.springframework.context.ApplicationContext;
-import org.springframework.context.ApplicationContextAware;
 import org.springframework.stereotype.Service;
 import uk.co.ramp.event.EventList;
 import uk.co.ramp.io.CompartmentWriter;
@@ -22,7 +22,7 @@ import java.util.List;
 import java.util.Map;
 
 @Service
-public class ContactRunner implements ApplicationContextAware {
+public class ContactRunner implements CommandLineRunner {
 
     private static final Logger LOGGER = LogManager.getLogger(ContactRunner.class);
     public static final String COMPARTMENTS_CSV = "Compartments.csv";
@@ -35,7 +35,6 @@ public class ContactRunner implements ApplicationContextAware {
         this.runProperties = standardProperties;
     }
 
-    @Override
     @Autowired
     public void setApplicationContext(ApplicationContext applicationContext) {
         this.ctx = applicationContext;
@@ -46,7 +45,9 @@ public class ContactRunner implements ApplicationContextAware {
         this.inputFiles = inputFiles;
     }
 
-    public void run() throws IOException {
+
+    @Override
+    public void run(String... args) throws IOException {
 
         Map<Integer, Case> population = ctx.getBean(PopulationGenerator.class).generate();
         try (Reader reader = new FileReader(inputFiles.contactData())) {
@@ -54,10 +55,7 @@ public class ContactRunner implements ApplicationContextAware {
             ContactReader contactReader = ctx.getBean(ContactReader.class);
             EventList eventList = ctx.getBean(EventList.class);
 
-//            Map<Integer, List<ContactRecord>> contactRecords = contactReader.read(reader, runProperties);
-//            Reader reader2 = new FileReader(inputFiles.contactData());
             eventList.addEvents(contactReader.readEvents(reader, runProperties));
-
 
             LOGGER.info("Generated Population and Parsed Contact data");
 

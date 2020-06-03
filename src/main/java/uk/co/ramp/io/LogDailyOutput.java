@@ -16,25 +16,27 @@ public class LogDailyOutput {
 
     public CmptRecord log(int time, Map<VirusStatus, Integer> stats) {
         if (time == 0) {
-            LOGGER.info("|   Time  |    S    |    E1   |    E2   |   Ia    |    Is   |    R    |    D    |");
+            LOGGER.info("|   Time  |    S    |    E    |    A    |    P    |   Sym   |   Sev   |    R    |    D    |");
         }
 
         CmptRecord cmptRecord = ImmutableCmptRecord.builder().time(time).
                 s(stats.get(SUSCEPTIBLE)).
-                e1(stats.get(EXPOSED)).
-                e2(stats.get(EXPOSED_2)).
-                ia(stats.get(INFECTED)).
-                is(stats.get(INFECTED_SYMP)).
+                e(stats.get(EXPOSED)).
+                a(stats.get(ASYMPTOMATIC)).
+                p(stats.get(PRESYMPTOMATIC)).
+                sym(stats.get(SYMPTOMATIC)).
+                sev(stats.get(SEVERELY_SYMPTOMATIC)).
                 r(stats.get(RECOVERED)).
                 d(stats.get(DEAD)).build();
 
-        String s = String.format("| %7d | %7d | %7d | %7d | %7d | %7d | %7d | %7d |",
+        String s = String.format("| %7d | %7d | %7d | %7d | %7d | %7d | %7d | %7d | %7d |",
                 cmptRecord.time(),
                 cmptRecord.s(),
-                cmptRecord.e1(),
-                cmptRecord.e2(),
-                cmptRecord.ia(),
-                cmptRecord.is(),
+                cmptRecord.e(),
+                cmptRecord.a(),
+                cmptRecord.p(),
+                cmptRecord.sym(),
+                cmptRecord.sev(),
                 cmptRecord.r(),
                 cmptRecord.d());
 

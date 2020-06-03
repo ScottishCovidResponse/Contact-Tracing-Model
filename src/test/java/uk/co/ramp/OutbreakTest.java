@@ -120,10 +120,10 @@ public class OutbreakTest {
 
         outbreak.evaluateExposures(contact, time);
 
-        verify(caseA, times(1)).setStatus(any());
+        verify(caseA, times(1)).setVirusStatus(any());
 
         ArgumentCaptor<VirusStatus> captor = ArgumentCaptor.forClass(VirusStatus.class);
-        verify(caseA).setStatus(captor.capture());
+        verify(caseA).setVirusStatus(captor.capture());
         VirusStatus interceptedStatus = captor.getValue();
 
         ArgumentCaptor<Integer> captor2 = ArgumentCaptor.forClass(Integer.class);

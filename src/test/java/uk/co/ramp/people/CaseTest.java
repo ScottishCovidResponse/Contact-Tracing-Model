@@ -38,7 +38,7 @@ public class CaseTest {
                 List<VirusStatus> validOptions = currentStatus.getValidTransitions();
                 int size = validOptions.size();
                 VirusStatus next = validOptions.get(random.nextInt(size));
-                person.setStatus(next);
+                person.setVirusStatus(next);
 
                 Assert.assertEquals(next, person.status());
             }
@@ -58,7 +58,7 @@ public class CaseTest {
             VirusStatus next = invalidOptions.get(random.nextInt(size));
 
             try {
-                person.setStatus(next);
+                person.setVirusStatus(next);
                 Assert.fail();
             } catch (InvalidStatusTransitionException e) {
                 Assert.assertThat(e.getMessage(), containsString(next.toString()));
@@ -200,7 +200,7 @@ public class CaseTest {
         Assert.assertEquals(Case.getDefault(), person.nextVirusStatusChange());
 
         int time = random.nextInt(10);
-        person.setStatus(EXPOSED);
+        person.setVirusStatus(EXPOSED);
         person.setNextVirusStatusChange(time);
 
         Assert.assertFalse(person.isInfectious());
@@ -208,7 +208,7 @@ public class CaseTest {
         Assert.assertEquals(time, person.nextVirusStatusChange());
 
         time += random.nextInt(10);
-        person.setStatus(EXPOSED_2);
+        person.setVirusStatus(EXPOSED_2);
         person.setNextVirusStatusChange(time);
 
         Assert.assertTrue(person.isInfectious());
@@ -216,7 +216,7 @@ public class CaseTest {
         Assert.assertEquals(time, person.nextVirusStatusChange());
 
         time += random.nextInt(10);
-        person.setStatus(INFECTED_SYMP);
+        person.setVirusStatus(INFECTED_SYMP);
         person.setNextVirusStatusChange(time);
 
         Assert.assertTrue(person.isInfectious());
@@ -225,7 +225,7 @@ public class CaseTest {
 
 
         time += random.nextInt(10);
-        person.setStatus(RECOVERED);
+        person.setVirusStatus(RECOVERED);
         person.setNextVirusStatusChange(time);
 
         Assert.assertFalse(person.isInfectious());
@@ -233,7 +233,7 @@ public class CaseTest {
         Assert.assertEquals(time, person.nextVirusStatusChange());
 
         try {
-            person.setStatus(DEAD);
+            person.setVirusStatus(DEAD);
         } catch (InvalidStatusTransitionException e) {
             Assert.assertThat(logSpy.getOutput(), containsString("It is not valid to transition between statuses RECOVERED -> DEAD"));
             throw e;
@@ -245,11 +245,11 @@ public class CaseTest {
     @Test
     public void isInfectious() {
 
-        person.setStatus(EXPOSED);
+        person.setVirusStatus(EXPOSED);
         Assert.assertFalse(person.isInfectious());
-        person.setStatus(EXPOSED_2);
+        person.setVirusStatus(EXPOSED_2);
         Assert.assertTrue(person.isInfectious());
-        person.setStatus(INFECTED);
+        person.setVirusStatus(INFECTED);
         Assert.assertTrue(person.isInfectious());
 
     }
