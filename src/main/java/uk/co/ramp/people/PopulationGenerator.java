@@ -76,6 +76,7 @@ public class PopulationGenerator {
         for (int i = 0; i < runProperties.populationSize(); i++) {
 
             int age = findAge();
+
             Gender gender = dataGenerator.nextUniform(0, 1) > properties.genderBalance() / 2d ? Gender.FEMALE : Gender.MALE;
             double compliance = dataGenerator.nextUniform(0, 1);
             double health = dataGenerator.nextUniform(0, 1);
