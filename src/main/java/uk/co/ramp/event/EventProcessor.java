@@ -24,7 +24,6 @@ import java.util.stream.Collectors;
 import static uk.co.ramp.people.AlertStatus.*;
 import static uk.co.ramp.people.VirusStatus.*;
 
-// to move all event logic
 @Service
 public class EventProcessor {
 

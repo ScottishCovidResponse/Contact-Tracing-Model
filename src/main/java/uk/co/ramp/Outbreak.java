@@ -108,6 +108,7 @@ public class Outbreak {
         // the latest time to run to
         int timeLimit = properties.timeLimit();
         double randomInfectionRate = diseaseProperties.randomInfectionRate();
+
         runContactData(timeLimit, randomInfectionRate);
 
         new InfectionMap(population).outputMap();
@@ -115,9 +116,15 @@ public class Outbreak {
     }
 
 
-    void runContactData(int maxContact, double randomInfectionRate) {
+    void runContactData(int timeLimit, double randomInfectionRate) {
         int lastContact = eventList.getMap().keySet().stream().max(Comparator.naturalOrder()).orElseThrow();
-        for (int time = 0; time <= maxContact; time++) {
+
+        if (lastContact > timeLimit) {
+            LOGGER.info("timeLimit it lower than time of last contact event");
+            LOGGER.info("Not all contact data will be used");
+        }
+
+        for (int time = 0; time <= timeLimit; time++) {
 
             eventProcessor.setPopulation(population);
             eventProcessor.process(time, randomInfectionRate, lastContact);
