@@ -38,7 +38,7 @@
   "testAccuracy": 0.95,
   "exposureTuning": 100,
   "exposureThreshold": 50,
-  "randomInfectionRate": 0.001,
+  "randomInfectionRate": 0.05,
   "progressionDistribution": "EXPONENTIAL"
 }
 

@@ -4,6 +4,8 @@ import com.google.gson.JsonParser;
 import org.junit.Test;
 import uk.co.ramp.io.types.DiseaseProperties;
 import uk.co.ramp.io.types.ImmutableDiseaseProperties;
+import uk.co.ramp.utilities.ImmutableMeanMax;
+import uk.co.ramp.utilities.MeanMax;
 
 import java.io.*;
 
@@ -11,20 +13,49 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static uk.co.ramp.io.ProgressionDistribution.FLAT;
 
 public class DiseasePropertiesReaderTest {
-    private static final String mockDiseaseSettings = "{ " +
-            "   'meanTimeToInfectious': 3.0, " +
-            "   'meanTimeToInfected': 3.0, " +
-            "   'meanTimeToFinalState': 7.0, " +
-            "   'maxTimeToInfectious': 14.0, " +
-            "   'maxTimeToInfected': 14.0, " +
-            "   'maxTimeToFinalState': 14.0, " +
-            "   'exposureTuning': 160, " +
-            "   'meanTestTime': 1, " +
-            "   'maxTestTime': 3, " +
-            "   'testAccuracy': 0.95, " +
-            "   'exposureThreshold': 10, " +
-            "   'randomInfectionRate': 0.01, " +
-            "   'progressionDistribution':  'FLAT' }";
+    private static final String mockDiseaseSettings = "{\n" +
+            "  \"timeLatent\": {\n" +
+            "    \"mean\": 5,\n" +
+            "    \"max\": 8\n" +
+            "  },\n" +
+            "  \"timeRecoveryAsymp\": {\n" +
+            "    \"mean\": 5,\n" +
+            "    \"max\": 8\n" +
+            "  },\n" +
+            "  \"timeRecoverySymp\": {\n" +
+            "    \"mean\": 5,\n" +
+            "    \"max\": 8\n" +
+            "  },\n" +
+            "  \"timeRecoverySev\": {\n" +
+            "    \"mean\": 5,\n" +
+            "    \"max\": 8\n" +
+            "  },\n" +
+            "  \"timeSymptomsOnset\": {\n" +
+            "    \"mean\": 5,\n" +
+            "    \"max\": 8\n" +
+            "  },\n" +
+            "  \"timeDecline\": {\n" +
+            "    \"mean\": 5,\n" +
+            "    \"max\": 8\n" +
+            "  },\n" +
+            "  \"timeDeath\": {\n" +
+            "    \"mean\": 5,\n" +
+            "    \"max\": 8\n" +
+            "  },\n" +
+            "  \"timeTestAdministered\": {\n" +
+            "    \"mean\": 5,\n" +
+            "    \"max\": 8\n" +
+            "  },\n" +
+            "  \"timeTestResult\": {\n" +
+            "    \"mean\": 5,\n" +
+            "    \"max\": 8\n" +
+            "  },\n" +
+            "  \"testAccuracy\": 0.95,\n" +
+            "  \"exposureTuning\": 5,\n" +
+            "  \"exposureThreshold\": 500,\n" +
+            "  \"randomInfectionRate\": 0.05,\n" +
+            "  \"progressionDistribution\": \"FLAT\"\n" +
+            "}";
 
     @Test
     public void testRead() {
@@ -33,21 +64,24 @@ public class DiseasePropertiesReaderTest {
         var reader = new DiseasePropertiesReader();
         DiseaseProperties actualDiseaseProperties = reader.read(underlyingReader);
 
-        var expectedDiseaseProperties = ImmutableDiseaseProperties.builder()
-                .exposureTuning(160)
-                .meanTimeToInfectious(3.0)
-                .meanTimeToInfected(3.0)
-                .meanTimeToFinalState(7.0)
-                .maxTimeToInfectious(14.0)
-                .maxTimeToInfected(14.0)
-                .maxTimeToFinalState(14.0)
-                .randomInfectionRate(0.01)
-                .meanTestTime(1)
-                .maxTestTime(3)
-                .testAccuracy(0.95)
-                .exposureThreshold(10)
-                .progressionDistribution(FLAT)
-                .build();
+        MeanMax meanMax = ImmutableMeanMax.builder().mean(5).max(8).build();
+
+        var expectedDiseaseProperties = ImmutableDiseaseProperties.builder().
+                timeLatent(meanMax).
+                timeRecoveryAsymp(meanMax).
+                timeRecoverySymp(meanMax).
+                timeRecoverySev(meanMax).
+                timeSymptomsOnset(meanMax).
+                timeDecline(meanMax).
+                timeDeath(meanMax).
+                timeTestAdministered(meanMax).
+                timeTestResult(meanMax).
+                testAccuracy(0.95).
+                exposureThreshold(500).
+                exposureTuning(5).
+                progressionDistribution(FLAT).
+                randomInfectionRate(0.05).
+                build();
         assertThat(actualDiseaseProperties).isEqualTo(expectedDiseaseProperties);
     }
 

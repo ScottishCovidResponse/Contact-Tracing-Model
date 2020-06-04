@@ -37,9 +37,10 @@ public class DiseasePropertiesReader {
                 timeTestAdministered(meanMax).
                 timeTestResult(meanMax).
                 testAccuracy(0.95).
-                exposureThreshold(10).
-                exposureTuning(160).
+                exposureThreshold(500).
+                exposureTuning(5).
                 progressionDistribution(FLAT).
+                randomInfectionRate(0.05).
                 build();
 
         Gson gson = new GsonBuilder().setPrettyPrinting().create();
