@@ -8,7 +8,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import uk.co.ramp.event.types.*;
 import uk.co.ramp.io.types.DiseaseProperties;
-import uk.co.ramp.io.types.StandardProperties;
 import uk.co.ramp.people.AlertStatus;
 import uk.co.ramp.people.Case;
 import uk.co.ramp.people.VirusStatus;
@@ -28,7 +27,6 @@ import static uk.co.ramp.people.VirusStatus.*;
 public class EventProcessor {
 
     private static final Logger LOGGER = LogManager.getLogger(EventProcessor.class);
-    private StandardProperties properties;
     private DiseaseProperties diseaseProperties;
     private RandomDataGenerator rng;
     private Map<Integer, Case> population;
@@ -48,11 +46,6 @@ public class EventProcessor {
     @Autowired
     public void setDiseaseProperties(DiseaseProperties diseaseProperties) {
         this.diseaseProperties = diseaseProperties;
-    }
-
-    @Autowired
-    public void setStandardProperties(StandardProperties standardProperties) {
-        this.properties = standardProperties;
     }
 
     @Autowired
@@ -84,7 +77,7 @@ public class EventProcessor {
 
     }
 
-    private List<InfectionEvent> createRandomInfections(int time, double randomRate) {
+    List<InfectionEvent> createRandomInfections(int time, double randomRate) {
 
         List<Case> sus = population.values().stream().filter(aCase -> aCase.status() == SUSCEPTIBLE).collect(Collectors.toList());
         List<InfectionEvent> randomInfections = new ArrayList<>();
@@ -104,12 +97,12 @@ public class EventProcessor {
         return randomInfections;
     }
 
-    private List<Event> runPolicyEvents(int time) {
+    List<Event> runPolicyEvents(int time) {
         //TODO
-        return new ArrayList<Event>();
+        return new ArrayList<>();
     }
 
-    private List<AlertEvent> runAlertEvents(int time) {
+    List<AlertEvent> runAlertEvents(int time) {
         List<AlertEvent> newEvents = new ArrayList<>();
         // Look at all alert events
         for (AlertEvent event : eventList.getForTime(time).stream().filter(event -> event instanceof AlertEvent).map(event -> (AlertEvent) event).collect(Collectors.toList())) {
@@ -134,7 +127,7 @@ public class EventProcessor {
         return newEvents;
     }
 
-    private List<InfectionEvent> runContactEvents(int time) {
+    List<InfectionEvent> runContactEvents(int time) {
         List<InfectionEvent> newEvents = new ArrayList<>();
         // Look at all contact events
         for (ContactEvent event : eventList.getForTime(time).stream().filter(event -> event instanceof ContactEvent).map(event -> (ContactEvent) event).collect(Collectors.toList())) {
@@ -149,7 +142,7 @@ public class EventProcessor {
 
     }
 
-    private List<Event> runVirusEvents(int time) {
+    List<Event> runVirusEvents(int time) {
         List<Event> newEvents = new ArrayList<>();
         // Look at all virus events
         for (VirusEvent event : eventList.getForTime(time).stream().filter(event -> event instanceof VirusEvent).map(event -> (VirusEvent) event).collect(Collectors.toList())) {
@@ -180,7 +173,7 @@ public class EventProcessor {
         return newEvents;
     }
 
-    private List<VirusEvent> runInfectionEvents(int time) {
+    List<VirusEvent> runInfectionEvents(int time) {
         List<VirusEvent> newEvents = new ArrayList<>();
         // Look at all infection events:
         for (InfectionEvent event : eventList.getForTime(time).stream().filter(event -> event instanceof InfectionEvent).map(event -> (InfectionEvent) event).collect(Collectors.toList())) {
@@ -232,9 +225,6 @@ public class EventProcessor {
     Optional<InfectionEvent> evaluateExposures(ContactEvent c, int time) {
         Case personA = utils.getMostSevere(population.get(c.to()), population.get(c.from()));
         Case personB = personA == population.get(c.to()) ? population.get(c.from()) : population.get(c.to());
-//
-//        personA.addContact(c);
-//        personB.addContact(c);
 
         boolean dangerMix = personA.isInfectious() && personB.status() == SUSCEPTIBLE;
 
@@ -278,7 +268,7 @@ public class EventProcessor {
 
     }
 
-    private Optional<Event> checkForAlert(VirusEvent trigger) {
+    Optional<Event> checkForAlert(VirusEvent trigger) {
 
         if (trigger.newStatus() == SYMPTOMATIC) {
             return Optional.of(ImmutableAlertEvent.builder().id(trigger.id()).time(trigger.time() + 1).oldStatus(NONE).newStatus(REQUESTED_TEST).build());
@@ -287,7 +277,7 @@ public class EventProcessor {
         return Optional.empty();
     }
 
-    private VirusStatus determineNextStatus(CommonVirusEvent event) {
+    VirusStatus determineNextStatus(CommonVirusEvent event) {
 
         List<VirusStatus> newStatus = event.newStatus().getValidTransitions();
 
@@ -309,7 +299,7 @@ public class EventProcessor {
     }
 
 
-    private int timeInCompartment(VirusStatus currentStatus, VirusStatus newStatus) {
+    int timeInCompartment(VirusStatus currentStatus, VirusStatus newStatus) {
 
         MeanMax progressionData;
         // TODO check when not exhausted
@@ -344,7 +334,7 @@ public class EventProcessor {
         return getDistributionValue(progressionData);
     }
 
-    private int timeInStatus(AlertStatus newStatus) {
+    int timeInStatus(AlertStatus newStatus) {
         // todo elaborate
         switch (newStatus) {
             case TESTED_POSITIVE:
@@ -391,17 +381,17 @@ public class EventProcessor {
     }
 
 
-    private VirusStatus determineInfection(Case p) {
+    VirusStatus determineInfection(Case p) {
         //TODO add real logic
         return p.health() > rng.nextUniform(0, 1) ? ASYMPTOMATIC : PRESYMPTOMATIC;
     }
 
-    private VirusStatus determineSeverity(Case p) {
+    VirusStatus determineSeverity(Case p) {
         //TODO add real logic
         return p.health() > rng.nextUniform(0, 1) ? RECOVERED : SEVERELY_SYMPTOMATIC;
     }
 
-    private VirusStatus determineOutcome(Case p) {
+    VirusStatus determineOutcome(Case p) {
         //TODO add real logic
         return p.health() > rng.nextUniform(0, 1) ? RECOVERED : DEAD;
     }
