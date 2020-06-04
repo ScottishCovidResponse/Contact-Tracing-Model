@@ -37,23 +37,25 @@ public class LogDailyOutputTest {
         for (VirusStatus v : values()) {
             map.put(v, random.nextInt(100));
         }
-
-        logger.log(time, map, previousActiveCases);
+        int dActive = random.nextInt(100);
+        logger.log(time, map, dActive);
 
         int[] numbers = Arrays.stream(logSpy.getOutput().replace("[INFO]", "")
                 .replaceAll("(?m:\\||$)", "").trim().split("\\s+"))
                 .mapToInt(Integer::parseInt).toArray();
 
 
-        Assert.assertEquals(values().length + 1, numbers.length);
+        Assert.assertEquals(values().length + 2, numbers.length);
         Assert.assertEquals(time, numbers[0]);
         Assert.assertEquals(map.get(SUSCEPTIBLE).intValue(), numbers[1]);
         Assert.assertEquals(map.get(EXPOSED).intValue(), numbers[2]);
-        Assert.assertEquals(map.get(EXPOSED_2).intValue(), numbers[3]);
-        Assert.assertEquals(map.get(INFECTED).intValue(), numbers[4]);
-        Assert.assertEquals(map.get(INFECTED_SYMP).intValue(), numbers[5]);
-        Assert.assertEquals(map.get(RECOVERED).intValue(), numbers[6]);
-        Assert.assertEquals(map.get(DEAD).intValue(), numbers[7]);
+        Assert.assertEquals(map.get(ASYMPTOMATIC).intValue(), numbers[3]);
+        Assert.assertEquals(map.get(PRESYMPTOMATIC).intValue(), numbers[4]);
+        Assert.assertEquals(map.get(SYMPTOMATIC).intValue(), numbers[5]);
+        Assert.assertEquals(map.get(SEVERELY_SYMPTOMATIC).intValue(), numbers[6]);
+        Assert.assertEquals(map.get(RECOVERED).intValue(), numbers[7]);
+        Assert.assertEquals(map.get(DEAD).intValue(), numbers[8]);
+        Assert.assertEquals(dActive, numbers[9]);
 
 
     }
@@ -67,9 +69,9 @@ public class LogDailyOutputTest {
         for (VirusStatus v : values()) {
             map.put(v, random.nextInt(100));
         }
-
+        int previousActiveCases = 0;
         logger.log(time, map, previousActiveCases);
-        Assert.assertThat(logSpy.getOutput(), containsString("|   Time  |    S    |    E1   |    E2   |   Ia    |    Is   |    R    |    D    |"));
+        Assert.assertThat(logSpy.getOutput(), containsString("|   Time  |    S    |    E    |    A    |    P    |   Sym   |   Sev   |    R    |    D    |   dAct  |"));
 
     }
 
