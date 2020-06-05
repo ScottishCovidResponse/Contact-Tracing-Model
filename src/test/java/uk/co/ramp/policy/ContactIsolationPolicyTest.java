@@ -8,11 +8,11 @@ import uk.co.ramp.people.Case;
 import uk.co.ramp.people.VirusStatus;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyDouble;
 import static org.mockito.ArgumentMatchers.anyInt;
-import static org.mockito.ArgumentMatchers.intThat;
+import static org.mockito.Mockito.eq;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 public class ContactIsolationPolicyTest {
@@ -47,8 +47,8 @@ public class ContactIsolationPolicyTest {
 
     @Test
     public void isContactIsolated_CaseAIsolate() {
-        when(singleCaseIsolationPolicy.isIndividualInIsolation(intThat(a -> a == 0), any(VirusStatus.class), any(AlertStatus.class), anyDouble(), anyDouble(), anyInt())).thenReturn(true);
-        when(singleCaseIsolationPolicy.isIndividualInIsolation(intThat(a -> a == 1), any(VirusStatus.class), any(AlertStatus.class), anyDouble(), anyDouble(), anyInt())).thenReturn(false);
+        when(singleCaseIsolationPolicy.isIndividualInIsolation(eq(caseA), anyDouble(), anyInt())).thenReturn(true);
+        when(singleCaseIsolationPolicy.isIndividualInIsolation(eq(caseB), anyDouble(), anyInt())).thenReturn(false);
 
         var isolationPolicy = new ContactIsolationPolicy(singleCaseIsolationPolicy, diseaseProperties);
         assertThat(isolationPolicy.isContactIsolated(caseA, caseB, contactWeight, actualInfectedProportion, currentTime)).isTrue();
@@ -56,16 +56,16 @@ public class ContactIsolationPolicyTest {
 
     @Test
     public void isContactIsolated_CaseBIsolate() {
-        when(singleCaseIsolationPolicy.isIndividualInIsolation(intThat(a -> a == 0), any(VirusStatus.class), any(AlertStatus.class), anyDouble(), anyDouble(), anyInt())).thenReturn(false);
-        when(singleCaseIsolationPolicy.isIndividualInIsolation(intThat(a -> a == 1), any(VirusStatus.class), any(AlertStatus.class), anyDouble(), anyDouble(), anyInt())).thenReturn(true);
+        when(singleCaseIsolationPolicy.isIndividualInIsolation(eq(caseA), anyDouble(), anyInt())).thenReturn(false);
+        when(singleCaseIsolationPolicy.isIndividualInIsolation(eq(caseB), anyDouble(), anyInt())).thenReturn(true);
 
         var isolationPolicy = new ContactIsolationPolicy(singleCaseIsolationPolicy, diseaseProperties);
         assertThat(isolationPolicy.isContactIsolated(caseA, caseB, contactWeight, actualInfectedProportion, currentTime)).isTrue();
     }
     @Test
     public void isContactIsolated_BothCaseABIsolate() {
-        when(singleCaseIsolationPolicy.isIndividualInIsolation(intThat(a -> a == 0), any(VirusStatus.class), any(AlertStatus.class), anyDouble(), anyDouble(), anyInt())).thenReturn(true);
-        when(singleCaseIsolationPolicy.isIndividualInIsolation(intThat(a -> a == 1), any(VirusStatus.class), any(AlertStatus.class), anyDouble(), anyDouble(), anyInt())).thenReturn(true);
+        when(singleCaseIsolationPolicy.isIndividualInIsolation(eq(caseA), anyDouble(), anyInt())).thenReturn(true);
+        when(singleCaseIsolationPolicy.isIndividualInIsolation(eq(caseB), anyDouble(), anyInt())).thenReturn(true);
 
         var isolationPolicy = new ContactIsolationPolicy(singleCaseIsolationPolicy, diseaseProperties);
         assertThat(isolationPolicy.isContactIsolated(caseA, caseB, contactWeight, actualInfectedProportion, currentTime)).isTrue();
@@ -73,8 +73,8 @@ public class ContactIsolationPolicyTest {
 
     @Test
     public void isContactIsolated_NoneIsolate() {
-        when(singleCaseIsolationPolicy.isIndividualInIsolation(intThat(a -> a == 0), any(VirusStatus.class), any(AlertStatus.class), anyDouble(), anyDouble(), anyInt())).thenReturn(false);
-        when(singleCaseIsolationPolicy.isIndividualInIsolation(intThat(a -> a == 1), any(VirusStatus.class), any(AlertStatus.class), anyDouble(), anyDouble(), anyInt())).thenReturn(false);
+        when(singleCaseIsolationPolicy.isIndividualInIsolation(eq(caseA), anyDouble(), anyInt())).thenReturn(false);
+        when(singleCaseIsolationPolicy.isIndividualInIsolation(eq(caseB), anyDouble(), anyInt())).thenReturn(false);
 
         var isolationPolicy = new ContactIsolationPolicy(singleCaseIsolationPolicy, diseaseProperties);
         assertThat(isolationPolicy.isContactIsolated(caseA, caseB, contactWeight, actualInfectedProportion, currentTime)).isFalse();
@@ -82,11 +82,19 @@ public class ContactIsolationPolicyTest {
 
     @Test
     public void isContactIsolated_BothABIsolate_StrongContact() {
-        when(singleCaseIsolationPolicy.isIndividualInIsolation(intThat(a -> a == 0), any(VirusStatus.class), any(AlertStatus.class), anyDouble(), anyDouble(), anyInt())).thenReturn(true);
-        when(singleCaseIsolationPolicy.isIndividualInIsolation(intThat(a -> a == 1), any(VirusStatus.class), any(AlertStatus.class), anyDouble(), anyDouble(), anyInt())).thenReturn(true);
+        when(singleCaseIsolationPolicy.isIndividualInIsolation(eq(caseA), anyDouble(), anyInt())).thenReturn(true);
+        when(singleCaseIsolationPolicy.isIndividualInIsolation(eq(caseB), anyDouble(), anyInt())).thenReturn(true);
 
         var contactWeight = 1.0;
         var isolationPolicy = new ContactIsolationPolicy(singleCaseIsolationPolicy, diseaseProperties);
         assertThat(isolationPolicy.isContactIsolated(caseA, caseB, contactWeight, actualInfectedProportion, currentTime)).isFalse();
+    }
+
+    @Test
+    public void isContactIsolated_VerifyMethodParams() {
+        var isolationPolicy = new ContactIsolationPolicy(singleCaseIsolationPolicy, diseaseProperties);
+        isolationPolicy.isContactIsolated(caseA, caseB, contactWeight, actualInfectedProportion, currentTime);
+        verify(singleCaseIsolationPolicy).isIndividualInIsolation(caseA, actualInfectedProportion, currentTime);
+        verify(singleCaseIsolationPolicy).isIndividualInIsolation(caseB, actualInfectedProportion, currentTime);
     }
 }

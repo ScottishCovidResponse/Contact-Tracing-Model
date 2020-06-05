@@ -18,8 +18,8 @@ class ContactIsolationPolicy implements IsolationPolicy {
 
     @Override
     public boolean isContactIsolated(Case caseA, Case caseB, double contactWeight, double actualInfectedProportion, int currentTime) {
-        boolean isCaseAInIsolation = singleCaseIsolationPolicy.isIndividualInIsolation(caseA.id(), caseA.status(), caseA.alertStatus(), caseA.compliance(), actualInfectedProportion, currentTime);
-        boolean isCaseBInIsolation = singleCaseIsolationPolicy.isIndividualInIsolation(caseB.id(), caseA.status(), caseA.alertStatus(), caseA.compliance(), actualInfectedProportion, currentTime);
+        boolean isCaseAInIsolation = singleCaseIsolationPolicy.isIndividualInIsolation(caseA, actualInfectedProportion, currentTime);
+        boolean isCaseBInIsolation = singleCaseIsolationPolicy.isIndividualInIsolation(caseB, actualInfectedProportion, currentTime);
 
         boolean weakContact = contactWeight < diseaseProperties.exposureThreshold();  // TODO implement and use regional lockdown policy
 

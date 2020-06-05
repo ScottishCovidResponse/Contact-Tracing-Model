@@ -9,6 +9,7 @@ import java.util.Optional;
 @Immutable
 @TypeAdapters
 interface IsolationProperty {
+    String id();
     Distribution isolationProbabilityDistribution();
     Optional<Distribution> isolationTimeDistribution();
     int priority();

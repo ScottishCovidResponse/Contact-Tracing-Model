@@ -5,14 +5,17 @@ import uk.co.ramp.distribution.Distribution;
 import uk.co.ramp.distribution.DistributionSampler;
 import uk.co.ramp.distribution.ImmutableDistribution;
 import uk.co.ramp.people.AlertStatus;
+import uk.co.ramp.people.Case;
 import uk.co.ramp.people.VirusStatus;
 
+import java.util.Comparator;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import static java.util.Comparator.comparingInt;
 import static uk.co.ramp.distribution.ProgressionDistribution.FLAT;
 
 class SingleCaseIsolationPolicy {
@@ -39,25 +42,46 @@ class SingleCaseIsolationPolicy {
     }
 
     private IsolationProperty findRelevantIsolationProperty(double actualInfectedProportion, VirusStatus virusStatus, AlertStatus alertStatus) {
-        Stream<IsolationProperty> globalIsolationPolicy = isolationProperties.globalIsolationPolicies().values().stream()
-                .filter(policy -> policy.proportionInfected().min() < actualInfectedProportion * 100)
+        Stream<IsolationProperty> globalIsolationPolicy = isolationProperties.globalIsolationPolicies().stream()
+                .filter(policy -> policy.proportionInfected().min() <= actualInfectedProportion * 100)
                 .filter(policy -> policy.proportionInfected().max() > actualInfectedProportion * 100)
                 .map(ProportionInfectedIsolationProperty::isolationProperty);
 
-        Stream<IsolationProperty> virusIsolationPolicy = isolationProperties.individualIsolationPolicies().virusStatusPolicies().values().stream()
+        Stream<IsolationProperty> virusIsolationPolicy = isolationProperties.virusStatusPolicies().stream()
                 .filter(policy -> policy.virusStatus() == virusStatus)
                 .map(VirusStatusIsolationProperty::isolationProperty);
 
-        Stream<IsolationProperty> alertIsolationPolicy = isolationProperties.individualIsolationPolicies().alertStatusPolicies().values().stream()
+        Stream<IsolationProperty> alertIsolationPolicy = isolationProperties.alertStatusPolicies().stream()
                 .filter(policy -> policy.alertStatus() == alertStatus)
                 .map(AlertStatusIsolationProperty::isolationProperty);
 
         Stream<IsolationProperty> defaultIsolationPolicy = Stream.of(isolationProperties.defaultPolicy());
 
-        return Stream.of(globalIsolationPolicy, virusIsolationPolicy, alertIsolationPolicy, defaultIsolationPolicy)
+        List<IsolationProperty> matchingHighestPriorityPolicies = Stream.of(globalIsolationPolicy, virusIsolationPolicy, alertIsolationPolicy, defaultIsolationPolicy)
                 .flatMap(s -> s)
-                .max(comparingInt(IsolationProperty::priority))
-                .orElseThrow();
+                .collect(Collectors.groupingBy(IsolationProperty::priority))
+                .entrySet()
+                .stream()
+                .max(Comparator.comparingLong(Map.Entry::getKey))
+                .orElseThrow(() -> new IllegalStateException("No matching policies found."))
+                .getValue();
+
+
+        boolean allPolicyOutcomesAreEqual = matchingHighestPriorityPolicies.stream()
+                .allMatch(p -> p.equals(matchingHighestPriorityPolicies.get(0)));
+
+        if (allPolicyOutcomesAreEqual) {
+            return matchingHighestPriorityPolicies.get(0);
+        } else {
+            throw new IllegalStateException("" +
+                    "Policy outcome description is not deterministic. " +
+                    "Please also ensure that there is only one policy outcome from the matching policies with a max priority value."
+            );
+        }
+    }
+
+    boolean isIndividualInIsolation(Case aCase, double actualInfectedProportion, int currentTime) {
+        return isIndividualInIsolation(aCase.id(), aCase.status(), aCase.alertStatus(), aCase.compliance(), actualInfectedProportion, currentTime);
     }
 
     boolean isIndividualInIsolation(int id, VirusStatus virusStatus, AlertStatus alertStatus, double compliance, double actualInfectedProportion, int currentTime) {
@@ -86,8 +110,13 @@ class SingleCaseIsolationPolicy {
         int requiredIsolationTime = distributionSampler.getDistributionValue(matchingIsolationProperty.isolationTimeDistribution().orElse(infinityDistribution));
         double threshold = isolationProperties.isolationProbabilityDistributionThreshold();
         double requiredIsolationFactor = distributionSampler.getDistributionValue(matchingIsolationProperty.isolationProbabilityDistribution());
+        boolean timedPolicy = matchingIsolationProperty.isolationTimeDistribution().isPresent();
+        boolean isDefaultPolicy = isolationProperties.defaultPolicy().equals(matchingIsolationProperty);
+
         boolean willIsolate = (threshold < requiredIsolationFactor) && (distributionSampler.uniformBetweenZeroAndOne() < compliance);
-        currentlyInIsolationMap.compute(id, (i, val) -> willIsolate ? updatedMapValue(val, matchingIsolationProperty, currentTime, requiredIsolationTime) : null);
+        if (timedPolicy || isDefaultPolicy) {
+            currentlyInIsolationMap.compute(id, (i, val) -> willIsolate ? updatedMapValue(val, matchingIsolationProperty, currentTime, requiredIsolationTime) : null);
+        }
         return willIsolate;
     }
 }
