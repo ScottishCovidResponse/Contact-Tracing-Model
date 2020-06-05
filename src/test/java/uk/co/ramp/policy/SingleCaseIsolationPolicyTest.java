@@ -14,10 +14,7 @@ import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static uk.co.ramp.distribution.ProgressionDistribution.FLAT;
-import static uk.co.ramp.people.AlertStatus.ALERTED;
-import static uk.co.ramp.people.AlertStatus.AWAITING_RESULT;
-import static uk.co.ramp.people.AlertStatus.NONE;
-import static uk.co.ramp.people.AlertStatus.TESTED_POSITIVE;
+import static uk.co.ramp.people.AlertStatus.*;
 import static uk.co.ramp.people.VirusStatus.EXPOSED;
 import static uk.co.ramp.people.VirusStatus.EXPOSED_2;
 import static uk.co.ramp.people.VirusStatus.INFECTED;
@@ -531,5 +528,21 @@ public class SingleCaseIsolationPolicyTest {
         assertThat(isolationPolicy.isIndividualInIsolation(id, INFECTED_SYMP, NONE, compliance, proportionOfPopulationInfectious, currentTime + 3)).isTrue();
         assertThat(isolationPolicy.isIndividualInIsolation(id, SUSCEPTIBLE, NONE, compliance, proportionOfPopulationInfectious, currentTime + 4)).isTrue();
         assertThat(isolationPolicy.isIndividualInIsolation(id, SUSCEPTIBLE, NONE, compliance, proportionOfPopulationInfectious, currentTime + 5)).isTrue();
+    }
+
+    @Test
+    public void testShouldIsolate_Alerted_Cycled() {
+        var proportionOfPopulationInfectious = 0.0;
+        assertThat(isolationPolicy.isIndividualInIsolation(id, SUSCEPTIBLE, ALERTED, compliance, proportionOfPopulationInfectious, currentTime)).isTrue();
+        assertThat(isolationPolicy.isIndividualInIsolation(id, SUSCEPTIBLE, NONE, compliance, proportionOfPopulationInfectious, currentTime + 1)).isFalse();
+        assertThat(isolationPolicy.isIndividualInIsolation(id, SUSCEPTIBLE, ALERTED, compliance, proportionOfPopulationInfectious, currentTime + 2)).isTrue();
+    }
+
+    @Test
+    public void testShouldIsolate_Alerted_Long_Cycled() {
+        var proportionOfPopulationInfectious = 0.0;
+        assertThat(isolationPolicy.isIndividualInIsolation(id, SUSCEPTIBLE, ALERTED, compliance, proportionOfPopulationInfectious, currentTime)).isTrue();
+        assertThat(isolationPolicy.isIndividualInIsolation(id, SUSCEPTIBLE, NONE, compliance, proportionOfPopulationInfectious, currentTime + 5)).isFalse();
+        assertThat(isolationPolicy.isIndividualInIsolation(id, SUSCEPTIBLE, ALERTED, compliance, proportionOfPopulationInfectious, currentTime + 9)).isTrue();
     }
 }
