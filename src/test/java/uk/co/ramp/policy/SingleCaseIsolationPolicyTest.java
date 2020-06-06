@@ -518,7 +518,7 @@ public class SingleCaseIsolationPolicyTest {
     }
 
     @Test
-    public void testShouldIsolate_ThroesException_NonDeterministicPolicyOutcome() {
+    public void testShouldIsolate_ThrowsException_NonDeterministicPolicyOutcome() {
         AlertStatusIsolationProperty alertStatusProperty = ImmutableAlertStatusIsolationProperty.builder()
                 .alertStatus(AlertStatus.ALERTED)
                 .isolationProperty(ImmutableIsolationProperty.builder()
