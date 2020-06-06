@@ -13,7 +13,6 @@ import uk.co.ramp.io.StandardProperties;
 import uk.co.ramp.people.Case;
 import uk.co.ramp.people.PopulationGenerator;
 import uk.co.ramp.people.VirusStatus;
-import uk.co.ramp.policy.IsolationPolicy;
 import uk.co.ramp.record.CmptRecord;
 import uk.co.ramp.utilities.UtilitiesBean;
 
@@ -29,7 +28,7 @@ public class Outbreak {
 
     private final StandardProperties properties;
     private final DiseaseProperties diseaseProperties;
-    private final RandomDataGenerator rng;
+    private final DistributionSampler distributionSampler;
     private final UtilitiesBean utils;
     private final LogDailyOutput outputLog;
 
@@ -40,14 +39,12 @@ public class Outbreak {
     private final Map<Integer, CmptRecord> records = new HashMap<>();
 
     @Autowired
-    public Outbreak(DiseaseProperties diseaseProperties, StandardProperties standardProperties, RandomDataGenerator randomDataGenerator, UtilitiesBean utils, LogDailyOutput outputLog) {
-
+    public Outbreak(DiseaseProperties diseaseProperties, StandardProperties standardProperties, DistributionSampler distributionSampler, UtilitiesBean utils, LogDailyOutput outputLog) {
+        this.distributionSampler = distributionSampler;
         this.diseaseProperties = diseaseProperties;
         this.properties = standardProperties;
-        this.rng = randomDataGenerator;
         this.utils = utils;
         this.outputLog = outputLog;
-
     }
 
     public void setPopulation(Map<Integer, Case> population) {
@@ -66,6 +63,7 @@ public class Outbreak {
 
         return records;
     }
+
 
     void generateInitialInfection() {
         Set<Integer> infectedIds = chooseInitialInfected();
@@ -107,7 +105,6 @@ public class Outbreak {
 
 
     boolean runContactData(int maxContact, double randomInfectionRate) {
-
         for (int time = 0; time <= maxContact; time++) {
 
             updatePopulationState(time, randomInfectionRate);
@@ -120,7 +117,6 @@ public class Outbreak {
                 return true;
             }
 
-            double proportionInfectious = proportionOfPopulationInfectious(population);
             for (ContactRecord contacts : todaysContacts) {
                 evaluateContact(time, contacts);
             }
@@ -130,22 +126,18 @@ public class Outbreak {
     }
 
 
-    private boolean isContactIsolated(ContactRecord contact, Case caseA, Case caseB, double proportionInfectious, int currentTime) {
-       return isolationPolicy.isContactIsolated(caseA, caseB, contact.weight(), proportionInfectious, currentTime);
-    }
-
-    private void evaluateContact(Map<Integer, Case> population, int time, ContactRecord contacts, double proportionInfectious) {
+    void evaluateContact(int time, ContactRecord contacts) {
         Case potentialSpreader = population.get(contacts.to());
         Case victim = population.get(contacts.from());
-        boolean shouldIsolateContact = isContactIsolated(contacts, potentialSpreader, victim, proportionInfectious, time);
-        if (shouldIsolateContact) {
-            LOGGER.trace("Skipping contact due to isolation");
-            return;
-        }
+
+        boolean conditionA = potentialSpreader.alertStatus() != NONE || victim.alertStatus() != NONE;
+        boolean conditionB = contacts.weight() < diseaseProperties.exposureThreshold();
 
 
-        if (potentialSpreader.status() != victim.status()) {
-            evaluateExposures(contacts, time);
+        if (conditionA && conditionB) {
+            // TODO: Apply behavioural logic here. Use compliance value?
+            LOGGER.trace("spreader: {}   victim: {}   weight: {} ", potentialSpreader.alertStatus(), victim.alertStatus(), contacts.weight());
+            LOGGER.info("Skipping contact due to threshold");
         }
     }
 
@@ -219,7 +211,6 @@ public class Outbreak {
             e.updateVirusStatus(EXPOSED, time, personA.id());
         }
     }
-
 
     Set<Integer> chooseInitialInfected() {
 
