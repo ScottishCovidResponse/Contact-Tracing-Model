@@ -1,4 +1,4 @@
-package uk.co.ramp.io;
+package uk.co.ramp.distribution;
 
 public enum ProgressionDistribution {
     FLAT, LINEAR, GAUSSIAN, EXPONENTIAL

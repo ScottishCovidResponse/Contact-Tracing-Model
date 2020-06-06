@@ -5,6 +5,7 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
+import uk.co.ramp.distribution.DistributionSampler;
 import uk.co.ramp.io.DiseaseProperties;
 import uk.co.ramp.people.*;
 import uk.co.ramp.utilities.ForbiddenAccessException;
@@ -32,9 +33,9 @@ public class EvaluateCaseTest {
         DiseaseProperties d = appConfig.diseaseProperties();
 
         RandomDataGenerator r = appConfig.randomDataGenerator(Optional.empty());
+        DistributionSampler ds = new DistributionSampler(r);
 
-
-        evaluateCase = new EvaluateCase(aCase, d, r);
+        evaluateCase = new EvaluateCase(aCase, d, ds);
     }
 
 

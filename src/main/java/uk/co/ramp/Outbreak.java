@@ -1,11 +1,11 @@
 package uk.co.ramp;
 
-import org.apache.commons.math3.random.RandomDataGenerator;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import uk.co.ramp.contact.ContactRecord;
+import uk.co.ramp.distribution.DistributionSampler;
 import uk.co.ramp.io.DiseaseProperties;
 import uk.co.ramp.io.InfectionMap;
 import uk.co.ramp.io.LogDailyOutput;
@@ -13,6 +13,7 @@ import uk.co.ramp.io.StandardProperties;
 import uk.co.ramp.people.Case;
 import uk.co.ramp.people.PopulationGenerator;
 import uk.co.ramp.people.VirusStatus;
+import uk.co.ramp.policy.IsolationPolicy;
 import uk.co.ramp.record.CmptRecord;
 import uk.co.ramp.utilities.UtilitiesBean;
 
@@ -32,6 +33,7 @@ public class Outbreak {
     private final UtilitiesBean utils;
     private final LogDailyOutput outputLog;
 
+
     private Map<Integer, Case> population;
     private Map<Integer, List<ContactRecord>> contactRecords;
 
@@ -47,7 +49,6 @@ public class Outbreak {
         this.outputLog = outputLog;
 
     }
-
 
     public void setPopulation(Map<Integer, Case> population) {
         this.population = population;
@@ -70,7 +71,7 @@ public class Outbreak {
         Set<Integer> infectedIds = chooseInitialInfected();
         for (Integer id : infectedIds) {
 
-            EvaluateCase evaluateCase = new EvaluateCase(population.get(id), diseaseProperties, rng);
+            EvaluateCase evaluateCase = new EvaluateCase(population.get(id), diseaseProperties, distributionSampler);
             evaluateCase.updateVirusStatus(EXPOSED, 0, Case.getInitial());
 
         }
@@ -106,6 +107,7 @@ public class Outbreak {
 
 
     boolean runContactData(int maxContact, double randomInfectionRate) {
+
         for (int time = 0; time <= maxContact; time++) {
 
             updatePopulationState(time, randomInfectionRate);
@@ -118,6 +120,7 @@ public class Outbreak {
                 return true;
             }
 
+            double proportionInfectious = proportionOfPopulationInfectious(population);
             for (ContactRecord contacts : todaysContacts) {
                 evaluateContact(time, contacts);
             }
@@ -126,19 +129,17 @@ public class Outbreak {
         return false;
     }
 
-    void evaluateContact(int time, ContactRecord contacts) {
+
+    private boolean isContactIsolated(ContactRecord contact, Case caseA, Case caseB, double proportionInfectious, int currentTime) {
+       return isolationPolicy.isContactIsolated(caseA, caseB, contact.weight(), proportionInfectious, currentTime);
+    }
+
+    private void evaluateContact(Map<Integer, Case> population, int time, ContactRecord contacts, double proportionInfectious) {
         Case potentialSpreader = population.get(contacts.to());
         Case victim = population.get(contacts.from());
-
-        boolean conditionA = potentialSpreader.alertStatus() != NONE || victim.alertStatus() != NONE;
-        boolean conditionB = contacts.weight() < diseaseProperties.exposureThreshold();
-
-
-        if (conditionA && conditionB) {
-
-            // TODO: Apply behavioural logic here. Use compliance value?
-            LOGGER.trace("spreader: {}   victim: {}   weight: {} ", potentialSpreader.alertStatus(), victim.alertStatus(), contacts.weight());
-            LOGGER.info("Skipping contact due to threshold");
+        boolean shouldIsolateContact = isContactIsolated(contacts, potentialSpreader, victim, proportionInfectious, time);
+        if (shouldIsolateContact) {
+            LOGGER.trace("Skipping contact due to isolation");
             return;
         }
 
@@ -178,11 +179,11 @@ public class Outbreak {
         Set<Integer> alerts = new HashSet<>();
 
         for (Case p : population.values()) {
-            EvaluateCase e = new EvaluateCase(p, diseaseProperties, rng);
+            EvaluateCase e = new EvaluateCase(p, diseaseProperties, distributionSampler);
             alerts.addAll(e.checkActionsAtTimestep(time));
 
             if (p.status() == SUSCEPTIBLE && randomInfectionRate > 0d && time > 0) {
-                boolean var = rng.nextUniform(0, 1) <= randomInfectionRate;
+                boolean var = distributionSampler.uniformBetweenZeroAndOne() <= randomInfectionRate;
                 if (var) e.randomExposure(time);
             }
         }
@@ -212,9 +213,9 @@ public class Outbreak {
 
         boolean dangerMix = personA.isInfectious() && personB.status() == SUSCEPTIBLE;
 
-        if (dangerMix && rng.nextUniform(0, 1) < c.weight() / diseaseProperties.exposureTuning()) {
+        if (dangerMix && distributionSampler.uniformBetweenZeroAndOne() < c.weight() / diseaseProperties.exposureTuning()) {
             LOGGER.trace("       DANGER MIX");
-            EvaluateCase e = new EvaluateCase(personB, diseaseProperties, rng);
+            EvaluateCase e = new EvaluateCase(personB, diseaseProperties, distributionSampler);
             e.updateVirusStatus(EXPOSED, time, personA.id());
         }
     }
@@ -224,7 +225,7 @@ public class Outbreak {
 
         Set<Integer> infectedIds = new HashSet<>();
         while (infectedIds.size() < properties.infected()) {
-            infectedIds.add(rng.nextInt(0, properties.populationSize() - 1));
+            infectedIds.add(distributionSampler.uniformInteger(properties.populationSize() - 1));
         }
         return infectedIds;
 

@@ -7,6 +7,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.SpringBootConfiguration;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
+import uk.co.ramp.distribution.DistributionSampler;
 import uk.co.ramp.io.DiseaseProperties;
 import uk.co.ramp.io.PopulationProperties;
 import uk.co.ramp.io.StandardProperties;
@@ -99,6 +100,11 @@ public class AppConfig {
     @Bean
     public UtilitiesBean utilitiesBean() {
         return new UtilitiesBean();
+    }
+
+   @Bean
+    public DistributionSampler distributionSampler(RandomDataGenerator randomDataGenerator) {
+        return new DistributionSampler(randomDataGenerator);
     }
 
 

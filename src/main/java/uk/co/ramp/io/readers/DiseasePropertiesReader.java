@@ -10,7 +10,7 @@ import java.io.Reader;
 import java.io.Writer;
 import java.util.ServiceLoader;
 
-import static uk.co.ramp.io.ProgressionDistribution.FLAT;
+import static uk.co.ramp.distribution.ProgressionDistribution.FLAT;
 
 public class DiseasePropertiesReader {
 

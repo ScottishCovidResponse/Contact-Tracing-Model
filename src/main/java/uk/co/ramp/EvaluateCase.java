@@ -1,9 +1,11 @@
 package uk.co.ramp;
 
-import org.apache.commons.math3.random.RandomDataGenerator;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import uk.co.ramp.contact.ContactRecord;
+import uk.co.ramp.distribution.Distribution;
+import uk.co.ramp.distribution.DistributionSampler;
+import uk.co.ramp.distribution.ImmutableDistribution;
 import uk.co.ramp.io.DiseaseProperties;
 import uk.co.ramp.people.AlertStatus;
 import uk.co.ramp.people.Case;
@@ -21,13 +23,13 @@ public class EvaluateCase {
     private static final Logger LOGGER = LogManager.getLogger(EvaluateCase.class);
     private final Case p;
     private final DiseaseProperties properties;
-    private final RandomDataGenerator rng;
+    private final DistributionSampler distributionSampler;
 
 
-    public EvaluateCase(Case p, DiseaseProperties diseaseProperties, RandomDataGenerator randomDataGenerator) {
+    public EvaluateCase(Case p, DiseaseProperties diseaseProperties, DistributionSampler distributionSampler) {
         this.p = p;
         this.properties = diseaseProperties;
-        this.rng = randomDataGenerator;
+        this.distributionSampler = distributionSampler;
     }
 
     public void initialExposure(VirusStatus newStatus, int currentTime) {
@@ -181,12 +183,12 @@ public class EvaluateCase {
 
     private VirusStatus determineOutcome(Case p) {
         //TODO add real logic
-        return p.health() > rng.nextUniform(0, 1) ? RECOVERED : DEAD;
+        return p.health() > distributionSampler.uniformBetweenZeroAndOne() ? RECOVERED : DEAD;
     }
 
     private VirusStatus determineInfection(Case p) {
         //TODO add real logic
-        return p.health() > rng.nextUniform(0, 1) ? INFECTED : INFECTED_SYMP;
+        return p.health() > distributionSampler.uniformBetweenZeroAndOne() ? INFECTED : INFECTED_SYMP;
     }
 
     public void randomExposure(int t) {
@@ -203,32 +205,12 @@ public class EvaluateCase {
     }
 
     int getDistributionValue(double mean, double max) {
-
-        int value = (int) Math.round(mean);
-        double sample;
-        switch (properties.progressionDistribution()) {
-            case GAUSSIAN:
-                sample = rng.nextGaussian(mean, mean / 2d);
-                break;
-            case LINEAR:
-                sample = rng.nextUniform(mean - mean / 2d, mean + mean / 2d);
-                break;
-            case EXPONENTIAL:
-                sample = rng.nextExponential(mean);
-                break;
-            case FLAT:
-            default:
-                return value;
-        }
-
-        value = (int) Math.round(sample);
-
-        // recursing to avoid artificial peaks at 1 and max
-        if (value < 1 || value > max) {
-            value = getDistributionValue(mean, max);
-        }
-
-        return value;
+        Distribution distribution = ImmutableDistribution.builder()
+                .type(properties.progressionDistribution())
+                .mean(mean)
+                .max(max)
+                .build();
+        return distributionSampler.getDistributionValue(distribution);
     }
 
 
