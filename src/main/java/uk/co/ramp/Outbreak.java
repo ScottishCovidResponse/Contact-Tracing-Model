@@ -26,16 +26,27 @@ public class Outbreak {
 
     private static final Logger LOGGER = LogManager.getLogger(Outbreak.class);
 
-    private StandardProperties properties;
-    private DiseaseProperties diseaseProperties;
-    private RandomDataGenerator rng;
+    private final StandardProperties properties;
+    private final DiseaseProperties diseaseProperties;
+    private final RandomDataGenerator rng;
+    private final UtilitiesBean utils;
+    private final LogDailyOutput outputLog;
 
     private Map<Integer, Case> population;
     private Map<Integer, List<ContactRecord>> contactRecords;
-    private final LogDailyOutput outputLog = new LogDailyOutput();
 
     private final Map<Integer, CmptRecord> records = new HashMap<>();
-    private UtilitiesBean utils;
+
+    @Autowired
+    public Outbreak(DiseaseProperties diseaseProperties, StandardProperties standardProperties, RandomDataGenerator randomDataGenerator, UtilitiesBean utils, LogDailyOutput outputLog) {
+
+        this.diseaseProperties = diseaseProperties;
+        this.properties = standardProperties;
+        this.rng = randomDataGenerator;
+        this.utils = utils;
+        this.outputLog = outputLog;
+
+    }
 
 
     public void setPopulation(Map<Integer, Case> population) {
@@ -44,26 +55,6 @@ public class Outbreak {
 
     public void setContactRecords(Map<Integer, List<ContactRecord>> contactRecords) {
         this.contactRecords = contactRecords;
-    }
-
-    @Autowired
-    public void setDiseaseProperties(DiseaseProperties diseaseProperties) {
-        this.diseaseProperties = diseaseProperties;
-    }
-
-    @Autowired
-    public void setStandardProperties(StandardProperties standardProperties) {
-        this.properties = standardProperties;
-    }
-
-    @Autowired
-    public void setRandomDataGenerator(RandomDataGenerator randomDataGenerator) {
-        this.rng = randomDataGenerator;
-    }
-
-    @Autowired
-    public void setUtilitiesBean(UtilitiesBean utils) {
-        this.utils = utils;
     }
 
     public Map<Integer, CmptRecord> propagate() {
@@ -109,7 +100,7 @@ public class Outbreak {
         }
 
         // Output map of infections
-        new InfectionMap(population).outputMap();
+        new InfectionMap(Collections.unmodifiableMap(population)).outputMap();
 
     }
 

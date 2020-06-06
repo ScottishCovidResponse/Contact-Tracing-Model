@@ -18,17 +18,12 @@ public class InfectionMap {
     public static final String INFECTION_MAP = "infectionMap.txt";
     private static final Logger LOGGER = LogManager.getLogger(InfectionMap.class);
     private final Map<Integer, Case> population;
-    private int tab = 0;
 
     public InfectionMap(Map<Integer, Case> population) {
         this.population = population;
     }
 
     public void outputMap() {
-        collateInfectionData();
-    }
-
-    void collateInfectionData() {
 
         List<Case> infections = population.values().stream()
                 .filter(c -> c.status() != SUSCEPTIBLE)
@@ -48,8 +43,8 @@ public class InfectionMap {
         }
 
         // initial infections sorted by id
-        List<Case> rootInfections = infectors.entrySet().stream()
-                .flatMap(e -> e.getValue().stream())
+        List<Case> rootInfections = infectors.values().stream()
+                .flatMap(Collection::stream)
                 .filter(e -> e.exposedBy() == Case.getInitial())
                 .sorted(Comparator.comparing(Case::id))
                 .collect(Collectors.toList());
@@ -64,7 +59,7 @@ public class InfectionMap {
 
 
         try (Writer writer = new FileWriter(new File(INFECTION_MAP))) {
-            recurseSet(rootInfections, infectors, writer);
+            recurseSet(rootInfections, infectors, writer, 1);
         } catch (IOException e) {
             String message = "An error occurred while writing the map file: " + e.getMessage();
             LOGGER.error(message);
@@ -74,9 +69,8 @@ public class InfectionMap {
 
     }
 
-    void recurseSet(List<Case> target, Map<Integer, Set<Case>> infectors, Writer writer) throws IOException {
+    void recurseSet(List<Case> target, Map<Integer, Set<Case>> infectors, Writer writer, int tab) throws IOException {
 
-        tab++;
         String spacer = "           ".repeat(tab - 1);
 
         for (Case seed : target) {
@@ -88,12 +82,11 @@ public class InfectionMap {
                     writer.write(spacer + "   ->  " + seed.getSource() + "   ->  " + newSeeds.stream().map(Case::getSource).map(String::trim).collect(Collectors.toList()) + "\n");
                 }
 
-                recurseSet(newSeeds, infectors, writer);
+                recurseSet(newSeeds, infectors, writer, tab + 1);
                 if (tab == 1) writer.write("\n");
             }
         }
 
-        tab--;
     }
 
 

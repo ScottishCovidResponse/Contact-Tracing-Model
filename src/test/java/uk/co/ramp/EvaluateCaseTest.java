@@ -101,7 +101,6 @@ public class EvaluateCaseTest {
         Assert.assertEquals(t, aCase.exposedTime());
         Assert.assertEquals(infecter, aCase.exposedBy());
 
-
     }
 
     @Test
@@ -125,23 +124,4 @@ public class EvaluateCaseTest {
         }
     }
 
-    @Test
-    public void testUpdateVirusStatus() {
-    }
-
-    @Test
-    public void checkActionsAtTimestep() {
-    }
-
-
-    @Test
-    public void getDistributionValue() {
-
-
-        for (int i = 0; i < 1000; i++) {
-            System.out.println(evaluateCase.getDistributionValue(5, 14));
-        }
-
-
-    }
 }

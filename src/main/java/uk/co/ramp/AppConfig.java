@@ -6,6 +6,7 @@ import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.SpringBootConfiguration;
 import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.ComponentScan;
 import uk.co.ramp.io.DiseaseProperties;
 import uk.co.ramp.io.PopulationProperties;
 import uk.co.ramp.io.StandardProperties;
@@ -18,6 +19,7 @@ import java.io.*;
 import java.util.Optional;
 
 @SpringBootConfiguration
+@ComponentScan
 public class AppConfig {
 
     private static final String RUN_SETTINGS_LOCATION = "input/runSettings.json";
