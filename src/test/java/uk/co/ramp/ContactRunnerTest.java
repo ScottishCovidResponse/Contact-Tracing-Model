@@ -77,7 +77,7 @@ public class ContactRunnerTest {
 
         runner.setApplicationContext(applicationContext);
         runner.setRunProperties(runProperties);
-        runner.setInputFiles(inputFiles);
+        runner.setInputFileLocation(inputFiles);
         runner.run();
 
 

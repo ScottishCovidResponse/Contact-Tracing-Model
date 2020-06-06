@@ -26,7 +26,7 @@ public class ContactRunner implements ApplicationContextAware {
 
     private static final Logger LOGGER = LogManager.getLogger(ContactRunner.class);
     public static final String COMPARTMENTS_CSV = "Compartments.csv";
-        try (Reader reader = new FileReader(inputFileLocation.contactData())) {
+    private InputFiles inputFileLocation;
     private StandardProperties runProperties;
     private ApplicationContext ctx;
 
@@ -42,14 +42,14 @@ public class ContactRunner implements ApplicationContextAware {
     }
 
     @Autowired
-    public void setInputFiles(InputFiles inputFiles) {
-        this.inputFiles = inputFiles;
+    public void setInputFileLocation(InputFiles inputFileLocation) {
+        this.inputFileLocation = inputFileLocation;
     }
 
     public void run() throws IOException {
 
         Map<Integer, Case> population = ctx.getBean(PopulationGenerator.class).generate();
-        try (Reader reader = new FileReader(inputFiles.contactData())) {
+        try (Reader reader = new FileReader(inputFileLocation.contactData())) {
 
             ContactReader contactReader = ctx.getBean(ContactReader.class);
 
