@@ -68,7 +68,8 @@ class SingleCaseIsolationPolicy {
 
 
         boolean allPolicyOutcomesAreEqual = matchingHighestPriorityPolicies.stream()
-                .allMatch(p -> p.equals(matchingHighestPriorityPolicies.get(0)));
+                .allMatch(p -> p.isolationTimeDistribution().equals(matchingHighestPriorityPolicies.get(0).isolationTimeDistribution()) &&
+                        p.isolationProbabilityDistribution().equals(matchingHighestPriorityPolicies.get(0).isolationProbabilityDistribution()));
 
         if (allPolicyOutcomesAreEqual) {
             return matchingHighestPriorityPolicies.get(0);

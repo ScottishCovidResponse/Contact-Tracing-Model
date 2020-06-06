@@ -9,6 +9,7 @@ import uk.co.ramp.people.AlertStatus;
 import uk.co.ramp.utilities.MinMax;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatIllegalStateException;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.Mockito.mock;
@@ -95,6 +96,12 @@ public class SingleCaseIsolationPolicyTest {
                     .priority(0)
                     .isolationProbabilityDistribution(flatZeroPercent)
                     .build())
+            .build();
+
+    private final Distribution flatThreeDays = ImmutableDistribution.builder()
+            .mean(3)
+            .max(3)
+            .type(FLAT)
             .build();
 
     private final int currentTime = 0;
@@ -228,11 +235,7 @@ public class SingleCaseIsolationPolicyTest {
                         .id("virusPolicyName4")
                         .priority(0)
                         .isolationProbabilityDistribution(flatHundredPercent)
-                        .isolationTimeDistribution(ImmutableDistribution.builder()
-                                .type(FLAT)
-                                .mean(3)
-                                .max(3)
-                                .build())
+                        .isolationTimeDistribution(flatThreeDays)
                         .build())
                 .build();
 
@@ -259,11 +262,7 @@ public class SingleCaseIsolationPolicyTest {
                         .id("virusPolicyName4")
                         .priority(0)
                         .isolationProbabilityDistribution(flatHundredPercent)
-                        .isolationTimeDistribution(ImmutableDistribution.builder()
-                                .type(FLAT)
-                                .mean(3)
-                                .max(3)
-                                .build())
+                        .isolationTimeDistribution(flatThreeDays)
                         .build())
                 .build();
 
@@ -290,11 +289,7 @@ public class SingleCaseIsolationPolicyTest {
                         .id("virusPolicyName4")
                         .priority(0)
                         .isolationProbabilityDistribution(flatHundredPercent)
-                        .isolationTimeDistribution(ImmutableDistribution.builder()
-                                .type(FLAT)
-                                .mean(3)
-                                .max(3)
-                                .build())
+                        .isolationTimeDistribution(flatThreeDays)
                         .build())
                 .build();
 
@@ -321,11 +316,7 @@ public class SingleCaseIsolationPolicyTest {
                         .id("virusPolicyName4")
                         .priority(0)
                         .isolationProbabilityDistribution(flatHundredPercent)
-                        .isolationTimeDistribution(ImmutableDistribution.builder()
-                                .type(FLAT)
-                                .mean(3)
-                                .max(3)
-                                .build())
+                        .isolationTimeDistribution(flatThreeDays)
                         .build())
                 .build();
 
@@ -358,11 +349,7 @@ public class SingleCaseIsolationPolicyTest {
                         .id("virusPolicyName4")
                         .priority(0)
                         .isolationProbabilityDistribution(flatHundredPercent)
-                        .isolationTimeDistribution(ImmutableDistribution.builder()
-                                .type(FLAT)
-                                .mean(3)
-                                .max(3)
-                                .build())
+                        .isolationTimeDistribution(flatThreeDays)
                         .build())
                 .build();
 
@@ -392,11 +379,7 @@ public class SingleCaseIsolationPolicyTest {
                         .id("virusPolicyName4")
                         .priority(0)
                         .isolationProbabilityDistribution(flatHundredPercent)
-                        .isolationTimeDistribution(ImmutableDistribution.builder()
-                                .type(FLAT)
-                                .mean(3)
-                                .max(3)
-                                .build())
+                        .isolationTimeDistribution(flatThreeDays)
                         .build())
                 .build();
 
@@ -406,11 +389,7 @@ public class SingleCaseIsolationPolicyTest {
                         .id("alertPolicyName4")
                         .priority(0)
                         .isolationProbabilityDistribution(flatHundredPercent)
-                        .isolationTimeDistribution(ImmutableDistribution.builder()
-                                .type(FLAT)
-                                .mean(3)
-                                .max(3)
-                                .build())
+                        .isolationTimeDistribution(flatThreeDays)
                         .build())
                 .build();
 
@@ -441,11 +420,7 @@ public class SingleCaseIsolationPolicyTest {
                         .id("virusPolicyName4")
                         .priority(0)
                         .isolationProbabilityDistribution(flatHundredPercent)
-                        .isolationTimeDistribution(ImmutableDistribution.builder()
-                                .type(FLAT)
-                                .mean(3)
-                                .max(3)
-                                .build())
+                        .isolationTimeDistribution(flatThreeDays)
                         .build())
                 .build();
 
@@ -455,11 +430,7 @@ public class SingleCaseIsolationPolicyTest {
                         .id("alertPolicyName4")
                         .priority(0)
                         .isolationProbabilityDistribution(flatHundredPercent)
-                        .isolationTimeDistribution(ImmutableDistribution.builder()
-                                .type(FLAT)
-                                .mean(3)
-                                .max(3)
-                                .build())
+                        .isolationTimeDistribution(flatThreeDays)
                         .build())
                 .build();
 
@@ -544,5 +515,42 @@ public class SingleCaseIsolationPolicyTest {
         assertThat(isolationPolicy.isIndividualInIsolation(id, SUSCEPTIBLE, ALERTED, compliance, proportionOfPopulationInfectious, currentTime)).isTrue();
         assertThat(isolationPolicy.isIndividualInIsolation(id, SUSCEPTIBLE, NONE, compliance, proportionOfPopulationInfectious, currentTime + 5)).isFalse();
         assertThat(isolationPolicy.isIndividualInIsolation(id, SUSCEPTIBLE, ALERTED, compliance, proportionOfPopulationInfectious, currentTime + 9)).isTrue();
+    }
+
+    @Test
+    public void testShouldIsolate_ThroesException_NonDeterministicPolicyOutcome() {
+        AlertStatusIsolationProperty alertStatusProperty = ImmutableAlertStatusIsolationProperty.builder()
+                .alertStatus(AlertStatus.ALERTED)
+                .isolationProperty(ImmutableIsolationProperty.builder()
+                        .id("alertedPolicyName1")
+                        .priority(2)
+                        .isolationProbabilityDistribution(flatHundredPercent)
+                        .isolationTimeDistribution(flatThreeDays)
+                        .build())
+                .build();
+
+        VirusStatusIsolationProperty virusStatusProperty = ImmutableVirusStatusIsolationProperty.builder()
+                .virusStatus(INFECTED_SYMP)
+                .isolationProperty(ImmutableIsolationProperty.builder()
+                        .id("virusPolicyName1")
+                        .priority(2)
+                        .isolationProbabilityDistribution(flatHundredPercent)
+                        .isolationTimeDistribution(flatOneDay)
+                        .build())
+                .build();
+
+        IsolationProperties isolationProperties = ImmutableIsolationProperties.builder()
+                .addVirusStatusPolicies(virusStatusProperty)
+                .addAlertStatusPolicies(alertStatusProperty)
+                .addGlobalIsolationPolicies(twentyPercentInfectedHundredPercentIsolationProperty)
+                .defaultPolicy(defaultZeroIsolationProperty)
+                .isolationProbabilityDistributionThreshold(50)
+                .build();
+
+        var isolationPolicy = new SingleCaseIsolationPolicy(isolationProperties, distributionSampler);
+
+        assertThatIllegalStateException()
+                .isThrownBy(() -> isolationPolicy.isIndividualInIsolation(id, INFECTED_SYMP, ALERTED, compliance, proportionOfPopulationInfected, currentTime))
+                .withMessageContaining("Policy outcome description is not deterministic");
     }
 }
