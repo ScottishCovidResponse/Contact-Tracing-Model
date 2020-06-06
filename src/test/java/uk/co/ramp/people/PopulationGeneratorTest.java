@@ -74,51 +74,6 @@ public class PopulationGeneratorTest {
     }
 
     @Test
-    public void testCreateCumulative() {
-
-        Map<Integer, Double> var = new HashMap<>();
-        Map<Integer, Double> cumulative = new HashMap<>();
-
-        // create a random number of bins, between 5 and 10
-        int bins = random.nextInt(5) + 5;
-        double sum = 0d;
-
-
-        for (int i = 0; i < bins; i++) {
-
-            // add a small value on to the end of the last bin
-            double sample = random.nextDouble() * 0.2;
-            sum += sample;
-
-            // if we overflow 1, end here with 1
-            // or put 1 in the last place.
-            if (sum > 1d) {
-                var.put(i, sample);
-                cumulative.put(i, 1d);
-                bins = i;
-                break;
-            } else if (i == bins - 1) {
-                var.put(i, 1 - sum);
-                cumulative.put(i, 1d);
-                break;
-            }
-
-            var.put(i, sample);
-            cumulative.put(i, sum);
-
-        }
-
-        Map<Integer, Double> result = populationGenerator.createCumulative(var);
-
-        // Assert the two methods produce the same result.
-        for (int i = 0; i < bins; i++) {
-            Assert.assertEquals(cumulative.get(i), result.get(i), DELTA);
-        }
-
-    }
-
-
-    @Test
     @Ignore
     public void testFindAgeSimple() {
 

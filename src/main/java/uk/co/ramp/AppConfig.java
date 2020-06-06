@@ -6,6 +6,7 @@ import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.SpringBootConfiguration;
 import org.springframework.context.annotation.Bean;
+import uk.co.ramp.distribution.DistributionSampler;
 import uk.co.ramp.io.DiseaseProperties;
 import uk.co.ramp.io.PopulationProperties;
 import uk.co.ramp.io.StandardProperties;
@@ -93,5 +94,9 @@ public class AppConfig {
 
     }
 
+    @Bean
+    public DistributionSampler distributionSampler(RandomDataGenerator randomDataGenerator) {
+        return new DistributionSampler(randomDataGenerator);
+    }
 
 }

@@ -2,6 +2,7 @@ package uk.co.ramp.io;
 
 import org.immutables.gson.Gson.TypeAdapters;
 import org.immutables.value.Value.Immutable;
+import uk.co.ramp.distribution.ProgressionDistribution;
 
 @TypeAdapters
 @Immutable

@@ -8,9 +8,7 @@ import uk.co.ramp.io.PopulationProperties;
 import uk.co.ramp.io.StandardProperties;
 import uk.co.ramp.utilities.MinMax;
 
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -58,30 +56,6 @@ public class PopulationGenerator {
 
         EnumeratedIntegerDistribution distribution = new EnumeratedIntegerDistribution(dataGenerator.getRandomGenerator(), outcomes, probabilities);
         return distribution.sample();
-    }
-
-    // the population data is provided in non-cumulative form. This creates a cumulative distribution
-    Map<Integer, Double> createCumulative(Map<Integer, Double> populationDistribution) {
-
-        List<Double> data = new ArrayList<>();
-        Map<Integer, Double> cumulative = new HashMap<>();
-
-        // extract the data in ascending order
-        for (Map.Entry<Integer, Double> entry : populationDistribution.entrySet()) {
-            data.add(entry.getKey(), populationDistribution.get(entry.getKey()));
-        }
-
-        // loop over the data
-        double sum = 0d;
-        for (int i = 0; i < data.size(); i++) {
-            sum += data.get(i);
-            if (i == data.size() - 1) {
-                sum = 1d;
-            }
-            cumulative.put(i, sum);
-        }
-
-        return cumulative;
     }
 
     public Map<Integer, Case> generate() {
