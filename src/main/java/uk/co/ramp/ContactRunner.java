@@ -26,7 +26,7 @@ public class ContactRunner implements ApplicationContextAware {
 
     private static final Logger LOGGER = LogManager.getLogger(ContactRunner.class);
     public static final String COMPARTMENTS_CSV = "Compartments.csv";
-    private InputFiles inputFiles;
+        try (Reader reader = new FileReader(inputFileLocation.contactData())) {
     private StandardProperties runProperties;
     private ApplicationContext ctx;
 
