@@ -15,6 +15,7 @@ import org.springframework.test.util.ReflectionTestUtils;
 import uk.co.ramp.distribution.DistributionSampler;
 import uk.co.ramp.event.EventList;
 import uk.co.ramp.event.EventProcessor;
+import uk.co.ramp.event.FormattedEventFactory;
 import uk.co.ramp.event.types.ContactEvent;
 import uk.co.ramp.event.types.ImmutableContactEvent;
 import uk.co.ramp.io.InitialCaseReader;
@@ -320,7 +321,7 @@ public class OutbreakTest {
             }
             contacts.put(i, dailyContacts);
         }
-        EventList eventList = new EventList();
+        EventList eventList = new EventList(new FormattedEventFactory());
         eventList.addEvents(contacts);
 
         return eventList;
