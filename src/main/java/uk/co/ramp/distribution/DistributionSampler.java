@@ -1,7 +1,6 @@
 package uk.co.ramp.distribution;
 
 import org.apache.commons.math3.random.RandomDataGenerator;
-import uk.co.ramp.io.ProgressionDistribution;
 
 public class DistributionSampler {
     private final RandomDataGenerator rng;
