@@ -36,7 +36,7 @@ public class Case {
         return human;
     }
 
-    public VirusStatus status() {
+    public VirusStatus virusStatus() {
         return virusStatus;
     }
 
@@ -96,7 +96,7 @@ public class Case {
     }
 
     public boolean isInfectious() {
-        return virusStatus == ASYMPTOMATIC || virusStatus == SYMPTOMATIC || virusStatus == PRESYMPTOMATIC;
+        return virusStatus == ASYMPTOMATIC || virusStatus == SYMPTOMATIC || virusStatus == SEVERELY_SYMPTOMATIC || virusStatus == PRESYMPTOMATIC;
     }
 
     // Event handling

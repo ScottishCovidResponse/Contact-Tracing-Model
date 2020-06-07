@@ -1,22 +1,49 @@
 package uk.co.ramp.event;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import org.springframework.stereotype.Service;
 import uk.co.ramp.event.types.*;
 import uk.co.ramp.people.Case;
 
+@Service
 public class FormattedEventFactory {
 
-    public static ImmutableFormattedEvent create(VirusEvent event) {
+    private static final Logger LOGGER = LogManager.getLogger(FormattedEventFactory.class);
+
+    public ImmutableFormattedEvent create(Event event) {
+
+        if (event instanceof VirusEvent) {
+            return create((VirusEvent) event);
+        } else if (event instanceof InfectionEvent) {
+            return create((InfectionEvent) event);
+        } else if (event instanceof AlertEvent) {
+            return create((AlertEvent) event);
+        } else if (event instanceof ContactEvent) {
+            // todo do we want to print these all out as they are an input?
+            return null;
+        } else if (event instanceof PolicyEvent) {
+            return create((PolicyEvent) event);
+        } else {
+            String message = "Unknown Event Type: " + event.getClass().getSimpleName();
+            LOGGER.error(message);
+            throw new EventException(message);
+        }
+    }
+
+
+    ImmutableFormattedEvent create(VirusEvent event) {
         return ImmutableFormattedEvent.builder().
                 time(event.time()).
                 eventType("VirusEvent").
                 id(event.id()).
                 newStatus(event.newStatus().toString()).
-                additionalInfo("").
+                additionalInfo("Old Status : " + event.oldStatus()).
                 build();
     }
 
 
-    public static ImmutableFormattedEvent create(InfectionEvent event) {
+    ImmutableFormattedEvent create(InfectionEvent event) {
 
         String exposedBy;
         if (event.exposedBy() == Case.getInitial()) {
@@ -24,7 +51,7 @@ public class FormattedEventFactory {
         } else if (event.exposedBy() == Case.getRandomInfection()) {
             exposedBy = "This case was a random infection";
         } else {
-            exposedBy = "This case was due to contact with " + event.exposedBy();
+            exposedBy = "This case was due to contact with " + event.exposedBy() + " at time = " + event.exposedTime();
         }
 
 
@@ -37,7 +64,7 @@ public class FormattedEventFactory {
                 build();
     }
 
-    public static ImmutableFormattedEvent create(AlertEvent event) {
+    ImmutableFormattedEvent create(AlertEvent event) {
         return ImmutableFormattedEvent.builder().
                 time(event.time()).
                 eventType("AlertEvent").
@@ -48,36 +75,27 @@ public class FormattedEventFactory {
     }
 
 
-    public static ImmutableFormattedEvent create(PolicyEvent event) {
+    ImmutableFormattedEvent create(PolicyEvent event) {
+        // TODO: check when merging
         return ImmutableFormattedEvent.builder().
                 time(event.time()).
                 eventType("PolicyEvent").
                 id(0).
                 newStatus("").
-                additionalInfo("").
+                additionalInfo("TODO will need to fill out").
                 build();
     }
 
 
-    public static ImmutableFormattedEvent create(ContactEvent event) {
+    ImmutableFormattedEvent create(ContactEvent event) {
         return ImmutableFormattedEvent.builder().
                 time(event.time()).
                 eventType("ContactEvent").
                 id(event.to()).
-                newStatus("").
-                additionalInfo("").
+                newStatus(event.label()).
+                additionalInfo("contact weight is " + event.weight()).
                 build();
     }
 
-    public static ImmutableFormattedEvent create(Event event) {
 
-        if (event instanceof VirusEvent) {
-            return create((VirusEvent) event);
-        } else if (event instanceof InfectionEvent) {
-            return create((InfectionEvent) event);
-        } else if (event instanceof AlertEvent) {
-            return create((AlertEvent) event);
-        }
-        return null;
-    }
 }

@@ -3,7 +3,6 @@ package uk.co.ramp;
 import org.apache.commons.math3.random.RandomDataGenerator;
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.context.annotation.Bean;
-import uk.co.ramp.event.EventProcessor;
 import uk.co.ramp.io.readers.DiseasePropertiesReader;
 import uk.co.ramp.io.readers.PopulationPropertiesReader;
 import uk.co.ramp.io.types.DiseaseProperties;
@@ -48,11 +47,6 @@ public class TestUtils {
     @Bean
     public static StandardProperties standardProperties() {
         return ImmutableStandardProperties.builder().initialExposures(10).populationSize(1000).seed(123).steadyState(true).timeLimit(100).build();
-    }
-
-    @Bean
-    public static EventProcessor eventProcessor() {
-        return new EventProcessor();
     }
 
 }

@@ -2,7 +2,6 @@ package uk.co.ramp;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import uk.co.ramp.event.EventList;
 import uk.co.ramp.event.EventProcessor;
@@ -27,51 +26,32 @@ public class Outbreak {
 
     private static final Logger LOGGER = LogManager.getLogger(Outbreak.class);
 
-    private StandardProperties properties;
-    private DiseaseProperties diseaseProperties;
-    private Map<Integer, Case> population;
-    private EventList eventList;
-    private InitialCaseReader initialCaseReader;
-    private EventProcessor eventProcessor;
+    private final StandardProperties properties;
+    private final DiseaseProperties diseaseProperties;
+    private final EventList eventList;
+    private final InitialCaseReader initialCaseReader;
+    private final EventProcessor eventProcessor;
+    private final UtilitiesBean utils;
+    private final LogDailyOutput outputLog;
 
-    private final LogDailyOutput outputLog = new LogDailyOutput();
+    private Map<Integer, Case> population;
 
     private int activeCases = 0;
 
     private final Map<Integer, CmptRecord> records = new HashMap<>();
-    private UtilitiesBean utils;
 
     public void setPopulation(Map<Integer, Case> population) {
         this.population = population;
     }
 
-    @Autowired
-    public void setEventProcessor(EventProcessor eventProcessor) {
+    public Outbreak(EventProcessor eventProcessor, EventList eventList, InitialCaseReader initialCaseReader, DiseaseProperties diseaseProperties, StandardProperties standardProperties, UtilitiesBean utils, LogDailyOutput outputLog) {
+
         this.eventProcessor = eventProcessor;
-    }
-
-    @Autowired
-    public void setEventList(EventList eventList) {
         this.eventList = eventList;
-    }
-
-    @Autowired
-    public void setInitialCaseReader(InitialCaseReader initialCaseReader) {
         this.initialCaseReader = initialCaseReader;
-    }
-
-    @Autowired
-    public void setDiseaseProperties(DiseaseProperties diseaseProperties) {
         this.diseaseProperties = diseaseProperties;
-    }
-
-    @Autowired
-    public void setStandardProperties(StandardProperties standardProperties) {
         this.properties = standardProperties;
-    }
-
-    @Autowired
-    public void setUtilitiesBean(UtilitiesBean utils) {
+        this.outputLog = outputLog;
         this.utils = utils;
     }
 

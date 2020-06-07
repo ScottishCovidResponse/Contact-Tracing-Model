@@ -5,18 +5,19 @@ import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Import;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.util.ReflectionTestUtils;
+import uk.co.ramp.distribution.DistributionSampler;
 import uk.co.ramp.event.EventList;
 import uk.co.ramp.event.EventProcessor;
 import uk.co.ramp.event.types.ContactEvent;
 import uk.co.ramp.event.types.ImmutableContactEvent;
 import uk.co.ramp.io.InitialCaseReader;
-import uk.co.ramp.io.ProgressionDistribution;
 import uk.co.ramp.io.types.CmptRecord;
 import uk.co.ramp.io.types.DiseaseProperties;
 import uk.co.ramp.io.types.StandardProperties;
@@ -34,6 +35,7 @@ import static org.mockito.Mockito.when;
 import static uk.co.ramp.people.VirusStatus.*;
 
 @SuppressWarnings("unchecked")
+@DirtiesContext
 @RunWith(SpringRunner.class)
 @Import({TestConfig.class, TestUtils.class, AppConfig.class})
 public class OutbreakTest {
@@ -42,27 +44,30 @@ public class OutbreakTest {
 
     @Rule
     public LogSpy logSpy = new LogSpy();
-    private Outbreak outbreak;
+
+    @Mock
+    @Autowired
+    EventProcessor eventProcessor;
 
     @Autowired
     UtilitiesBean utilitiesBean;
-
     @Autowired
-    EventProcessor eventProcessor;
+    DistributionSampler distributionSampler;
 
     @Autowired
     DiseaseProperties diseaseProperties;
 
     @Autowired
     StandardProperties standardProperties;
+    @Autowired
+    private Outbreak outbreak;
 
     @Before
+
     public void setUp() {
-        outbreak = new Outbreak();
+
         outbreak.setPopulation(mock(Map.class));
-        outbreak.setStandardProperties(standardProperties);
-        outbreak.setDiseaseProperties(diseaseProperties);
-        outbreak.setUtilitiesBean(utilitiesBean);
+
     }
 
     @Test
@@ -85,15 +90,16 @@ public class OutbreakTest {
 
         EventList contacts = createContactRecords(days, population);
 
+        ReflectionTestUtils.setField(outbreak, "eventList", contacts);
 
         outbreak.setPopulation(population);
-        outbreak.setEventList(contacts);
-        outbreak.setDiseaseProperties(d);
-
-        outbreak.setEventProcessor(eventProcessor);
+//        outbreak.setEventList(contacts);
+//        outbreak.setDiseaseProperties(d);
+//
+//        outbreak.setEventProcessor(eventProcessor);
         outbreak.runContactData(days - 1, randomInfection);
 
-        long sus = population.values().stream().map(Case::status).filter(status -> status == SUSCEPTIBLE).count();
+        long sus = population.values().stream().map(Case::virusStatus).filter(status -> status == SUSCEPTIBLE).count();
 
         // we expect this to roughly follow an exp decay
         double test = popSize * Math.exp(-randomInfection * days);
@@ -143,8 +149,8 @@ public class OutbreakTest {
         int popSize = 100;
 
         DiseaseProperties d = TestUtils.diseaseProperties();
-        outbreak.setDiseaseProperties(d);
-        outbreak.setEventProcessor(eventProcessor);
+//        outbreak.setDiseaseProperties(d);
+//        outbreak.setEventProcessor(eventProcessor);
 
         StandardProperties standardProperties = mock(StandardProperties.class);
         when(standardProperties.timeLimit()).thenReturn(100);
@@ -166,18 +172,17 @@ public class OutbreakTest {
 
         EventList contacts = createContactRecords(200, population);
 
+        ReflectionTestUtils.setField(outbreak, "eventList", contacts);
+        ReflectionTestUtils.setField(outbreak, "properties", standardProperties);
         outbreak.setPopulation(population);
-        outbreak.setEventList(contacts);
-        outbreak.setStandardProperties(standardProperties);
-        outbreak.setInitialCaseReader(initialCaseReader);
 
 
-        long susceptible = population.values().stream().map(Case::status).filter(status -> status == SUSCEPTIBLE).count();
+        long susceptible = population.values().stream().map(Case::virusStatus).filter(status -> status == SUSCEPTIBLE).count();
 
         Map<Integer, CmptRecord> records = outbreak.propagate();
 
 
-        long susceptiblePost = getPopulationViaReflection().values().stream().map(Case::status).filter(status -> status == SUSCEPTIBLE).count();
+        long susceptiblePost = getPopulationViaReflection().values().stream().map(Case::virusStatus).filter(status -> status == SUSCEPTIBLE).count();
 
         Assert.assertEquals(records.size(), standardProperties.timeLimit() + 1);
         Assert.assertTrue(susceptiblePost < susceptible);
@@ -194,8 +199,8 @@ public class OutbreakTest {
         int infections = 1 + popSize / 10;
 
         DiseaseProperties d = TestUtils.diseaseProperties();
-        outbreak.setDiseaseProperties(d);
-        outbreak.setEventProcessor(eventProcessor);
+//        outbreak.setDiseaseProperties(d);
+//        outbreak.setEventProcessor(eventProcessor);
         Map<Integer, Case> population = new HashMap<>();
 
         for (int i = 0; i < popSize; i++) {
@@ -217,17 +222,18 @@ public class OutbreakTest {
 
         EventList contacts = createContactRecords(500, population);
 
+        ReflectionTestUtils.setField(outbreak, "eventList", contacts);
         outbreak.setPopulation(population);
-        outbreak.setEventList(contacts);
-        outbreak.setStandardProperties(properties);
-        outbreak.setInitialCaseReader(initialCaseReader);
-        outbreak.setDiseaseProperties(d);
+//        outbreak.setEventList(contacts);
+//        outbreak.setStandardProperties(properties);
+//        outbreak.setInitialCaseReader(initialCaseReader);
+//        outbreak.setDiseaseProperties(d);
         outbreak.generateInitialInfection();
 
-        long susceptible = population.values().stream().map(Case::status).filter(status -> status == SUSCEPTIBLE).count();
+        long susceptible = population.values().stream().map(Case::virusStatus).filter(status -> status == SUSCEPTIBLE).count();
         outbreak.runToCompletion();
 
-        long susceptiblePost = getPopulationViaReflection().values().stream().map(Case::status).filter(status -> status == SUSCEPTIBLE).count();
+        long susceptiblePost = getPopulationViaReflection().values().stream().map(Case::virusStatus).filter(status -> status == SUSCEPTIBLE).count();
 
         Assert.assertTrue(susceptiblePost < susceptible);
         Assert.assertThat(logSpy.getOutput(), containsString("Not all contact data will be used"));
@@ -237,13 +243,10 @@ public class OutbreakTest {
 
     @Test
     @DirtiesContext
-    public void runToCompletionSmallContact() throws FileNotFoundException {
+    public void runToCompletionSmallContact() {
         int popSize = 100;
         int infections = 1 + popSize / 10;
 
-        DiseaseProperties d = TestUtils.diseaseProperties();
-        outbreak.setDiseaseProperties(d);
-        outbreak.setEventProcessor(eventProcessor);
         Map<Integer, Case> population = new HashMap<>();
 
         for (int i = 0; i < popSize; i++) {
@@ -256,26 +259,17 @@ public class OutbreakTest {
         InitialCaseReader initialCaseReader = mock(InitialCaseReader.class);
         when(initialCaseReader.getCases()).thenReturn(cases);
 
-        StandardProperties properties = mock(StandardProperties.class);
-        when(properties.initialExposures()).thenReturn(infections);
-        when(properties.timeLimit()).thenReturn(100);
-        when(properties.populationSize()).thenReturn(popSize);
-        when(properties.steadyState()).thenReturn(true);
-
         EventList contacts = createContactRecords(5, population);
 
-        outbreak.setPopulation(population);
-        outbreak.setEventList(contacts);
-        outbreak.setStandardProperties(properties);
-        outbreak.setInitialCaseReader(initialCaseReader);
-        outbreak.setDiseaseProperties(d);
+        ReflectionTestUtils.setField(outbreak, "eventList", contacts);
 
+        outbreak.setPopulation(population);
         outbreak.generateInitialInfection();
 
-        long susceptible = population.values().stream().map(Case::status).filter(status -> status == SUSCEPTIBLE).count();
+        long susceptible = population.values().stream().map(Case::virusStatus).filter(status -> status == SUSCEPTIBLE).count();
         outbreak.runToCompletion();
 
-        long susceptiblePost = getPopulationViaReflection().values().stream().map(Case::status).filter(status -> status == SUSCEPTIBLE).count();
+        long susceptiblePost = getPopulationViaReflection().values().stream().map(Case::virusStatus).filter(status -> status == SUSCEPTIBLE).count();
 
         Assert.assertTrue(susceptiblePost < susceptible);
         Assert.assertThat(logSpy.getOutput(), containsString("There are no active cases and the random infection rate is zero."));
@@ -286,9 +280,6 @@ public class OutbreakTest {
 
     @Test
     public void runContactDataWithoutRandoms() {
-        DiseaseProperties d = mock(DiseaseProperties.class);
-        when(d.progressionDistribution()).thenReturn(ProgressionDistribution.FLAT);
-        outbreak.setDiseaseProperties(d);
 
         int days = 11;
         int popSize = 500;
@@ -304,9 +295,8 @@ public class OutbreakTest {
 
         EventList contacts = createContactRecords(days, population);
 
+        ReflectionTestUtils.setField(outbreak, "eventList", contacts);
         outbreak.setPopulation(population);
-        outbreak.setEventList(contacts);
-        outbreak.setEventProcessor(eventProcessor);
         outbreak.runContactData(days - 1, randomInfection);
 
         Assert.assertThat(logSpy.getOutput(), containsString("There are no active cases and the random infection rate is zero."));
@@ -346,7 +336,7 @@ public class OutbreakTest {
             VirusStatus status = VirusStatus.values()[random.nextInt(numStatus)];
             if (status == SUSCEPTIBLE || status == RECOVERED || status == DEAD) inactiveCases++;
             Case thisCase = Mockito.mock(Case.class);
-            when(thisCase.status()).thenReturn(status);
+            when(thisCase.virusStatus()).thenReturn(status);
             when(thisCase.id()).thenReturn(i);
 
             population.put(i, thisCase);

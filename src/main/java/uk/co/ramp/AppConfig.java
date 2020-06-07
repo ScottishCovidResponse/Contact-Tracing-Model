@@ -7,6 +7,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.SpringBootConfiguration;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
+import uk.co.ramp.distribution.DistributionSampler;
 import uk.co.ramp.io.readers.DiseasePropertiesReader;
 import uk.co.ramp.io.readers.InputFilesReader;
 import uk.co.ramp.io.readers.PopulationPropertiesReader;
@@ -104,6 +105,13 @@ public class AppConfig {
     public UtilitiesBean utilitiesBean() {
         return new UtilitiesBean();
     }
+
+
+    @Bean
+    public DistributionSampler distributionSampler(RandomDataGenerator randomDataGenerator) {
+        return new DistributionSampler(randomDataGenerator);
+    }
+
 
     Reader getReader(String input) throws FileNotFoundException {
         return new FileReader(new File(input));

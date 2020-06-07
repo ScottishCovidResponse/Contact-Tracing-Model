@@ -2,6 +2,7 @@ package uk.co.ramp.io;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.springframework.stereotype.Service;
 import uk.co.ramp.io.types.CmptRecord;
 import uk.co.ramp.io.types.ImmutableCmptRecord;
 import uk.co.ramp.people.VirusStatus;
@@ -10,6 +11,7 @@ import java.util.Map;
 
 import static uk.co.ramp.people.VirusStatus.*;
 
+@Service
 public class LogDailyOutput {
 
     private static final Logger LOGGER = LogManager.getLogger(LogDailyOutput.class);

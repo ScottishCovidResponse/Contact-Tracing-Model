@@ -25,13 +25,9 @@ public class InfectionMap {
     }
 
     public void outputMap() {
-        collateInfectionData();
-    }
-
-    void collateInfectionData() {
 
         List<Case> infections = population.values().stream()
-                .filter(c -> c.status() != SUSCEPTIBLE)
+                .filter(c -> c.virusStatus() != SUSCEPTIBLE)
                 .sorted(Comparator.comparingInt(Case::exposedTime))
                 .collect(Collectors.toList());
 

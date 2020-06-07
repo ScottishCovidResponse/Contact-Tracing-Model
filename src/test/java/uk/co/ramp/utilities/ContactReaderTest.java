@@ -1,8 +1,8 @@
 package uk.co.ramp.utilities;
 
 import org.junit.Test;
-import uk.co.ramp.contact.ContactRecord;
-import uk.co.ramp.contact.ImmutableContactRecord;
+import uk.co.ramp.event.types.ContactEvent;
+import uk.co.ramp.event.types.ImmutableContactEvent;
 import uk.co.ramp.io.ContactReader;
 import uk.co.ramp.io.types.ImmutableStandardProperties;
 import uk.co.ramp.io.types.StandardProperties;
@@ -28,7 +28,7 @@ public class ContactReaderTest {
             .steadyState(true)
             .build();
 
-    private final ContactRecord record1 = ImmutableContactRecord.builder()
+    private final ContactEvent record1 = ImmutableContactEvent.builder()
             .time(0)
             .from(8)
             .to(9)
@@ -36,7 +36,7 @@ public class ContactReaderTest {
             .label("label")
             .build();
 
-    private final ContactRecord record2 = ImmutableContactRecord.builder()
+    private final ContactEvent record2 = ImmutableContactEvent.builder()
             .time(0)
             .from(7)
             .to(8)
@@ -47,7 +47,7 @@ public class ContactReaderTest {
     @Test
     public void testRead() throws IOException {
         StringReader stringReader = new StringReader(csv);
-        Map<Integer, List<ContactRecord>> dailyContactRecords = new ContactReader().read(stringReader, properties);
+        Map<Integer, List<ContactEvent>> dailyContactRecords = new ContactReader().readEvents(stringReader, properties);
 
         assertThat(dailyContactRecords).containsOnlyKeys(0);
         assertThat(dailyContactRecords.get(0)).containsExactly(record1, record2);
@@ -62,7 +62,7 @@ public class ContactReaderTest {
                 "2,10000,10001,8.2, label\n";
         StringReader stringReader = new StringReader(csvOverPersonLimit);
 
-        Map<Integer, List<ContactRecord>> dailyContactRecords = new ContactReader().read(stringReader, properties);
+        Map<Integer, List<ContactEvent>> dailyContactRecords = new ContactReader().readEvents(stringReader, properties);
 
         assertThat(dailyContactRecords).isEmpty();
     }

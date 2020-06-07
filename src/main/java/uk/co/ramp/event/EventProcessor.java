@@ -6,11 +6,15 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import uk.co.ramp.distribution.Distribution;
+import uk.co.ramp.distribution.DistributionSampler;
+import uk.co.ramp.distribution.ImmutableDistribution;
 import uk.co.ramp.event.types.*;
 import uk.co.ramp.io.types.DiseaseProperties;
 import uk.co.ramp.people.AlertStatus;
 import uk.co.ramp.people.Case;
 import uk.co.ramp.people.VirusStatus;
+import uk.co.ramp.utilities.ImmutableMeanMax;
 import uk.co.ramp.utilities.MeanMax;
 import uk.co.ramp.utilities.UtilitiesBean;
 
@@ -27,30 +31,19 @@ import static uk.co.ramp.people.VirusStatus.*;
 public class EventProcessor {
 
     private static final Logger LOGGER = LogManager.getLogger(EventProcessor.class);
-    private DiseaseProperties diseaseProperties;
-    private RandomDataGenerator rng;
     private Map<Integer, Case> population;
-    private EventList eventList;
-    private UtilitiesBean utils;
+
+    private final DiseaseProperties diseaseProperties;
+    private final EventList eventList;
+    private final UtilitiesBean utils;
+    private final DistributionSampler distributionSampler;
 
     @Autowired
-    public void setUtilitiesBean(UtilitiesBean utils) {
+    public EventProcessor(DistributionSampler distributionSampler, UtilitiesBean utils, EventList eventList, DiseaseProperties diseaseProperties, RandomDataGenerator randomDataGenerator) {
+        this.distributionSampler = distributionSampler;
         this.utils = utils;
-    }
-
-    @Autowired
-    public void setEventList(EventList eventList) {
         this.eventList = eventList;
-    }
-
-    @Autowired
-    public void setDiseaseProperties(DiseaseProperties diseaseProperties) {
         this.diseaseProperties = diseaseProperties;
-    }
-
-    @Autowired
-    public void setRandomDataGenerator(RandomDataGenerator randomDataGenerator) {
-        this.rng = randomDataGenerator;
     }
 
 
@@ -79,10 +72,10 @@ public class EventProcessor {
 
     List<InfectionEvent> createRandomInfections(int time, double randomRate) {
 
-        List<Case> sus = population.values().stream().filter(aCase -> aCase.status() == SUSCEPTIBLE).collect(Collectors.toList());
+        List<Case> sus = population.values().stream().filter(aCase -> aCase.virusStatus() == SUSCEPTIBLE).collect(Collectors.toList());
         List<InfectionEvent> randomInfections = new ArrayList<>();
         for (Case aCase : sus) {
-            if (rng.nextUniform(0, 1) < randomRate) {
+            if (distributionSampler.uniformBetweenZeroAndOne() < randomRate) {
                 randomInfections.add(
                         ImmutableInfectionEvent.builder().
                                 time(time + 1).id(aCase.id()).
@@ -153,7 +146,6 @@ public class EventProcessor {
             // will return self if at DEAD or RECOVERED
             if (event.newStatus() != nextStatus) {
 
-
                 int nextTime = timeInCompartment(event.newStatus(), nextStatus);
 
                 VirusEvent subsequentEvent = ImmutableVirusEvent.builder().
@@ -178,7 +170,7 @@ public class EventProcessor {
         // Look at all infection events:
         for (InfectionEvent event : eventList.getForTime(time).stream().filter(event -> event instanceof InfectionEvent).map(event -> (InfectionEvent) event).collect(Collectors.toList())) {
 
-            if (population.get(event.id()).status() == SUSCEPTIBLE) {
+            if (population.get(event.id()).virusStatus() == SUSCEPTIBLE) {
                 population.get(event.id()).processEvent(event, time);
 
                 VirusStatus nextStatus = determineNextStatus(event);
@@ -215,7 +207,7 @@ public class EventProcessor {
         }
 
 
-        if (potentialSpreader.status() != victim.status()) {
+        if (potentialSpreader.virusStatus() != victim.virusStatus()) {
             return evaluateExposures(contacts, time);
         }
 
@@ -226,9 +218,9 @@ public class EventProcessor {
         Case personA = utils.getMostSevere(population.get(c.to()), population.get(c.from()));
         Case personB = personA == population.get(c.to()) ? population.get(c.from()) : population.get(c.to());
 
-        boolean dangerMix = personA.isInfectious() && personB.status() == SUSCEPTIBLE;
+        boolean dangerMix = personA.isInfectious() && personB.virusStatus() == SUSCEPTIBLE;
 
-        if (dangerMix && rng.nextUniform(0, 1) < c.weight() / diseaseProperties.exposureTuning()) {
+        if (dangerMix && distributionSampler.uniformBetweenZeroAndOne() < c.weight() / diseaseProperties.exposureTuning()) {
             LOGGER.debug("       DANGER MIX");
 
             InfectionEvent infectionEvent = ImmutableInfectionEvent.builder().
@@ -293,7 +285,7 @@ public class EventProcessor {
             case SEVERELY_SYMPTOMATIC:
                 return determineOutcome(population.get(event.id()));
             default:
-                System.out.println(event);
+                LOGGER.error(event);
                 throw new RuntimeException("Shouldn't get here");
         }
     }
@@ -328,71 +320,52 @@ public class EventProcessor {
                 }
                 break;
             default:
-                progressionData = diseaseProperties.timeRecoverySymp();
+                String message = "Unexpected Virus statuses: " + currentStatus + " -> " + newStatus;
+                LOGGER.error(message);
+                throw new RuntimeException(message);
         }
 
-        return getDistributionValue(progressionData);
+        Distribution distribution = ImmutableDistribution.builder().type(diseaseProperties.progressionDistribution()).mean(progressionData.mean()).max(progressionData.max()).build();
+        return distributionSampler.getDistributionValue(distribution);
     }
 
     int timeInStatus(AlertStatus newStatus) {
-        // todo elaborate
+
+        MeanMax progressionData;
         switch (newStatus) {
-            case TESTED_POSITIVE:
-                break;
             case TESTED_NEGATIVE:
+                progressionData = ImmutableMeanMax.builder().mean(1).max(1).build();
                 break;
             case AWAITING_RESULT:
+                progressionData = diseaseProperties.timeTestResult();
                 break;
             case REQUESTED_TEST:
+                progressionData = diseaseProperties.timeTestAdministered();
                 break;
             case ALERTED:
+                progressionData = ImmutableMeanMax.builder().mean(1).max(1).build();
                 break;
-            case NONE:
-                break;
-        }
-        MeanMax progressionData = diseaseProperties.timeTestAdministered();
-        return getDistributionValue(progressionData);
-    }
-
-    int getDistributionValue(MeanMax progressionData) {
-        double mean = progressionData.mean();
-        double max = progressionData.max();
-
-        int value = (int) Math.round(mean);
-        double sample;
-        switch (diseaseProperties.progressionDistribution()) {
-            case GAUSSIAN:
-                sample = rng.nextGaussian(mean, mean / 2d);
-                break;
-            case LINEAR:
-                sample = rng.nextUniform(Math.max(mean - max, 1) / 2d, max);
-                break;
-            case EXPONENTIAL:
-                sample = rng.nextExponential(mean);
-                break;
-            case FLAT:
             default:
-                return value;
+                return 0;
         }
 
-        value = (int) Math.round(sample);
-
-        return Math.min(Math.max(value, 1), (int) max);
+        Distribution distribution = ImmutableDistribution.builder().type(diseaseProperties.progressionDistribution()).mean(progressionData.mean()).max(progressionData.max()).build();
+        return distributionSampler.getDistributionValue(distribution);
     }
 
 
     VirusStatus determineInfection(Case p) {
         //TODO add real logic
-        return p.health() > rng.nextUniform(0, 1) ? ASYMPTOMATIC : PRESYMPTOMATIC;
+        return p.health() > distributionSampler.uniformBetweenZeroAndOne() ? ASYMPTOMATIC : PRESYMPTOMATIC;
     }
 
     VirusStatus determineSeverity(Case p) {
         //TODO add real logic
-        return p.health() > rng.nextUniform(0, 1) ? RECOVERED : SEVERELY_SYMPTOMATIC;
+        return p.health() > distributionSampler.uniformBetweenZeroAndOne() ? RECOVERED : SEVERELY_SYMPTOMATIC;
     }
 
     VirusStatus determineOutcome(Case p) {
         //TODO add real logic
-        return p.health() > rng.nextUniform(0, 1) ? RECOVERED : DEAD;
+        return p.health() > distributionSampler.uniformBetweenZeroAndOne() ? RECOVERED : DEAD;
     }
 }

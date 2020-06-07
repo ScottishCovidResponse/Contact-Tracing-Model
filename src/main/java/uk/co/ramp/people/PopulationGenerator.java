@@ -41,7 +41,7 @@ public class PopulationGenerator {
     public static Map<VirusStatus, Integer> getCmptCounts(Map<Integer, Case> population) {
 
         Map<VirusStatus, Integer> pop = population.values().stream()
-                .map(Case::status)
+                .map(Case::virusStatus)
                 .collect(Collectors.groupingBy(Function.identity(), Collectors.summingInt(e -> 1)));
 
         Stream.of(VirusStatus.values()).forEach(vs -> pop.putIfAbsent(vs, 0));
