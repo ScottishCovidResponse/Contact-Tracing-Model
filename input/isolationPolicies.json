@@ -33,7 +33,7 @@
   ],
   "virusStatusPolicies": [
     {
-      "virusStatus": "INFECTED_SYMP",
+      "virusStatus": "SYMPTOMATIC",
       "isolationProperty": {
         "id": "Infected Symptomatic Policy",
         "isolationProbabilityDistribution": {

@@ -1,7 +1,6 @@
 package uk.co.ramp.event;
 
 
-import org.apache.commons.math3.random.RandomDataGenerator;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,6 +13,7 @@ import uk.co.ramp.io.types.DiseaseProperties;
 import uk.co.ramp.people.AlertStatus;
 import uk.co.ramp.people.Case;
 import uk.co.ramp.people.VirusStatus;
+import uk.co.ramp.policy.IsolationPolicy;
 import uk.co.ramp.utilities.ImmutableMeanMax;
 import uk.co.ramp.utilities.MeanMax;
 import uk.co.ramp.utilities.UtilitiesBean;
@@ -37,13 +37,15 @@ public class EventProcessor {
     private final EventList eventList;
     private final UtilitiesBean utils;
     private final DistributionSampler distributionSampler;
+    private final IsolationPolicy isolationPolicy;
 
     @Autowired
-    public EventProcessor(DistributionSampler distributionSampler, UtilitiesBean utils, EventList eventList, DiseaseProperties diseaseProperties, RandomDataGenerator randomDataGenerator) {
+    public EventProcessor(DistributionSampler distributionSampler, UtilitiesBean utils, EventList eventList, DiseaseProperties diseaseProperties, IsolationPolicy isolationPolicy) {
         this.distributionSampler = distributionSampler;
         this.utils = utils;
         this.eventList = eventList;
         this.diseaseProperties = diseaseProperties;
+        this.isolationPolicy = isolationPolicy;
     }
 
 
@@ -68,6 +70,15 @@ public class EventProcessor {
 
         eventList.addEvents(newEvents);
 
+    }
+
+    private boolean isContactIsolated(ContactEvent contact, Case caseA, Case caseB, double proportionInfectious, int currentTime) {
+        return isolationPolicy.isContactIsolated(caseA, caseB, contact.weight(), proportionInfectious, currentTime);
+    }
+
+
+    private double proportionOfPopulationInfectious() {
+        return population.values().parallelStream().filter(Case::isInfectious).count() / (double) population.size();
     }
 
     List<InfectionEvent> createRandomInfections(int time, double randomRate) {
@@ -121,10 +132,11 @@ public class EventProcessor {
     }
 
     List<InfectionEvent> runContactEvents(int time) {
+        double proportionInfectious = proportionOfPopulationInfectious();
         List<InfectionEvent> newEvents = new ArrayList<>();
         // Look at all contact events
         for (ContactEvent event : eventList.getForTime(time).stream().filter(event -> event instanceof ContactEvent).map(event -> (ContactEvent) event).collect(Collectors.toList())) {
-            Optional<InfectionEvent> newEvent = evaluateContact(time, event);
+            Optional<InfectionEvent> newEvent = evaluateContact(time, event, proportionInfectious);
 
             if (newEvent.isPresent()) {
                 newEvents.add(newEvent.get());
@@ -192,20 +204,16 @@ public class EventProcessor {
     }
 
 
-    Optional<InfectionEvent> evaluateContact(int time, ContactEvent contacts) {
+    Optional<InfectionEvent> evaluateContact(int time, ContactEvent contacts, double proportionInfectious) {
         Case potentialSpreader = population.get(contacts.to());
         Case victim = population.get(contacts.from());
 
-        boolean conditionA = potentialSpreader.alertStatus() != NONE || victim.alertStatus() != NONE;
-        boolean conditionB = contacts.weight() < diseaseProperties.exposureThreshold();
+        boolean shouldIsolateContact = isContactIsolated(contacts, potentialSpreader, victim, proportionInfectious, time);
 
-        if (conditionA && conditionB) {
-            // TODO: Apply behavioural logic here. Use compliance value?
-            LOGGER.trace("spreader: {}   victim: {}   weight: {} ", potentialSpreader.alertStatus(), victim.alertStatus(), contacts.weight());
-            LOGGER.debug("Skipping contact due to threshold");
+        if (shouldIsolateContact) {
+            LOGGER.trace("Skipping contact due to isolation");
             return Optional.empty();
         }
-
 
         if (potentialSpreader.virusStatus() != victim.virusStatus()) {
             return evaluateExposures(contacts, time);

@@ -2,6 +2,7 @@ package uk.co.ramp.event;
 
 import org.junit.Before;
 import org.junit.Test;
+import org.springframework.beans.factory.annotation.Autowired;
 import uk.co.ramp.TestUtils;
 
 import java.io.IOException;
@@ -9,7 +10,8 @@ import java.util.Random;
 
 public class EventListTest {
 
-    EventList eventList = new EventList();
+    @Autowired
+    EventList eventList;
     Random random = TestUtils.getRandom();
 
     @Before

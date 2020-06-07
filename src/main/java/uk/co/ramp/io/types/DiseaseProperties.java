@@ -2,7 +2,7 @@ package uk.co.ramp.io.types;
 
 import org.immutables.gson.Gson.TypeAdapters;
 import org.immutables.value.Value.Immutable;
-import uk.co.ramp.io.ProgressionDistribution;
+import uk.co.ramp.distribution.ProgressionDistribution;
 import uk.co.ramp.utilities.MeanMax;
 
 @TypeAdapters

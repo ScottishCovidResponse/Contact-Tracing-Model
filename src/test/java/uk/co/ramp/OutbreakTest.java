@@ -25,6 +25,7 @@ import uk.co.ramp.io.types.StandardProperties;
 import uk.co.ramp.people.Case;
 import uk.co.ramp.people.Human;
 import uk.co.ramp.people.VirusStatus;
+import uk.co.ramp.policy.IsolationPolicyContext;
 import uk.co.ramp.utilities.UtilitiesBean;
 
 import java.io.FileNotFoundException;
@@ -38,7 +39,7 @@ import static uk.co.ramp.people.VirusStatus.*;
 @SuppressWarnings("unchecked")
 @DirtiesContext
 @RunWith(SpringRunner.class)
-@Import({TestConfig.class, TestUtils.class, AppConfig.class})
+@Import({TestConfig.class, TestUtils.class, AppConfig.class, IsolationPolicyContext.class})
 public class OutbreakTest {
 
     private final Random random = TestUtils.getRandom();

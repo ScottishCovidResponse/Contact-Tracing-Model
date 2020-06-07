@@ -2,7 +2,7 @@ package uk.co.ramp.policy;
 
 import org.junit.Before;
 import org.junit.Test;
-import uk.co.ramp.io.DiseaseProperties;
+import uk.co.ramp.io.types.DiseaseProperties;
 import uk.co.ramp.people.AlertStatus;
 import uk.co.ramp.people.Case;
 import uk.co.ramp.people.VirusStatus;
@@ -10,10 +10,7 @@ import uk.co.ramp.people.VirusStatus;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.anyDouble;
 import static org.mockito.ArgumentMatchers.anyInt;
-import static org.mockito.Mockito.eq;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 public class ContactIsolationPolicyTest {
 
@@ -34,13 +31,13 @@ public class ContactIsolationPolicyTest {
 
         this.caseA = mock(Case.class);
         when(caseA.id()).thenReturn(0);
-        when(caseA.status()).thenReturn(VirusStatus.INFECTED);
+        when(caseA.virusStatus()).thenReturn(VirusStatus.SYMPTOMATIC);
         when(caseA.alertStatus()).thenReturn(AlertStatus.NONE);
         when(caseA.compliance()).thenReturn(1.0);
 
         this.caseB = mock(Case.class);
         when(caseB.id()).thenReturn(1);
-        when(caseB.status()).thenReturn(VirusStatus.SUSCEPTIBLE);
+        when(caseB.virusStatus()).thenReturn(VirusStatus.SUSCEPTIBLE);
         when(caseB.alertStatus()).thenReturn(AlertStatus.NONE);
         when(caseB.compliance()).thenReturn(1.0);
     }

@@ -59,7 +59,7 @@ public class IsolationPropertiesReaderTest {
             "  ]," +
             "  'virusStatusPolicies': [" +
             "    {" +
-            "      'virusStatus': 'INFECTED_SYMP'," +
+            "      'virusStatus': 'SYMPTOMATIC'," +
             "      'isolationProperty': {" +
             "        'id': 'Infected Symptomatic Policy', " +
             "        'isolationProbabilityDistribution': {" +
@@ -172,7 +172,7 @@ public class IsolationPropertiesReaderTest {
                                 .build())
                         .build())
                 .addVirusStatusPolicies(ImmutableVirusStatusIsolationProperty.builder()
-                        .virusStatus(VirusStatus.INFECTED_SYMP)
+                        .virusStatus(VirusStatus.SYMPTOMATIC)
                         .isolationProperty(ImmutableIsolationProperty.builder()
                                 .id("Infected Symptomatic Policy")
                                 .isolationProbabilityDistribution(ImmutableDistribution.builder()

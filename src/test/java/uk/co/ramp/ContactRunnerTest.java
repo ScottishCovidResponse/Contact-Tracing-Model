@@ -4,6 +4,7 @@ import org.junit.*;
 import org.mockito.Mockito;
 import org.springframework.context.ApplicationContext;
 import uk.co.ramp.event.EventList;
+import uk.co.ramp.event.FormattedEventFactory;
 import uk.co.ramp.event.types.ContactEvent;
 import uk.co.ramp.io.CompartmentWriter;
 import uk.co.ramp.io.ContactReader;
@@ -73,7 +74,7 @@ public class ContactRunnerTest {
         // setting context
         when(applicationContext.getBean(PopulationGenerator.class)).thenReturn(populationGenerator);
         when(applicationContext.getBean(ContactReader.class)).thenReturn(reader);
-        when(applicationContext.getBean(EventList.class)).thenReturn(new EventList());
+        when(applicationContext.getBean(EventList.class)).thenReturn(new EventList(new FormattedEventFactory()));
         when(applicationContext.getBean(Outbreak.class)).thenReturn(outbreak);
         when(applicationContext.getBean(CompartmentWriter.class)).thenReturn(compartmentWriter);
 
