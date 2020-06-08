@@ -5,19 +5,24 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
+import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Import;
+import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.util.ReflectionTestUtils;
 import uk.co.ramp.contact.ContactRecord;
 import uk.co.ramp.contact.ImmutableContactRecord;
+import uk.co.ramp.distribution.ProgressionDistribution;
 import uk.co.ramp.io.DiseaseProperties;
 import uk.co.ramp.io.InitialCaseReader;
-import uk.co.ramp.io.ProgressionDistribution;
 import uk.co.ramp.io.StandardProperties;
 import uk.co.ramp.people.AlertStatus;
 import uk.co.ramp.people.Case;
 import uk.co.ramp.people.Human;
 import uk.co.ramp.people.VirusStatus;
+import uk.co.ramp.policy.IsolationPolicyContext;
 import uk.co.ramp.utilities.UtilitiesBean;
 
 import java.io.FileNotFoundException;
@@ -31,23 +36,34 @@ import static uk.co.ramp.people.AlertStatus.ALERTED;
 import static uk.co.ramp.people.VirusStatus.*;
 
 @SuppressWarnings("unchecked")
+@RunWith(SpringRunner.class)
+@Import({TestUtils.class, AppConfig.class, IsolationPolicyContext.class})
 public class OutbreakTest {
 
     private final Random random = TestUtils.getRandom();
     private final UtilitiesBean utils = new UtilitiesBean();
+
     @Rule
     public LogSpy logSpy = new LogSpy();
+
+    @Autowired
     private Outbreak outbreak;
 
     @Before
-
     public void setUp() {
-        outbreak = new Outbreak();
-        outbreak.setPopulation(mock(Map.class));
-        outbreak.setStandardProperties(mock(StandardProperties.class));
-        outbreak.setDiseaseProperties(mock(DiseaseProperties.class));
-        outbreak.setRandomDataGenerator(TestUtils.dataGenerator());
-        outbreak.setUtilitiesBean(utils);
+//        outbreak.setPopulation(mock(Map.class));
+//        outbreak.setStandardProperties(mock(StandardProperties.class));
+//        outbreak.setDiseaseProperties(mock(DiseaseProperties.class));
+//        outbreak.setRandomDataGenerator(TestUtils.dataGenerator());
+//        outbreak.setUtilitiesBean(utils);
+//        DiseaseProperties a = mock(DiseaseProperties.class);
+//        StandardProperties b = mock(StandardProperties.class);
+//        DistributionSampler c = TestUtils.;
+//        UtilitiesBean d = utils;
+//        LogDailyOutput e = new LogDailyOutput();
+//
+//        InitialCaseReader f = new InitialCaseReader(TestUtils.dataGenerator(), b, g);
+//        outbreak = new Outbreak(a, b, c, d, e, f);
     }
 
     @Test
@@ -103,9 +119,7 @@ public class OutbreakTest {
         when(caseB.id()).thenReturn(personB);
         when(caseA.id()).thenReturn(personA);
 
-        DiseaseProperties diseaseProperties = mock(DiseaseProperties.class);
-        when(diseaseProperties.progressionDistribution()).thenReturn(ProgressionDistribution.FLAT);
-        outbreak.setDiseaseProperties(diseaseProperties);
+        setDiseasePropertiesViaReflection();
 
         RandomDataGenerator rng = mock(RandomDataGenerator.class);
         when(rng.nextUniform(0, 1)).thenReturn(0.d);
@@ -139,7 +153,7 @@ public class OutbreakTest {
         int popSize = 100;
 
         DiseaseProperties d = TestUtils.diseaseProperties();
-        outbreak.setDiseaseProperties(d);
+        setPropertiesViaReflection(d, "diseaseProperties");
 
         StandardProperties standardProperties = mock(StandardProperties.class);
         when(standardProperties.timeLimit()).thenReturn(100);
@@ -163,9 +177,9 @@ public class OutbreakTest {
 
         outbreak.setPopulation(population);
         outbreak.setContactRecords(contacts);
-        outbreak.setStandardProperties(standardProperties);
-        outbreak.setInitialCaseReader(initialCaseReader);
 
+        setPropertiesViaReflection(standardProperties, "properties");
+        setPropertiesViaReflection(initialCaseReader, "initialCaseReader");
 
         long susceptible = population.values().stream().map(Case::status).filter(status -> status == SUSCEPTIBLE).count();
 
@@ -211,13 +225,14 @@ public class OutbreakTest {
         when(properties.initialExposures()).thenReturn(infected);
         when(properties.populationSize()).thenReturn(population.size());
 
+
         DiseaseProperties diseaseProperties = mock(DiseaseProperties.class);
         when(diseaseProperties.progressionDistribution()).thenReturn(ProgressionDistribution.FLAT);
+        setPropertiesViaReflection(diseaseProperties, "diseaseProperties");
+        setPropertiesViaReflection(properties, "properties");
+        setPropertiesViaReflection(initialCaseReader, "initialCaseReader");
 
         outbreak.setPopulation(population);
-        outbreak.setStandardProperties(properties);
-        outbreak.setInitialCaseReader(initialCaseReader);
-        outbreak.setDiseaseProperties(diseaseProperties);
 
         outbreak.generateInitialInfection();
 
@@ -244,7 +259,7 @@ public class OutbreakTest {
         int infections = 1 + popSize / 10;
 
         DiseaseProperties d = TestUtils.diseaseProperties();
-        outbreak.setDiseaseProperties(d);
+        setPropertiesViaReflection(d, "diseaseProperties");
 
         Map<Integer, Case> population = new HashMap<>();
 
@@ -254,6 +269,7 @@ public class OutbreakTest {
             Case thisCase = new Case(h);
             population.put(i, thisCase);
         }
+
         Set<Integer> cases = generateTestCases(infections, popSize);
         InitialCaseReader initialCaseReader = mock(InitialCaseReader.class);
         when(initialCaseReader.getCases()).thenReturn(cases);
@@ -264,12 +280,13 @@ public class OutbreakTest {
         when(properties.populationSize()).thenReturn(popSize);
         when(properties.steadyState()).thenReturn(false);
 
+        setPropertiesViaReflection(properties, "properties");
+        setPropertiesViaReflection(initialCaseReader, "initialCaseReader");
+
         Map<Integer, List<ContactRecord>> contacts = createContactRecords(500, population);
 
         outbreak.setPopulation(population);
-        outbreak.setStandardProperties(properties);
-        outbreak.setInitialCaseReader(initialCaseReader);
-        outbreak.setDiseaseProperties(d);
+
         outbreak.setContactRecords(contacts);
         outbreak.generateInitialInfection();
 
@@ -292,7 +309,7 @@ public class OutbreakTest {
         int infections = 1 + popSize / 10;
 
         DiseaseProperties d = TestUtils.diseaseProperties();
-        outbreak.setDiseaseProperties(d);
+        setPropertiesViaReflection(d, "diseaseProperties");
 
         Map<Integer, Case> population = new HashMap<>();
 
@@ -312,12 +329,12 @@ public class OutbreakTest {
         when(properties.populationSize()).thenReturn(popSize);
         when(properties.steadyState()).thenReturn(true);
 
+        setPropertiesViaReflection(properties, "properties");
+        setPropertiesViaReflection(initialCaseReader, "initialCaseReader");
+
         Map<Integer, List<ContactRecord>> contacts = createContactRecords(5, population);
 
         outbreak.setPopulation(population);
-        outbreak.setStandardProperties(properties);
-        outbreak.setInitialCaseReader(initialCaseReader);
-        outbreak.setDiseaseProperties(d);
         outbreak.setContactRecords(contacts);
         outbreak.generateInitialInfection();
 
@@ -339,7 +356,7 @@ public class OutbreakTest {
         DiseaseProperties d = mock(DiseaseProperties.class);
         when(d.progressionDistribution()).thenReturn(ProgressionDistribution.FLAT);
         when(d.exposureThreshold()).thenReturn(101d);
-        outbreak.setDiseaseProperties(d);
+        setPropertiesViaReflection(d, "diseaseProperties");
 
         Map<Integer, Case> population = new HashMap<>();
         Case diseased = new Case(Mockito.mock(Human.class));
@@ -373,9 +390,7 @@ public class OutbreakTest {
     @Test
     public void evaluateContact() {
 
-        DiseaseProperties d = mock(DiseaseProperties.class);
-        when(d.progressionDistribution()).thenReturn(ProgressionDistribution.FLAT);
-        outbreak.setDiseaseProperties(d);
+        setDiseasePropertiesViaReflection();
 
         Map<Integer, Case> population = new HashMap<>();
         Case diseased = new Case(Mockito.mock(Human.class));
@@ -405,9 +420,7 @@ public class OutbreakTest {
 
     @Test
     public void runContactDataWithRandoms() {
-        DiseaseProperties d = mock(DiseaseProperties.class);
-        when(d.progressionDistribution()).thenReturn(ProgressionDistribution.FLAT);
-        outbreak.setDiseaseProperties(d);
+        setDiseasePropertiesViaReflection();
 
         int days = 11;
         int popSize = 500;
@@ -439,9 +452,7 @@ public class OutbreakTest {
 
     @Test
     public void runContactDataWithoutRandoms() {
-        DiseaseProperties d = mock(DiseaseProperties.class);
-        when(d.progressionDistribution()).thenReturn(ProgressionDistribution.FLAT);
-        outbreak.setDiseaseProperties(d);
+        setDiseasePropertiesViaReflection();
 
         int days = 11;
         int popSize = 500;
@@ -512,9 +523,7 @@ public class OutbreakTest {
         double randomInfection = 0.1d;
         int time = 0;
 
-        DiseaseProperties d = mock(DiseaseProperties.class);
-        when(d.progressionDistribution()).thenReturn(ProgressionDistribution.FLAT);
-        outbreak.setDiseaseProperties(d);
+        setDiseasePropertiesViaReflection();
 
 
         for (int i = 0; i < 500; i++) {
@@ -550,6 +559,7 @@ public class OutbreakTest {
 
 
     }
+
 
     @Test
     public void alertPopulation() {
@@ -627,6 +637,16 @@ public class OutbreakTest {
         Assert.assertTrue(population.size() > 0);
 
         return population;
+    }
+
+    private void setDiseasePropertiesViaReflection() {
+        DiseaseProperties d = mock(DiseaseProperties.class);
+        when(d.progressionDistribution()).thenReturn(ProgressionDistribution.FLAT);
+        setPropertiesViaReflection(d, "diseaseProperties");
+    }
+
+    private void setPropertiesViaReflection(Object d, String field) {
+        ReflectionTestUtils.setField(outbreak, field, d);
     }
 
 }

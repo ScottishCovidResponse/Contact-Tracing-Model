@@ -2,11 +2,10 @@ package uk.co.ramp;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import uk.co.ramp.contact.ContactRecord;
-import uk.co.ramp.io.*;
 import uk.co.ramp.distribution.DistributionSampler;
+import uk.co.ramp.io.*;
 import uk.co.ramp.people.Case;
 import uk.co.ramp.people.PopulationGenerator;
 import uk.co.ramp.people.VirusStatus;
@@ -28,6 +27,7 @@ public class Outbreak {
     private final DistributionSampler distributionSampler;
     private final UtilitiesBean utils;
     private final LogDailyOutput outputLog;
+    private final InitialCaseReader initialCaseReader;
 
 
     private Map<Integer, Case> population;
@@ -38,7 +38,7 @@ public class Outbreak {
 
     public Outbreak(DiseaseProperties diseaseProperties, StandardProperties standardProperties, DistributionSampler distributionSampler, UtilitiesBean utils, LogDailyOutput outputLog, InitialCaseReader initialCaseReader) {
         this.distributionSampler = distributionSampler;
-        this.initialCaseReader = initialCaseReader
+        this.initialCaseReader = initialCaseReader;
         this.diseaseProperties = diseaseProperties;
         this.properties = standardProperties;
         this.utils = utils;
