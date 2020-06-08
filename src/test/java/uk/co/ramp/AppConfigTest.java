@@ -4,9 +4,11 @@ import org.apache.commons.math3.random.RandomDataGenerator;
 import org.junit.*;
 import org.mockito.Mockito;
 import uk.co.ramp.io.DiseaseProperties;
+import uk.co.ramp.io.InputFiles;
 import uk.co.ramp.io.PopulationProperties;
 import uk.co.ramp.io.StandardProperties;
 
+import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.Optional;
@@ -40,26 +42,30 @@ public class AppConfigTest {
         StandardProperties standardProperties = appConfig.standardProperties();
 
         Assert.assertNotNull(standardProperties);
-        Assert.assertFalse(standardProperties.contactsFile().isEmpty());
+//        Assert.assertFalse(standardProperties.contactsFile().isEmpty());
         Assert.assertNotNull(standardProperties.steadyState());
-        Assert.assertTrue(standardProperties.infected() > 0);
+        Assert.assertTrue(standardProperties.initialExposures() > 0);
         Assert.assertTrue(standardProperties.populationSize() > 0);
         Assert.assertTrue(standardProperties.seed() >= 0);
         Assert.assertTrue(standardProperties.timeLimit() > 0);
-        Assert.assertTrue(standardProperties.populationSize() > standardProperties.infected());
+        Assert.assertTrue(standardProperties.populationSize() > standardProperties.initialExposures());
 
     }
 
     @Test(expected = ConfigurationException.class)
     public void standardPropertiesError() throws ConfigurationException, IOException {
 
+        String file = File.createTempFile("temp", "file").getAbsolutePath();
         try {
+            InputFiles input = mock(InputFiles.class);
+            when(input.runSettings()).thenReturn(file);
             appConfig = mock(AppConfig.class);
             when(appConfig.getReader(anyString())).thenThrow(new FileNotFoundException());
             when(appConfig.standardProperties()).thenCallRealMethod();
+            when(appConfig.inputFiles()).thenReturn(input);
             appConfig.standardProperties();
         } catch (ConfigurationException e) {
-            Assert.assertThat(appender.getOutput(), containsString("An error occurred while parsing the run properties at input/runSettings.json"));
+            Assert.assertThat(appender.getOutput(), containsString("An error occurred while parsing the run properties at " + file));
             throw e;
         }
 
@@ -92,14 +98,18 @@ public class AppConfigTest {
     }
 
     @Test(expected = ConfigurationException.class)
-    public void diseasePropertiesError() throws FileNotFoundException, ConfigurationException {
+    public void diseasePropertiesError() throws IOException, ConfigurationException {
+        String file = File.createTempFile("temp", "file").getAbsolutePath();
         try {
+            InputFiles input = mock(InputFiles.class);
+            when(input.diseaseSettings()).thenReturn(file);
             appConfig = mock(AppConfig.class);
             when(appConfig.getReader(anyString())).thenThrow(new FileNotFoundException());
             when(appConfig.diseaseProperties()).thenCallRealMethod();
+            when(appConfig.inputFiles()).thenReturn(input);
             appConfig.diseaseProperties();
         } catch (ConfigurationException e) {
-            Assert.assertThat(appender.getOutput(), containsString("An error occurred while parsing the disease properties at input/diseaseSettings.json"));
+            Assert.assertThat(appender.getOutput(), containsString("An error occurred while parsing the disease properties at " + file));
             throw e;
         }
 
@@ -117,14 +127,18 @@ public class AppConfigTest {
     }
 
     @Test(expected = ConfigurationException.class)
-    public void populationPropertiesError() throws FileNotFoundException, ConfigurationException {
+    public void populationPropertiesError() throws IOException, ConfigurationException {
+        String file = File.createTempFile("temp", "file").getAbsolutePath();
         try {
+            InputFiles input = mock(InputFiles.class);
+            when(input.populationSettings()).thenReturn(file);
             appConfig = mock(AppConfig.class);
             when(appConfig.getReader(anyString())).thenThrow(new FileNotFoundException());
             when(appConfig.populationProperties()).thenCallRealMethod();
+            when(appConfig.inputFiles()).thenReturn(input);
             appConfig.populationProperties();
         } catch (ConfigurationException e) {
-            Assert.assertThat(appender.getOutput(), containsString("An error occurred while parsing the population properties at input/populationSettings.json"));
+            Assert.assertThat(appender.getOutput(), containsString("An error occurred while parsing the population properties at " + file));
             throw e;
         }
 

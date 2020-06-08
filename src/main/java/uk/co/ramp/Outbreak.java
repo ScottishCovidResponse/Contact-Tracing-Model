@@ -2,14 +2,10 @@ package uk.co.ramp;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import uk.co.ramp.contact.ContactRecord;
 import uk.co.ramp.distribution.DistributionSampler;
-import uk.co.ramp.io.DiseaseProperties;
-import uk.co.ramp.io.InfectionMap;
-import uk.co.ramp.io.LogDailyOutput;
-import uk.co.ramp.io.StandardProperties;
+import uk.co.ramp.io.*;
 import uk.co.ramp.people.Case;
 import uk.co.ramp.people.PopulationGenerator;
 import uk.co.ramp.people.VirusStatus;
@@ -31,6 +27,7 @@ public class Outbreak {
     private final DistributionSampler distributionSampler;
     private final UtilitiesBean utils;
     private final LogDailyOutput outputLog;
+    private final InitialCaseReader initialCaseReader;
 
 
     private Map<Integer, Case> population;
@@ -38,9 +35,10 @@ public class Outbreak {
 
     private final Map<Integer, CmptRecord> records = new HashMap<>();
 
-    @Autowired
-    public Outbreak(DiseaseProperties diseaseProperties, StandardProperties standardProperties, DistributionSampler distributionSampler, UtilitiesBean utils, LogDailyOutput outputLog) {
+
+    public Outbreak(DiseaseProperties diseaseProperties, StandardProperties standardProperties, DistributionSampler distributionSampler, UtilitiesBean utils, LogDailyOutput outputLog, InitialCaseReader initialCaseReader) {
         this.distributionSampler = distributionSampler;
+        this.initialCaseReader = initialCaseReader;
         this.diseaseProperties = diseaseProperties;
         this.properties = standardProperties;
         this.utils = utils;
@@ -55,10 +53,11 @@ public class Outbreak {
         this.contactRecords = contactRecords;
     }
 
+
     public Map<Integer, CmptRecord> propagate() {
 
         generateInitialInfection();
-        LOGGER.info("Generated initial outbreak of {} cases", properties.infected());
+        LOGGER.info("Generated initial outbreak of {} cases", properties.initialExposures());
         runToCompletion();
 
         return records;
@@ -66,7 +65,9 @@ public class Outbreak {
 
 
     void generateInitialInfection() {
-        Set<Integer> infectedIds = chooseInitialInfected();
+
+        Set<Integer> infectedIds = initialCaseReader.getCases();
+
         for (Integer id : infectedIds) {
 
             EvaluateCase evaluateCase = new EvaluateCase(population.get(id), diseaseProperties, distributionSampler);
@@ -137,7 +138,13 @@ public class Outbreak {
         if (conditionA && conditionB) {
             // TODO: Apply behavioural logic here. Use compliance value?
             LOGGER.trace("spreader: {}   victim: {}   weight: {} ", potentialSpreader.alertStatus(), victim.alertStatus(), contacts.weight());
-            LOGGER.info("Skipping contact due to threshold");
+            LOGGER.debug("Skipping contact due to threshold");
+            return;
+        }
+
+
+        if (potentialSpreader.status() != victim.status()) {
+            evaluateExposures(contacts, time);
         }
     }
 
@@ -210,16 +217,6 @@ public class Outbreak {
             EvaluateCase e = new EvaluateCase(personB, diseaseProperties, distributionSampler);
             e.updateVirusStatus(EXPOSED, time, personA.id());
         }
-    }
-
-    Set<Integer> chooseInitialInfected() {
-
-        Set<Integer> infectedIds = new HashSet<>();
-        while (infectedIds.size() < properties.infected()) {
-            infectedIds.add(distributionSampler.uniformInteger(properties.populationSize() - 1));
-        }
-        return infectedIds;
-
     }
 
     int calculateDailyStatistics(int time) {

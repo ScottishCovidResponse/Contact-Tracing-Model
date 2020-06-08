@@ -1,0 +1,7 @@
+{
+  "runSettings": "input/runSettings.json",
+  "populationSettings": "input/populationSettings.json",
+  "diseaseSettings": "input/diseaseSettings.json",
+  "contactData": "input/homogeneous_contacts.csv",
+  "initialExposures": "input/initialExposures.csv"
+}

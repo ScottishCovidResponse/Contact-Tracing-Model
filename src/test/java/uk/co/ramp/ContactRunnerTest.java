@@ -5,6 +5,7 @@ import org.mockito.Mockito;
 import org.springframework.context.ApplicationContext;
 import uk.co.ramp.contact.ContactRecord;
 import uk.co.ramp.io.CompartmentWriter;
+import uk.co.ramp.io.InputFiles;
 import uk.co.ramp.io.StandardProperties;
 import uk.co.ramp.io.csv.CsvException;
 import uk.co.ramp.people.Case;
@@ -53,11 +54,11 @@ public class ContactRunnerTest {
         Outbreak outbreak = Mockito.mock(Outbreak.class);
         ContactReader reader = Mockito.mock(ContactReader.class);
         CompartmentWriter compartmentWriter = Mockito.mock(CompartmentWriter.class);
-
+        InputFiles inputFiles = Mockito.mock(InputFiles.class);
 
         // provide junk file for reader
         File temp = File.createTempFile("test", "file");
-        when(runProperties.contactsFile()).thenReturn(temp.getAbsolutePath());
+        when(inputFiles.contactData()).thenReturn(temp.getAbsolutePath());
 
         // empty map returns
         Map<Integer, Case> testData = new HashMap<>();
@@ -76,7 +77,7 @@ public class ContactRunnerTest {
 
         runner.setApplicationContext(applicationContext);
         runner.setRunProperties(runProperties);
-
+        runner.setInputFileLocation(inputFiles);
         runner.run();
 
 

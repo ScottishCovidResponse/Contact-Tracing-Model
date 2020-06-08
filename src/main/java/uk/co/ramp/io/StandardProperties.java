@@ -8,9 +8,10 @@ import org.immutables.value.Value.Immutable;
 public interface StandardProperties {
     int populationSize();
     int timeLimit();
-    int infected();
+
+    int initialExposures();
+
     int seed();
     boolean steadyState();
 
-    String contactsFile();
 }
