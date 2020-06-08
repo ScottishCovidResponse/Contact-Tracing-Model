@@ -8,3 +8,6 @@ build
 .idea
 /SEIR.csv
 /runSettings.json
+/Compartments.csv
+/events.csv
+/infectionMap.txt

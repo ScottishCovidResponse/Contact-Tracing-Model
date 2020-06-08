@@ -70,10 +70,6 @@ public class EventList {
         } catch (IOException e) {
             e.printStackTrace();
         }
-//        for (FormattedEvent event : finalList ){
-//            System.out.println("event = " + event);
-//        }
-
 
     }
 }
