@@ -40,7 +40,4 @@ public enum AlertStatus {
         return next;
     }
 
-    public List<AlertStatus> getValidTransitions(AlertStatus alertStatus) {
-        return validTransitions.get(alertStatus);
-    }
 }

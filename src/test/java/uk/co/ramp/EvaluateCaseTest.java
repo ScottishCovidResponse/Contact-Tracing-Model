@@ -31,6 +31,7 @@ public class EvaluateCaseTest {
         Human human = ImmutableHuman.builder().health(0.5).gender(Gender.MALE).age(50).compliance(0.5).id(0).build();
         aCase = new Case(human);
         DiseaseProperties d = appConfig.diseaseProperties();
+
         RandomDataGenerator r = appConfig.randomDataGenerator(Optional.empty());
         DistributionSampler ds = new DistributionSampler(r);
 
@@ -101,7 +102,6 @@ public class EvaluateCaseTest {
         Assert.assertEquals(t, aCase.exposedTime());
         Assert.assertEquals(infecter, aCase.exposedBy());
 
-
     }
 
     @Test
@@ -125,16 +125,4 @@ public class EvaluateCaseTest {
         }
     }
 
-    @Test
-    public void testUpdateVirusStatus() {
-    }
-
-    @Test
-    public void checkActionsAtTimestep() {
-    }
-
-
-    @Test
-    public void getDistributionValue() {
-    }
 }

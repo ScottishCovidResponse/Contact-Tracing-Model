@@ -126,7 +126,7 @@ public class EvaluateCase {
             case AWAITING_RESULT:
                 // TODO: maybe include flag for has had virus?
                 // TODO: should a recovered person test +ve?
-                if (p.wasInfectious()) {
+                if (p.wasInfectiousWhenTested()) {
                     LOGGER.trace("user {} has tested positive", p.id());
                     updateAlertStatus(TESTED_POSITIVE, time);
                 } else {
@@ -138,7 +138,7 @@ public class EvaluateCase {
             case REQUESTED_TEST:
                 LOGGER.trace("user {} is awaiting test result", p.id());
                 updateAlertStatus(AWAITING_RESULT, time);
-                p.setWasInfectious(p.isInfectious());
+                p.setWasInfectiousWhenTested(p.isInfectious());
                 break;
             case ALERTED:
                 updateAlertStatus(REQUESTED_TEST, time);
@@ -165,7 +165,7 @@ public class EvaluateCase {
         // remove self
         contactIds.remove(p.id());
 
-        LOGGER.trace("Alerting " + contactIds);
+        LOGGER.trace("Alerting {}", contactIds);
         return contactIds;
 
     }

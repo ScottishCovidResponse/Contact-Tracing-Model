@@ -1,5 +1,6 @@
 package uk.co.ramp.people;
 
+import com.google.common.base.Strings;
 import uk.co.ramp.contact.ContactRecord;
 
 import java.util.HashSet;
@@ -18,7 +19,7 @@ public class Case {
     private int exposedTime;
     private int nextVirusStatusChange;
     private int nextAlertStatusChange;
-    private boolean wasInfectious;
+    private boolean wasInfectiousWhenTested;
 
     private static final int DEFAULT = -1;
     private static final int INITIAL = -3;
@@ -33,15 +34,7 @@ public class Case {
         exposedTime = -1;
         nextVirusStatusChange = -1;
         nextAlertStatusChange = -1;
-        wasInfectious = false;
-    }
-
-    public boolean wasInfectious() {
-        return wasInfectious;
-    }
-
-    public void setWasInfectious(boolean wasInfectious) {
-        this.wasInfectious = wasInfectious;
+        wasInfectiousWhenTested = false;
     }
 
     public static int getDefault() {
@@ -52,37 +45,6 @@ public class Case {
         return RANDOM_INFECTION;
     }
 
-    public static int getInitial() {
-        return INITIAL;
-    }
-
-    public int exposedTime() {
-        return exposedTime;
-    }
-
-    public void setExposedTime(int exposedTime) {
-        this.exposedTime = exposedTime;
-    }
-
-    public int nextAlertStatusChange() {
-        return nextAlertStatusChange;
-    }
-
-    public void setNextAlertStatusChange(int nextAlertStatusChange) {
-        this.nextAlertStatusChange = nextAlertStatusChange;
-    }
-
-    public AlertStatus alertStatus() {
-        return alertStatus;
-    }
-
-    public void setAlertStatus(AlertStatus alertStatus) {
-        this.alertStatus = this.alertStatus.transitionTo(alertStatus);
-    }
-
-    public Set<ContactRecord> contactRecords() {
-        return contactRecords;
-    }
 
     public double health() {
         return human.health();
@@ -112,8 +74,61 @@ public class Case {
         return status;
     }
 
-    public void setStatus(VirusStatus status) {
-        this.status = this.status.transitionTo(status);
+    public static int getInitial() {
+        return INITIAL;
+    }
+
+    public int age() {
+        return getHuman().age();
+    }
+
+    // Event statuses
+
+    public int nextVirusStatusChange() {
+        return nextVirusStatusChange;
+    }
+
+    public void setNextVirusStatusChange(int nextVirusStatusChange) {
+        this.nextVirusStatusChange = nextVirusStatusChange;
+    }
+
+    public boolean wasInfectiousWhenTested() {
+        return wasInfectiousWhenTested;
+    }
+
+    public void setWasInfectiousWhenTested(boolean wasInfectiousWhenTested) {
+        this.wasInfectiousWhenTested = wasInfectiousWhenTested;
+    }
+
+    public void setStatus(VirusStatus newStatus) {
+        this.status = this.status.transitionTo(newStatus);
+    }
+
+    public int nextAlertStatusChange() {
+        return nextAlertStatusChange;
+    }
+
+
+    // Exposure and contact data
+
+    public void setNextAlertStatusChange(int nextAlertStatusChange) {
+        this.nextAlertStatusChange = nextAlertStatusChange;
+    }
+
+    public void addContact(ContactRecord record) {
+        contactRecords.add(record);
+    }
+
+    public AlertStatus alertStatus() {
+        return alertStatus;
+    }
+
+    public void setAlertStatus(AlertStatus alertStatus) {
+        this.alertStatus = this.alertStatus.transitionTo(alertStatus);
+    }
+
+    public Set<ContactRecord> contactRecords() {
+        return contactRecords;
     }
 
     public int exposedBy() {
@@ -124,16 +139,18 @@ public class Case {
         this.exposedBy = exposedBy;
     }
 
-    public int nextVirusStatusChange() {
-        return nextVirusStatusChange;
+    // statics
+
+    public int exposedTime() {
+        return exposedTime;
     }
 
-    public void setNextVirusStatusChange(int nextVirusStatusChange) {
-        this.nextVirusStatusChange = nextVirusStatusChange;
+    public void setExposedTime(int exposedTime) {
+        this.exposedTime = exposedTime;
     }
 
-    public void addContact(ContactRecord record) {
-        contactRecords.add(record);
+    public String getSource() {
+        return Strings.padEnd(id() + "(" + exposedTime + ")", 12, ' ');
     }
 
 }

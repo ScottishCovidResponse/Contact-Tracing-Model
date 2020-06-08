@@ -29,9 +29,6 @@ public class ContactRunner implements ApplicationContextAware {
     private StandardProperties runProperties;
     private ApplicationContext ctx;
 
-    public ContactRunner() {
-    }
-
     @Autowired
     public void setRunProperties(StandardProperties standardProperties) {
         this.runProperties = standardProperties;

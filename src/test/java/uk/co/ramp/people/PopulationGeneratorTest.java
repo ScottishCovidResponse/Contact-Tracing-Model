@@ -1,23 +1,15 @@
 package uk.co.ramp.people;
 
-import org.apache.commons.math3.random.RandomDataGenerator;
 import org.junit.Assert;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
-import org.mockito.Mockito;
 import uk.co.ramp.TestUtils;
-import uk.co.ramp.io.ImmutablePopulationProperties;
-import uk.co.ramp.io.ImmutableStandardProperties;
-import uk.co.ramp.io.PopulationProperties;
 import uk.co.ramp.io.StandardProperties;
-import uk.co.ramp.utilities.ImmutableMinMax;
-import uk.co.ramp.utilities.MinMax;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Random;
+import java.io.FileNotFoundException;
+import java.util.*;
 
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static uk.co.ramp.people.VirusStatus.*;
 
@@ -29,10 +21,10 @@ public class PopulationGeneratorTest {
     private final Random random = TestUtils.getRandom();
 
     @Before
-    public void setup() {
-        PopulationProperties populationProperties = Mockito.mock(PopulationProperties.class);
-        StandardProperties properties = Mockito.mock(StandardProperties.class);
-        populationGenerator = new PopulationGenerator(properties, populationProperties, new RandomDataGenerator());
+    public void setup() throws FileNotFoundException {
+        populationGenerator = new PopulationGenerator();
+        populationGenerator.setProperties(TestUtils.populationProperties());
+        populationGenerator.setDataGenerator(TestUtils.dataGenerator());
     }
 
     @Test
@@ -74,160 +66,76 @@ public class PopulationGeneratorTest {
     }
 
     @Test
-    @Ignore
-    public void testFindAgeSimple() {
+    public void findAge() {
 
-        Map<Integer, Double> b = new HashMap<>();
-        Map<Integer, MinMax> c = new HashMap<>();
 
-        MinMax minMax = ImmutableMinMax.of(0, 10);
-        c.put(0, minMax);
-        b.put(0, 1d);
 
-        for (int i = 0; i < 100; i++) {
-
-            int age = populationGenerator.findAge(b, c);
-            Assert.assertTrue(age <= minMax.max());
-            Assert.assertTrue(age >= minMax.min());
+        int n = 10000;
+        List<Integer> ages = new ArrayList<>();
+        for (int i = 0; i < n; i++) {
+            ages.add(populationGenerator.findAge());
         }
 
-        c.put(1, ImmutableMinMax.of(11, 20));
-        b.put(0, 0.5d);
-        b.put(1, 1d);
+        double sum = ages.stream().mapToInt(Integer::intValue).average().orElseThrow();
+        int max = ages.stream().mapToInt(Integer::intValue).max().orElseThrow();
+        int min = ages.stream().mapToInt(Integer::intValue).min().orElseThrow();
 
-        for (int i = 0; i < 200; i++) {
-            int age = populationGenerator.findAge(b, c);
-//            if (a > 0.5) {
-//                Assert.assertTrue(age <= c.get(1).max());
-//                Assert.assertTrue(age >= c.get(1).min());
-//            } else {
-//                Assert.assertTrue(age <= c.get(0).max());
-//                Assert.assertTrue(age >= c.get(0).min());
 
-//            }
-        }
+        Assert.assertEquals(50d, sum, 0.5);
+        Assert.assertTrue(max <= 100);
+        Assert.assertTrue(max > 80);
+        Assert.assertTrue(min < 20);
+        Assert.assertTrue(min >= 0);
+
+        long group0 = ages.stream().filter(a -> a < 20).count();
+        long group1 = ages.stream().filter(a -> a >= 20 && a < 40).count();
+        long group2 = ages.stream().filter(a -> a >= 40 && a < 60).count();
+        long group3 = ages.stream().filter(a -> a >= 60 && a < 80).count();
+        long group4 = ages.stream().filter(a -> a >= 80 && a < 100).count();
+
+        Assert.assertEquals(0.2, group0 / (double) n, 0.01);
+        Assert.assertEquals(0.2, group1 / (double) n, 0.01);
+        Assert.assertEquals(0.2, group2 / (double) n, 0.01);
+        Assert.assertEquals(0.2, group3 / (double) n, 0.01);
+        Assert.assertEquals(0.2, group4 / (double) n, 0.01);
     }
-
 
     @Test
-    @Ignore
-    public void testFindAgeUniform() {
+    public void generate() {
+        int popSize = 10000;
+        StandardProperties runSettings = mock(StandardProperties.class);
+        when(runSettings.populationSize()).thenReturn(popSize);
+        populationGenerator.setRunProperties(runSettings);
 
 
-        Map<Integer, Double> b = generateAgeDistribution();
-        Map<Integer, MinMax> c = generateAgeRanges();
+        Map<Integer, Case> population = populationGenerator.generate();
 
-        for (int i = 0; i < 200; i++) {
-            int age = populationGenerator.findAge(b, c);
-//            if (a <= 0.2d) {
-//                Assert.assertTrue(age <= c.get(0).max());
-//                Assert.assertTrue(age >= c.get(0).min());
-//            } else if (a > 0.2d && a < 0.4d) {
-//                Assert.assertTrue(age <= c.get(1).max());
-//                Assert.assertTrue(age >= c.get(1).min());
-//            } else if (a > 0.4d && a < 0.6d) {
-//                Assert.assertTrue(age <= c.get(2).max());
-//                Assert.assertTrue(age >= c.get(2).min());
-//            } else if (a > 0.6d && a < 0.8d) {
-//                Assert.assertTrue(age <= c.get(3).max());
-//                Assert.assertTrue(age >= c.get(3).min());
-//            } else if (a > 0.8d) {
-//                Assert.assertTrue(age <= c.get(4).max());
-//                Assert.assertTrue(age >= c.get(4).min());
-//            }
-        }
-    }
+        Assert.assertEquals(popSize, population.size());
 
-    private Map<Integer, Double> generateAgeDistribution() {
-        Map<Integer, Double> b = new HashMap<>();
-        b.put(0, 0.2d);
-        b.put(1, 0.4d);
-        b.put(2, 0.6d);
-        b.put(3, 0.8d);
-        b.put(4, 1d);
-        return b;
-    }
-
-    private Map<Integer, MinMax> generateAgeRanges() {
-        Map<Integer, MinMax> c = new HashMap<>();
-        c.put(0, ImmutableMinMax.of(0, 20));
-        c.put(1, ImmutableMinMax.of(20, 39));
-        c.put(2, ImmutableMinMax.of(40, 59));
-        c.put(3, ImmutableMinMax.of(60, 79));
-        c.put(4, ImmutableMinMax.of(80, 90));
-        return c;
-    }
+        double compliance = population.values().stream().mapToDouble(Case::compliance).average().orElseThrow();
+        double health = population.values().stream().mapToDouble(Case::health).average().orElseThrow();
+        double age = population.values().stream().mapToDouble(Case::age).average().orElseThrow();
+        double men = population.values().stream().map(Case::gender).filter(a -> a.equals(Gender.MALE)).count() / (double) popSize;
+        double women = population.values().stream().map(Case::gender).filter(a -> a.equals(Gender.FEMALE)).count() / (double) popSize;
 
 
-    @Test
-    @Ignore
-    public void testGeneratePopulation() {
-
-        Map<Integer, Double> populationDistribution = generateAgeDistribution();
-        Map<Integer, MinMax> populationAges = generateAgeRanges();
-        double genderBalance = 1.d;
-        PopulationProperties populationProperties = ImmutablePopulationProperties.builder()
-                .populationDistribution(populationDistribution)
-                .populationAges(populationAges)
-                .genderBalance(genderBalance)
-                .build();
-
-        int populationSize = 10000;
-        int timeLimit = 0;
-        int infected = 0;
-        int seed = 10;
-        boolean steadyState = true;
-
-        StandardProperties properties = ImmutableStandardProperties.builder()
-                .populationSize(populationSize)
-                .timeLimit(timeLimit)
-                .infected(infected)
-                .seed(seed)
-                .steadyState(steadyState)
-                .contactsFile("input/contacts.csv")
-                .build();
-
-        RandomDataGenerator dataGenerator = new RandomDataGenerator();
-
-        populationGenerator = new PopulationGenerator(properties, populationProperties, dataGenerator);
-
-        Map<Integer, Case> result = populationGenerator.generate();
-
-        int men = 0;
-        int women = 0;
-        double compliance = 0d;
-        double health = 0d;
-        for (Case p : result.values()) {
-            compliance += p.compliance();
-            health += p.health();
-
-            if (p.gender() == Gender.FEMALE) {
-                women++;
-            } else {
-                men++;
-            }
-
-        }
-
-        Assert.assertEquals(0.5, compliance / (double) populationSize, 1d / Math.sqrt(populationSize));
-        Assert.assertEquals(0.5, health / (double) populationSize, 1d / Math.sqrt(populationSize));
-
-        Assert.assertEquals(populationSize, men + women);
-
-        Assert.assertEquals(0.5, men / (double) populationSize, 1d / Math.sqrt(populationSize));
-        Assert.assertEquals(0.5, women / (double) populationSize, 1d / Math.sqrt(populationSize));
+        Assert.assertEquals(0.5, compliance, 0.01);
+        Assert.assertEquals(0.5, health, 0.01);
+        Assert.assertEquals(50, age, 0.5);
+        Assert.assertEquals(0.5, men, 0.01);
+        Assert.assertEquals(0.5, women, 0.01);
 
 
     }
-
 
     private void createPeople(Map<Integer, Case> var, int start, int end, VirusStatus v) {
         for (int p = start; p < end; p++) {
 
-            Case c = Mockito.mock(Case.class);
+            Case c = mock(Case.class);
             when(c.status()).thenReturn(v);
             var.put(p, c);
         }
     }
+
 
 }
