@@ -1,27 +1,20 @@
 package uk.co.ramp;
 
-
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import uk.co.ramp.event.EventList;
-import uk.co.ramp.event.EventProcessor;
-import uk.co.ramp.event.types.Event;
-import uk.co.ramp.event.types.ImmutableInfectionEvent;
-import uk.co.ramp.event.types.InfectionEvent;
-import uk.co.ramp.io.InfectionMap;
-import uk.co.ramp.io.InitialCaseReader;
-import uk.co.ramp.io.LogDailyOutput;
-import uk.co.ramp.io.types.CmptRecord;
-import uk.co.ramp.io.types.DiseaseProperties;
-import uk.co.ramp.io.types.StandardProperties;
+import uk.co.ramp.contact.ContactRecord;
 import uk.co.ramp.people.Case;
+import uk.co.ramp.people.PopulationGenerator;
 import uk.co.ramp.people.VirusStatus;
 import uk.co.ramp.policy.IsolationPolicy;
+import uk.co.ramp.record.CmptRecord;
 import uk.co.ramp.utilities.UtilitiesBean;
 
 import java.util.*;
 
+import static uk.co.ramp.people.AlertStatus.NONE;
 import static uk.co.ramp.people.VirusStatus.*;
 
 @Service
@@ -39,28 +32,35 @@ public class Outbreak {
     private final IsolationPolicy isolationPolicy;
 
 
-    private Map<Integer, Case> population;
+    private final StandardProperties properties;
+    private final DiseaseProperties diseaseProperties;
+    private final DistributionSampler distributionSampler;
+    private final UtilitiesBean utils;
+    private final LogDailyOutput outputLog;
+    private final InitialCaseReader initialCaseReader;
 
-    private int activeCases = 0;
+
+    private Map<Integer, Case> population;
+    private Map<Integer, List<ContactRecord>> contactRecords;
 
     private final Map<Integer, CmptRecord> records = new HashMap<>();
 
 
-    public Outbreak(EventProcessor eventProcessor, EventList eventList, InitialCaseReader initialCaseReader, DiseaseProperties diseaseProperties, StandardProperties standardProperties, UtilitiesBean utils, LogDailyOutput outputLog, IsolationPolicy isolationPolicy) {
-
-        this.eventProcessor = eventProcessor;
-        this.eventList = eventList;
+    public Outbreak(DiseaseProperties diseaseProperties, StandardProperties standardProperties, DistributionSampler distributionSampler, UtilitiesBean utils, LogDailyOutput outputLog, InitialCaseReader initialCaseReader) {
+        this.distributionSampler = distributionSampler;
         this.initialCaseReader = initialCaseReader;
         this.diseaseProperties = diseaseProperties;
         this.properties = standardProperties;
-        this.outputLog = outputLog;
         this.utils = utils;
-        this.isolationPolicy = isolationPolicy;
-
+        this.outputLog = outputLog;
     }
 
     public void setPopulation(Map<Integer, Case> population) {
         this.population = population;
+    }
+
+    public void setContactRecords(Map<Integer, List<ContactRecord>> contactRecords) {
+        this.contactRecords = contactRecords;
     }
 
 

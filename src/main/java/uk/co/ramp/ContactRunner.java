@@ -26,7 +26,7 @@ public class ContactRunner implements CommandLineRunner {
 
     private static final Logger LOGGER = LogManager.getLogger(ContactRunner.class);
     public static final String COMPARTMENTS_CSV = "Compartments.csv";
-    private InputFiles inputFiles;
+    private InputFiles inputFileLocation;
     private StandardProperties runProperties;
     private ApplicationContext ctx;
 
@@ -41,8 +41,8 @@ public class ContactRunner implements CommandLineRunner {
     }
 
     @Autowired
-    public void setInputFiles(InputFiles inputFiles) {
-        this.inputFiles = inputFiles;
+    public void setInputFileLocation(InputFiles inputFileLocation) {
+        this.inputFileLocation = inputFileLocation;
     }
 
 
@@ -50,7 +50,7 @@ public class ContactRunner implements CommandLineRunner {
     public void run(String... args) throws IOException {
 
         Map<Integer, Case> population = ctx.getBean(PopulationGenerator.class).generate();
-        try (Reader reader = new FileReader(inputFiles.contactData())) {
+        try (Reader reader = new FileReader(inputFileLocation.contactData())) {
 
             ContactReader contactReader = ctx.getBean(ContactReader.class);
             EventList eventList = ctx.getBean(EventList.class);
