@@ -21,7 +21,7 @@ public class CaseTest {
     @Rule
     public LogSpy logSpy = new LogSpy();
     private final Random random = TestUtils.getRandom();
-    private ImmutableHuman human;
+    private Human human;
 
     @Before
     public void setup() {

@@ -6,6 +6,7 @@ import org.springframework.context.annotation.AnnotationConfigApplicationContext
 import uk.co.ramp.io.CompartmentWriter;
 import uk.co.ramp.io.InitialCaseReader;
 import uk.co.ramp.people.PopulationGenerator;
+import uk.co.ramp.policy.IsolationPolicyContext;
 import uk.co.ramp.utilities.ContactReader;
 
 import java.io.IOException;
@@ -15,7 +16,7 @@ public class Framework {
 
     public static void main(String[] args) throws IOException, ConfigurationException {
         SpringApplication.run(Framework.class, args);
-        AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext(AppConfig.class);
+        AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext(AppConfig.class,IsolationPolicyContext.class);
         registerServices(ctx);
         ContactRunner runner = (ContactRunner) ctx.getBean("contactRunner");
         runner.run();

@@ -629,5 +629,4 @@ public class OutbreakTest {
         return population;
     }
 
-
 }

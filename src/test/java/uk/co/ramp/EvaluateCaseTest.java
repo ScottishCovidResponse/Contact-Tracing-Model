@@ -5,6 +5,7 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
+import uk.co.ramp.distribution.DistributionSampler;
 import uk.co.ramp.io.DiseaseProperties;
 import uk.co.ramp.people.*;
 import uk.co.ramp.utilities.ForbiddenAccessException;
@@ -32,9 +33,9 @@ public class EvaluateCaseTest {
         DiseaseProperties d = appConfig.diseaseProperties();
 
         RandomDataGenerator r = appConfig.randomDataGenerator(Optional.empty());
+        DistributionSampler ds = new DistributionSampler(r);
 
-
-        evaluateCase = new EvaluateCase(aCase, d, r);
+        evaluateCase = new EvaluateCase(aCase, d, ds);
     }
 
 
@@ -101,7 +102,6 @@ public class EvaluateCaseTest {
         Assert.assertEquals(t, aCase.exposedTime());
         Assert.assertEquals(infecter, aCase.exposedBy());
 
-
     }
 
     @Test
@@ -125,23 +125,4 @@ public class EvaluateCaseTest {
         }
     }
 
-    @Test
-    public void testUpdateVirusStatus() {
-    }
-
-    @Test
-    public void checkActionsAtTimestep() {
-    }
-
-
-    @Test
-    public void getDistributionValue() {
-
-
-        for (int i = 0; i < 1000; i++) {
-            System.out.println(evaluateCase.getDistributionValue(5, 14));
-        }
-
-
-    }
 }
