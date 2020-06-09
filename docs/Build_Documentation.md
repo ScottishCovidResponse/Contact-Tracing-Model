@@ -436,7 +436,7 @@ PersonA is the more severe case; the least severe case is personB. A
 dangerous mix is when personA is infectious (E2, I, IA) and personB is
 susceptible. If this is the case, the following test is conducted:
 
-$$n\  < \frac{\text{weight}}{\text{exposureTuning}}\overset{\text{\ \ \ \ }}{\rightarrow}\text{EXPOSED}$$
+$$n\  < \frac{\text{weight}}{\text{exposureTuning}}\overset{\text{ }}{\rightarrow}\text{EXPOSED}$$
 
 Where n is a random number.
 
