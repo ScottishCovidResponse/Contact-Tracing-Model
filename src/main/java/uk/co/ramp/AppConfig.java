@@ -29,7 +29,7 @@ public class AppConfig {
     private static final String INPUT_FILE = "input/inputLocations.json";
 
     @Bean
-    public InputFiles inputFiles() throws ConfigurationException {
+    public InputFiles inputFiles() {
         try (Reader reader = getReader(INPUT_FILE)) {
             return new InputFilesReader().read(reader);
         } catch (IOException e) {
@@ -41,7 +41,7 @@ public class AppConfig {
     }
 
     @Bean
-    public StandardProperties standardProperties() throws ConfigurationException {
+    public StandardProperties standardProperties() {
         try (Reader reader = getReader(inputFiles().runSettings())) {
             return new StandardPropertiesReader().read(reader);
         } catch (IOException e) {
@@ -52,7 +52,7 @@ public class AppConfig {
     }
 
     @Bean
-    public DiseaseProperties diseaseProperties() throws ConfigurationException {
+    public DiseaseProperties diseaseProperties() {
         try (Reader reader = getReader(inputFiles().diseaseSettings())) {
             return new DiseasePropertiesReader().read(reader);
         } catch (IOException e) {
@@ -63,7 +63,7 @@ public class AppConfig {
     }
 
     @Bean
-    public PopulationProperties populationProperties() throws ConfigurationException {
+    public PopulationProperties populationProperties() {
         try (Reader reader = getReader(inputFiles().populationSettings())) {
             return new PopulationPropertiesReader().read(reader);
         } catch (IOException e) {
@@ -74,7 +74,7 @@ public class AppConfig {
     }
 
     @Bean
-    public RandomDataGenerator randomDataGenerator(@Value("${cmdLineArgument:#{null}}") Optional<String[]> argumentValue) throws ConfigurationException {
+    public RandomDataGenerator randomDataGenerator(@Value("${cmdLineArgument:#{null}}") Optional<String[]> argumentValue) {
         long arg = 0;
         try {
             if (argumentValue.isPresent() && argumentValue.get().length > 0) {

@@ -1,10 +1,13 @@
 package uk.co.ramp.event;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 import uk.co.ramp.event.types.ContactEvent;
 import uk.co.ramp.event.types.Event;
 import uk.co.ramp.event.types.ImmutableFormattedEvent;
+import uk.co.ramp.io.csv.CsvException;
 import uk.co.ramp.io.csv.CsvWriter;
 
 import java.io.FileWriter;
@@ -19,6 +22,8 @@ public class EventList {
     private final Map<Integer, List<Event>> map = new HashMap<>();
     private final Map<Integer, List<Event>> completedMap = new HashMap<>();
     private final FormattedEventFactory formattedEventFactory;
+
+    private static final Logger LOGGER = LogManager.getLogger(EventList.class);
 
     @Autowired
     public EventList(FormattedEventFactory formattedEventFactory) {
@@ -35,8 +40,9 @@ public class EventList {
     }
 
     public void addEvents(Map<Integer, List<ContactEvent>> readEvents) {
-        for (int key : readEvents.keySet()) {
-            bulkAdd(key, readEvents.get(key));
+
+        for (Map.Entry<Integer, List<ContactEvent>> entry : readEvents.entrySet()) {
+            bulkAdd(entry.getKey(), entry.getValue());
         }
     }
 
@@ -68,7 +74,9 @@ public class EventList {
             new CsvWriter().write(writer, finalList, ImmutableFormattedEvent.class);
 
         } catch (IOException e) {
-            e.printStackTrace();
+            String message = "An error occurred while writing a CSV file";
+            LOGGER.error(message);
+            throw new CsvException(message, e);
         }
 
     }

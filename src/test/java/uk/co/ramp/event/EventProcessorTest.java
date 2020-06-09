@@ -1,6 +1,5 @@
 package uk.co.ramp.event;
 
-import org.apache.commons.math3.random.RandomDataGenerator;
 import org.assertj.core.error.ShouldHaveSizeBetween;
 import org.junit.Assert;
 import org.junit.Before;
@@ -17,7 +16,6 @@ import uk.co.ramp.AppConfig;
 import uk.co.ramp.LogSpy;
 import uk.co.ramp.TestConfig;
 import uk.co.ramp.TestUtils;
-import uk.co.ramp.distribution.DistributionSampler;
 import uk.co.ramp.distribution.ProgressionDistribution;
 import uk.co.ramp.event.types.*;
 import uk.co.ramp.io.types.DiseaseProperties;
@@ -44,19 +42,18 @@ import static uk.co.ramp.people.VirusStatus.*;
 @Import({TestUtils.class, AppConfig.class, TestConfig.class})
 public class EventProcessorTest {
 
-    @Autowired
-    RandomDataGenerator randomDataGenerator;
 
     @Rule
     public LogSpy logSpy = new LogSpy();
+
+
     DiseaseProperties diseaseProperties;
-    @Autowired
-    DistributionSampler distributionSampler;
-    @Autowired
-    private EventProcessor eventProcessor;
 
     @Autowired
+    private EventProcessor eventProcessor;
+    @Autowired
     private EventList eventList;
+
 
     @Before
     public void setUp() throws Exception {
@@ -107,10 +104,6 @@ public class EventProcessorTest {
     }
 
     @Test
-    public void runPolicyEvents() {
-    }
-
-    @Test
     public void runAlertEvents() {
         int infector = 0;
 
@@ -122,11 +115,9 @@ public class EventProcessorTest {
 
         Map<Integer, Case> population = new HashMap<>();
         population.put(0, mock0);
-//        population.put(1, mock1);
 
         eventProcessor.setPopulation(population);
 
-//        EventList eventList = new EventList();
         AlertEvent event = ImmutableAlertEvent.builder().time(0).id(0).oldStatus(NONE).newStatus(ALERTED).build();
         eventList.addEvent(event);
 
@@ -169,7 +160,6 @@ public class EventProcessorTest {
 
         eventProcessor.setPopulation(population);
 
-//        EventList eventList = new EventList();
         ContactEvent event = ImmutableContactEvent.builder().time(0).to(0).from(1).weight(50000).label("").build();
         eventList.addEvent(event);
 
@@ -202,7 +192,6 @@ public class EventProcessorTest {
 
         eventProcessor.setPopulation(population);
 
-//        EventList eventList = new EventList();
         VirusEvent event = ImmutableVirusEvent.builder().time(0).id(0).oldStatus(EXPOSED).newStatus(ASYMPTOMATIC).build();
         eventList.addEvent(event);
 
@@ -241,7 +230,6 @@ public class EventProcessorTest {
         population.put(1, mock1);
         eventProcessor.setPopulation(population);
 
-//        EventList eventList = new EventList();
         InfectionEvent event = ImmutableInfectionEvent.builder().time(0).exposedBy(1).id(0).exposedTime(0).oldStatus(SUSCEPTIBLE).newStatus(EXPOSED).build();
         eventList.addEvent(event);
 
@@ -293,45 +281,6 @@ public class EventProcessorTest {
 
     }
 
-//    @Test
-//    public void evaluateContactFalse() {
-//
-//        int infector = 0;
-//        int infectee = 1;
-//        int time = 0;
-//
-//        Case mock0 = mock(Case.class);
-//        when(mock0.virusStatus()).thenReturn(SUSCEPTIBLE);
-//        when(mock0.isInfectious()).thenReturn(false);
-//        when(mock0.id()).thenReturn(infector);
-//
-//        Case mock1 = mock(Case.class);
-//        when(mock1.id()).thenReturn(infectee);
-//        when(mock1.virusStatus()).thenReturn(SUSCEPTIBLE);
-//
-//        Map<Integer, Case> population = new HashMap<>();
-//        population.put(0, mock0);
-//        population.put(1, mock1);
-//        eventProcessor.setPopulation(population);
-//
-//        // outer empty return
-//        ContactEvent contactEvent = ImmutableContactEvent.builder().from(infector).to(infectee).time(time).weight(5000).label("").build();
-//
-//        Optional<InfectionEvent> var = eventProcessor.evaluateContact(time, contactEvent, 0);
-//
-//        Assert.assertFalse(var.isPresent());
-//        Assert.assertTrue(logSpy.getOutput().isEmpty());
-//
-//
-//        // inner empty return
-//        contactEvent = ImmutableContactEvent.builder().from(infector).to(infectee).time(time).weight(5).label("").build();
-//
-//        var = eventProcessor.evaluateContact(time, contactEvent, 0.5);
-//
-//        Assert.assertFalse(var.isPresent());
-//        Assert.assertThat(logSpy.getOutput(), containsString("Skipping contact due to threshold"));
-//    }
-
     @Test
     public void evaluateExposuresReturn() {
 
@@ -363,7 +312,7 @@ public class EventProcessorTest {
         InfectionEvent infectionEvent = var.get();
         Assert.assertEquals(infectionEvent.time(), time + 1);
         Assert.assertEquals(infectionEvent.id(), infectee);
-        Assert.assertEquals(infectionEvent.newStatus(), EXPOSED);
+        Assert.assertEquals(EXPOSED, infectionEvent.newStatus());
         Assert.assertThat(logSpy.getOutput(), containsString("DANGER MIX"));
 
     }

@@ -24,7 +24,7 @@ public class IsolationPolicyContext {
         return new ContactIsolationPolicy(singleCaseIsolationPolicy, diseaseProperties);
     }
 
-    private IsolationProperties isolationProperties() throws ConfigurationException {
+    private IsolationProperties isolationProperties() {
         try (Reader reader = new FileReader(new File(ISOLATION_SETTINGS_LOCATION))) {
             return new IsolationPropertiesReader().read(reader);
         } catch (IOException e) {

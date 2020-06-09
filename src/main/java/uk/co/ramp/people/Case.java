@@ -1,6 +1,7 @@
 package uk.co.ramp.people;
 
 import com.google.common.base.Strings;
+import uk.co.ramp.event.EventException;
 import uk.co.ramp.event.types.AlertEvent;
 import uk.co.ramp.event.types.Event;
 import uk.co.ramp.event.types.InfectionEvent;
@@ -100,31 +101,31 @@ public class Case {
     }
 
     // Event handling
-    private void processInfectionEvent(InfectionEvent event, int time) {
+    private void processInfectionEvent(InfectionEvent event) {
         virusStatus = virusStatus.transitionTo(event.newStatus());
         exposedTime = event.exposedTime();
         exposedBy = event.exposedBy();
     }
 
-    private void processVirusEvent(VirusEvent event, int time) {
+    private void processVirusEvent(VirusEvent event) {
         virusStatus = virusStatus.transitionTo(event.newStatus());
     }
 
-    public void processEvent(Event event, int time) {
+    public void processEvent(Event event) {
 
         if (event instanceof VirusEvent) {
-            processVirusEvent((VirusEvent) event, time);
+            processVirusEvent((VirusEvent) event);
         } else if (event instanceof InfectionEvent) {
-            processInfectionEvent((InfectionEvent) event, time);
+            processInfectionEvent((InfectionEvent) event);
         } else if (event instanceof AlertEvent) {
-            processAlertEvent((AlertEvent) event, time);
+            processAlertEvent((AlertEvent) event);
         } else {
-            throw new RuntimeException("uncovered condition");
+            throw new EventException("uncovered condition");
         }
 
     }
 
-    private void processAlertEvent(AlertEvent event, int time) {
+    private void processAlertEvent(AlertEvent event) {
         alertStatus = event.newStatus();
     }
 

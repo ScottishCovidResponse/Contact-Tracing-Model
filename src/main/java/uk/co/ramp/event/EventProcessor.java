@@ -110,7 +110,7 @@ public class EventProcessor {
         List<AlertEvent> newEvents = new ArrayList<>();
         // Look at all alert events
         for (AlertEvent event : eventList.getForTime(time).stream().filter(event -> event instanceof AlertEvent).map(event -> (AlertEvent) event).collect(Collectors.toList())) {
-            population.get(event.id()).processEvent(event, time);
+            population.get(event.id()).processEvent(event);
 
             AlertStatus nextStatus = determineNextAlertStatus(event);
 
@@ -152,7 +152,7 @@ public class EventProcessor {
         // Look at all virus events
         for (VirusEvent event : eventList.getForTime(time).stream().filter(event -> event instanceof VirusEvent).map(event -> (VirusEvent) event).collect(Collectors.toList())) {
 
-            population.get(event.id()).processEvent(event, time);
+            population.get(event.id()).processEvent(event);
             VirusStatus nextStatus = determineNextStatus(event);
 
             // will return self if at DEAD or RECOVERED
@@ -183,7 +183,7 @@ public class EventProcessor {
         for (InfectionEvent event : eventList.getForTime(time).stream().filter(event -> event instanceof InfectionEvent).map(event -> (InfectionEvent) event).collect(Collectors.toList())) {
 
             if (population.get(event.id()).virusStatus() == SUSCEPTIBLE) {
-                population.get(event.id()).processEvent(event, time);
+                population.get(event.id()).processEvent(event);
 
                 VirusStatus nextStatus = determineNextStatus(event);
                 int nextTime = timeInCompartment(event.newStatus(), nextStatus);
@@ -260,11 +260,10 @@ public class EventProcessor {
                 return NONE;
             case TESTED_POSITIVE:
                 return TESTED_POSITIVE;
+            default:
+                LOGGER.error(event);
+                throw new EventException("There is no case for the event" + event);
         }
-
-        System.out.println(event);
-
-        throw new RuntimeException("should i be here?");
 
     }
 
@@ -294,7 +293,7 @@ public class EventProcessor {
                 return determineOutcome(population.get(event.id()));
             default:
                 LOGGER.error(event);
-                throw new RuntimeException("Shouldn't get here");
+                throw new EventException("There is no case for the event" + event);
         }
     }
 
@@ -330,7 +329,7 @@ public class EventProcessor {
             default:
                 String message = "Unexpected Virus statuses: " + currentStatus + " -> " + newStatus;
                 LOGGER.error(message);
-                throw new RuntimeException(message);
+                throw new EventException(message);
         }
 
         Distribution distribution = ImmutableDistribution.builder().type(diseaseProperties.progressionDistribution()).mean(progressionData.mean()).max(progressionData.max()).build();
