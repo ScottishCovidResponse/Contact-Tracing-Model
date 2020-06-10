@@ -4,8 +4,6 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import uk.co.ramp.people.Case;
 
-import java.io.File;
-import java.io.FileWriter;
 import java.io.IOException;
 import java.io.Writer;
 import java.util.*;
@@ -15,7 +13,6 @@ import static uk.co.ramp.people.VirusStatus.SUSCEPTIBLE;
 
 public class InfectionMap {
 
-    public static final String INFECTION_MAP = "infectionMap.txt";
     private static final Logger LOGGER = LogManager.getLogger(InfectionMap.class);
     private final Map<Integer, Case> population;
 
@@ -23,24 +20,9 @@ public class InfectionMap {
         this.population = population;
     }
 
-    public void outputMap() {
+    public void outputMap(Writer writer) {
 
-        List<Case> infections = population.values().stream()
-                .filter(c -> c.virusStatus() != SUSCEPTIBLE)
-                .sorted(Comparator.comparingInt(Case::exposedTime))
-                .collect(Collectors.toList());
-
-
-        Map<Integer, Set<Case>> infectors = new HashMap<>();
-
-        for (Case c : infections) {
-            infectors.putIfAbsent(c.exposedBy(), new HashSet<>());
-
-            Set<Case> var = infectors.get(c.exposedBy());
-
-            var.add(c);
-            infectors.put(c.exposedBy(), var);
-        }
+        Map<Integer, Set<Case>> infectors = collectInfectors();
 
         // initial infections sorted by id
         List<Case> rootInfections = infectors.values().stream()
@@ -58,7 +40,7 @@ public class InfectionMap {
                         .collect(Collectors.toList()));
 
 
-        try (Writer writer = new FileWriter(new File(INFECTION_MAP))) {
+        try {
             recurseSet(rootInfections, infectors, writer, 1);
         } catch (IOException e) {
             String message = "An error occurred while writing the map file: " + e.getMessage();
@@ -89,5 +71,24 @@ public class InfectionMap {
 
     }
 
+    Map<Integer, Set<Case>> collectInfectors() {
+
+        List<Case> infections = population.values().stream()
+                .filter(c -> c.virusStatus() != SUSCEPTIBLE)
+                .sorted(Comparator.comparingInt(Case::exposedTime))
+                .collect(Collectors.toList());
+
+        Map<Integer, Set<Case>> infectors = new HashMap<>();
+
+        infections.forEach(i -> {
+            int key = i.exposedBy();
+            infectors.putIfAbsent(key, new HashSet<>());
+            infectors.computeIfPresent(key, (id, set) -> {
+                set.add(i);
+                return set;
+            });
+        });
+        return infectors;
+    }
 
 }

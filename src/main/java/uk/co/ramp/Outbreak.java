@@ -10,6 +10,7 @@ import uk.co.ramp.event.types.Event;
 import uk.co.ramp.event.types.ImmutableInfectionEvent;
 import uk.co.ramp.event.types.InfectionEvent;
 import uk.co.ramp.io.InfectionMap;
+import uk.co.ramp.io.InfectionMapException;
 import uk.co.ramp.io.InitialCaseReader;
 import uk.co.ramp.io.LogDailyOutput;
 import uk.co.ramp.io.types.CmptRecord;
@@ -19,6 +20,10 @@ import uk.co.ramp.people.Case;
 import uk.co.ramp.people.VirusStatus;
 import uk.co.ramp.utilities.UtilitiesBean;
 
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.io.Writer;
 import java.util.*;
 
 import static uk.co.ramp.people.VirusStatus.*;
@@ -40,6 +45,7 @@ public class Outbreak {
 
     private Map<Integer, Case> population;
     private final Map<Integer, CmptRecord> records = new HashMap<>();
+    private static final String INFECTION_MAP = "infectionMap.txt";
 
     @Autowired
     public Outbreak(DiseaseProperties diseaseProperties, StandardProperties standardProperties,
@@ -96,7 +102,14 @@ public class Outbreak {
 
         runContactData(timeLimit, randomInfectionRate);
 
-        new InfectionMap(population).outputMap();
+        try (Writer writer = new FileWriter(new File(INFECTION_MAP))) {
+            new InfectionMap(population).outputMap(writer);
+        } catch (IOException e) {
+            String message = "An error occured generating the infection map";
+            LOGGER.error(message);
+            throw new InfectionMapException(message, e);
+        }
+
         eventList.output();
     }
 

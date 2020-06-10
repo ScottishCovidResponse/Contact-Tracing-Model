@@ -6,4 +6,8 @@ public class InfectionMapException extends RuntimeException {
         super(message);
     }
 
+    public InfectionMapException(String message, Exception e) {
+        super(message, e);
+    }
+
 }
