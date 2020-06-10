@@ -456,7 +456,7 @@ The virus status is updated first, both Exposed and Infected have a
 single option, which they progress to, the next status change is
 calculated using the mean and max times from the disease properties and
 the chosen random number distribution. Exposed<sub>2</sub> and
-Infected<sub>sump</sub> have two options, denoted by the red box. These
+Infected<sub>symp</sub> have two options, denoted by the red box. These
 are chosen by random number, n:
 
 ![](eq8.gif)
