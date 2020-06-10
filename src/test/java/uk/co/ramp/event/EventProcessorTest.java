@@ -118,7 +118,7 @@ public class EventProcessorTest {
 
         eventProcessor.setPopulation(population);
 
-        AlertEvent event = ImmutableAlertEvent.builder().time(0).id(0).oldStatus(NONE).newStatus(ALERTED).build();
+        AlertEvent event = ImmutableAlertEvent.builder().time(0).id(0).oldStatus(NONE).nextStatus(ALERTED).build();
         eventList.addEvent(event);
 
         ReflectionTestUtils.setField(eventProcessor, "eventList", eventList);
@@ -133,7 +133,7 @@ public class EventProcessorTest {
         Assert.assertEquals(1, evnt.time());
         Assert.assertEquals(0, evnt.id());
         Assert.assertEquals(ALERTED, evnt.oldStatus());
-        Assert.assertEquals(REQUESTED_TEST, evnt.newStatus());
+        Assert.assertEquals(REQUESTED_TEST, evnt.nextStatus());
 
 
     }
@@ -192,7 +192,7 @@ public class EventProcessorTest {
 
         eventProcessor.setPopulation(population);
 
-        VirusEvent event = ImmutableVirusEvent.builder().time(0).id(0).oldStatus(EXPOSED).newStatus(ASYMPTOMATIC).build();
+        VirusEvent event = ImmutableVirusEvent.builder().time(0).id(0).oldStatus(EXPOSED).nextStatus(ASYMPTOMATIC).build();
         eventList.addEvent(event);
 
         ReflectionTestUtils.setField(eventProcessor, "eventList", eventList);
@@ -230,7 +230,7 @@ public class EventProcessorTest {
         population.put(1, mock1);
         eventProcessor.setPopulation(population);
 
-        InfectionEvent event = ImmutableInfectionEvent.builder().time(0).exposedBy(1).id(0).exposedTime(0).oldStatus(SUSCEPTIBLE).newStatus(EXPOSED).build();
+        InfectionEvent event = ImmutableInfectionEvent.builder().time(0).exposedBy(1).id(0).exposedTime(0).oldStatus(SUSCEPTIBLE).nextStatus(EXPOSED).build();
         eventList.addEvent(event);
 
         ReflectionTestUtils.setField(eventProcessor, "eventList", eventList);
@@ -352,12 +352,12 @@ public class EventProcessorTest {
     @Test
     public void checkForAlert() {
 
-        VirusEvent virusEvent = ImmutableVirusEvent.builder().id(0).oldStatus(EXPOSED).newStatus(PRESYMPTOMATIC).time(1).build();
+        VirusEvent virusEvent = ImmutableVirusEvent.builder().id(0).oldStatus(EXPOSED).nextStatus(PRESYMPTOMATIC).time(1).build();
 
         Assert.assertTrue(eventProcessor.checkForAlert(virusEvent).isEmpty());
         int time = 1;
         int id = 0;
-        virusEvent = ImmutableVirusEvent.builder().id(id).oldStatus(PRESYMPTOMATIC).newStatus(SYMPTOMATIC).time(time).build();
+        virusEvent = ImmutableVirusEvent.builder().id(id).oldStatus(PRESYMPTOMATIC).nextStatus(SYMPTOMATIC).time(time).build();
 
         Optional<Event> var = eventProcessor.checkForAlert(virusEvent);
 
@@ -367,7 +367,7 @@ public class EventProcessorTest {
 
         Assert.assertEquals(time + 1, event.time());
         Assert.assertEquals(NONE, event.oldStatus());
-        Assert.assertEquals(REQUESTED_TEST, event.newStatus());
+        Assert.assertEquals(REQUESTED_TEST, event.nextStatus());
         Assert.assertEquals(id, event.id());
     }
 
@@ -377,17 +377,17 @@ public class EventProcessorTest {
         Map<Integer, Case> population = new HashMap<>();
         population.put(0, mock);
         eventProcessor.setPopulation(population);
-        CommonVirusEvent commonVirusEvent = ImmutableVirusEvent.builder().id(0).oldStatus(EXPOSED).newStatus(EXPOSED).time(1).build();
+        CommonVirusEvent commonVirusEvent = ImmutableVirusEvent.builder().id(0).oldStatus(EXPOSED).nextStatus(EXPOSED).time(1).build();
         VirusStatus var = eventProcessor.determineNextStatus(commonVirusEvent);
 
         Assert.assertTrue(EXPOSED.getValidTransitions().contains(var));
 
-        commonVirusEvent = ImmutableVirusEvent.builder().id(0).oldStatus(EXPOSED).newStatus(SYMPTOMATIC).time(1).build();
+        commonVirusEvent = ImmutableVirusEvent.builder().id(0).oldStatus(EXPOSED).nextStatus(SYMPTOMATIC).time(1).build();
         var = eventProcessor.determineNextStatus(commonVirusEvent);
 
         Assert.assertTrue(SYMPTOMATIC.getValidTransitions().contains(var));
 
-        commonVirusEvent = ImmutableVirusEvent.builder().id(0).oldStatus(EXPOSED).newStatus(SEVERELY_SYMPTOMATIC).time(1).build();
+        commonVirusEvent = ImmutableVirusEvent.builder().id(0).oldStatus(EXPOSED).nextStatus(SEVERELY_SYMPTOMATIC).time(1).build();
         var = eventProcessor.determineNextStatus(commonVirusEvent);
 
         Assert.assertTrue(SEVERELY_SYMPTOMATIC.getValidTransitions().contains(var));
@@ -463,13 +463,20 @@ public class EventProcessorTest {
         when(human.health()).thenReturn(-1d);
         Case aCase = new Case(human);
 
-        VirusStatus out = eventProcessor.determineInfection(aCase);
+        Map<Integer, Case> population = new HashMap<>();
+        population.put(0, aCase);
+        eventProcessor.setPopulation(population);
+        CommonVirusEvent event = mock(CommonVirusEvent.class);
+        when(event.nextStatus()).thenReturn(EXPOSED);
+
+        VirusStatus out = eventProcessor.determineInfection(event);
         Assert.assertEquals(PRESYMPTOMATIC, out);
 
         when(human.health()).thenReturn(2d);
-        aCase = new Case(human);
+        population.put(0, aCase);
+        eventProcessor.setPopulation(population);
 
-        out = eventProcessor.determineInfection(aCase);
+        out = eventProcessor.determineInfection(event);
         Assert.assertEquals(ASYMPTOMATIC, out);
 
     }
@@ -480,13 +487,21 @@ public class EventProcessorTest {
         when(human.health()).thenReturn(-1d);
         Case aCase = new Case(human);
 
-        VirusStatus out = eventProcessor.determineSeverity(aCase);
+        Map<Integer, Case> population = new HashMap<>();
+        population.put(0, aCase);
+        eventProcessor.setPopulation(population);
+        CommonVirusEvent event = mock(CommonVirusEvent.class);
+        when(event.nextStatus()).thenReturn(SYMPTOMATIC);
+
+
+        VirusStatus out = eventProcessor.determineSeverity(event);
         Assert.assertEquals(SEVERELY_SYMPTOMATIC, out);
 
         when(human.health()).thenReturn(2d);
-        aCase = new Case(human);
+        population.put(0, aCase);
+        eventProcessor.setPopulation(population);
 
-        out = eventProcessor.determineSeverity(aCase);
+        out = eventProcessor.determineSeverity(event);
         Assert.assertEquals(RECOVERED, out);
     }
 
@@ -496,13 +511,21 @@ public class EventProcessorTest {
         when(human.health()).thenReturn(-1d);
         Case aCase = new Case(human);
 
-        VirusStatus out = eventProcessor.determineOutcome(aCase);
+        Map<Integer, Case> population = new HashMap<>();
+        population.put(0, aCase);
+        eventProcessor.setPopulation(population);
+        CommonVirusEvent event = mock(CommonVirusEvent.class);
+        when(event.nextStatus()).thenReturn(SEVERELY_SYMPTOMATIC);
+
+
+        VirusStatus out = eventProcessor.determineOutcome(event);
         Assert.assertEquals(DEAD, out);
 
         when(human.health()).thenReturn(2d);
-        aCase = new Case(human);
+        population.put(0, aCase);
+        eventProcessor.setPopulation(population);
 
-        out = eventProcessor.determineOutcome(aCase);
+        out = eventProcessor.determineOutcome(event);
         Assert.assertEquals(RECOVERED, out);
     }
 }

@@ -6,7 +6,6 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
-import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Import;
 import org.springframework.test.annotation.DirtiesContext;
@@ -24,7 +23,6 @@ import uk.co.ramp.io.types.DiseaseProperties;
 import uk.co.ramp.io.types.StandardProperties;
 import uk.co.ramp.people.Case;
 import uk.co.ramp.people.Human;
-import uk.co.ramp.people.VirusStatus;
 import uk.co.ramp.policy.IsolationPolicyContext;
 import uk.co.ramp.utilities.UtilitiesBean;
 
@@ -34,7 +32,7 @@ import java.util.*;
 import static org.hamcrest.CoreMatchers.containsString;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
-import static uk.co.ramp.people.VirusStatus.*;
+import static uk.co.ramp.people.VirusStatus.SUSCEPTIBLE;
 
 @SuppressWarnings("unchecked")
 @DirtiesContext
@@ -326,32 +324,6 @@ public class OutbreakTest {
         eventList.addEvents(contacts);
 
         return eventList;
-    }
-
-    @Test
-    public void updateLogActiveCases() {
-        int time = 0;
-        int numStatus = values().length;
-        int inactiveCases = 0;
-        Map<Integer, Case> population = new HashMap<>();
-        for (int i = 0; i < 500; i++) {
-            VirusStatus status = VirusStatus.values()[random.nextInt(numStatus)];
-            if (status == SUSCEPTIBLE || status == RECOVERED || status == DEAD) inactiveCases++;
-            Case thisCase = Mockito.mock(Case.class);
-            when(thisCase.virusStatus()).thenReturn(status);
-            when(thisCase.id()).thenReturn(i);
-
-            population.put(i, thisCase);
-        }
-
-        outbreak.setPopulation(population);
-
-        ReflectionTestUtils.setField(outbreak, "activeCases", 123);
-        outbreak.updateLogActiveCases(time);
-        int activeCases = (int) ReflectionTestUtils.getField(outbreak, "activeCases");
-
-        Assert.assertEquals(population.size(), activeCases + inactiveCases);
-
     }
 
     private Map<Integer, Case> getPopulationViaReflection() {

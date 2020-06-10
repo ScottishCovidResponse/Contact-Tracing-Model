@@ -103,13 +103,13 @@ public class Outbreak {
 
         try (Writer writer = new FileWriter(new File(INFECTION_MAP))) {
             new InfectionMap(population).outputMap(writer);
+            eventList.output();
         } catch (IOException e) {
-            String message = "An error occured generating the infection map";
+            String message = "An error occurred generating the infection map";
             LOGGER.error(message);
             throw new InfectionMapException(message, e);
         }
 
-        eventList.output();
     }
 
 

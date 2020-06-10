@@ -50,7 +50,6 @@ public class InfectionMapTest {
                 when(thisCase.id()).thenReturn(i);
                 when(thisCase.virusStatus()).thenReturn(RECOVERED);
                 when(thisCase.exposedBy()).thenReturn(Case.getInitial());
-                when(thisCase.getSource()).thenCallRealMethod();
                 population.put(i, thisCase);
             } else {
                 VirusStatus virusStatus = statuses[random.nextInt(count)];
@@ -62,7 +61,6 @@ public class InfectionMapTest {
                 when(thisCase.id()).thenReturn(i);
                 when(thisCase.virusStatus()).thenReturn(virusStatus);
                 when(thisCase.exposedBy()).thenReturn(infector);
-                when(thisCase.getSource()).thenCallRealMethod();
                 population.put(i, thisCase);
 
             }
@@ -127,28 +125,28 @@ public class InfectionMapTest {
         when(root.id()).thenReturn(0);
         when(root.exposedBy()).thenReturn(Case.getInitial());
         when(root.exposedTime()).thenReturn(10);
-        when(root.getSource()).thenCallRealMethod();
 
         Case first = mock(Case.class);
         when(first.id()).thenReturn(1);
         when(first.exposedBy()).thenReturn(0);
         when(first.exposedTime()).thenReturn(10);
-        when(first.getSource()).thenCallRealMethod();
         infectors.putIfAbsent(root.id(), Set.of(first));
 
         Case second = mock(Case.class);
         when(second.id()).thenReturn(2);
         when(second.exposedBy()).thenReturn(1);
         when(second.exposedTime()).thenReturn(10);
-        when(second.getSource()).thenCallRealMethod();
         infectors.putIfAbsent(first.id(), Set.of(second));
 
         List<Case> target = List.of(root);
         Writer writer = new StringBuilderWriter();
         infectionMap.recurseSet(target, infectors, writer, tab);
 
-        Assert.assertEquals(writer.toString().trim(), "0(0)          ->  [1(0)]\n" +
-                "              ->  1(0)           ->  [2(0)]");
+        String expected =
+                "0(10)         ->  [1(10)]\n" +
+                        "              ->  1(10)          ->  [2(10)]";
+
+        Assert.assertEquals(expected, writer.toString().trim());
 
     }
 }

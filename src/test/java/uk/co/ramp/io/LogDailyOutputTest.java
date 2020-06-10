@@ -8,10 +8,7 @@ import uk.co.ramp.LogSpy;
 import uk.co.ramp.TestUtils;
 import uk.co.ramp.people.VirusStatus;
 
-import java.util.Arrays;
-import java.util.EnumMap;
-import java.util.Map;
-import java.util.Random;
+import java.util.*;
 
 import static org.hamcrest.CoreMatchers.containsString;
 import static uk.co.ramp.people.VirusStatus.*;
@@ -37,8 +34,11 @@ public class LogDailyOutputTest {
         for (VirusStatus v : values()) {
             map.put(v, random.nextInt(100));
         }
-        int dActive = random.nextInt(100);
-        logger.log(time, map, dActive);
+
+        Set<VirusStatus> active = Set.of(EXPOSED, ASYMPTOMATIC, PRESYMPTOMATIC, SYMPTOMATIC, SEVERELY_SYMPTOMATIC);
+
+        int dActive = map.entrySet().stream().filter(e -> active.contains(e.getKey())).mapToInt(Map.Entry::getValue).sum();
+        logger.log(time, map);
 
         int[] numbers = Arrays.stream(logSpy.getOutput().replace("[INFO]", "")
                 .replaceAll("(?m:\\||$)", "").trim().split("\\s+"))
@@ -69,8 +69,9 @@ public class LogDailyOutputTest {
         for (VirusStatus v : values()) {
             map.put(v, random.nextInt(100));
         }
-        int previousActiveCases = 0;
-        logger.log(time, map, previousActiveCases);
+//        int previousActiveCases = 0;
+        logger.log(time, map);
+//        logger.log(time, map, previousActiveCases);
         Assert.assertThat(logSpy.getOutput(), containsString("|   Time  |    S    |    E    |    A    |    P    |   Sym   |   Sev   |    R    |    D    |   dAct  |"));
 
     }

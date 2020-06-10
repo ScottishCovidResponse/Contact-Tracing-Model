@@ -33,7 +33,7 @@ public class FormattedEventFactoryTest {
         VirusStatus old = VirusStatus.EXPOSED;
         VirusStatus next = VirusStatus.PRESYMPTOMATIC;
 
-        VirusEvent virusEvent = ImmutableVirusEvent.builder().time(time).id(id).oldStatus(old).newStatus(next).build();
+        VirusEvent virusEvent = ImmutableVirusEvent.builder().time(time).id(id).oldStatus(old).nextStatus(next).build();
 
         ImmutableFormattedEvent formatted = formattedEventFactory.create(virusEvent);
 
@@ -55,7 +55,7 @@ public class FormattedEventFactoryTest {
         VirusStatus old = VirusStatus.SUSCEPTIBLE;
         VirusStatus next = VirusStatus.EXPOSED;
 
-        InfectionEvent infectionEvent = ImmutableInfectionEvent.builder().time(time).id(id).oldStatus(old).newStatus(next).exposedBy(exposer).exposedTime(exposedTime).build();
+        InfectionEvent infectionEvent = ImmutableInfectionEvent.builder().time(time).id(id).oldStatus(old).nextStatus(next).exposedBy(exposer).exposedTime(exposedTime).build();
 
         ImmutableFormattedEvent formatted = formattedEventFactory.create(infectionEvent);
 
@@ -97,7 +97,7 @@ public class FormattedEventFactoryTest {
         AlertStatus old = AlertStatus.NONE;
         AlertStatus next = AlertStatus.ALERTED;
 
-        AlertEvent alertEvent = ImmutableAlertEvent.builder().time(time).id(id).newStatus(next).oldStatus(old).build();
+        AlertEvent alertEvent = ImmutableAlertEvent.builder().time(time).id(id).nextStatus(next).oldStatus(old).build();
 
         ImmutableFormattedEvent formatted = formattedEventFactory.create(alertEvent);
 
@@ -150,9 +150,9 @@ public class FormattedEventFactoryTest {
 
         Event contactEvent = ImmutableContactEvent.builder().time(time).to(id).from(id2).weight(weight).label(label).build();
         Event policyEvent = ImmutablePolicyEvent.builder().time(time).build();
-        Event alertEvent = ImmutableAlertEvent.builder().time(time).id(id).newStatus(nextAlert).oldStatus(oldAlert).build();
-        Event infectionEvent = ImmutableInfectionEvent.builder().time(time).id(id).oldStatus(oldVirus).newStatus(nextVirus).exposedBy(exposer).exposedTime(exposedTime).build();
-        Event virusEvent = ImmutableVirusEvent.builder().time(time).id(id).oldStatus(oldVirus).newStatus(nextVirus).build();
+        Event alertEvent = ImmutableAlertEvent.builder().time(time).id(id).nextStatus(nextAlert).oldStatus(oldAlert).build();
+        Event infectionEvent = ImmutableInfectionEvent.builder().time(time).id(id).oldStatus(oldVirus).nextStatus(nextVirus).exposedBy(exposer).exposedTime(exposedTime).build();
+        Event virusEvent = ImmutableVirusEvent.builder().time(time).id(id).oldStatus(oldVirus).nextStatus(nextVirus).build();
         Event notCovered = Mockito.mock(CommonVirusEvent.class);
 
         // TODO: not printing these as they're an input... should discuss with group.

@@ -1,7 +1,6 @@
 package uk.co.ramp.policy;
 
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import uk.co.ramp.distribution.Distribution;
 import uk.co.ramp.distribution.DistributionSampler;
@@ -132,10 +131,8 @@ public class SingleCaseIsolationPolicyTest {
     }
 
     @Test
-    @Ignore
-    //TODO fix
     public void testShouldIsolate_UsesIndividualPolicy_InfectedAndNoneTestedPositive() {
-        assertThat(isolationPolicy.isIndividualInIsolation(id, SYMPTOMATIC, NONE, compliance, proportionOfPopulationInfected, currentTime)).isFalse();
+        assertThat(isolationPolicy.isIndividualInIsolation(id, PRESYMPTOMATIC, NONE, compliance, proportionOfPopulationInfected, currentTime)).isFalse();
     }
 
     @Test
