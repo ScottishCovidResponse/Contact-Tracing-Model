@@ -88,7 +88,7 @@ public class Outbreak {
                 id(-1).
                 time(0).build();
 
-        infectedIds.forEach(id -> virusEvents.add(ImmutableInfectionEvent.builder().from(genericEvent).id(id).build()));
+        infectedIds.forEach(id -> virusEvents.add(ImmutableInfectionEvent.copyOf(genericEvent).withId(id)));
         eventList.addEvents(virusEvents);
 
     }
