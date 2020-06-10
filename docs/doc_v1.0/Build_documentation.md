@@ -1,7 +1,6 @@
 Build Documention
 ================
-Sam Brett
-27/05/2020
+Author: Sam Brett
 
 \===================
 
@@ -462,7 +461,7 @@ are chosen by random number, n:
 
 ![](eq8.gif)
 
-Likewise, the outcome of an Infected<sub>sump</sub> is determined by:
+Likewise, the outcome of an Infected<sub>symp</sub> is determined by:
 
 ![](eq9.gif)
 
