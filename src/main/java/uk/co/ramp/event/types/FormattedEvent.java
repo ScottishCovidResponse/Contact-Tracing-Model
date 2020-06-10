@@ -9,7 +9,7 @@ import org.immutables.value.Value;
 @Value.Immutable
 @JsonSerialize
 @JsonDeserialize
-@JsonPropertyOrder({"time", "eventType", "id", "newStatus", "additional"})
+@JsonPropertyOrder({"time", "eventType", "id", "newStatus", "additionalInfo"})
 public interface FormattedEvent {
 
     int time();

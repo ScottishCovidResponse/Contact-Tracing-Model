@@ -19,6 +19,7 @@ import java.util.stream.Collectors;
 @Repository
 public class EventList {
 
+    public static final String EVENTS_CSV = "events.csv";
     private final Map<Integer, List<Event>> map = new HashMap<>();
     private final Map<Integer, List<Event>> completedMap = new HashMap<>();
     private final FormattedEventFactory formattedEventFactory;
@@ -56,7 +57,7 @@ public class EventList {
 
 
     //read
-    public List<Event> getForTime(int time) {
+    List<Event> getForTime(int time) {
         return map.getOrDefault(time, new ArrayList<>());
     }
 
@@ -70,7 +71,7 @@ public class EventList {
         timeStamps.sort(Comparator.naturalOrder());
         List<ImmutableFormattedEvent> finalList = timeStamps.stream().map(completedMap::get).flatMap(Collection::stream).map(formattedEventFactory::create).filter(Objects::nonNull).collect(Collectors.toList());
 
-        try (Writer writer = new FileWriter("events.csv")) {
+        try (Writer writer = new FileWriter(EVENTS_CSV)) {
             new CsvWriter().write(writer, finalList, ImmutableFormattedEvent.class);
 
         } catch (IOException e) {
@@ -80,4 +81,9 @@ public class EventList {
         }
 
     }
+
+    public Optional<Integer> lastContactTime() {
+        return map.keySet().stream().max(Comparator.naturalOrder());
+    }
+
 }

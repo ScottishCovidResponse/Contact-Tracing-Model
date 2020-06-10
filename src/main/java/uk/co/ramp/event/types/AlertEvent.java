@@ -12,7 +12,7 @@ public interface AlertEvent extends Event {
 
     int id();
 
-    AlertStatus newStatus();
+    AlertStatus nextStatus();
 
     AlertStatus oldStatus();
 }

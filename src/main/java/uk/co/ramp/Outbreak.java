@@ -41,11 +41,10 @@ public class Outbreak {
     private final UtilitiesBean utils;
     private final LogDailyOutput outputLog;
 
-    private int activeCases;
-
     private Map<Integer, Case> population;
     private final Map<Integer, CmptRecord> records = new HashMap<>();
     private static final String INFECTION_MAP = "infectionMap.txt";
+
 
     @Autowired
     public Outbreak(DiseaseProperties diseaseProperties, StandardProperties standardProperties,
@@ -84,7 +83,7 @@ public class Outbreak {
         InfectionEvent genericEvent = ImmutableInfectionEvent.builder().
                 exposedBy(Case.getInitial()).
                 oldStatus(SUSCEPTIBLE).
-                newStatus(EXPOSED).
+                nextStatus(EXPOSED).
                 exposedTime(0).
                 id(-1).
                 time(0).build();
@@ -115,7 +114,7 @@ public class Outbreak {
 
 
     void runContactData(int timeLimit, double randomInfectionRate) {
-        int lastContact = eventList.getMap().keySet().stream().max(Comparator.naturalOrder()).orElseThrow();
+        int lastContact = eventList.lastContactTime().orElseThrow();
 
         if (lastContact > timeLimit) {
             LOGGER.info("timeLimit it lower than time of last contact event");
@@ -129,11 +128,11 @@ public class Outbreak {
             updateLogActiveCases(time);
 
             // stop random infections after contacts end
-            if (activeCases == 0 && lastContact < time) {
+            if (activeCases() == 0 && lastContact < time) {
                 randomInfectionRate = 0d;
             }
 
-            if (activeCases == 0 && randomInfectionRate == 0d) {
+            if (activeCases() == 0 && randomInfectionRate == 0d) {
                 LOGGER.info("There are no active cases and the random infection rate is zero.");
                 LOGGER.info("Exiting as solution is stable.");
                 break;
@@ -142,12 +141,14 @@ public class Outbreak {
     }
 
     void updateLogActiveCases(int time) {
-        int previousActiveCases = activeCases;
         Map<VirusStatus, Integer> stats = utils.getCmptCounts(population);
-        activeCases = stats.get(EXPOSED) + stats.get(ASYMPTOMATIC) + stats.get(PRESYMPTOMATIC) + stats.get(SYMPTOMATIC) + stats.get(SEVERELY_SYMPTOMATIC);
-
-        CmptRecord cmptRecord = outputLog.log(time, stats, activeCases - previousActiveCases);
+        CmptRecord cmptRecord = outputLog.log(time, stats);
         records.put(time, cmptRecord);
+    }
+
+    private int activeCases() {
+        var stats = utils.getCmptCounts(population);
+        return stats.get(EXPOSED) + stats.get(ASYMPTOMATIC) + stats.get(PRESYMPTOMATIC) + stats.get(SYMPTOMATIC) + stats.get(SEVERELY_SYMPTOMATIC);
     }
 
 }

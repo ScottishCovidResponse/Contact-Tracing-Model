@@ -1,6 +1,5 @@
 package uk.co.ramp.people;
 
-import com.google.common.base.Strings;
 import uk.co.ramp.event.EventException;
 import uk.co.ramp.event.types.AlertEvent;
 import uk.co.ramp.event.types.Event;
@@ -80,10 +79,6 @@ public class Case {
 
     //derived values
 
-    public String getSource() {
-        return Strings.padEnd(id() + "(" + exposedTime + ")", 12, ' ');
-    }
-
     public double compliance() {
         return human.compliance();
     }
@@ -102,13 +97,13 @@ public class Case {
 
     // Event handling
     private void processInfectionEvent(InfectionEvent event) {
-        virusStatus = virusStatus.transitionTo(event.newStatus());
+        virusStatus = virusStatus.transitionTo(event.nextStatus());
         exposedTime = event.exposedTime();
         exposedBy = event.exposedBy();
     }
 
     private void processVirusEvent(VirusEvent event) {
-        virusStatus = virusStatus.transitionTo(event.newStatus());
+        virusStatus = virusStatus.transitionTo(event.nextStatus());
     }
 
     public void processEvent(Event event) {
@@ -126,7 +121,7 @@ public class Case {
     }
 
     private void processAlertEvent(AlertEvent event) {
-        alertStatus = event.newStatus();
+        alertStatus = event.nextStatus();
     }
 
 

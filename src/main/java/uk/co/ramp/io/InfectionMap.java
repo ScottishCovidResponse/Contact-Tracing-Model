@@ -1,5 +1,6 @@
 package uk.co.ramp.io;
 
+import com.google.common.base.Strings;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import uk.co.ramp.people.Case;
@@ -59,9 +60,9 @@ public class InfectionMap {
             if (infectors.containsKey(seed.id())) {
                 List<Case> newSeeds = new ArrayList<>(infectors.get(seed.id()));
                 if (tab == 1) {
-                    writer.write(seed.getSource() + "  ->  " + newSeeds.stream().map(Case::getSource).map(String::trim).collect(Collectors.toList()) + "\n");
+                    writer.write(getSource(seed) + "  ->  " + newSeeds.stream().map(this::getSource).map(String::trim).collect(Collectors.toList()) + "\n");
                 } else {
-                    writer.write(spacer + "   ->  " + seed.getSource() + "   ->  " + newSeeds.stream().map(Case::getSource).map(String::trim).collect(Collectors.toList()) + "\n");
+                    writer.write(spacer + "   ->  " + getSource(seed) + "   ->  " + newSeeds.stream().map(this::getSource).map(String::trim).collect(Collectors.toList()) + "\n");
                 }
 
                 recurseSet(newSeeds, infectors, writer, tab + 1);
@@ -89,6 +90,11 @@ public class InfectionMap {
             });
         });
         return infectors;
+    }
+
+
+    public String getSource(Case c) {
+        return Strings.padEnd(c.id() + "(" + c.exposedTime() + ")", 12, ' ');
     }
 
 }

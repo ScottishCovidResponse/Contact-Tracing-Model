@@ -173,7 +173,7 @@ public class EventProcessorTest {
         Assert.assertEquals(1, evnt.time());
         Assert.assertEquals(0, evnt.id());
         Assert.assertEquals(SUSCEPTIBLE, evnt.oldStatus());
-        Assert.assertEquals(EXPOSED, evnt.newStatus());
+        Assert.assertEquals(EXPOSED, evnt.nextStatus());
 
     }
 
@@ -206,7 +206,7 @@ public class EventProcessorTest {
         Assert.assertEquals(diseaseProperties.timeLatent().mean(), evnt.time());
         Assert.assertEquals(0, evnt.id());
         Assert.assertEquals(ASYMPTOMATIC, evnt.oldStatus());
-        Assert.assertTrue(ASYMPTOMATIC.getValidTransitions().contains(evnt.newStatus()));
+        Assert.assertTrue(ASYMPTOMATIC.getValidTransitions().contains(evnt.nextStatus()));
 
     }
 
@@ -243,7 +243,7 @@ public class EventProcessorTest {
         Assert.assertEquals(diseaseProperties.timeLatent().mean(), evnt.time());
         Assert.assertEquals(0, evnt.id());
         Assert.assertEquals(EXPOSED, evnt.oldStatus());
-        Assert.assertTrue(EXPOSED.getValidTransitions().contains(evnt.newStatus()));
+        Assert.assertTrue(EXPOSED.getValidTransitions().contains(evnt.nextStatus()));
 
     }
 
@@ -277,7 +277,7 @@ public class EventProcessorTest {
         InfectionEvent infectionEvent = var.get();
         Assert.assertEquals(infectionEvent.time(), time + 1);
         Assert.assertEquals(infectionEvent.id(), infectee);
-        Assert.assertEquals(infectionEvent.newStatus(), EXPOSED);
+        Assert.assertEquals(infectionEvent.nextStatus(), EXPOSED);
 
     }
 
@@ -312,7 +312,7 @@ public class EventProcessorTest {
         InfectionEvent infectionEvent = var.get();
         Assert.assertEquals(infectionEvent.time(), time + 1);
         Assert.assertEquals(infectionEvent.id(), infectee);
-        Assert.assertEquals(EXPOSED, infectionEvent.newStatus());
+        Assert.assertEquals(EXPOSED, infectionEvent.nextStatus());
         Assert.assertThat(logSpy.getOutput(), containsString("DANGER MIX"));
 
     }

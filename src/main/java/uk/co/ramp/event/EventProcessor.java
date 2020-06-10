@@ -90,7 +90,7 @@ public class EventProcessor {
                 randomInfections.add(
                         ImmutableInfectionEvent.builder().
                                 time(time + 1).id(aCase.id()).
-                                newStatus(EXPOSED).
+                                nextStatus(EXPOSED).
                                 oldStatus(SUSCEPTIBLE).
                                 exposedTime(time).
                                 exposedBy(Case.getRandomInfection()).
@@ -112,16 +112,17 @@ public class EventProcessor {
         for (AlertEvent event : eventList.getForTime(time).stream().filter(event -> event instanceof AlertEvent).map(event -> (AlertEvent) event).collect(Collectors.toList())) {
             population.get(event.id()).processEvent(event);
 
-            AlertStatus nextStatus = determineNextAlertStatus(event);
+            AlertStatus proposedStatus = determineNextAlertStatus(event);
+            AlertStatus nextStatus = event.nextStatus().transitionTo(proposedStatus);
 
-            if (nextStatus != event.newStatus()) {
-                int nextTime = timeInStatus(nextStatus);
+            if (nextStatus != event.nextStatus()) {
+                int deltaTime = timeInStatus(nextStatus);
 
                 AlertEvent subsequentEvent = ImmutableAlertEvent.builder().
                         id(event.id()).
-                        oldStatus(event.newStatus()).
-                        newStatus(nextStatus).
-                        time(time + nextTime).
+                        oldStatus(event.nextStatus()).
+                        nextStatus(nextStatus).
+                        time(time + deltaTime).
                         build();
 
                 newEvents.add(subsequentEvent);
@@ -156,15 +157,15 @@ public class EventProcessor {
             VirusStatus nextStatus = determineNextStatus(event);
 
             // will return self if at DEAD or RECOVERED
-            if (event.newStatus() != nextStatus) {
+            if (event.nextStatus() != nextStatus) {
 
-                int nextTime = timeInCompartment(event.newStatus(), nextStatus);
+                int deltaTime = timeInCompartment(event.nextStatus(), nextStatus);
 
                 VirusEvent subsequentEvent = ImmutableVirusEvent.builder().
                         id(event.id()).
-                        oldStatus(event.newStatus()).
-                        newStatus(nextStatus).
-                        time(time + nextTime).
+                        oldStatus(event.nextStatus()).
+                        nextStatus(nextStatus).
+                        time(time + deltaTime).
                         build();
 
                 Optional<Event> e = checkForAlert(subsequentEvent);
@@ -186,13 +187,13 @@ public class EventProcessor {
                 population.get(event.id()).processEvent(event);
 
                 VirusStatus nextStatus = determineNextStatus(event);
-                int nextTime = timeInCompartment(event.newStatus(), nextStatus);
+                int deltaTime = timeInCompartment(event.nextStatus(), nextStatus);
 
                 VirusEvent subsequentEvent = ImmutableVirusEvent.builder().
                         id(event.id()).
-                        oldStatus(event.newStatus()).
-                        newStatus(nextStatus).
-                        time(nextTime + time).
+                        oldStatus(event.nextStatus()).
+                        nextStatus(nextStatus).
+                        time(time + deltaTime).
                         build();
 
                 newEvents.add(subsequentEvent);
@@ -233,7 +234,7 @@ public class EventProcessor {
 
             InfectionEvent infectionEvent = ImmutableInfectionEvent.builder().
                     id(personB.id()).time(c.time() + 1).
-                    oldStatus(SUSCEPTIBLE).newStatus(EXPOSED).
+                    oldStatus(SUSCEPTIBLE).nextStatus(EXPOSED).
                     exposedTime(time).exposedBy(personA.id()).
                     build();
 
@@ -248,12 +249,12 @@ public class EventProcessor {
 
         Case thisCase = population.get(event.id());
 
-        List<AlertStatus> newStatus = getValidTransitions(event.newStatus());
+        List<AlertStatus> newStatus = getValidTransitions(event.nextStatus());
 
-        if (newStatus.isEmpty()) return event.newStatus();
+        if (newStatus.isEmpty()) return event.nextStatus();
         if (newStatus.size() == 1) return newStatus.get(0);
 
-        switch (event.newStatus()) {
+        switch (event.nextStatus()) {
             case AWAITING_RESULT:
                 return thisCase.isInfectious() ? TESTED_POSITIVE : TESTED_NEGATIVE;
             case NONE:
@@ -269,8 +270,8 @@ public class EventProcessor {
 
     Optional<Event> checkForAlert(VirusEvent trigger) {
 
-        if (trigger.newStatus() == SYMPTOMATIC) {
-            return Optional.of(ImmutableAlertEvent.builder().id(trigger.id()).time(trigger.time() + 1).oldStatus(NONE).newStatus(REQUESTED_TEST).build());
+        if (trigger.nextStatus() == SYMPTOMATIC) {
+            return Optional.of(ImmutableAlertEvent.builder().id(trigger.id()).time(trigger.time() + 1).oldStatus(NONE).nextStatus(REQUESTED_TEST).build());
         }
 
         return Optional.empty();
@@ -278,19 +279,19 @@ public class EventProcessor {
 
     VirusStatus determineNextStatus(CommonVirusEvent event) {
 
-        List<VirusStatus> newStatus = event.newStatus().getValidTransitions();
+        List<VirusStatus> newStatus = event.nextStatus().getValidTransitions();
 
-        if (newStatus.isEmpty()) return event.newStatus();
+        if (newStatus.isEmpty()) return event.nextStatus();
         if (newStatus.size() == 1) return newStatus.get(0);
 
         // these cases have multiple paths
-        switch (event.newStatus()) {
+        switch (event.nextStatus()) {
             case EXPOSED:
-                return determineInfection(population.get(event.id()));
+                return determineInfection(event);
             case SYMPTOMATIC:
-                return determineSeverity(population.get(event.id()));
+                return determineSeverity(event);
             case SEVERELY_SYMPTOMATIC:
-                return determineOutcome(population.get(event.id()));
+                return determineOutcome(event);
             default:
                 LOGGER.error(event);
                 throw new EventException("There is no case for the event" + event);
@@ -361,18 +362,24 @@ public class EventProcessor {
     }
 
 
-    VirusStatus determineInfection(Case p) {
+    VirusStatus determineInfection(CommonVirusEvent e) {
         //TODO add real logic
-        return p.health() > distributionSampler.uniformBetweenZeroAndOne() ? ASYMPTOMATIC : PRESYMPTOMATIC;
+        Case p = population.get(e.id());
+        VirusStatus proposedVirusStatus = p.health() > distributionSampler.uniformBetweenZeroAndOne() ? ASYMPTOMATIC : PRESYMPTOMATIC;
+        return e.nextStatus().transitionTo(proposedVirusStatus);
     }
 
-    VirusStatus determineSeverity(Case p) {
+    VirusStatus determineSeverity(CommonVirusEvent e) {
         //TODO add real logic
-        return p.health() > distributionSampler.uniformBetweenZeroAndOne() ? RECOVERED : SEVERELY_SYMPTOMATIC;
+        Case p = population.get(e.id());
+        VirusStatus proposedVirusStatus = p.health() > distributionSampler.uniformBetweenZeroAndOne() ? RECOVERED : SEVERELY_SYMPTOMATIC;
+        return e.nextStatus().transitionTo(proposedVirusStatus);
     }
 
-    VirusStatus determineOutcome(Case p) {
+    VirusStatus determineOutcome(CommonVirusEvent e) {
         //TODO add real logic
-        return p.health() > distributionSampler.uniformBetweenZeroAndOne() ? RECOVERED : DEAD;
+        Case p = population.get(e.id());
+        VirusStatus proposedVirusStatus = p.health() > distributionSampler.uniformBetweenZeroAndOne() ? RECOVERED : DEAD;
+        return e.nextStatus().transitionTo(proposedVirusStatus);
     }
 }

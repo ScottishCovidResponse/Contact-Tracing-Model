@@ -37,7 +37,7 @@ public class FormattedEventFactory {
                 time(event.time()).
                 eventType("VirusEvent").
                 id(event.id()).
-                newStatus(event.newStatus().toString()).
+                newStatus(event.nextStatus().toString()).
                 additionalInfo("Old Status : " + event.oldStatus()).
                 build();
     }
@@ -59,7 +59,7 @@ public class FormattedEventFactory {
                 time(event.time()).
                 eventType("InfectionEvent").
                 id(event.id()).
-                newStatus(event.newStatus().toString()).
+                newStatus(event.nextStatus().toString()).
                 additionalInfo(exposedBy).
                 build();
     }
@@ -69,14 +69,13 @@ public class FormattedEventFactory {
                 time(event.time()).
                 eventType("AlertEvent").
                 id(event.id()).
-                newStatus(event.newStatus().toString()).
+                newStatus(event.nextStatus().toString()).
                 additionalInfo("").
                 build();
     }
 
 
     ImmutableFormattedEvent create(PolicyEvent event) {
-        // TODO: check when merging
         return ImmutableFormattedEvent.builder().
                 time(event.time()).
                 eventType("PolicyEvent").

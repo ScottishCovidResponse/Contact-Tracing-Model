@@ -15,11 +15,14 @@ import static uk.co.ramp.people.VirusStatus.*;
 public class LogDailyOutput {
 
     private static final Logger LOGGER = LogManager.getLogger(LogDailyOutput.class);
+    private int previousActiveCases = 0;
 
-    public CmptRecord log(int time, Map<VirusStatus, Integer> stats, int dActive) {
+    public CmptRecord log(int time, Map<VirusStatus, Integer> stats) {
         if (time == 0) {
             LOGGER.info("|   Time  |    S    |    E    |    A    |    P    |   Sym   |   Sev   |    R    |    D    |   dAct  |");
         }
+        int activeCases = activeCases(stats);
+        int dActive = activeCases - previousActiveCases;
 
         CmptRecord cmptRecord = ImmutableCmptRecord.builder().time(time).
                 s(stats.get(SUSCEPTIBLE)).
@@ -44,8 +47,12 @@ public class LogDailyOutput {
                 dActive);
 
         LOGGER.info(s);
+        previousActiveCases = activeCases;
         return cmptRecord;
     }
 
+    private int activeCases(Map<VirusStatus, Integer> stats) {
+        return stats.get(EXPOSED) + stats.get(ASYMPTOMATIC) + stats.get(PRESYMPTOMATIC) + stats.get(SYMPTOMATIC) + stats.get(SEVERELY_SYMPTOMATIC);
+    }
 
 }

@@ -8,6 +8,6 @@ public interface CommonVirusEvent extends Event {
 
     VirusStatus oldStatus();
 
-    VirusStatus newStatus();
+    VirusStatus nextStatus();
 
 }
