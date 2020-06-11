@@ -17,7 +17,6 @@ import java.util.Map;
 
 @Service
 public class ContactReader {
-    private static final Logger LOGGER = LogManager.getLogger(ContactReader.class);
 
     private final StandardProperties properties;
     @Autowired
