@@ -23,19 +23,11 @@ public class ContactReader {
 
         List<ImmutableContactEvent> contactEvents = new CsvReader().read(reader, ImmutableContactEvent.class);
 
-        Map<Integer, List<ContactEvent>> dailyRecord = new HashMap<>();
-        for (ContactEvent event : contactEvents) {
-            // This saves time/memory when running a small simulation from a larger contact set.
-            if (event.from() >= properties.populationSize() ||
-                    event.to() >= properties.populationSize() ||
-                    event.time() > properties.timeLimit()) continue;
-
-            dailyRecord.putIfAbsent(event.time(), new ArrayList<>());
-            dailyRecord.get(event.time()).add(event);
-
-        }
-
-        return dailyRecord;
+return contactEvents.stream()
+                .filter(event -> event.from() < properties.populationSize())
+                .filter(event -> event.to() < properties.populationSize())
+                .filter(event -> event.time() <= properties.timeLimit())
+                .collect(Collectors.groupingBy(ContactEvent::time));
     }
 
 }
