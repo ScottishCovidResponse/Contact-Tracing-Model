@@ -54,9 +54,6 @@ public class EventList {
         return map.getOrDefault(time, new ArrayList<>());
     }
 
-    public Map<Integer, List<Event>> getMap() {
-        return map;
-    }
 
     public void output() {
 
