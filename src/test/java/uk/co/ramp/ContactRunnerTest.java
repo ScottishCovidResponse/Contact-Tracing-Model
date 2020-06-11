@@ -68,7 +68,7 @@ public class ContactRunnerTest {
 
 
         // inner behaviour
-        when(reader.readEvents(any(), any())).thenReturn(testData2);
+        when(reader.readEvents(any())).thenReturn(testData2);
         when(populationGenerator.generate()).thenReturn(testData);
 
         // setting context

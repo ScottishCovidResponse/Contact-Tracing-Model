@@ -14,6 +14,7 @@ import uk.co.ramp.people.VirusStatus;
 
 import java.util.Random;
 
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.hamcrest.CoreMatchers.containsString;
 
 public class FormattedEventFactoryTest {
@@ -128,7 +129,7 @@ public class FormattedEventFactoryTest {
 
     }
 
-    @Test(expected = EventException.class)
+    @Test
     public void createEvent() {
 
         int time = random.nextInt(100);

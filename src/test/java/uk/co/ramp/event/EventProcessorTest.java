@@ -183,7 +183,7 @@ public class EventProcessorTest {
         int infector = 0;
 
         Case mock0 = mock(Case.class);
-        when(mock0.virusStatus()).thenReturn(SUSCEPTIBLE);
+        when(mock0.virusStatus()).thenReturn(EXPOSED);
         when(mock0.isInfectious()).thenReturn(true);
         when(mock0.id()).thenReturn(infector);
 

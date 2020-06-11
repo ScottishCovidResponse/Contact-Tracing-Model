@@ -16,7 +16,7 @@ import java.io.Writer;
 import java.util.*;
 import java.util.stream.Collectors;
 
-import static org.hamcrest.CoreMatchers.containsString;
+import static org.assertj.core.api.AssertionsForClassTypes.assertThatExceptionOfType;
 import static org.mockito.Mockito.*;
 import static uk.co.ramp.people.VirusStatus.RECOVERED;
 import static uk.co.ramp.people.VirusStatus.SUSCEPTIBLE;
@@ -93,7 +93,7 @@ public class InfectionMapTest {
         doCallRealMethod().when(infectionMap).outputMap(any());
         doThrow(new IOException("")).when(infectionMap).recurseSet(anyList(), anyMap(), any(), anyInt());
 
-assertThatExceptionOfType(InfectionMapException.class)
+        assertThatExceptionOfType(InfectionMapException.class)
                 .isThrownBy(() -> infectionMap.outputMap(new StringWriter()))
                 .withMessageContaining("An error occurred while writing the map file");
     }
@@ -101,7 +101,7 @@ assertThatExceptionOfType(InfectionMapException.class)
     @Test
     public void collectInfectors() {
 
-        Map<Integer, Set<Case>> temp = infectionMap.collectInfectors();
+        Map<Integer, List<Case>> temp = infectionMap.collectInfectors();
         Assert.assertEquals(seeds.size(), temp.get(Case.getInitial()).size());
 
         int sum = seeds.stream().mapToInt(seed -> temp.get(seed).size()).sum();
@@ -115,7 +115,7 @@ assertThatExceptionOfType(InfectionMapException.class)
     public void recurseSet() throws IOException {
 
         int tab = 1;
-        Map<Integer, Set<Case>> infectors = new HashMap<>();
+        Map<Integer, List<Case>> infectors = new HashMap<>();
 
         Case root = mock(Case.class);
         when(root.id()).thenReturn(0);
@@ -126,13 +126,13 @@ assertThatExceptionOfType(InfectionMapException.class)
         when(first.id()).thenReturn(1);
         when(first.exposedBy()).thenReturn(0);
         when(first.exposedTime()).thenReturn(10);
-        infectors.putIfAbsent(root.id(), Set.of(first));
+        infectors.putIfAbsent(root.id(), List.of(first));
 
         Case second = mock(Case.class);
         when(second.id()).thenReturn(2);
         when(second.exposedBy()).thenReturn(1);
         when(second.exposedTime()).thenReturn(10);
-        infectors.putIfAbsent(first.id(), Set.of(second));
+        infectors.putIfAbsent(first.id(), List.of(second));
 
         List<Case> target = List.of(root);
         Writer writer = new StringBuilderWriter();

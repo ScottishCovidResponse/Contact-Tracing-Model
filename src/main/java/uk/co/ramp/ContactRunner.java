@@ -55,7 +55,7 @@ public class ContactRunner implements CommandLineRunner {
             ContactReader contactReader = ctx.getBean(ContactReader.class);
             EventList eventList = ctx.getBean(EventList.class);
 
-            eventList.addEvents(contactReader.readEvents(reader, runProperties));
+            eventList.addEvents(contactReader.readEvents(reader));
 
             LOGGER.info("Generated Population and Parsed Contact data");
 

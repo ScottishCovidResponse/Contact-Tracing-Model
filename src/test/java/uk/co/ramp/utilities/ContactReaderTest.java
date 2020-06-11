@@ -47,7 +47,7 @@ public class ContactReaderTest {
     @Test
     public void testRead() throws IOException {
         StringReader stringReader = new StringReader(csv);
-        Map<Integer, List<ContactEvent>> dailyContactRecords = new ContactReader().readEvents(stringReader, properties);
+        Map<Integer, List<ContactEvent>> dailyContactRecords = new ContactReader(properties).readEvents(stringReader);
 
         assertThat(dailyContactRecords).containsOnlyKeys(0);
         assertThat(dailyContactRecords.get(0)).containsExactly(record1, record2);
@@ -62,7 +62,7 @@ public class ContactReaderTest {
                 "2,10000,10001,8.2, label\n";
         StringReader stringReader = new StringReader(csvOverPersonLimit);
 
-        Map<Integer, List<ContactEvent>> dailyContactRecords = new ContactReader().readEvents(stringReader, properties);
+        Map<Integer, List<ContactEvent>> dailyContactRecords = new ContactReader(properties).readEvents(stringReader);
 
         assertThat(dailyContactRecords).isEmpty();
     }
