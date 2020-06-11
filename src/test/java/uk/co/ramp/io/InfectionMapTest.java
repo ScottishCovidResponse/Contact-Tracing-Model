@@ -94,12 +94,9 @@ public class InfectionMapTest {
         doCallRealMethod().when(infectionMap).outputMap(any());
         doThrow(new IOException("")).when(infectionMap).recurseSet(anyList(), anyMap(), any(), anyInt());
 
-        try {
-            infectionMap.outputMap(new StringWriter());
-        } catch (InfectionMapException e) {
-            Assert.assertThat(logSpy.getOutput(), containsString("An error occurred while writing the map file"));
-            throw e;
-        }
+assertThatExceptionOfType(InfectionMapException.class)
+                .isThrownBy(() -> infectionMap.outputMap(new StringWriter()))
+                .withMessageContaining("An error occurred while writing the map file");
     }
 
     @Test
