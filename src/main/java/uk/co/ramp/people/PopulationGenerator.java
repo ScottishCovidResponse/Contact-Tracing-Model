@@ -4,8 +4,8 @@ import org.apache.commons.math3.distribution.EnumeratedIntegerDistribution;
 import org.apache.commons.math3.random.RandomDataGenerator;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import uk.co.ramp.io.PopulationProperties;
-import uk.co.ramp.io.StandardProperties;
+import uk.co.ramp.io.types.PopulationProperties;
+import uk.co.ramp.io.types.StandardProperties;
 import uk.co.ramp.utilities.MinMax;
 
 import java.util.HashMap;
@@ -41,7 +41,7 @@ public class PopulationGenerator {
     public static Map<VirusStatus, Integer> getCmptCounts(Map<Integer, Case> population) {
 
         Map<VirusStatus, Integer> pop = population.values().stream()
-                .map(Case::status)
+                .map(Case::virusStatus)
                 .collect(Collectors.groupingBy(Function.identity(), Collectors.summingInt(e -> 1)));
 
         Stream.of(VirusStatus.values()).forEach(vs -> pop.putIfAbsent(vs, 0));

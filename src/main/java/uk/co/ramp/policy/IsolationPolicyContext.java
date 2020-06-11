@@ -6,7 +6,7 @@ import org.springframework.boot.SpringBootConfiguration;
 import org.springframework.context.annotation.Bean;
 import uk.co.ramp.ConfigurationException;
 import uk.co.ramp.distribution.DistributionSampler;
-import uk.co.ramp.io.DiseaseProperties;
+import uk.co.ramp.io.types.DiseaseProperties;
 
 import java.io.File;
 import java.io.FileReader;
@@ -24,7 +24,7 @@ public class IsolationPolicyContext {
         return new ContactIsolationPolicy(singleCaseIsolationPolicy, diseaseProperties);
     }
 
-    private IsolationProperties isolationProperties() throws ConfigurationException {
+    private IsolationProperties isolationProperties() {
         try (Reader reader = new FileReader(new File(ISOLATION_SETTINGS_LOCATION))) {
             return new IsolationPropertiesReader().read(reader);
         } catch (IOException e) {

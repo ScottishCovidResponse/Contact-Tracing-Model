@@ -1,11 +1,10 @@
 package uk.co.ramp.io;
 
+import com.google.common.base.Strings;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import uk.co.ramp.people.Case;
 
-import java.io.File;
-import java.io.FileWriter;
 import java.io.IOException;
 import java.io.Writer;
 import java.util.*;
@@ -15,7 +14,6 @@ import static uk.co.ramp.people.VirusStatus.SUSCEPTIBLE;
 
 public class InfectionMap {
 
-    public static final String INFECTION_MAP = "infectionMap.txt";
     private static final Logger LOGGER = LogManager.getLogger(InfectionMap.class);
     private final Map<Integer, Case> population;
 
@@ -23,24 +21,9 @@ public class InfectionMap {
         this.population = population;
     }
 
-    public void outputMap() {
+    public void outputMap(Writer writer) {
 
-        List<Case> infections = population.values().stream()
-                .filter(c -> c.status() != SUSCEPTIBLE)
-                .sorted(Comparator.comparingInt(Case::exposedTime))
-                .collect(Collectors.toList());
-
-
-        Map<Integer, Set<Case>> infectors = new HashMap<>();
-
-        for (Case c : infections) {
-            infectors.putIfAbsent(c.exposedBy(), new HashSet<>());
-
-            Set<Case> var = infectors.get(c.exposedBy());
-
-            var.add(c);
-            infectors.put(c.exposedBy(), var);
-        }
+        Map<Integer, List<Case>> infectors = collectInfectors();
 
         // initial infections sorted by id
         List<Case> rootInfections = infectors.values().stream()
@@ -58,7 +41,7 @@ public class InfectionMap {
                         .collect(Collectors.toList()));
 
 
-        try (Writer writer = new FileWriter(new File(INFECTION_MAP))) {
+        try {
             recurseSet(rootInfections, infectors, writer, 1);
         } catch (IOException e) {
             String message = "An error occurred while writing the map file: " + e.getMessage();
@@ -69,7 +52,7 @@ public class InfectionMap {
 
     }
 
-    void recurseSet(List<Case> target, Map<Integer, Set<Case>> infectors, Writer writer, int tab) throws IOException {
+    void recurseSet(List<Case> target, Map<Integer, List<Case>> infectors, Writer writer, int tab) throws IOException {
 
         String spacer = "           ".repeat(tab - 1);
 
@@ -77,9 +60,9 @@ public class InfectionMap {
             if (infectors.containsKey(seed.id())) {
                 List<Case> newSeeds = new ArrayList<>(infectors.get(seed.id()));
                 if (tab == 1) {
-                    writer.write(seed.getSource() + "  ->  " + newSeeds.stream().map(Case::getSource).map(String::trim).collect(Collectors.toList()) + "\n");
+                    writer.write(getSource(seed) + "  ->  " + newSeeds.stream().map(this::getSource).map(String::trim).collect(Collectors.toList()) + "\n");
                 } else {
-                    writer.write(spacer + "   ->  " + seed.getSource() + "   ->  " + newSeeds.stream().map(Case::getSource).map(String::trim).collect(Collectors.toList()) + "\n");
+                    writer.write(spacer + "   ->  " + getSource(seed) + "   ->  " + newSeeds.stream().map(this::getSource).map(String::trim).collect(Collectors.toList()) + "\n");
                 }
 
                 recurseSet(newSeeds, infectors, writer, tab + 1);
@@ -89,5 +72,29 @@ public class InfectionMap {
 
     }
 
+    Map<Integer, List<Case>> collectInfectors() {
+
+        List<Case> infections = population.values().stream()
+                .filter(c -> c.virusStatus() != SUSCEPTIBLE)
+                .sorted(Comparator.comparingInt(Case::exposedTime))
+                .collect(Collectors.toList());
+
+        Map<Integer, List<Case>> infectors = new HashMap<>();
+
+        infections.forEach(i -> {
+            int key = i.exposedBy();
+            infectors.putIfAbsent(key, new ArrayList<>());
+            infectors.computeIfPresent(key, (id, set) -> {
+                set.add(i);
+                return set;
+            });
+        });
+        return infectors;
+    }
+
+
+    public String getSource(Case c) {
+        return Strings.padEnd(c.id() + "(" + c.exposedTime() + ")", 12, ' ');
+    }
 
 }

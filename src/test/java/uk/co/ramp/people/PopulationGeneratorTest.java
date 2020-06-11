@@ -4,7 +4,7 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import uk.co.ramp.TestUtils;
-import uk.co.ramp.io.StandardProperties;
+import uk.co.ramp.io.types.StandardProperties;
 
 import java.io.FileNotFoundException;
 import java.util.*;
@@ -48,7 +48,7 @@ public class PopulationGeneratorTest {
 
         start += e;
         end += i;
-        v = INFECTED;
+        v = PRESYMPTOMATIC;
         createPeople(var, start, end, v);
 
         start += i;
@@ -60,14 +60,14 @@ public class PopulationGeneratorTest {
 
         Assert.assertEquals(s, result.get(SUSCEPTIBLE).intValue());
         Assert.assertEquals(e, result.get(EXPOSED).intValue());
-        Assert.assertEquals(i, result.get(INFECTED).intValue());
+        Assert.assertEquals(i, result.get(PRESYMPTOMATIC).intValue());
         Assert.assertEquals(r, result.get(RECOVERED).intValue());
 
     }
 
+
     @Test
     public void findAge() {
-
 
 
         int n = 10000;
@@ -132,7 +132,7 @@ public class PopulationGeneratorTest {
         for (int p = start; p < end; p++) {
 
             Case c = mock(Case.class);
-            when(c.status()).thenReturn(v);
+            when(c.virusStatus()).thenReturn(v);
             var.put(p, c);
         }
     }

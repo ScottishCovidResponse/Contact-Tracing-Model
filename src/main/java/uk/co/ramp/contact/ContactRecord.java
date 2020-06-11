@@ -8,11 +8,16 @@ import org.immutables.value.Value.Immutable;
 @Immutable
 @JsonSerialize
 @JsonDeserialize
-@JsonPropertyOrder({"time", "from", "to", "weight"})
+@JsonPropertyOrder({"time", "from", "to", "weight", "label"})
 @SuppressWarnings("immutables:from")
 public interface ContactRecord {
     int time();
+
     int from();
+
     int to();
+
     double weight();
+
+    String label();
 }

@@ -10,10 +10,11 @@ public enum VirusStatus {
 
     DEAD(-1, Collections.emptyList()),
     RECOVERED(1, Collections.emptyList()),
-    INFECTED_SYMP(5, List.of(RECOVERED, DEAD)),
-    INFECTED(4, List.of(RECOVERED)),
-    EXPOSED_2(3, List.of(INFECTED, INFECTED_SYMP)),
-    EXPOSED(2, List.of(EXPOSED_2)),
+    SEVERELY_SYMPTOMATIC(6, List.of(RECOVERED, DEAD)),
+    SYMPTOMATIC(5, List.of(RECOVERED, SEVERELY_SYMPTOMATIC)),
+    ASYMPTOMATIC(4, List.of(RECOVERED)),
+    PRESYMPTOMATIC(3, List.of(SYMPTOMATIC)),
+    EXPOSED(2, List.of(PRESYMPTOMATIC, ASYMPTOMATIC)),
     SUSCEPTIBLE(0, List.of(EXPOSED));
 
     private final int val;

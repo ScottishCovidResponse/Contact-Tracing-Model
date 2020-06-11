@@ -3,8 +3,8 @@ package uk.co.ramp.io.readers;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.TypeAdapterFactory;
-import uk.co.ramp.io.ImmutablePopulationProperties;
-import uk.co.ramp.io.PopulationProperties;
+import uk.co.ramp.io.types.ImmutablePopulationProperties;
+import uk.co.ramp.io.types.PopulationProperties;
 import uk.co.ramp.utilities.ImmutableMinMax;
 
 import java.io.Reader;

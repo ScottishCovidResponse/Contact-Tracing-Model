@@ -8,11 +8,7 @@ import uk.co.ramp.people.AlertStatus;
 import uk.co.ramp.people.Case;
 import uk.co.ramp.people.VirusStatus;
 
-import java.util.Comparator;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -82,7 +78,7 @@ class SingleCaseIsolationPolicy {
     }
 
     boolean isIndividualInIsolation(Case aCase, double actualInfectedProportion, int currentTime) {
-        return isIndividualInIsolation(aCase.id(), aCase.status(), aCase.alertStatus(), aCase.compliance(), actualInfectedProportion, currentTime);
+        return isIndividualInIsolation(aCase.id(), aCase.virusStatus(), aCase.alertStatus(), aCase.compliance(), actualInfectedProportion, currentTime);
     }
 
     boolean isIndividualInIsolation(int id, VirusStatus virusStatus, AlertStatus alertStatus, double compliance, double actualInfectedProportion, int currentTime) {

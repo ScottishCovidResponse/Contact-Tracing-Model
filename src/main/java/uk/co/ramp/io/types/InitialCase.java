@@ -1,4 +1,4 @@
-package uk.co.ramp.io;
+package uk.co.ramp.io.types;
 
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;

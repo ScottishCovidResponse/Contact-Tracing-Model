@@ -1,4 +1,4 @@
-package uk.co.ramp.record;
+package uk.co.ramp.io.types;
 
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
@@ -13,17 +13,18 @@ import static uk.co.ramp.people.VirusStatus.*;
 @Value.Immutable
 @JsonSerialize
 @JsonDeserialize
-@JsonPropertyOrder({"time", "s", "e1", "e2", "ia", "is", "r", "d"})
+@JsonPropertyOrder({"time", "s", "e", "a", "p", "sym", "sev", "r", "d"})
 public interface CmptRecord {
 
     static CmptRecord of(int time, Map<VirusStatus, Integer> counts) {
         return ImmutableCmptRecord.builder().
                 time(time).
                 s(counts.get(SUSCEPTIBLE)).
-                e1(counts.get(EXPOSED)).
-                e2(counts.get(EXPOSED_2)).
-                ia(counts.get(INFECTED)).
-                is(counts.get(INFECTED_SYMP)).
+                e(counts.get(EXPOSED)).
+                a(counts.get(ASYMPTOMATIC)).
+                p(counts.get(PRESYMPTOMATIC)).
+                sym(counts.get(SYMPTOMATIC)).
+                sev(counts.get(SEVERELY_SYMPTOMATIC)).
                 r(counts.get(RECOVERED)).
                 d(counts.get(DEAD)).build();
     }
@@ -32,13 +33,15 @@ public interface CmptRecord {
 
     int s();
 
-    int e1();
+    int e();
 
-    int e2();
+    int a();
 
-    int ia();
+    int p();
 
-    int is();
+    int sym();
+
+    int sev();
 
     int r();
 

@@ -3,18 +3,18 @@ package uk.co.ramp;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.CommandLineRunner;
 import org.springframework.context.ApplicationContext;
-import org.springframework.context.ApplicationContextAware;
 import org.springframework.stereotype.Service;
-import uk.co.ramp.contact.ContactRecord;
+import uk.co.ramp.event.EventList;
 import uk.co.ramp.io.CompartmentWriter;
-import uk.co.ramp.io.InputFiles;
-import uk.co.ramp.io.StandardProperties;
+import uk.co.ramp.io.ContactReader;
 import uk.co.ramp.io.csv.CsvException;
+import uk.co.ramp.io.types.CmptRecord;
+import uk.co.ramp.io.types.InputFiles;
+import uk.co.ramp.io.types.StandardProperties;
 import uk.co.ramp.people.Case;
 import uk.co.ramp.people.PopulationGenerator;
-import uk.co.ramp.record.CmptRecord;
-import uk.co.ramp.utilities.ContactReader;
 
 import java.io.*;
 import java.util.ArrayList;
@@ -22,7 +22,7 @@ import java.util.List;
 import java.util.Map;
 
 @Service
-public class ContactRunner implements ApplicationContextAware {
+public class ContactRunner implements CommandLineRunner {
 
     private static final Logger LOGGER = LogManager.getLogger(ContactRunner.class);
     public static final String COMPARTMENTS_CSV = "Compartments.csv";
@@ -35,7 +35,6 @@ public class ContactRunner implements ApplicationContextAware {
         this.runProperties = standardProperties;
     }
 
-    @Override
     @Autowired
     public void setApplicationContext(ApplicationContext applicationContext) {
         this.ctx = applicationContext;
@@ -46,19 +45,21 @@ public class ContactRunner implements ApplicationContextAware {
         this.inputFileLocation = inputFileLocation;
     }
 
-    public void run() throws IOException {
+
+    @Override
+    public void run(String... args) throws IOException {
 
         Map<Integer, Case> population = ctx.getBean(PopulationGenerator.class).generate();
         try (Reader reader = new FileReader(inputFileLocation.contactData())) {
 
             ContactReader contactReader = ctx.getBean(ContactReader.class);
+            EventList eventList = ctx.getBean(EventList.class);
 
-            Map<Integer, List<ContactRecord>> contactRecords = contactReader.read(reader, runProperties);
+            eventList.addEvents(contactReader.readEvents(reader));
 
             LOGGER.info("Generated Population and Parsed Contact data");
 
             Outbreak infection = ctx.getBean(Outbreak.class);
-            infection.setContactRecords(contactRecords);
             infection.setPopulation(population);
 
             LOGGER.info("Initialised Outbreak");

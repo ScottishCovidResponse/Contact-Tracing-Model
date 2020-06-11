@@ -1,4 +1,4 @@
-package uk.co.ramp.io;
+package uk.co.ramp.io.types;
 
 import org.immutables.gson.Gson.TypeAdapters;
 import org.immutables.value.Value.Immutable;

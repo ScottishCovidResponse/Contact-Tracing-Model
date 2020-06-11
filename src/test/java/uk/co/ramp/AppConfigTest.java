@@ -3,10 +3,10 @@ package uk.co.ramp;
 import org.apache.commons.math3.random.RandomDataGenerator;
 import org.junit.*;
 import org.mockito.Mockito;
-import uk.co.ramp.io.DiseaseProperties;
-import uk.co.ramp.io.InputFiles;
-import uk.co.ramp.io.PopulationProperties;
-import uk.co.ramp.io.StandardProperties;
+import uk.co.ramp.io.types.DiseaseProperties;
+import uk.co.ramp.io.types.InputFiles;
+import uk.co.ramp.io.types.PopulationProperties;
+import uk.co.ramp.io.types.StandardProperties;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -80,14 +80,26 @@ public class AppConfigTest {
 
         Assert.assertNotNull(diseaseProperties);
 
-        Assert.assertTrue(diseaseProperties.meanTimeToInfectious() > 0);
-        Assert.assertTrue(diseaseProperties.meanTimeToInfected() > 0);
-        Assert.assertTrue(diseaseProperties.meanTimeToFinalState() > 0);
-        Assert.assertTrue(diseaseProperties.maxTimeToInfectious() > 0);
-        Assert.assertTrue(diseaseProperties.maxTimeToInfected() > 0);
-        Assert.assertTrue(diseaseProperties.maxTimeToFinalState() > 0);
-        Assert.assertTrue(diseaseProperties.meanTestTime() > 0);
-        Assert.assertTrue(diseaseProperties.maxTestTime() > 0);
+        Assert.assertTrue(diseaseProperties.timeLatent().mean() > 0);
+        Assert.assertTrue(diseaseProperties.timeRecoveryAsymp().mean() > 0);
+        Assert.assertTrue(diseaseProperties.timeRecoverySymp().mean() > 0);
+        Assert.assertTrue(diseaseProperties.timeRecoverySev().mean() > 0);
+        Assert.assertTrue(diseaseProperties.timeSymptomsOnset().mean() > 0);
+        Assert.assertTrue(diseaseProperties.timeDecline().mean() > 0);
+        Assert.assertTrue(diseaseProperties.timeDeath().mean() > 0);
+        Assert.assertTrue(diseaseProperties.timeTestAdministered().mean() > 0);
+        Assert.assertTrue(diseaseProperties.timeTestResult().mean() > 0);
+
+        Assert.assertTrue(diseaseProperties.timeLatent().max() > 0);
+        Assert.assertTrue(diseaseProperties.timeRecoveryAsymp().max() > 0);
+        Assert.assertTrue(diseaseProperties.timeRecoverySymp().max() > 0);
+        Assert.assertTrue(diseaseProperties.timeRecoverySev().max() > 0);
+        Assert.assertTrue(diseaseProperties.timeSymptomsOnset().max() > 0);
+        Assert.assertTrue(diseaseProperties.timeDecline().max() > 0);
+        Assert.assertTrue(diseaseProperties.timeDeath().max() > 0);
+        Assert.assertTrue(diseaseProperties.timeTestAdministered().max() > 0);
+        Assert.assertTrue(diseaseProperties.timeTestResult().max() > 0);
+
         Assert.assertTrue(diseaseProperties.testAccuracy() > 0);
         Assert.assertTrue(diseaseProperties.exposureTuning() > 0);
         Assert.assertTrue(diseaseProperties.exposureThreshold() > 0);

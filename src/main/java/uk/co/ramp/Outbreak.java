@@ -2,19 +2,30 @@ package uk.co.ramp;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import uk.co.ramp.contact.ContactRecord;
-import uk.co.ramp.distribution.DistributionSampler;
-import uk.co.ramp.io.*;
+import uk.co.ramp.event.EventList;
+import uk.co.ramp.event.EventProcessor;
+import uk.co.ramp.event.types.Event;
+import uk.co.ramp.event.types.ImmutableInfectionEvent;
+import uk.co.ramp.event.types.InfectionEvent;
+import uk.co.ramp.io.InfectionMap;
+import uk.co.ramp.io.InfectionMapException;
+import uk.co.ramp.io.InitialCaseReader;
+import uk.co.ramp.io.LogDailyOutput;
+import uk.co.ramp.io.types.CmptRecord;
+import uk.co.ramp.io.types.DiseaseProperties;
+import uk.co.ramp.io.types.StandardProperties;
 import uk.co.ramp.people.Case;
-import uk.co.ramp.people.PopulationGenerator;
 import uk.co.ramp.people.VirusStatus;
-import uk.co.ramp.record.CmptRecord;
 import uk.co.ramp.utilities.UtilitiesBean;
 
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.io.Writer;
 import java.util.*;
 
-import static uk.co.ramp.people.AlertStatus.NONE;
 import static uk.co.ramp.people.VirusStatus.*;
 
 @Service
@@ -24,33 +35,34 @@ public class Outbreak {
 
     private final StandardProperties properties;
     private final DiseaseProperties diseaseProperties;
-    private final DistributionSampler distributionSampler;
+    private final EventList eventList;
+    private final InitialCaseReader initialCaseReader;
+    private final EventProcessor eventProcessor;
     private final UtilitiesBean utils;
     private final LogDailyOutput outputLog;
-    private final InitialCaseReader initialCaseReader;
-
 
     private Map<Integer, Case> population;
-    private Map<Integer, List<ContactRecord>> contactRecords;
-
     private final Map<Integer, CmptRecord> records = new HashMap<>();
+    private static final String INFECTION_MAP = "infectionMap.txt";
 
 
-    public Outbreak(DiseaseProperties diseaseProperties, StandardProperties standardProperties, DistributionSampler distributionSampler, UtilitiesBean utils, LogDailyOutput outputLog, InitialCaseReader initialCaseReader) {
-        this.distributionSampler = distributionSampler;
+    @Autowired
+    public Outbreak(DiseaseProperties diseaseProperties, StandardProperties standardProperties,
+                    UtilitiesBean utils, LogDailyOutput outputLog, InitialCaseReader initialCaseReader,
+                    EventList eventList, EventProcessor eventProcessor) {
+
         this.initialCaseReader = initialCaseReader;
         this.diseaseProperties = diseaseProperties;
         this.properties = standardProperties;
         this.utils = utils;
         this.outputLog = outputLog;
+        this.eventProcessor = eventProcessor;
+        this.eventList = eventList;
+
     }
 
     public void setPopulation(Map<Integer, Case> population) {
         this.population = population;
-    }
-
-    public void setContactRecords(Map<Integer, List<ContactRecord>> contactRecords) {
-        this.contactRecords = contactRecords;
     }
 
 
@@ -63,171 +75,80 @@ public class Outbreak {
         return records;
     }
 
-
     void generateInitialInfection() {
 
         Set<Integer> infectedIds = initialCaseReader.getCases();
+        List<Event> virusEvents = new ArrayList<>();
 
-        for (Integer id : infectedIds) {
+        InfectionEvent genericEvent = ImmutableInfectionEvent.builder().
+                exposedBy(Case.getInitial()).
+                oldStatus(SUSCEPTIBLE).
+                nextStatus(EXPOSED).
+                exposedTime(0).
+                id(-1).
+                time(0).build();
 
-            EvaluateCase evaluateCase = new EvaluateCase(population.get(id), diseaseProperties, distributionSampler);
-            evaluateCase.updateVirusStatus(EXPOSED, 0, Case.getInitial());
+        infectedIds.forEach(id -> virusEvents.add(ImmutableInfectionEvent.copyOf(genericEvent).withId(id)));
+        eventList.addEvents(virusEvents);
 
-        }
     }
 
 
     void runToCompletion() {
+        // the latest time to run to
         int timeLimit = properties.timeLimit();
-        int maxContact = contactRecords.keySet().stream().max(Comparator.naturalOrder()).orElseThrow(RuntimeException::new);
-        int runTime;
-        boolean steadyState = properties.steadyState();
         double randomInfectionRate = diseaseProperties.randomInfectionRate();
 
-        if (timeLimit <= maxContact) {
-            LOGGER.warn("Not all contact data will be used");
-            runTime = timeLimit;
-            steadyState = false;
-        } else {
-            LOGGER.info("Potential for steady state soln");
-            runTime = maxContact;
+        runContactData(timeLimit, randomInfectionRate);
+
+        try (Writer writer = new FileWriter(new File(INFECTION_MAP))) {
+            new InfectionMap(population).outputMap(writer);
+            eventList.output();
+        } catch (IOException e) {
+            String message = "An error occurred generating the infection map";
+            LOGGER.error(message);
+            throw new InfectionMapException(message, e);
         }
-
-        boolean complete = runContactData(runTime, randomInfectionRate);
-
-        if (steadyState && !complete) {
-            runToSteadyState(runTime, timeLimit);
-        }
-
-        // Output map of infections
-        new InfectionMap(Collections.unmodifiableMap(population)).outputMap();
 
     }
 
 
-    boolean runContactData(int maxContact, double randomInfectionRate) {
-        for (int time = 0; time <= maxContact; time++) {
+    void runContactData(int timeLimit, double randomInfectionRate) {
+        int lastContact = eventList.lastContactTime().orElseThrow();
 
-            updatePopulationState(time, randomInfectionRate);
-            List<ContactRecord> todaysContacts = contactRecords.get(time);
-            int activeCases = calculateDailyStatistics(time);
+        if (lastContact > timeLimit) {
+            LOGGER.info("timeLimit it lower than time of last contact event");
+            LOGGER.info("Not all contact data will be used");
+        }
 
-            if (activeCases == 0 && randomInfectionRate == 0d) {
+        for (int time = 0; time <= timeLimit; time++) {
+
+            eventProcessor.setPopulation(population);
+            eventProcessor.process(time, randomInfectionRate, lastContact);
+            updateLogActiveCases(time);
+
+            // stop random infections after contacts end
+            if (activeCases() == 0 && lastContact < time) {
+                randomInfectionRate = 0d;
+            }
+
+            if (activeCases() == 0 && randomInfectionRate == 0d) {
                 LOGGER.info("There are no active cases and the random infection rate is zero.");
                 LOGGER.info("Exiting as solution is stable.");
-                return true;
-            }
-
-            for (ContactRecord contacts : todaysContacts) {
-                evaluateContact(time, contacts);
-            }
-
-        }
-        return false;
-    }
-
-
-    void evaluateContact(int time, ContactRecord contacts) {
-        Case potentialSpreader = population.get(contacts.to());
-        Case victim = population.get(contacts.from());
-
-        boolean conditionA = potentialSpreader.alertStatus() != NONE || victim.alertStatus() != NONE;
-        boolean conditionB = contacts.weight() < diseaseProperties.exposureThreshold();
-
-
-        if (conditionA && conditionB) {
-            // TODO: Apply behavioural logic here. Use compliance value?
-            LOGGER.trace("spreader: {}   victim: {}   weight: {} ", potentialSpreader.alertStatus(), victim.alertStatus(), contacts.weight());
-            LOGGER.debug("Skipping contact due to threshold");
-            return;
-        }
-
-
-        if (potentialSpreader.status() != victim.status()) {
-            evaluateExposures(contacts, time);
-        }
-    }
-
-
-    void runToSteadyState(int runTime, int timeLimit) {
-        for (int time = runTime; time <= timeLimit; time++) {
-
-            // set random infection rate to zero in steady state mode
-            updatePopulationState(time, 0d);
-            calculateDailyStatistics(time);
-
-            Map<VirusStatus, Integer> compartmentCounts = PopulationGenerator.getCmptCounts(population);
-
-
-            boolean exitCondition = compartmentCounts.get(EXPOSED) == 0 &&
-                    compartmentCounts.get(EXPOSED_2) == 0 &&
-                    compartmentCounts.get(INFECTED) == 0 &&
-                    compartmentCounts.get(INFECTED_SYMP) == 0;
-
-
-            if (exitCondition) {
-                LOGGER.info("Steady state solution reached at t={} ", time);
-                LOGGER.info("Exiting early.");
-                return;
+                break;
             }
         }
     }
 
-    void updatePopulationState(int time, double randomInfectionRate) {
-
-        Set<Integer> alerts = new HashSet<>();
-
-        for (Case p : population.values()) {
-            EvaluateCase e = new EvaluateCase(p, diseaseProperties, distributionSampler);
-            alerts.addAll(e.checkActionsAtTimestep(time));
-
-            if (p.status() == SUSCEPTIBLE && randomInfectionRate > 0d && time > 0) {
-                boolean var = distributionSampler.uniformBetweenZeroAndOne() <= randomInfectionRate;
-                if (var) e.randomExposure(time);
-            }
-        }
-
-        if (!alerts.isEmpty()) alertPopulation(alerts, time);
-    }
-
-    void alertPopulation(Set<Integer> alerts, int time) {
-
-        for (Integer id : alerts) {
-            Case potentialInfected = population.get(id);
-            if (potentialInfected.alertStatus() == NONE && potentialInfected.status() != DEAD) {
-                potentialInfected.setNextAlertStatusChange(time + 1);
-                LOGGER.trace("ALERTED: {} - {} - {} ", id, potentialInfected.status(), potentialInfected.alertStatus());
-            }
-        }
-
-    }
-
-
-    void evaluateExposures(ContactRecord c, int time) {
-        Case personA = utils.getMostSevere(population.get(c.to()), population.get(c.from()));
-        Case personB = personA == population.get(c.to()) ? population.get(c.from()) : population.get(c.to());
-
-        personA.addContact(c);
-        personB.addContact(c);
-
-        boolean dangerMix = personA.isInfectious() && personB.status() == SUSCEPTIBLE;
-
-        if (dangerMix && distributionSampler.uniformBetweenZeroAndOne() < c.weight() / diseaseProperties.exposureTuning()) {
-            LOGGER.trace("       DANGER MIX");
-            EvaluateCase e = new EvaluateCase(personB, diseaseProperties, distributionSampler);
-            e.updateVirusStatus(EXPOSED, time, personA.id());
-        }
-    }
-
-    int calculateDailyStatistics(int time) {
+    void updateLogActiveCases(int time) {
         Map<VirusStatus, Integer> stats = utils.getCmptCounts(population);
-        int activeCases = stats.get(EXPOSED) + stats.get(EXPOSED_2) + stats.get(INFECTED) + stats.get(INFECTED_SYMP);
-
         CmptRecord cmptRecord = outputLog.log(time, stats);
         records.put(time, cmptRecord);
+    }
 
-        return activeCases;
-
+    private int activeCases() {
+        var stats = utils.getCmptCounts(population);
+        return stats.get(EXPOSED) + stats.get(ASYMPTOMATIC) + stats.get(PRESYMPTOMATIC) + stats.get(SYMPTOMATIC) + stats.get(SEVERELY_SYMPTOMATIC);
     }
 
 }

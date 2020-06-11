@@ -2,14 +2,10 @@ package uk.co.ramp.io.readers;
 
 import com.google.gson.JsonParser;
 import org.junit.Test;
-import uk.co.ramp.io.PopulationProperties;
+import uk.co.ramp.io.types.PopulationProperties;
 import uk.co.ramp.utilities.ImmutableMinMax;
 
-import java.io.BufferedReader;
-import java.io.BufferedWriter;
-import java.io.IOException;
-import java.io.StringReader;
-import java.io.StringWriter;
+import java.io.*;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.data.Offset.offset;
