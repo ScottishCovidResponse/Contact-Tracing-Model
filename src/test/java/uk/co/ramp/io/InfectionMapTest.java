@@ -87,7 +87,6 @@ public class InfectionMapTest {
         Assert.assertEquals(lines, seeds);
     }
 
-    @Test(expected = InfectionMapException.class)
     public void testException() throws IOException {
 
         infectionMap = mock(InfectionMap.class);
