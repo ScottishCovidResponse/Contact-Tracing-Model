@@ -41,14 +41,7 @@ public class EventList {
     }
 
     public void addEvents(Map<Integer, List<ContactEvent>> readEvents) {
-
-        for (Map.Entry<Integer, List<ContactEvent>> entry : readEvents.entrySet()) {
-            bulkAdd(entry.getKey(), entry.getValue());
-        }
-    }
-
-    private void bulkAdd(int time, List<ContactEvent> events) {
-        map.computeIfAbsent(time, k -> new ArrayList<>()).addAll(events);
+        readEvents.values().stream().flatMap(List::stream).forEach(this::addEvent);
     }
 
     public void completed(Event e) {
