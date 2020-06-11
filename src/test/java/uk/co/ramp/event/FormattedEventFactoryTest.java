@@ -181,12 +181,9 @@ public class FormattedEventFactoryTest {
         Assert.assertNotNull(event.eventType());
         Assert.assertEquals("PolicyEvent", event.eventType());
 
-        try {
-            formattedEventFactory.create(notCovered);
-
-        } catch (EventException e) {
-            Assert.assertThat(logSpy.getOutput(), containsString(notCovered.getClass().getSimpleName()));
-            throw e;
-        }
+        assertThatExceptionOfType(EventException.class)
+                .isThrownBy(() -> formattedEventFactory.create(notCovered))
+                .withMessageContaining("Unknown Event Type")
+                .withMessageContaining(notCovered.getClass().getSimpleName());
     }
 }
