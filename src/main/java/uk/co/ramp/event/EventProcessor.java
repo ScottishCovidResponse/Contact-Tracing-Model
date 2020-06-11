@@ -110,7 +110,7 @@ public class EventProcessor {
         List<AlertEvent> newEvents = new ArrayList<>();
         // Look at all alert events
         for (AlertEvent event : eventList.getForTime(time).stream().filter(event -> event instanceof AlertEvent).map(event -> (AlertEvent) event).collect(Collectors.toList())) {
-            population.get(event.id()).processEvent(event);
+            event.applyEventToCase(population.get(event.id()));
 
             AlertStatus proposedStatus = determineNextAlertStatus(event);
             AlertStatus nextStatus = event.nextStatus().transitionTo(proposedStatus);
@@ -152,8 +152,8 @@ public class EventProcessor {
         List<Event> newEvents = new ArrayList<>();
         // Look at all virus events
         for (VirusEvent event : eventList.getForTime(time).stream().filter(event -> event instanceof VirusEvent).map(event -> (VirusEvent) event).collect(Collectors.toList())) {
+            event.applyEventToCase(population.get(event.id()));
 
-            population.get(event.id()).processEvent(event);
             VirusStatus nextStatus = determineNextStatus(event);
 
             // will return self if at DEAD or RECOVERED
@@ -184,7 +184,7 @@ public class EventProcessor {
         for (InfectionEvent event : eventList.getForTime(time).stream().filter(event -> event instanceof InfectionEvent).map(event -> (InfectionEvent) event).collect(Collectors.toList())) {
 
             if (population.get(event.id()).virusStatus() == SUSCEPTIBLE) {
-                population.get(event.id()).processEvent(event);
+                event.applyEventToCase(population.get(event.id()));
 
                 VirusStatus nextStatus = determineNextStatus(event);
                 int deltaTime = timeInCompartment(event.nextStatus(), nextStatus);
@@ -259,8 +259,6 @@ public class EventProcessor {
                 return thisCase.isInfectious() ? TESTED_POSITIVE : TESTED_NEGATIVE;
             case NONE:
                 return NONE;
-            case TESTED_POSITIVE:
-                return TESTED_POSITIVE;
             default:
                 LOGGER.error(event);
                 throw new EventException("There is no case for the event" + event);

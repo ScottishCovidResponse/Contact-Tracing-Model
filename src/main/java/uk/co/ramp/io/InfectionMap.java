@@ -23,7 +23,7 @@ public class InfectionMap {
 
     public void outputMap(Writer writer) {
 
-        Map<Integer, Set<Case>> infectors = collectInfectors();
+        Map<Integer, List<Case>> infectors = collectInfectors();
 
         // initial infections sorted by id
         List<Case> rootInfections = infectors.values().stream()
@@ -52,7 +52,7 @@ public class InfectionMap {
 
     }
 
-    void recurseSet(List<Case> target, Map<Integer, Set<Case>> infectors, Writer writer, int tab) throws IOException {
+    void recurseSet(List<Case> target, Map<Integer, List<Case>> infectors, Writer writer, int tab) throws IOException {
 
         String spacer = "           ".repeat(tab - 1);
 
@@ -72,18 +72,18 @@ public class InfectionMap {
 
     }
 
-    Map<Integer, Set<Case>> collectInfectors() {
+    Map<Integer, List<Case>> collectInfectors() {
 
         List<Case> infections = population.values().stream()
                 .filter(c -> c.virusStatus() != SUSCEPTIBLE)
                 .sorted(Comparator.comparingInt(Case::exposedTime))
                 .collect(Collectors.toList());
 
-        Map<Integer, Set<Case>> infectors = new HashMap<>();
+        Map<Integer, List<Case>> infectors = new HashMap<>();
 
         infections.forEach(i -> {
             int key = i.exposedBy();
-            infectors.putIfAbsent(key, new HashSet<>());
+            infectors.putIfAbsent(key, new ArrayList<>());
             infectors.computeIfPresent(key, (id, set) -> {
                 set.add(i);
                 return set;

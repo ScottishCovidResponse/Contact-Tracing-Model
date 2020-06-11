@@ -11,6 +11,7 @@ import org.immutables.value.Value;
 @JsonPropertyOrder({"time", "from", "to", "weight", "label"})
 @SuppressWarnings("immutables:from")
 public interface ContactEvent extends Event {
+
     int from();
 
     int to();

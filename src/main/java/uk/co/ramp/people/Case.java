@@ -1,11 +1,5 @@
 package uk.co.ramp.people;
 
-import uk.co.ramp.event.EventException;
-import uk.co.ramp.event.types.AlertEvent;
-import uk.co.ramp.event.types.Event;
-import uk.co.ramp.event.types.InfectionEvent;
-import uk.co.ramp.event.types.VirusEvent;
-
 import static uk.co.ramp.people.AlertStatus.NONE;
 import static uk.co.ramp.people.VirusStatus.*;
 
@@ -14,8 +8,8 @@ public class Case {
     private final Human human;
     private VirusStatus virusStatus;
     private AlertStatus alertStatus;
-    private int exposedBy;
-    private int exposedTime;
+    private final int exposedBy;
+    private final int exposedTime;
 
     private static final int DEFAULT = -1;
     private static final int INITIAL = -3;
@@ -30,7 +24,7 @@ public class Case {
     }
 
 
-    // simple getters
+    // simple get/setters
 
     public Human getHuman() {
         return human;
@@ -52,6 +46,13 @@ public class Case {
         return exposedTime;
     }
 
+    public void setVirusStatus(VirusStatus virusStatus) {
+        this.virusStatus = this.virusStatus.transitionTo(virusStatus);
+    }
+
+    public void setAlertStatus(AlertStatus alertStatus) {
+        this.alertStatus = this.alertStatus.transitionTo(alertStatus);
+    }
 
     // exposing from Human Type
 
@@ -95,34 +96,34 @@ public class Case {
         return virusStatus == ASYMPTOMATIC || virusStatus == SYMPTOMATIC || virusStatus == SEVERELY_SYMPTOMATIC || virusStatus == PRESYMPTOMATIC;
     }
 
-    // Event handling
-    private void processInfectionEvent(InfectionEvent event) {
-        virusStatus = virusStatus.transitionTo(event.nextStatus());
-        exposedTime = event.exposedTime();
-        exposedBy = event.exposedBy();
-    }
+//    // Event handling
+//    private void processInfectionEvent(InfectionEvent event) {
+//        virusStatus = virusStatus.transitionTo(event.nextStatus());
+//        exposedTime = event.exposedTime();
+//        exposedBy = event.exposedBy();
+//    }
+//
+//    private void processVirusEvent(VirusEvent event) {
+//        virusStatus = virusStatus.transitionTo(event.nextStatus());
+//    }
+//
+//    public void processEvent(Event event) {
+//
+//        if (event instanceof VirusEvent) {
+//            processVirusEvent((VirusEvent) event);
+//        } else if (event instanceof InfectionEvent) {
+//            processInfectionEvent((InfectionEvent) event);
+//        } else if (event instanceof AlertEvent) {
+//            processAlertEvent((AlertEvent) event);
+//        } else {
+//            throw new EventException("uncovered condition");
+//        }
+//
+//    }
 
-    private void processVirusEvent(VirusEvent event) {
-        virusStatus = virusStatus.transitionTo(event.nextStatus());
-    }
-
-    public void processEvent(Event event) {
-
-        if (event instanceof VirusEvent) {
-            processVirusEvent((VirusEvent) event);
-        } else if (event instanceof InfectionEvent) {
-            processInfectionEvent((InfectionEvent) event);
-        } else if (event instanceof AlertEvent) {
-            processAlertEvent((AlertEvent) event);
-        } else {
-            throw new EventException("uncovered condition");
-        }
-
-    }
-
-    private void processAlertEvent(AlertEvent event) {
-        alertStatus = event.nextStatus();
-    }
+//    private void processAlertEvent(AlertEvent event) {
+//        alertStatus = event.nextStatus();
+//    }
 
 
 }
