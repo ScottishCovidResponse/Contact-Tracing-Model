@@ -19,7 +19,13 @@ import java.util.Map;
 public class ContactReader {
     private static final Logger LOGGER = LogManager.getLogger(ContactReader.class);
 
-    public Map<Integer, List<ContactEvent>> readEvents(Reader reader, StandardProperties properties) throws IOException {
+    private final StandardProperties properties;
+    @Autowired
+    public ContactReader(StandardProperties standardProperties) {
+        this.properties = standardProperties;
+    }
+
+    public Map<Integer, List<ContactEvent>> readEvents(Reader reader) throws IOException {
 
         List<ImmutableContactEvent> contactEvents = new CsvReader().read(reader, ImmutableContactEvent.class);
 
