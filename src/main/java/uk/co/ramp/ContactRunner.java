@@ -12,9 +12,6 @@ import uk.co.ramp.io.ContactReader;
 import uk.co.ramp.io.csv.CsvException;
 import uk.co.ramp.io.types.CmptRecord;
 import uk.co.ramp.io.types.InputFiles;
-import uk.co.ramp.io.types.StandardProperties;
-import uk.co.ramp.people.Case;
-import uk.co.ramp.people.PopulationGenerator;
 
 import java.io.*;
 import java.util.ArrayList;
@@ -27,13 +24,7 @@ public class ContactRunner implements CommandLineRunner {
     private static final Logger LOGGER = LogManager.getLogger(ContactRunner.class);
     public static final String COMPARTMENTS_CSV = "Compartments.csv";
     private InputFiles inputFileLocation;
-    private StandardProperties runProperties;
     private ApplicationContext ctx;
-
-    @Autowired
-    public void setRunProperties(StandardProperties standardProperties) {
-        this.runProperties = standardProperties;
-    }
 
     @Autowired
     public void setApplicationContext(ApplicationContext applicationContext) {
@@ -49,7 +40,6 @@ public class ContactRunner implements CommandLineRunner {
     @Override
     public void run(String... args) throws IOException {
 
-        Map<Integer, Case> population = ctx.getBean(PopulationGenerator.class).generate();
         try (Reader reader = new FileReader(inputFileLocation.contactData())) {
 
             ContactReader contactReader = ctx.getBean(ContactReader.class);
@@ -60,7 +50,6 @@ public class ContactRunner implements CommandLineRunner {
             LOGGER.info("Generated Population and Parsed Contact data");
 
             Outbreak infection = ctx.getBean(Outbreak.class);
-            infection.setPopulation(population);
 
             LOGGER.info("Initialised Outbreak");
 

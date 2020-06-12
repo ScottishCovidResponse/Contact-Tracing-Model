@@ -16,9 +16,12 @@ import uk.co.ramp.io.types.DiseaseProperties;
 import uk.co.ramp.io.types.InputFiles;
 import uk.co.ramp.io.types.PopulationProperties;
 import uk.co.ramp.io.types.StandardProperties;
+import uk.co.ramp.people.Case;
+import uk.co.ramp.people.PopulationGenerator;
 import uk.co.ramp.utilities.UtilitiesBean;
 
 import java.io.*;
+import java.util.Map;
 import java.util.Optional;
 
 @SpringBootConfiguration
