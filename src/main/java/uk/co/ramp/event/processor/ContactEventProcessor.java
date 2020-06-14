@@ -40,7 +40,7 @@ public class ContactEventProcessor implements EventProcessor<ContactEvent> {
 
     @Override
     public ProcessedEventResult processEvent(ContactEvent event) {
-        Optional<InfectionEvent> newEvent = evaluateContact(event, proportionOfPopulationInfectious());
+        Optional<InfectionEvent> newEvent = evaluateContact(event, proportionOfPopulationInfectious(event.time()));
         return newEvent.map(e -> ImmutableProcessedEventResult.builder()
                 .addNewEvents(e)
                 .completedEvent(event)
@@ -48,8 +48,8 @@ public class ContactEventProcessor implements EventProcessor<ContactEvent> {
                 .orElseGet(() -> ImmutableProcessedEventResult.builder().build());
     }
 
-    private double proportionOfPopulationInfectious() {
-        return population.proportionInfectious();
+    private double proportionOfPopulationInfectious(int time) {
+        return population.proportionInfectious(time);
     }
 
     private boolean isContactIsolated(ContactEvent contact, Case caseA, Case caseB, double proportionInfectious, int currentTime) {
