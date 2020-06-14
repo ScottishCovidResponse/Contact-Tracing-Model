@@ -4,6 +4,7 @@ import com.google.common.base.Preconditions;
 import org.immutables.gson.Gson.TypeAdapters;
 import org.immutables.value.Value;
 import org.immutables.value.Value.Immutable;
+import uk.co.ramp.distribution.Distribution;
 
 import java.util.List;
 import java.util.function.Function;
@@ -17,7 +18,7 @@ interface IsolationProperties {
     List<VirusStatusIsolationProperty> virusStatusPolicies();
     List<AlertStatusIsolationProperty> alertStatusPolicies();
     IsolationProperty defaultPolicy();
-    int isolationProbabilityDistributionThreshold();
+    Distribution isolationProbabilityDistributionThreshold();
 
     @Value.Check
     default void check() {

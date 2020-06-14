@@ -129,5 +129,9 @@
     },
     "priority": 0
   },
-  "isolationProbabilityDistributionThreshold": 50
+  "isolationProbabilityDistributionThreshold": {
+    "type": "LINEAR",
+    "mean": 50,
+    "max": 100
+  }
 }

@@ -8,13 +8,18 @@ import uk.co.ramp.distribution.ImmutableDistribution;
 import uk.co.ramp.people.AlertStatus;
 import uk.co.ramp.utilities.MinMax;
 
+import java.util.List;
+
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatIllegalStateException;
+import static org.mockito.AdditionalAnswers.returnsElementsOf;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static uk.co.ramp.distribution.ProgressionDistribution.FLAT;
+import static uk.co.ramp.distribution.ProgressionDistribution.LINEAR;
 import static uk.co.ramp.people.AlertStatus.*;
 import static uk.co.ramp.people.VirusStatus.*;
 
@@ -99,6 +104,12 @@ public class SingleCaseIsolationPolicyTest {
             .type(FLAT)
             .build();
 
+    private final Distribution thresholdLinearDistribution = ImmutableDistribution.builder()
+            .mean(50)
+            .max(100)
+            .type(LINEAR)
+            .build();
+
     private final int currentTime = 0;
     private final int id = 0;
     private final double compliance = 1.0;
@@ -114,7 +125,7 @@ public class SingleCaseIsolationPolicyTest {
                 .addAlertStatusPolicies(testedPositiveHundredPercentIsolationProperty)
                 .addAlertStatusPolicies(alertedHundredPercentIsolationProperty)
                 .addGlobalIsolationPolicies(twentyPercentInfectedHundredPercentIsolationProperty)
-                .isolationProbabilityDistributionThreshold(50)
+                .isolationProbabilityDistributionThreshold(thresholdLinearDistribution)
                 .build();
 
         this.distributionSampler = mock(DistributionSampler.class);
@@ -191,7 +202,7 @@ public class SingleCaseIsolationPolicyTest {
                         .build())
                 .addGlobalIsolationPolicies(twentyPercentInfectedZeroPercentIsolationProperty)
                 .defaultPolicy(defaultZeroIsolationProperty)
-                .isolationProbabilityDistributionThreshold(50)
+                .isolationProbabilityDistributionThreshold(thresholdLinearDistribution)
                 .build();
 
         var isolationPolicy = new SingleCaseIsolationPolicy(isolationProperties, distributionSampler);
@@ -213,7 +224,7 @@ public class SingleCaseIsolationPolicyTest {
                                 .build())
                         .build())
                 .defaultPolicy(defaultZeroIsolationProperty)
-                .isolationProbabilityDistributionThreshold(50)
+                .isolationProbabilityDistributionThreshold(thresholdLinearDistribution)
                 .build();
 
         var isolationPolicy = new SingleCaseIsolationPolicy(isolationProperties, distributionSampler);
@@ -238,7 +249,7 @@ public class SingleCaseIsolationPolicyTest {
                 .addVirusStatusPolicies(virusStatusIsolationProperty)
                 .addGlobalIsolationPolicies(twentyPercentInfectedZeroPercentIsolationProperty)
                 .defaultPolicy(defaultZeroIsolationProperty)
-                .isolationProbabilityDistributionThreshold(50)
+                .isolationProbabilityDistributionThreshold(thresholdLinearDistribution)
                 .build();
 
         var isolationPolicy = new SingleCaseIsolationPolicy(isolationProperties, distributionSampler);
@@ -265,7 +276,7 @@ public class SingleCaseIsolationPolicyTest {
                 .addVirusStatusPolicies(virusStatusIsolationProperty)
                 .addGlobalIsolationPolicies(twentyPercentInfectedZeroPercentIsolationProperty)
                 .defaultPolicy(defaultZeroIsolationProperty)
-                .isolationProbabilityDistributionThreshold(50)
+                .isolationProbabilityDistributionThreshold(thresholdLinearDistribution)
                 .build();
 
         var isolationPolicy = new SingleCaseIsolationPolicy(isolationProperties, distributionSampler);
@@ -292,7 +303,7 @@ public class SingleCaseIsolationPolicyTest {
                 .addVirusStatusPolicies(virusStatusIsolationProperty)
                 .addGlobalIsolationPolicies(twentyPercentInfectedZeroPercentIsolationProperty)
                 .defaultPolicy(defaultZeroIsolationProperty)
-                .isolationProbabilityDistributionThreshold(50)
+                .isolationProbabilityDistributionThreshold(thresholdLinearDistribution)
                 .build();
 
         var isolationPolicy = new SingleCaseIsolationPolicy(isolationProperties, distributionSampler);
@@ -319,7 +330,7 @@ public class SingleCaseIsolationPolicyTest {
                 .addVirusStatusPolicies(virusStatusIsolationProperty)
                 .addGlobalIsolationPolicies(twentyPercentInfectedZeroPercentIsolationProperty)
                 .defaultPolicy(defaultZeroIsolationProperty)
-                .isolationProbabilityDistributionThreshold(50)
+                .isolationProbabilityDistributionThreshold(thresholdLinearDistribution)
                 .build();
 
         var isolationPolicy = new SingleCaseIsolationPolicy(isolationProperties, distributionSampler);
@@ -352,7 +363,7 @@ public class SingleCaseIsolationPolicyTest {
                 .addVirusStatusPolicies(virusStatusIsolationProperty)
                 .addGlobalIsolationPolicies(twentyPercentInfectedZeroPercentIsolationProperty)
                 .defaultPolicy(defaultZeroIsolationProperty)
-                .isolationProbabilityDistributionThreshold(50)
+                .isolationProbabilityDistributionThreshold(thresholdLinearDistribution)
                 .build();
 
         var isolationPolicy = new SingleCaseIsolationPolicy(isolationProperties, distributionSampler);
@@ -393,7 +404,7 @@ public class SingleCaseIsolationPolicyTest {
                 .addAlertStatusPolicies(alertStatusIsolationProperty)
                 .addGlobalIsolationPolicies(twentyPercentInfectedZeroPercentIsolationProperty)
                 .defaultPolicy(defaultZeroIsolationProperty)
-                .isolationProbabilityDistributionThreshold(50)
+                .isolationProbabilityDistributionThreshold(thresholdLinearDistribution)
                 .build();
 
         var isolationPolicy = new SingleCaseIsolationPolicy(isolationProperties, distributionSampler);
@@ -434,7 +445,7 @@ public class SingleCaseIsolationPolicyTest {
                 .addAlertStatusPolicies(alertStatusIsolationProperty)
                 .addGlobalIsolationPolicies(twentyPercentInfectedZeroPercentIsolationProperty)
                 .defaultPolicy(defaultZeroIsolationProperty)
-                .isolationProbabilityDistributionThreshold(50)
+                .isolationProbabilityDistributionThreshold(thresholdLinearDistribution)
                 .build();
 
         var isolationPolicy = new SingleCaseIsolationPolicy(isolationProperties, distributionSampler);
@@ -466,7 +477,7 @@ public class SingleCaseIsolationPolicyTest {
                                 .build())
                         .build())
                 .defaultPolicy(defaultZeroIsolationProperty)
-                .isolationProbabilityDistributionThreshold(50)
+                .isolationProbabilityDistributionThreshold(thresholdLinearDistribution)
                 .build();
 
         var isolationPolicy = new SingleCaseIsolationPolicy(isolationProperties, distributionSampler);
@@ -539,7 +550,7 @@ public class SingleCaseIsolationPolicyTest {
                 .addAlertStatusPolicies(alertStatusProperty)
                 .addGlobalIsolationPolicies(twentyPercentInfectedHundredPercentIsolationProperty)
                 .defaultPolicy(defaultZeroIsolationProperty)
-                .isolationProbabilityDistributionThreshold(50)
+                .isolationProbabilityDistributionThreshold(thresholdLinearDistribution)
                 .build();
 
         var isolationPolicy = new SingleCaseIsolationPolicy(isolationProperties, distributionSampler);
@@ -547,5 +558,48 @@ public class SingleCaseIsolationPolicyTest {
         assertThatIllegalStateException()
                 .isThrownBy(() -> isolationPolicy.isIndividualInIsolation(id, SYMPTOMATIC, ALERTED, compliance, proportionOfPopulationInfected, currentTime))
                 .withMessageContaining("Policy outcome description is not deterministic");
+    }
+
+    @Test
+    public void testShouldIsolate_70PercentChance() {
+        var seventyFlatDistribution = ImmutableDistribution.builder()
+                .mean(70)
+                .max(70)
+                .type(FLAT)
+                .build();
+
+        ProportionInfectedIsolationProperty twentyPercentInfectedSeventyPercentIsolationProperty = ImmutableProportionInfectedIsolationProperty.builder()
+                .proportionInfected(MinMax.of(20, 100))
+                .isolationProperty(ImmutableIsolationProperty.builder()
+                        .id("globalPolicyName1")
+                        .priority(1)
+                        .isolationProbabilityDistribution(seventyFlatDistribution)
+                        .build())
+                .build();
+
+        IsolationProperties isolationProperties = ImmutableIsolationProperties.builder()
+                .defaultPolicy(defaultZeroIsolationProperty)
+                .addGlobalIsolationPolicies(twentyPercentInfectedSeventyPercentIsolationProperty)
+                .isolationProbabilityDistributionThreshold(thresholdLinearDistribution)
+                .build();
+
+        var proportionOfPopulationInfectious = 0.2;
+
+        when(this.distributionSampler.getDistributionValue(eq(thresholdLinearDistribution))).thenAnswer(returnsElementsOf(List.of(5, 15, 25, 35, 45, 55, 65, 75, 85, 95)));
+        when(this.distributionSampler.getDistributionValue(eq(seventyFlatDistribution))).thenReturn(75);
+        when(this.distributionSampler.uniformBetweenZeroAndOne()).thenAnswer(returnsElementsOf(List.of(0.05, 0.15, 0.25, 0.35, 0.45, 0.55, 0.65, 0.75, 0.85, 0.95)));
+
+        var isolationPolicy = new SingleCaseIsolationPolicy(isolationProperties, distributionSampler);
+
+        assertThat(isolationPolicy.isIndividualInIsolation(id, SUSCEPTIBLE, NONE, compliance, proportionOfPopulationInfectious, currentTime)).isTrue();
+        assertThat(isolationPolicy.isIndividualInIsolation(id, SUSCEPTIBLE, NONE, compliance, proportionOfPopulationInfectious, currentTime)).isTrue();
+        assertThat(isolationPolicy.isIndividualInIsolation(id, SUSCEPTIBLE, NONE, compliance, proportionOfPopulationInfectious, currentTime)).isTrue();
+        assertThat(isolationPolicy.isIndividualInIsolation(id, SUSCEPTIBLE, NONE, compliance, proportionOfPopulationInfectious, currentTime)).isTrue();
+        assertThat(isolationPolicy.isIndividualInIsolation(id, SUSCEPTIBLE, NONE, compliance, proportionOfPopulationInfectious, currentTime)).isTrue();
+        assertThat(isolationPolicy.isIndividualInIsolation(id, SUSCEPTIBLE, NONE, compliance, proportionOfPopulationInfectious, currentTime)).isTrue();
+        assertThat(isolationPolicy.isIndividualInIsolation(id, SUSCEPTIBLE, NONE, compliance, proportionOfPopulationInfectious, currentTime)).isTrue();
+        assertThat(isolationPolicy.isIndividualInIsolation(id, SUSCEPTIBLE, NONE, compliance, proportionOfPopulationInfectious, currentTime)).isFalse();
+        assertThat(isolationPolicy.isIndividualInIsolation(id, SUSCEPTIBLE, NONE, compliance, proportionOfPopulationInfectious, currentTime)).isFalse();
+        assertThat(isolationPolicy.isIndividualInIsolation(id, SUSCEPTIBLE, NONE, compliance, proportionOfPopulationInfectious, currentTime)).isFalse();
     }
 }
