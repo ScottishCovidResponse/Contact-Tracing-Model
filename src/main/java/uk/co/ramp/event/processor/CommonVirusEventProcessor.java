@@ -19,7 +19,7 @@ import java.util.List;
 import static uk.co.ramp.people.VirusStatus.*;
 
 public abstract class CommonVirusEventProcessor<T extends Event> implements EventProcessor<T> {
-    private static final Logger LOGGER = LogManager.getLogger(InfectionEventProcessor.class);
+    private static final Logger LOGGER = LogManager.getLogger(CommonVirusEventProcessor.class);
 
     private final Population population;
     private final DiseaseProperties diseaseProperties;
