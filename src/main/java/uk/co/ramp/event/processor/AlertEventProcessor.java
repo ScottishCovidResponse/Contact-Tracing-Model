@@ -26,7 +26,7 @@ import static uk.co.ramp.people.AlertStatus.NONE;
 
 @Service
 public class AlertEventProcessor implements EventProcessor<AlertEvent> {
-    private static final Logger LOGGER = LogManager.getLogger(AlertEvent.class);
+    private static final Logger LOGGER = LogManager.getLogger(AlertEventProcessor.class);
 
     private final Population population;
     private final DiseaseProperties diseaseProperties;
