@@ -10,7 +10,6 @@ import uk.co.ramp.event.types.*;
 import uk.co.ramp.io.types.DiseaseProperties;
 import uk.co.ramp.people.Case;
 import uk.co.ramp.policy.IsolationPolicy;
-import uk.co.ramp.utilities.UtilitiesBean;
 
 import java.util.Optional;
 
@@ -25,16 +24,14 @@ public class ContactEventProcessor implements EventProcessor<ContactEvent> {
     private final DiseaseProperties diseaseProperties;
     private final DistributionSampler distributionSampler;
     private final IsolationPolicy isolationPolicy;
-    private final UtilitiesBean utils;
     private final InfectionEventProcessor infectionEventProcessor;
 
     @Autowired
-    public ContactEventProcessor(Population population, DiseaseProperties diseaseProperties, DistributionSampler distributionSampler, IsolationPolicy isolationPolicy, UtilitiesBean utils, InfectionEventProcessor infectionEventProcessor) {
+    public ContactEventProcessor(Population population, DiseaseProperties diseaseProperties, DistributionSampler distributionSampler, IsolationPolicy isolationPolicy, InfectionEventProcessor infectionEventProcessor) {
         this.population = population;
         this.diseaseProperties = diseaseProperties;
         this.distributionSampler = distributionSampler;
         this.isolationPolicy = isolationPolicy;
-        this.utils = utils;
         this.infectionEventProcessor = infectionEventProcessor;
     }
 
@@ -76,7 +73,7 @@ public class ContactEventProcessor implements EventProcessor<ContactEvent> {
     }
 
     Optional<InfectionEvent> evaluateExposures(ContactEvent c, int time) {
-        Case personA = utils.getMostSevere(population.get(c.to()), population.get(c.from()));
+        Case personA = getMostSevere(population.get(c.to()), population.get(c.from()));
         Case personB = personA == population.get(c.to()) ? population.get(c.from()) : population.get(c.to());
 
         boolean dangerMix = personA.isInfectious() && personB.virusStatus() == SUSCEPTIBLE;
@@ -96,5 +93,12 @@ public class ContactEventProcessor implements EventProcessor<ContactEvent> {
 
         }
         return Optional.empty();
+    }
+
+    private Case getMostSevere(Case personA, Case personB) {
+        int a = personA.virusStatus().getVal();
+        int b = personB.virusStatus().getVal();
+
+        return a > b ? personA : personB;
     }
 }

@@ -32,7 +32,6 @@ public abstract class CommonVirusEventProcessor<T extends Event> implements Even
     }
 
     VirusStatus determineNextStatus(CommonVirusEvent event) {
-        Case thisCase = population.get(event.id());
         List<VirusStatus> newStatus = event.nextStatus().getValidTransitions();
 
         if (newStatus.isEmpty()) return event.nextStatus();

@@ -24,10 +24,15 @@ import uk.co.ramp.people.Case;
 import uk.co.ramp.people.Human;
 import uk.co.ramp.policy.IsolationPolicy;
 import uk.co.ramp.policy.IsolationPolicyContext;
-import uk.co.ramp.utilities.UtilitiesBean;
 
 import java.io.FileNotFoundException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Random;
+import java.util.Set;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.CoreMatchers.containsString;
@@ -56,8 +61,6 @@ public class OutbreakTest {
     private EventList eventList;
     @Autowired
     private IsolationPolicy isolationPolicy;
-    @Autowired
-    private UtilitiesBean utils;
 
     private DiseaseProperties diseaseProperties = TestUtils.diseaseProperties();
 
@@ -78,7 +81,7 @@ public class OutbreakTest {
         alertEventProcessor = new AlertEventProcessor(population, diseaseProperties, distributionSampler);
         virusEventProcessor = new VirusEventProcessor(population, diseaseProperties, distributionSampler, alertEventProcessor);
         infectionEventProcessor = new InfectionEventProcessor(population, diseaseProperties, distributionSampler, virusEventProcessor);
-        contactEventProcessor = new ContactEventProcessor(population, diseaseProperties, distributionSampler, isolationPolicy, utils, infectionEventProcessor);
+        contactEventProcessor = new ContactEventProcessor(population, diseaseProperties, distributionSampler, isolationPolicy, infectionEventProcessor);
         eventProcessorRunner = new EventProcessorRunner(population, distributionSampler, eventList, infectionEventProcessor);
     }
 
