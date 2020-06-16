@@ -8,6 +8,8 @@ public interface InfectionEvent extends CommonVirusEvent {
 
     default void applyEventToCase(Case aCase) {
         aCase.setVirusStatus(aCase.virusStatus().transitionTo(this.nextStatus()));
+        aCase.setExposedTime(this.exposedTime());
+        aCase.setExposedBy(this.exposedBy());
     }
 
     int exposedBy();
