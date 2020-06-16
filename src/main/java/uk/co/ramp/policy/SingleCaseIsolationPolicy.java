@@ -105,7 +105,7 @@ class SingleCaseIsolationPolicy {
 
     private boolean populateAndGet(int id, double compliance, IsolationProperty matchingIsolationProperty, int currentTime) {
         int requiredIsolationTime = distributionSampler.getDistributionValue(matchingIsolationProperty.isolationTimeDistribution().orElse(infinityDistribution));
-        double threshold = isolationProperties.isolationProbabilityDistributionThreshold();
+        double threshold = distributionSampler.getDistributionValue(isolationProperties.isolationProbabilityDistributionThreshold());
         double requiredIsolationFactor = distributionSampler.getDistributionValue(matchingIsolationProperty.isolationProbabilityDistribution());
         boolean timedPolicy = matchingIsolationProperty.isolationTimeDistribution().isPresent();
         boolean isDefaultPolicy = isolationProperties.defaultPolicy().equals(matchingIsolationProperty);

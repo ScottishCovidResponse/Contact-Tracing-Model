@@ -126,7 +126,11 @@ public class IsolationPropertiesReaderTest {
             "    }," +
             "    'priority': 0" +
             "  }," +
-            "  'isolationProbabilityDistributionThreshold': 50" +
+            "  'isolationProbabilityDistributionThreshold': {" +
+            "    'type': 'LINEAR'," +
+            "    'mean': 50," +
+            "    'max': 100" +
+            "  }" +
             "}";
 
     @Test
@@ -236,7 +240,11 @@ public class IsolationPropertiesReaderTest {
                                 .build())
                         .priority(0)
                         .build())
-                .isolationProbabilityDistributionThreshold(50)
+                .isolationProbabilityDistributionThreshold(ImmutableDistribution.builder()
+                        .type(LINEAR)
+                        .mean(50)
+                        .max(100)
+                        .build())
                 .build();
 
         assertThat(actualIsolationProperties).isEqualTo(expectedIsolationProperties);
