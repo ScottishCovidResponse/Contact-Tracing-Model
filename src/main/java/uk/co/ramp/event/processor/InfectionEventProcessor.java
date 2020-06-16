@@ -28,6 +28,8 @@ public class InfectionEventProcessor extends CommonVirusEventProcessor<Infection
         Case thisCase = population.get(event.id());
         if (thisCase.virusStatus() == SUSCEPTIBLE) {
             thisCase.setVirusStatus(thisCase.virusStatus().transitionTo(event.nextStatus()));
+            thisCase.setExposedBy(event.exposedBy());
+            thisCase.setExposedTime(event.exposedTime());
 
             VirusStatus nextStatus = determineNextStatus(event);
             int deltaTime = timeInCompartment(event.nextStatus(), nextStatus);

@@ -27,9 +27,11 @@ import java.util.HashMap;
 import java.util.Map;
 
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-import static uk.co.ramp.people.VirusStatus.*;
 import static uk.co.ramp.people.VirusStatus.EXPOSED;
+import static uk.co.ramp.people.VirusStatus.SUSCEPTIBLE;
+import static uk.co.ramp.people.VirusStatus.SYMPTOMATIC;
 
 @RunWith(SpringRunner.class)
 @DirtiesContext
@@ -41,18 +43,32 @@ public class InfectionEventProcessorTest {
     @Autowired
     private DistributionSampler distributionSampler;
 
+    private Case thisCase;
+
+    private InfectionEvent event;
+
     @Before
     public void setUp() throws FileNotFoundException {
         diseaseProperties = TestUtils.diseaseProperties();
 
-        Human human = mock(Human.class);
-        when(human.health()).thenReturn(-1d);
-        Case aCase = new Case(human);
+        thisCase = mock(Case.class);
+        when(thisCase.virusStatus()).thenReturn(SUSCEPTIBLE);
+        when(thisCase.health()).thenReturn(-1d);
 
         Map<Integer, Case> population = new HashMap<>();
-        population.put(0, aCase);
+        population.put(0, thisCase);
 
         this.eventProcessor = new InfectionEventProcessor(new Population(population), diseaseProperties, distributionSampler, mock(VirusEventProcessor.class));
+
+        event = ImmutableInfectionEvent.builder()
+                .exposedBy(10)
+                .exposedTime(5)
+                .id(0)
+                .nextStatus(EXPOSED)
+                .oldStatus(SUSCEPTIBLE)
+                .eventProcessor(eventProcessor)
+                .time(3)
+                .build();
     }
 
     @Test
@@ -87,6 +103,24 @@ public class InfectionEventProcessorTest {
         Assert.assertEquals(EXPOSED, evnt.oldStatus());
         Assert.assertTrue(EXPOSED.getValidTransitions().contains(evnt.nextStatus()));
 
+    }
+
+    @Test
+    public void testInfectionEventExposedBySetInCase() {
+        event.processEvent();
+        verify(thisCase).setExposedBy(10);
+    }
+
+    @Test
+    public void testInfectionEventExposedTimeSetInCase() {
+        event.processEvent();
+        verify(thisCase).setExposedTime(5);
+    }
+
+    @Test
+    public void testInfectionEventVirusStatusSetInCase() {
+        event.processEvent();
+        verify(thisCase).setVirusStatus(EXPOSED);
     }
 
 }
