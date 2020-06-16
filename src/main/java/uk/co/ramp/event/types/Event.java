@@ -4,5 +4,5 @@ public interface Event {
 
     int time();
 
-
+    ProcessedEventResult processEvent();
 }

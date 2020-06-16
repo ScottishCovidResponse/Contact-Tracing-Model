@@ -8,8 +8,8 @@ public class Case {
     private final Human human;
     private VirusStatus virusStatus;
     private AlertStatus alertStatus;
-    private final int exposedBy;
-    private final int exposedTime;
+    private int exposedBy;
+    private int exposedTime;
 
     private static final int DEFAULT = -1;
     private static final int INITIAL = -3;
@@ -94,6 +94,14 @@ public class Case {
 
     public boolean isInfectious() {
         return virusStatus == ASYMPTOMATIC || virusStatus == SYMPTOMATIC || virusStatus == SEVERELY_SYMPTOMATIC || virusStatus == PRESYMPTOMATIC;
+    }
+
+    public void setExposedBy(int exposedBy) {
+        this.exposedBy = exposedBy;
+    }
+
+    public void setExposedTime(int exposedTime) {
+        this.exposedTime = exposedTime;
     }
 
 //    // Event handling

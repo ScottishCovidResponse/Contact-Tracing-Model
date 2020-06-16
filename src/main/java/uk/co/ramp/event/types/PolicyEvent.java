@@ -10,4 +10,8 @@ import org.immutables.value.Value;
 public interface PolicyEvent extends Event {
     // TODO will need to fill out
 
+    default ProcessedEventResult processEvent() {
+        throw new UnsupportedOperationException();
+    }
+
 }

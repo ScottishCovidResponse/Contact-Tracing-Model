@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import org.immutables.value.Value;
+import uk.co.ramp.event.processor.ContactEventProcessor;
 
 @Value.Immutable
 @JsonSerialize
@@ -19,4 +20,10 @@ public interface ContactEvent extends Event {
     double weight();
 
     String label();
+
+    ContactEventProcessor eventProcessor();
+
+    default ProcessedEventResult processEvent() {
+        return eventProcessor().processEvent(this);
+    }
 }
