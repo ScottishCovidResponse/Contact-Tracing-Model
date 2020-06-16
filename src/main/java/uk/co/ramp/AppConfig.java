@@ -16,9 +16,12 @@ import uk.co.ramp.io.types.DiseaseProperties;
 import uk.co.ramp.io.types.InputFiles;
 import uk.co.ramp.io.types.PopulationProperties;
 import uk.co.ramp.io.types.StandardProperties;
-import uk.co.ramp.utilities.UtilitiesBean;
 
-import java.io.*;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
+import java.io.IOException;
+import java.io.Reader;
 import java.util.Optional;
 
 @SpringBootConfiguration
@@ -99,11 +102,6 @@ public class AppConfig {
 
         }
 
-    }
-
-    @Bean
-    public UtilitiesBean utilitiesBean() {
-        return new UtilitiesBean();
     }
 
     @Bean

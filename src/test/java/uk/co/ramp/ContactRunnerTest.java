@@ -79,7 +79,6 @@ public class ContactRunnerTest {
         when(applicationContext.getBean(CompartmentWriter.class)).thenReturn(compartmentWriter);
 
         runner.setApplicationContext(applicationContext);
-        runner.setRunProperties(runProperties);
         runner.setInputFileLocation(inputFiles);
         runner.run();
 
