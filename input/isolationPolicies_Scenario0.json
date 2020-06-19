@@ -1,0 +1,19 @@
+{
+  "globalIsolationPolicies": [],
+  "virusStatusPolicies": [],
+  "alertStatusPolicies": [],
+  "defaultPolicy": {
+    "id": "Default Policy",
+    "isolationProbabilityDistribution": {
+      "type": "FLAT",
+      "mean": 0,
+      "max": 0
+    },
+    "priority": 0
+  },
+  "isolationProbabilityDistributionThreshold": {
+    "type": "LINEAR",
+    "mean": 50,
+    "max": 100
+  }
+}
