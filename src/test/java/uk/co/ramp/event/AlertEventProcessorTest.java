@@ -1,16 +1,19 @@
-package uk.co.ramp.event.processor;
+package uk.co.ramp.event;
 
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Import;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.junit4.SpringRunner;
-import org.springframework.test.util.ReflectionTestUtils;
-import uk.co.ramp.*;
+import uk.co.ramp.AppConfig;
+import uk.co.ramp.LogSpy;
+import uk.co.ramp.Population;
+import uk.co.ramp.TestConfig;
+import uk.co.ramp.TestUtils;
+import uk.co.ramp.distribution.DistributionSampler;
 import uk.co.ramp.event.types.AlertEvent;
 import uk.co.ramp.event.types.ImmutableAlertEvent;
 import uk.co.ramp.event.types.ProcessedEventResult;
@@ -20,6 +23,7 @@ import uk.co.ramp.people.Case;
 import java.util.HashMap;
 import java.util.Map;
 
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static uk.co.ramp.people.AlertStatus.*;
@@ -34,20 +38,23 @@ public class AlertEventProcessorTest {
     @Rule
     public LogSpy logSpy = new LogSpy();
 
-    @Autowired
-    DiseaseProperties diseaseProperties;
+    private DiseaseProperties diseaseProperties;
+    private Population population;
+    private DistributionSampler distributionSampler;
 
-    @Autowired
     private AlertEventProcessor eventProcessor;
 
     @Before
     public void setUp() throws Exception {
         diseaseProperties = TestUtils.diseaseProperties();
-        ReflectionTestUtils.setField(eventProcessor, "diseaseProperties", diseaseProperties);
+        population = mock(Population.class);
+        distributionSampler = mock(DistributionSampler.class);
+        when(distributionSampler.getDistributionValue(any())).thenReturn(1);
     }
 
     @Test
     public void timeInStatus() {
+        eventProcessor = new AlertEventProcessor(population, diseaseProperties, distributionSampler);
 
         int time = eventProcessor.timeInStatus(NONE);
         Assert.assertEquals(0, time);
@@ -82,16 +89,20 @@ public class AlertEventProcessorTest {
         Map<Integer, Case> population = new HashMap<>();
         population.put(0, mock0);
 
-        ReflectionTestUtils.setField(eventProcessor, "population", new Population(population));
+        eventProcessor = new AlertEventProcessor(new Population(population), diseaseProperties, distributionSampler);
 
-        AlertEvent event = ImmutableAlertEvent.builder().time(0).id(0).oldStatus(NONE).nextStatus(ALERTED).eventProcessor(eventProcessor).build();
+        AlertEvent event = ImmutableAlertEvent.builder().time(0).id(0).oldStatus(NONE).nextStatus(ALERTED).build();
 
         ProcessedEventResult eventResult = eventProcessor.processEvent(event);
 
-        System.out.println(eventResult.newEvents());
+        System.out.println(eventResult);
 
-        Assert.assertEquals(1, eventResult.newEvents().size());
-        AlertEvent evnt = (AlertEvent) eventResult.newEvents().get(0);
+        Assert.assertEquals(1, eventResult.newAlertEvents().size());
+        Assert.assertEquals(0, eventResult.newContactEvents().size());
+        Assert.assertEquals(0, eventResult.newInfectionEvents().size());
+        Assert.assertEquals(0, eventResult.newVirusEvents().size());
+        Assert.assertEquals(1, eventResult.completedEvents().size());
+        AlertEvent evnt = eventResult.newAlertEvents().get(0);
 
         Assert.assertEquals(1, evnt.time());
         Assert.assertEquals(0, evnt.id());

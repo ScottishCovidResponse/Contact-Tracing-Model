@@ -4,20 +4,15 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import uk.co.ramp.event.EventList;
-import uk.co.ramp.event.EventProcessorRunner;
-import uk.co.ramp.event.processor.InfectionEventProcessor;
-import uk.co.ramp.event.types.Event;
-import uk.co.ramp.event.types.ImmutableInfectionEvent;
-import uk.co.ramp.event.types.InfectionEvent;
+import uk.co.ramp.event.EventListWriter;
+import uk.co.ramp.event.LastContactTime;
+import uk.co.ramp.event.types.EventRunner;
 import uk.co.ramp.io.InfectionMap;
 import uk.co.ramp.io.InfectionMapException;
-import uk.co.ramp.io.InitialCaseReader;
 import uk.co.ramp.io.LogDailyOutput;
 import uk.co.ramp.io.types.CmptRecord;
 import uk.co.ramp.io.types.DiseaseProperties;
 import uk.co.ramp.io.types.StandardProperties;
-import uk.co.ramp.people.Case;
 import uk.co.ramp.people.VirusStatus;
 
 import java.io.File;
@@ -35,11 +30,10 @@ public class Outbreak {
 
     private final StandardProperties properties;
     private final DiseaseProperties diseaseProperties;
-    private final EventList eventList;
-    private final InitialCaseReader initialCaseReader;
-    private final EventProcessorRunner eventProcessorRunner;
+    private final EventRunner eventRunner;
+    private final EventListWriter eventListWriter;
     private final LogDailyOutput outputLog;
-    private final InfectionEventProcessor infectionEventProcessor;
+    private final LastContactTime lastContactTime;
 
     private final Population population;
     private final Map<Integer, CmptRecord> records = new HashMap<>();
@@ -48,46 +42,21 @@ public class Outbreak {
 
     @Autowired
     public Outbreak(Population population, DiseaseProperties diseaseProperties, StandardProperties standardProperties,
-                    LogDailyOutput outputLog, InitialCaseReader initialCaseReader,
-                    EventList eventList, EventProcessorRunner eventProcessorRunner,
-                    InfectionEventProcessor infectionEventProcessor) {
+                    LogDailyOutput outputLog, EventRunner eventRunner, EventListWriter eventListWriter,
+                    LastContactTime lastContactTime) {
 
         this.population = population;
-        this.initialCaseReader = initialCaseReader;
         this.diseaseProperties = diseaseProperties;
         this.properties = standardProperties;
         this.outputLog = outputLog;
-        this.eventProcessorRunner = eventProcessorRunner;
-        this.infectionEventProcessor = infectionEventProcessor;
-        this.eventList = eventList;
+        this.eventRunner = eventRunner;
+        this.eventListWriter = eventListWriter;
+        this.lastContactTime = lastContactTime;
     }
 
     public Map<Integer, CmptRecord> propagate() {
-
-        generateInitialInfection();
-        LOGGER.info("Generated initial outbreak of {} cases", properties.initialExposures());
         runToCompletion();
-
         return records;
-    }
-
-    void generateInitialInfection() {
-
-        Set<Integer> infectedIds = initialCaseReader.getCases();
-        List<Event> virusEvents = new ArrayList<>();
-
-        InfectionEvent genericEvent = ImmutableInfectionEvent.builder().
-                exposedBy(Case.getInitial()).
-                oldStatus(SUSCEPTIBLE).
-                nextStatus(EXPOSED).
-                exposedTime(0).
-                id(-1).
-                eventProcessor(infectionEventProcessor).
-                time(0).build();
-
-        infectedIds.forEach(id -> virusEvents.add(ImmutableInfectionEvent.copyOf(genericEvent).withId(id)));
-        eventList.addEvents(virusEvents);
-
     }
 
 
@@ -100,7 +69,7 @@ public class Outbreak {
 
         try (Writer writer = new FileWriter(new File(INFECTION_MAP))) {
             new InfectionMap(population.view()).outputMap(writer);
-            eventList.output();
+            eventListWriter.output();
         } catch (IOException e) {
             String message = "An error occurred generating the infection map";
             LOGGER.error(message);
@@ -111,7 +80,7 @@ public class Outbreak {
 
 
     void runContactData(int timeLimit, double randomInfectionRate) {
-        int lastContact = eventList.lastContactTime().orElseThrow();
+        int lastContact = lastContactTime.get();
 
         if (lastContact > timeLimit) {
             LOGGER.info("timeLimit it lower than time of last contact event");
@@ -120,7 +89,7 @@ public class Outbreak {
 
         for (int time = 0; time <= timeLimit; time++) {
 
-            eventProcessorRunner.process(time, randomInfectionRate, lastContact);
+            eventRunner.run(time, randomInfectionRate, lastContact);
             updateLogActiveCases(time);
 
             // stop random infections after contacts end

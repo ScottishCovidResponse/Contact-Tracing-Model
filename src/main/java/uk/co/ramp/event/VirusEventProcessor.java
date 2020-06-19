@@ -1,4 +1,4 @@
-package uk.co.ramp.event.processor;
+package uk.co.ramp.event;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -18,14 +18,12 @@ import static uk.co.ramp.people.VirusStatus.*;
 
 @Service
 public class VirusEventProcessor extends CommonVirusEventProcessor<VirusEvent> {
-    private final AlertEventProcessor alertEventProcessor;
     private final Population population;
 
     @Autowired
-    public VirusEventProcessor(Population population, DiseaseProperties diseaseProperties, DistributionSampler distributionSampler, AlertEventProcessor alertEventProcessor) {
+    public VirusEventProcessor(Population population, DiseaseProperties diseaseProperties, DistributionSampler distributionSampler) {
         super(population, diseaseProperties, distributionSampler);
         this.population = population;
-        this.alertEventProcessor = alertEventProcessor;
     }
 
     @Override
@@ -45,15 +43,14 @@ public class VirusEventProcessor extends CommonVirusEventProcessor<VirusEvent> {
                     oldStatus(event.nextStatus()).
                     nextStatus(nextStatus).
                     time(event.time() + deltaTime).
-                    eventProcessor(this).
                     build();
 
             Optional<AlertEvent> e = checkForAlert(subsequentEvent);
 
             return ImmutableProcessedEventResult.builder()
-                    .addNewEvents(subsequentEvent)
-                    .addAllNewEvents(e.stream().collect(Collectors.toList()))
-                    .completedEvent(event)
+                    .addNewVirusEvents(subsequentEvent)
+                    .addAllNewAlertEvents(e.stream().collect(Collectors.toList()))
+                    .addCompletedEvents(event)
                     .build();
         }
         return ImmutableProcessedEventResult.builder().build();
@@ -62,7 +59,7 @@ public class VirusEventProcessor extends CommonVirusEventProcessor<VirusEvent> {
     Optional<AlertEvent> checkForAlert(VirusEvent trigger) {
 
         if (trigger.nextStatus() == SYMPTOMATIC) {
-            return Optional.of(ImmutableAlertEvent.builder().id(trigger.id()).time(trigger.time() + 1).oldStatus(NONE).nextStatus(REQUESTED_TEST).eventProcessor(alertEventProcessor).build());
+            return Optional.of(ImmutableAlertEvent.builder().id(trigger.id()).time(trigger.time() + 1).oldStatus(NONE).nextStatus(REQUESTED_TEST).build());
         }
 
         return Optional.empty();

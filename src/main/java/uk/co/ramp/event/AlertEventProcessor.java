@@ -1,18 +1,12 @@
-package uk.co.ramp.event.processor;
+package uk.co.ramp.event;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
 import uk.co.ramp.Population;
 import uk.co.ramp.distribution.Distribution;
 import uk.co.ramp.distribution.DistributionSampler;
 import uk.co.ramp.distribution.ImmutableDistribution;
-import uk.co.ramp.event.EventException;
-import uk.co.ramp.event.types.AlertEvent;
-import uk.co.ramp.event.types.ImmutableAlertEvent;
-import uk.co.ramp.event.types.ImmutableProcessedEventResult;
-import uk.co.ramp.event.types.ProcessedEventResult;
+import uk.co.ramp.event.types.*;
 import uk.co.ramp.io.types.DiseaseProperties;
 import uk.co.ramp.people.AlertStatus;
 import uk.co.ramp.people.Case;
@@ -24,7 +18,6 @@ import java.util.List;
 import static uk.co.ramp.people.AlertStatus.*;
 import static uk.co.ramp.people.AlertStatus.NONE;
 
-@Service
 public class AlertEventProcessor implements EventProcessor<AlertEvent> {
     private static final Logger LOGGER = LogManager.getLogger(AlertEventProcessor.class);
 
@@ -32,7 +25,6 @@ public class AlertEventProcessor implements EventProcessor<AlertEvent> {
     private final DiseaseProperties diseaseProperties;
     private final DistributionSampler distributionSampler;
 
-    @Autowired
     public AlertEventProcessor(Population population, DiseaseProperties diseaseProperties, DistributionSampler distributionSampler) {
         this.population = population;
         this.diseaseProperties = diseaseProperties;
@@ -55,12 +47,11 @@ public class AlertEventProcessor implements EventProcessor<AlertEvent> {
                     oldStatus(event.nextStatus()).
                     nextStatus(nextStatus).
                     time(event.time() + deltaTime).
-                    eventProcessor(this).
                     build();
 
             return ImmutableProcessedEventResult.builder()
-                    .addNewEvents(subsequentEvent)
-                    .completedEvent(event)
+                    .addNewAlertEvents(subsequentEvent)
+                    .addCompletedEvents(event)
                     .build();
         }
         return ImmutableProcessedEventResult.builder().build();

@@ -3,7 +3,7 @@
     <include resource="org/springframework/boot/logging/logback/base.xml"/>
     <logger name="uk.co.ramp.Outbreak" level="debug"/>
     <logger name="uk.co.ramp.event.EventProcessorRunner" level="debug"/>
-    <logger name="uk.co.ramp.event.processor.ContactEventProcessor" level="debug"/>
+    <logger name="uk.co.ramp.event.ContactEventProcessor" level="debug"/>
     <logger name="org.springframework.core " level="error"/>
     <logger name="org.springframework.beans" level="error"/>
     <logger name="org.springframework.context" level="error"/>

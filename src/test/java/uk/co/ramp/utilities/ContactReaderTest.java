@@ -1,9 +1,6 @@
 package uk.co.ramp.utilities;
 
 import org.junit.Test;
-import uk.co.ramp.contact.ContactRecord;
-import uk.co.ramp.contact.ImmutableContactRecord;
-import uk.co.ramp.event.processor.ContactEventProcessor;
 import uk.co.ramp.event.types.ContactEvent;
 import uk.co.ramp.event.types.ImmutableContactEvent;
 import uk.co.ramp.io.ContactReader;
@@ -32,14 +29,12 @@ public class ContactReaderTest {
             .steadyState(true)
             .build();
 
-    private ContactEventProcessor eventProcessor = mock(ContactEventProcessor.class);
     private final ContactEvent record1 = ImmutableContactEvent.builder()
             .time(0)
             .from(8)
             .to(9)
             .weight(6.7)
             .label("label")
-            .eventProcessor(eventProcessor)
             .build();
 
     private final ContactEvent record2 = ImmutableContactEvent.builder()
@@ -48,16 +43,14 @@ public class ContactReaderTest {
             .to(8)
             .weight(8.2)
             .label("label")
-            .eventProcessor(eventProcessor)
             .build();
 
     @Test
     public void testRead() throws IOException {
         StringReader stringReader = new StringReader(csv);
-        Map<Integer, List<ContactEvent>> dailyContactRecords = new ContactReader(properties, eventProcessor).readEvents(stringReader);
+        List<ContactEvent> dailyContactRecords = new ContactReader(properties).readEvents(stringReader);
 
-        assertThat(dailyContactRecords).containsOnlyKeys(0);
-        assertThat(dailyContactRecords.get(0)).containsExactly(record1, record2);
+        assertThat(dailyContactRecords).containsExactly(record1, record2);
     }
 
 
@@ -69,7 +62,7 @@ public class ContactReaderTest {
                 "2,10000,10001,8.2, label\n";
         StringReader stringReader = new StringReader(csvOverPersonLimit);
 
-        Map<Integer, List<ContactEvent>> dailyContactRecords = new ContactReader(properties, eventProcessor).readEvents(stringReader);
+        List<ContactEvent> dailyContactRecords = new ContactReader(properties).readEvents(stringReader);
 
         assertThat(dailyContactRecords).isEmpty();
     }

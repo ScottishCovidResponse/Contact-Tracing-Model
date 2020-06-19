@@ -1,9 +1,7 @@
-package uk.co.ramp.event.processor;
+package uk.co.ramp.event;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
 import uk.co.ramp.Population;
 import uk.co.ramp.distribution.DistributionSampler;
 import uk.co.ramp.event.types.*;
@@ -16,7 +14,6 @@ import java.util.Optional;
 import static uk.co.ramp.people.VirusStatus.EXPOSED;
 import static uk.co.ramp.people.VirusStatus.SUSCEPTIBLE;
 
-@Service
 public class ContactEventProcessor implements EventProcessor<ContactEvent> {
     private static final Logger LOGGER = LogManager.getLogger(ContactEventProcessor.class);
 
@@ -24,23 +21,20 @@ public class ContactEventProcessor implements EventProcessor<ContactEvent> {
     private final DiseaseProperties diseaseProperties;
     private final DistributionSampler distributionSampler;
     private final IsolationPolicy isolationPolicy;
-    private final InfectionEventProcessor infectionEventProcessor;
 
-    @Autowired
-    public ContactEventProcessor(Population population, DiseaseProperties diseaseProperties, DistributionSampler distributionSampler, IsolationPolicy isolationPolicy, InfectionEventProcessor infectionEventProcessor) {
+    public ContactEventProcessor(Population population, DiseaseProperties diseaseProperties, DistributionSampler distributionSampler, IsolationPolicy isolationPolicy) {
         this.population = population;
         this.diseaseProperties = diseaseProperties;
         this.distributionSampler = distributionSampler;
         this.isolationPolicy = isolationPolicy;
-        this.infectionEventProcessor = infectionEventProcessor;
     }
 
     @Override
     public ProcessedEventResult processEvent(ContactEvent event) {
         Optional<InfectionEvent> newEvent = evaluateContact(event, proportionOfPopulationInfectious(event.time()));
         return newEvent.map(e -> ImmutableProcessedEventResult.builder()
-                .addNewEvents(e)
-                .completedEvent(event)
+                .addNewInfectionEvents(e)
+                .addCompletedEvents(event)
                 .build())
                 .orElseGet(() -> ImmutableProcessedEventResult.builder().build());
     }
@@ -85,7 +79,6 @@ public class ContactEventProcessor implements EventProcessor<ContactEvent> {
                     id(personB.id()).time(c.time() + 1).
                     oldStatus(SUSCEPTIBLE).nextStatus(EXPOSED).
                     exposedTime(time).exposedBy(personA.id()).
-                    eventProcessor(infectionEventProcessor).
                     build();
 
 
