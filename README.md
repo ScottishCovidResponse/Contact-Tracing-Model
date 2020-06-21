@@ -128,6 +128,8 @@ This file describes the networks and the interactions between individuals
 * **to**: the receipient of the interaction
 * **weight**: the relative strength of the interaction, high may be family, low may be shop worker
 
+N.B.: Note that the example input files 'contact.csv' and 'contacts_homogeneous.csv' represent very sparse networks (comparable to movements in lockdown).
+
 
 ## Outputs
 
