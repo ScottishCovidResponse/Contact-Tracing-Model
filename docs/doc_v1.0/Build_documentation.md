@@ -2,7 +2,6 @@ Build Documention
 ================
 Author: Sam Brett
 
-\===================
 
 ## Intro
 
