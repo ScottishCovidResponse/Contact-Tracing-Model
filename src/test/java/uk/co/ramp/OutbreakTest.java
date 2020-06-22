@@ -1,6 +1,7 @@
 package uk.co.ramp;
 
 import org.junit.Assert;
+import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -8,21 +9,15 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Import;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.junit4.SpringRunner;
-import uk.co.ramp.distribution.DistributionSampler;
-import uk.co.ramp.event.EventList;
-import uk.co.ramp.event.EventProcessorRunner;
-import uk.co.ramp.event.processor.*;
-import uk.co.ramp.event.FormattedEventFactory;
-import uk.co.ramp.event.types.ContactEvent;
-import uk.co.ramp.event.types.ImmutableContactEvent;
+import org.springframework.test.util.ReflectionTestUtils;
+import uk.co.ramp.event.*;
+import uk.co.ramp.event.types.*;
 import uk.co.ramp.io.InitialCaseReader;
-import uk.co.ramp.io.LogDailyOutput;
 import uk.co.ramp.io.types.CmptRecord;
 import uk.co.ramp.io.types.DiseaseProperties;
 import uk.co.ramp.io.types.StandardProperties;
 import uk.co.ramp.people.Case;
 import uk.co.ramp.people.Human;
-import uk.co.ramp.policy.IsolationPolicy;
 import uk.co.ramp.policy.IsolationPolicyContext;
 
 import java.io.FileNotFoundException;
@@ -36,8 +31,7 @@ import java.util.Set;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.CoreMatchers.containsString;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 import static uk.co.ramp.people.VirusStatus.SUSCEPTIBLE;
 
 @SuppressWarnings("unchecked")
@@ -53,36 +47,27 @@ public class OutbreakTest {
 
     @Autowired
     private StandardProperties standardProperties;
-    @Autowired
-    private LogDailyOutput logDailyOutput;
+
     @Autowired
     private InitialCaseReader initialCaseReader;
-    @Autowired
-    private EventList eventList;
-    @Autowired
-    private IsolationPolicy isolationPolicy;
-
-    private DiseaseProperties diseaseProperties = TestUtils.diseaseProperties();
 
     @Autowired
-    private DistributionSampler distributionSampler;
-
     private Outbreak outbreak;
-    private AlertEventProcessor alertEventProcessor;
-    private VirusEventProcessor virusEventProcessor;
-    private InfectionEventProcessor infectionEventProcessor;
-    private ContactEventProcessor contactEventProcessor;
-    private EventProcessorRunner eventProcessorRunner;
+
+    @Autowired
+    private EventListGroup eventListGroup;
+
+    @Autowired
+    Population population;
+
+    private DiseaseProperties diseaseProperties;
 
     public OutbreakTest() throws FileNotFoundException {
     }
 
-    public void setUp(Population population) {
-        alertEventProcessor = new AlertEventProcessor(population, diseaseProperties, distributionSampler);
-        virusEventProcessor = new VirusEventProcessor(population, diseaseProperties, distributionSampler, alertEventProcessor);
-        infectionEventProcessor = new InfectionEventProcessor(population, diseaseProperties, distributionSampler, virusEventProcessor);
-        contactEventProcessor = new ContactEventProcessor(population, diseaseProperties, distributionSampler, isolationPolicy, infectionEventProcessor);
-        eventProcessorRunner = new EventProcessorRunner(population, distributionSampler, eventList, infectionEventProcessor);
+    @Before
+    public void setUp() throws FileNotFoundException {
+        this.diseaseProperties = TestUtils.diseaseProperties();
     }
 
     @Test
@@ -101,12 +86,14 @@ public class OutbreakTest {
             Case thisCase = new Case(human);
             population.put(i, thisCase);
         }
-        setUp(new Population(population));
 
-        EventList contacts = createContactRecords(days, population);
+        List<ContactEvent> contacts = createContactRecords(days, population);
+        eventListGroup.addContactEvents(contacts);
 
-        outbreak = new Outbreak(new Population(population), diseaseProperties, standardProperties, logDailyOutput, initialCaseReader, contacts, eventProcessorRunner, infectionEventProcessor);
+        ReflectionTestUtils.setField(this.diseaseProperties, "randomInfectionRate", randomInfection);
+        ReflectionTestUtils.setField(this.population, "population", population);
 
+        
         outbreak.runContactData(days - 1, randomInfection);
 
         long sus = population.values().stream().map(Case::virusStatus).filter(status -> status == SUSCEPTIBLE).count();
@@ -162,15 +149,13 @@ public class OutbreakTest {
 //        outbreak.setDiseaseProperties(d);
 //        outbreak.setEventProcessor(eventProcessor);
 
-        StandardProperties standardProperties = mock(StandardProperties.class);
-        when(standardProperties.timeLimit()).thenReturn(100);
-        when(standardProperties.initialExposures()).thenReturn(popSize / 10);
-        when(standardProperties.populationSize()).thenReturn(popSize);
+        ReflectionTestUtils.setField(standardProperties, "timeLimit", 100);
+        ReflectionTestUtils.setField(standardProperties, "initialExposures", 10);
+        ReflectionTestUtils.setField(standardProperties, "populationSize", popSize);
 
         Set<Integer> cases = generateTestCases(popSize / 10, popSize);
 
-        InitialCaseReader initialCaseReader = mock(InitialCaseReader.class);
-        when(initialCaseReader.getCases()).thenReturn(cases);
+        ReflectionTestUtils.setField(this.initialCaseReader, "cases", cases);
 
         Map<Integer, Case> population = new HashMap<>();
         for (int i = 0; i < popSize; i++) {
@@ -180,11 +165,10 @@ public class OutbreakTest {
             population.put(i, thisCase);
         }
 
-        setUp(new Population(population));
+        List<ContactEvent> contacts = createContactRecords(200, population);
+        eventListGroup.addContactEvents(contacts);
 
-        EventList contacts = createContactRecords(200, population);
-
-        outbreak = new Outbreak(new Population(population), diseaseProperties, standardProperties, logDailyOutput, initialCaseReader, contacts, eventProcessorRunner, infectionEventProcessor);
+        ReflectionTestUtils.setField(this.population, "population", population);
 
         long susceptible = population.values().stream().map(Case::virusStatus).filter(status -> status == SUSCEPTIBLE).count();
 
@@ -217,22 +201,17 @@ public class OutbreakTest {
             population.put(i, thisCase);
         }
         Set<Integer> cases = generateTestCases(infections, popSize);
-        InitialCaseReader initialCaseReader = mock(InitialCaseReader.class);
-        when(initialCaseReader.getCases()).thenReturn(cases);
+        ReflectionTestUtils.setField(this.initialCaseReader, "cases", cases);
 
-        StandardProperties properties = mock(StandardProperties.class);
-        when(properties.initialExposures()).thenReturn(infections);
-        when(properties.timeLimit()).thenReturn(100);
-        when(properties.populationSize()).thenReturn(popSize);
-        when(properties.steadyState()).thenReturn(false);
+        ReflectionTestUtils.setField(standardProperties, "timeLimit", 100);
+        ReflectionTestUtils.setField(standardProperties, "initialExposures", infections);
+        ReflectionTestUtils.setField(standardProperties, "populationSize", popSize);
+        ReflectionTestUtils.setField(standardProperties, "steadyState", false);
 
-        setUp(new Population(population));
+        List<ContactEvent> contacts = createContactRecords(500, population);
+        eventListGroup.addContactEvents(contacts);
 
-        EventList contacts = createContactRecords(500, population);
-
-        outbreak = new Outbreak(new Population(population), diseaseProperties, properties, logDailyOutput, initialCaseReader, contacts, eventProcessorRunner, infectionEventProcessor);
-
-        outbreak.generateInitialInfection();
+        ReflectionTestUtils.setField(this.population, "population", population);
 
         long susceptible = population.values().stream().map(Case::virusStatus).filter(status -> status == SUSCEPTIBLE).count();
         outbreak.runToCompletion();
@@ -261,16 +240,12 @@ public class OutbreakTest {
             population.put(i, thisCase);
         }
         Set<Integer> cases = generateTestCases(infections, popSize);
-        InitialCaseReader initialCaseReader = mock(InitialCaseReader.class);
-        when(initialCaseReader.getCases()).thenReturn(cases);
+        ReflectionTestUtils.setField(this.initialCaseReader, "cases", cases);
 
-        setUp(new Population(population));
+        List<ContactEvent> contacts = createContactRecords(5, population);
+        eventListGroup.addContactEvents(contacts);
 
-        EventList contacts = createContactRecords(5, population);
-
-        outbreak = new Outbreak(new Population(population), diseaseProperties, standardProperties, logDailyOutput, initialCaseReader, contacts, eventProcessorRunner, infectionEventProcessor);
-
-        outbreak.generateInitialInfection();
+        ReflectionTestUtils.setField(this.population, "population", population);
 
         long susceptible = population.values().stream().map(Case::virusStatus).filter(status -> status == SUSCEPTIBLE).count();
         outbreak.runToCompletion();
@@ -299,11 +274,10 @@ public class OutbreakTest {
             population.put(i, thisCase);
         }
 
-        setUp(new Population(population));
+        List<ContactEvent> contacts = createContactRecords(days, population);
+        eventListGroup.addContactEvents(contacts);
 
-        EventList contacts = createContactRecords(days, population);
-
-        outbreak = new Outbreak(new Population(population), diseaseProperties, standardProperties, logDailyOutput, initialCaseReader, contacts, eventProcessorRunner, infectionEventProcessor);
+        ReflectionTestUtils.setField(this.population, "population", population);
 
         outbreak.runContactData(days - 1, randomInfection);
 
@@ -312,8 +286,8 @@ public class OutbreakTest {
 
     }
 
-    private EventList createContactRecords(int days, Map<Integer, Case> population) {
-        Map<Integer, List<ContactEvent>> contacts = new HashMap<>();
+    private List<ContactEvent> createContactRecords(int days, Map<Integer, Case> population) {
+        List<ContactEvent> contacts = new ArrayList<>();
         for (int i = 0; i < days; i++) {
 
             List<ContactEvent> dailyContacts = new ArrayList<>();
@@ -323,15 +297,12 @@ public class OutbreakTest {
                 int personB = random.nextInt(population.size());
                 int weight = random.nextInt(100);
 
-                dailyContacts.add(ImmutableContactEvent.builder().from(personA).to(personB).label("").weight(weight).time(i).eventProcessor(contactEventProcessor).build());
+                dailyContacts.add(ImmutableContactEvent.builder().from(personA).to(personB).label("").weight(weight).time(i).build());
 
             }
-            contacts.put(i, dailyContacts);
+            contacts.addAll(dailyContacts);
         }
-        EventList eventList = new EventList(new FormattedEventFactory());
-        eventList.addEvents(contacts);
-
-        return eventList;
+        return contacts;
     }
 
     private Set<Integer> generateTestCases(int numCases, int popSize) {

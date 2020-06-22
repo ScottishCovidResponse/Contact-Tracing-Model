@@ -1,4 +1,4 @@
-package uk.co.ramp.event.processor;
+package uk.co.ramp.event;
 
 import org.junit.Assert;
 import org.junit.Before;
@@ -51,18 +51,18 @@ public class VirusEventProcessorTest {
         Map<Integer, Case> population = new HashMap<>();
         population.put(0, aCase);
 
-        this.eventProcessor = new VirusEventProcessor(new Population(population), diseaseProperties, distributionSampler, mock(AlertEventProcessor.class));
+        this.eventProcessor = new VirusEventProcessor(new Population(population), diseaseProperties, distributionSampler);
     }
 
     @Test
     public void checkForAlert() {
 
-        VirusEvent virusEvent = ImmutableVirusEvent.builder().id(0).oldStatus(EXPOSED).nextStatus(PRESYMPTOMATIC).time(1).eventProcessor(eventProcessor).build();
+        VirusEvent virusEvent = ImmutableVirusEvent.builder().id(0).oldStatus(EXPOSED).nextStatus(PRESYMPTOMATIC).time(1).build();
 
         Assert.assertTrue(eventProcessor.checkForAlert(virusEvent).isEmpty());
         int time = 1;
         int id = 0;
-        virusEvent = ImmutableVirusEvent.builder().id(id).oldStatus(PRESYMPTOMATIC).nextStatus(SYMPTOMATIC).time(time).eventProcessor(eventProcessor).build();
+        virusEvent = ImmutableVirusEvent.builder().id(id).oldStatus(PRESYMPTOMATIC).nextStatus(SYMPTOMATIC).time(time).build();
 
         Optional<AlertEvent> var = eventProcessor.checkForAlert(virusEvent);
 
@@ -91,13 +91,17 @@ public class VirusEventProcessorTest {
 
         ReflectionTestUtils.setField(eventProcessor, "population", new Population(population));
 
-        VirusEvent event = ImmutableVirusEvent.builder().time(0).id(0).oldStatus(EXPOSED).nextStatus(ASYMPTOMATIC).eventProcessor(eventProcessor).build();
+        VirusEvent event = ImmutableVirusEvent.builder().time(0).id(0).oldStatus(EXPOSED).nextStatus(ASYMPTOMATIC).build();
 
         ProcessedEventResult processedEventResult = eventProcessor.processEvent(event);
 
-        Assert.assertEquals(1, processedEventResult.newEvents().size());
-        Assert.assertTrue(processedEventResult.newEvents().get(0) instanceof VirusEvent);
-        VirusEvent evnt = (VirusEvent) processedEventResult.newEvents().get(0);
+        Assert.assertEquals(1, processedEventResult.newVirusEvents().size());
+        Assert.assertEquals(0, processedEventResult.newAlertEvents().size());
+        Assert.assertEquals(0, processedEventResult.newContactEvents().size());
+        Assert.assertEquals(0, processedEventResult.newInfectionEvents().size());
+        Assert.assertEquals(1, processedEventResult.completedEvents().size());
+
+        VirusEvent evnt = processedEventResult.newVirusEvents().get(0);
 
         Assert.assertEquals(diseaseProperties.timeLatent().mean(), evnt.time());
         Assert.assertEquals(0, evnt.id());

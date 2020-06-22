@@ -1,4 +1,4 @@
-package uk.co.ramp.event.processor;
+package uk.co.ramp.event;
 
 import org.junit.Assert;
 import org.junit.Before;
@@ -20,7 +20,6 @@ import uk.co.ramp.event.types.ProcessedEventResult;
 import uk.co.ramp.event.types.VirusEvent;
 import uk.co.ramp.io.types.DiseaseProperties;
 import uk.co.ramp.people.Case;
-import uk.co.ramp.people.Human;
 
 import java.io.FileNotFoundException;
 import java.util.HashMap;
@@ -58,7 +57,7 @@ public class InfectionEventProcessorTest {
         Map<Integer, Case> population = new HashMap<>();
         population.put(0, thisCase);
 
-        this.eventProcessor = new InfectionEventProcessor(new Population(population), diseaseProperties, distributionSampler, mock(VirusEventProcessor.class));
+        this.eventProcessor = new InfectionEventProcessor(new Population(population), diseaseProperties, distributionSampler);
 
         event = ImmutableInfectionEvent.builder()
                 .exposedBy(10)
@@ -66,7 +65,6 @@ public class InfectionEventProcessorTest {
                 .id(0)
                 .nextStatus(EXPOSED)
                 .oldStatus(SUSCEPTIBLE)
-                .eventProcessor(eventProcessor)
                 .time(3)
                 .build();
     }
@@ -91,12 +89,16 @@ public class InfectionEventProcessorTest {
         population.put(1, mock1);
         ReflectionTestUtils.setField(eventProcessor, "population", new Population(population));
 
-        InfectionEvent event = ImmutableInfectionEvent.builder().time(0).exposedBy(1).id(0).exposedTime(0).oldStatus(SUSCEPTIBLE).nextStatus(EXPOSED).eventProcessor(eventProcessor).build();
+        InfectionEvent event = ImmutableInfectionEvent.builder().time(0).exposedBy(1).id(0).exposedTime(0).oldStatus(SUSCEPTIBLE).nextStatus(EXPOSED).build();
 
         ProcessedEventResult processedEventResult = eventProcessor.processEvent(event);
 
-        Assert.assertEquals(1, processedEventResult.newEvents().size());
-        VirusEvent evnt = (VirusEvent) processedEventResult.newEvents().get(0);
+        Assert.assertEquals(1, processedEventResult.newVirusEvents().size());
+        Assert.assertEquals(0, processedEventResult.newInfectionEvents().size());
+        Assert.assertEquals(0, processedEventResult.newContactEvents().size());
+        Assert.assertEquals(0, processedEventResult.newAlertEvents().size());
+        Assert.assertEquals(1, processedEventResult.completedEvents().size());
+        VirusEvent evnt = processedEventResult.newVirusEvents().get(0);
 
         Assert.assertEquals(diseaseProperties.timeLatent().mean(), evnt.time());
         Assert.assertEquals(0, evnt.id());
@@ -107,19 +109,19 @@ public class InfectionEventProcessorTest {
 
     @Test
     public void testInfectionEventExposedBySetInCase() {
-        event.processEvent();
+        eventProcessor.processEvent(event);
         verify(thisCase).setExposedBy(10);
     }
 
     @Test
     public void testInfectionEventExposedTimeSetInCase() {
-        event.processEvent();
+        eventProcessor.processEvent(event);
         verify(thisCase).setExposedTime(5);
     }
 
     @Test
     public void testInfectionEventVirusStatusSetInCase() {
-        event.processEvent();
+        eventProcessor.processEvent(event);
         verify(thisCase).setVirusStatus(EXPOSED);
     }
 

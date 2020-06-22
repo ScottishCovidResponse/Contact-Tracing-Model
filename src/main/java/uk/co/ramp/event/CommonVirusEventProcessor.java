@@ -1,4 +1,4 @@
-package uk.co.ramp.event.processor;
+package uk.co.ramp.event;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -6,9 +6,9 @@ import uk.co.ramp.Population;
 import uk.co.ramp.distribution.Distribution;
 import uk.co.ramp.distribution.DistributionSampler;
 import uk.co.ramp.distribution.ImmutableDistribution;
-import uk.co.ramp.event.EventException;
 import uk.co.ramp.event.types.CommonVirusEvent;
 import uk.co.ramp.event.types.Event;
+import uk.co.ramp.event.types.EventProcessor;
 import uk.co.ramp.io.types.DiseaseProperties;
 import uk.co.ramp.people.Case;
 import uk.co.ramp.people.VirusStatus;

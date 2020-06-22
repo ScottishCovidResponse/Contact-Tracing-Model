@@ -28,58 +28,37 @@ import static uk.co.ramp.people.VirusStatus.*;
 @DirtiesContext
 @Import({TestUtils.class, AppConfig.class, TestConfig.class})
 public class EventProcessorRunnerTest {
-
+    private interface MockEventProcessor extends EventProcessor<Event> {}
 
     @Rule
     public LogSpy logSpy = new LogSpy();
 
+    private EventProcessorRunner<Event> eventProcessorRunner;
+    private EventProcessor<Event> eventProcessor;
+    private ProcessedEventsGrouper processedEventsGrouper;
 
-    DiseaseProperties diseaseProperties;
-
-    @Autowired
-    private EventProcessorRunner eventProcessorRunner;
-
-    @Autowired
-    private EventList eventList;
-
+    private Event mockEvent1;
+    private Event mockEvent2;
+    private ProcessedEventResult mockProcessedEventResult3;
 
     @Before
     public void setUp() throws Exception {
-        diseaseProperties = TestUtils.diseaseProperties();
+        this.eventProcessor = mock(MockEventProcessor.class);
+        this.processedEventsGrouper = mock(ProcessedEventsGrouper.class);
+        this.mockEvent1 = mock(Event.class);
+        this.mockEvent2 = mock(Event.class);
+        var mockProcessedEventResult1 = mock(ProcessedEventResult.class);
+        var mockProcessedEventResult2 = mock(ProcessedEventResult.class);
+        this.mockProcessedEventResult3 = mock(ProcessedEventResult.class);
+
+        when(processedEventsGrouper.groupProcessedEventResults(eq(List.of(mockProcessedEventResult1, mockProcessedEventResult2)))).thenReturn(mockProcessedEventResult3);
+        when(eventProcessor.processEvent(eq(mockEvent1))).thenReturn(mockProcessedEventResult1);
+        when(eventProcessor.processEvent(eq(mockEvent2))).thenReturn(mockProcessedEventResult2);
     }
 
-
     @Test
-    public void process() {
-
-        eventProcessorRunner = mock(EventProcessorRunner.class);
-        doCallRealMethod().when(eventProcessorRunner).process(anyInt(), anyDouble(), anyInt());
-        ReflectionTestUtils.setField(eventProcessorRunner, "eventList", eventList);
-
-        eventProcessorRunner.process(0, 0.1, 1);
-
-        verify(eventProcessorRunner, times(1)).runAllEvents(anyInt());
-        verify(eventProcessorRunner, times(1)).runPolicyEvents(anyInt());
-        verify(eventProcessorRunner, times(1)).createRandomInfections(anyInt(), anyDouble());
-
-    }
-
-
-    @Test
-    public void createRandomInfections() {
-
-        Map<Integer, Case> population = new HashMap<>();
-        for (int i = 0; i < 10000; i++) {
-            Case mock0 = mock(Case.class);
-            when(mock0.virusStatus()).thenReturn(SUSCEPTIBLE);
-            when(mock0.id()).thenReturn(i);
-            population.put(i, mock0);
-        }
-        ReflectionTestUtils.setField(eventProcessorRunner, "population", new Population(population));
-
-
-        List<InfectionEvent> list = eventProcessorRunner.createRandomInfections(0, 0.1);
-
-        assertThat(list.size()).isBetween(990, 1010);
+    public void run() {
+        eventProcessorRunner = new EventProcessorRunner<>(eventProcessor, processedEventsGrouper);
+        assertThat(eventProcessorRunner.run(List.of(mockEvent1, mockEvent2))).isEqualTo(mockProcessedEventResult3);
     }
 }

@@ -1,4 +1,4 @@
-package uk.co.ramp.event.processor;
+package uk.co.ramp.event;
 
 import org.junit.Assert;
 import org.junit.Before;
@@ -65,17 +65,17 @@ public class CommonVirusEventProcessorTest {
 
     @Test
     public void determineNextStatus() {
-        CommonVirusEvent commonVirusEvent = ImmutableVirusEvent.builder().id(0).oldStatus(EXPOSED).nextStatus(EXPOSED).time(1).eventProcessor(mock(VirusEventProcessor.class)).build();
+        CommonVirusEvent commonVirusEvent = ImmutableVirusEvent.builder().id(0).oldStatus(EXPOSED).nextStatus(EXPOSED).time(1).build();
         VirusStatus var = eventProcessor.determineNextStatus(commonVirusEvent);
 
         Assert.assertTrue(EXPOSED.getValidTransitions().contains(var));
 
-        commonVirusEvent = ImmutableVirusEvent.builder().id(0).oldStatus(EXPOSED).nextStatus(SYMPTOMATIC).time(1).eventProcessor(mock(VirusEventProcessor.class)).build();
+        commonVirusEvent = ImmutableVirusEvent.builder().id(0).oldStatus(EXPOSED).nextStatus(SYMPTOMATIC).time(1).build();
         var = eventProcessor.determineNextStatus(commonVirusEvent);
 
         Assert.assertTrue(SYMPTOMATIC.getValidTransitions().contains(var));
 
-        commonVirusEvent = ImmutableVirusEvent.builder().id(0).oldStatus(EXPOSED).nextStatus(SEVERELY_SYMPTOMATIC).time(1).eventProcessor(mock(VirusEventProcessor.class)).build();
+        commonVirusEvent = ImmutableVirusEvent.builder().id(0).oldStatus(EXPOSED).nextStatus(SEVERELY_SYMPTOMATIC).time(1).build();
         var = eventProcessor.determineNextStatus(commonVirusEvent);
 
         Assert.assertTrue(SEVERELY_SYMPTOMATIC.getValidTransitions().contains(var));

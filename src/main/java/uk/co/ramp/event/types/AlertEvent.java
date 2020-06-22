@@ -3,7 +3,6 @@ package uk.co.ramp.event.types;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import org.immutables.value.Value;
-import uk.co.ramp.event.processor.AlertEventProcessor;
 import uk.co.ramp.people.AlertStatus;
 
 @Value.Immutable
@@ -16,10 +15,4 @@ public interface AlertEvent extends Event {
     AlertStatus nextStatus();
 
     AlertStatus oldStatus();
-
-    AlertEventProcessor eventProcessor();
-
-    default ProcessedEventResult processEvent() {
-        return eventProcessor().processEvent(this);
-    }
 }
