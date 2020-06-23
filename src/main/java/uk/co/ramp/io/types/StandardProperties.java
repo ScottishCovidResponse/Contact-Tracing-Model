@@ -8,18 +8,20 @@ import org.immutables.value.Value.Immutable;
 @TypeAdapters
 @Immutable
 public interface StandardProperties {
-    int populationSize();
-    int timeLimit();
+  int populationSize();
 
-    int initialExposures();
+  int timeLimit();
 
-    int seed();
-    boolean steadyState();
+  int initialExposures();
 
-    @Check
-    default void check() {
-        Preconditions.checkState(populationSize() > 0, "Population size should be greater than 0");
-        Preconditions.checkState(timeLimit() >= 0, "Time limit should not be negative");
-        Preconditions.checkState(initialExposures() >= 0, "Initial exposures should not be negative");
-    }
+  int seed();
+
+  boolean steadyState();
+
+  @Check
+  default void check() {
+    Preconditions.checkState(populationSize() > 0, "Population size should be greater than 0");
+    Preconditions.checkState(timeLimit() >= 0, "Time limit should not be negative");
+    Preconditions.checkState(initialExposures() >= 0, "Initial exposures should not be negative");
+  }
 }

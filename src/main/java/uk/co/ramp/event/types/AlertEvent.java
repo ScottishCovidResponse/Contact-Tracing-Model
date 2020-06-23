@@ -10,9 +10,9 @@ import uk.co.ramp.people.AlertStatus;
 @JsonDeserialize
 public interface AlertEvent extends Event {
 
-    int id();
+  int id();
 
-    AlertStatus nextStatus();
+  AlertStatus nextStatus();
 
-    AlertStatus oldStatus();
+  AlertStatus oldStatus();
 }

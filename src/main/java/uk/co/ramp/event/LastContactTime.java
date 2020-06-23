@@ -1,13 +1,13 @@
 package uk.co.ramp.event;
 
 public class LastContactTime {
-    private final EventListGroup eventListGroup;
+  private final EventListGroup eventListGroup;
 
-    LastContactTime(EventListGroup eventListGroup) {
-        this.eventListGroup = eventListGroup;
-    }
+  LastContactTime(EventListGroup eventListGroup) {
+    this.eventListGroup = eventListGroup;
+  }
 
-    public int get() {
-        return eventListGroup.lastContactTime();
-    }
+  public int get() {
+    return eventListGroup.lastContactTime();
+  }
 }

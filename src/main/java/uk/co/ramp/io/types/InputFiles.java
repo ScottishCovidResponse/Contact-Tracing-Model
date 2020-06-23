@@ -9,22 +9,25 @@ import org.immutables.value.Value.Immutable;
 @Immutable
 public interface InputFiles {
 
-    String runSettings();
+  String runSettings();
 
-    String populationSettings();
+  String populationSettings();
 
-    String diseaseSettings();
+  String diseaseSettings();
 
-    String contactData();
+  String contactData();
 
-    String initialExposures();
+  String initialExposures();
 
-    @Check
-    default void check() {
-        Preconditions.checkState(!runSettings().isBlank(), "Run settings location should not be blank");
-        Preconditions.checkState(!populationSettings().isBlank(), "Population settings location should not be blank");
-        Preconditions.checkState(!diseaseSettings().isBlank(), "Disease settings location should not be blank");
-        Preconditions.checkState(!contactData().isBlank(), "Contact data location should not be blank");
-        Preconditions.checkState(!initialExposures().isBlank(), "Initial exposure data location should not be blank");
-    }
+  @Check
+  default void check() {
+    Preconditions.checkState(!runSettings().isBlank(), "Run settings location should not be blank");
+    Preconditions.checkState(
+        !populationSettings().isBlank(), "Population settings location should not be blank");
+    Preconditions.checkState(
+        !diseaseSettings().isBlank(), "Disease settings location should not be blank");
+    Preconditions.checkState(!contactData().isBlank(), "Contact data location should not be blank");
+    Preconditions.checkState(
+        !initialExposures().isBlank(), "Initial exposure data location should not be blank");
+  }
 }

@@ -11,38 +11,41 @@ import uk.co.ramp.utilities.MeanMax;
 @Immutable
 public interface DiseaseProperties {
 
-    MeanMax timeLatent();
+  MeanMax timeLatent();
 
-    MeanMax timeRecoveryAsymp();
+  MeanMax timeRecoveryAsymp();
 
-    MeanMax timeRecoverySymp();
+  MeanMax timeRecoverySymp();
 
-    MeanMax timeRecoverySev();
+  MeanMax timeRecoverySev();
 
-    MeanMax timeSymptomsOnset();
+  MeanMax timeSymptomsOnset();
 
-    MeanMax timeDecline();
+  MeanMax timeDecline();
 
-    MeanMax timeDeath();
+  MeanMax timeDeath();
 
-    MeanMax timeTestAdministered();
+  MeanMax timeTestAdministered();
 
-    MeanMax timeTestResult();
+  MeanMax timeTestResult();
 
-    double testAccuracy();
+  double testAccuracy();
 
-    double randomInfectionRate();
+  double randomInfectionRate();
 
-    double exposureTuning();
+  double exposureTuning();
 
-    double exposureThreshold();
+  double exposureThreshold();
 
-    ProgressionDistribution progressionDistribution();
+  ProgressionDistribution progressionDistribution();
 
-    @Check
-    default void check() {
-        Preconditions.checkState(testAccuracy() >= 0 && testAccuracy() <= 1, "Test accuracy should be between 0 and 1");
-        Preconditions.checkState(randomInfectionRate() >= 0 && randomInfectionRate() <= 1, "Random infection rate should be between 0 and 1");
-        Preconditions.checkState(exposureTuning() >= 0, "Exposure tuning value should be positive");
-    }
+  @Check
+  default void check() {
+    Preconditions.checkState(
+        testAccuracy() >= 0 && testAccuracy() <= 1, "Test accuracy should be between 0 and 1");
+    Preconditions.checkState(
+        randomInfectionRate() >= 0 && randomInfectionRate() <= 1,
+        "Random infection rate should be between 0 and 1");
+    Preconditions.checkState(exposureTuning() >= 0, "Exposure tuning value should be positive");
+  }
 }

@@ -11,13 +11,13 @@ import org.immutables.value.Value.Immutable;
 @JsonPropertyOrder({"time", "from", "to", "weight", "label"})
 @SuppressWarnings("immutables:from")
 public interface ContactRecord {
-    int time();
+  int time();
 
-    int from();
+  int from();
 
-    int to();
+  int to();
 
-    double weight();
+  double weight();
 
-    String label();
+  String label();
 }

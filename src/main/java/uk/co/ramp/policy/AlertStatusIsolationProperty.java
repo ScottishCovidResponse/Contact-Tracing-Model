@@ -7,6 +7,7 @@ import uk.co.ramp.people.AlertStatus;
 @Gson.TypeAdapters
 @Value.Immutable
 interface AlertStatusIsolationProperty {
-    AlertStatus alertStatus();
-    IsolationProperty isolationProperty();
+  AlertStatus alertStatus();
+
+  IsolationProperty isolationProperty();
 }

@@ -8,5 +8,5 @@ import org.immutables.value.Value;
 @JsonSerialize
 @JsonDeserialize
 public interface PolicyEvent extends Event {
-    // TODO will need to fill out
+  // TODO will need to fill out
 }
