@@ -40,13 +40,13 @@ public class EventRunnerImpl implements EventRunner {
   public void run(int time, double randomInfectionRate, double randomCutOff) {
     List<ProcessedEventResult> processedResults =
         Stream.of(
-            infectionEventRunner.run(generateInitialInfection(time)),
-            alertEventRunner.run(eventList.getNewAlertEvents(time)),
-            contactEventRunner.run(eventList.getNewContactEvents(time)),
-            infectionEventRunner.run(eventList.getNewInfectionEvents(time)),
-            virusEventRunner.run(eventList.getNewVirusEvents(time)),
-            infectionEventRunner.run(
-                createRandomInfections(time, randomInfectionRate, randomCutOff)))
+                infectionEventRunner.run(generateInitialInfection(time)),
+                alertEventRunner.run(eventList.getNewAlertEvents(time)),
+                contactEventRunner.run(eventList.getNewContactEvents(time)),
+                infectionEventRunner.run(eventList.getNewInfectionEvents(time)),
+                virusEventRunner.run(eventList.getNewVirusEvents(time)),
+                infectionEventRunner.run(
+                    createRandomInfections(time, randomInfectionRate, randomCutOff)))
             .collect(Collectors.toList());
 
     ProcessedEventResult eventResults =
