@@ -27,11 +27,12 @@ import uk.co.ramp.io.types.DiseaseProperties;
 import uk.co.ramp.people.Case;
 import uk.co.ramp.people.Human;
 import uk.co.ramp.people.VirusStatus;
+import uk.co.ramp.policy.alert.AlertPolicyContext;
 import uk.co.ramp.utilities.ImmutableMeanMax;
 
 @RunWith(SpringRunner.class)
 @DirtiesContext
-@Import({TestUtils.class, AppConfig.class, TestConfig.class})
+@Import({TestUtils.class, AppConfig.class, TestConfig.class, AlertPolicyContext.class})
 public class CommonVirusEventProcessorTest {
   @Rule public LogSpy logSpy = new LogSpy();
 
@@ -65,7 +66,12 @@ public class CommonVirusEventProcessorTest {
   @Test
   public void determineNextStatus() {
     CommonVirusEvent commonVirusEvent =
-        ImmutableVirusEvent.builder().id(0).oldStatus(EXPOSED).nextStatus(EXPOSED).time(1).build();
+        ImmutableVirusEvent.builder()
+            .id(0)
+            .oldStatus(SUSCEPTIBLE)
+            .nextStatus(EXPOSED)
+            .time(1)
+            .build();
     VirusStatus var = eventProcessor.determineNextStatus(commonVirusEvent);
 
     Assert.assertTrue(EXPOSED.getValidTransitions().contains(var));
@@ -74,17 +80,17 @@ public class CommonVirusEventProcessorTest {
         ImmutableVirusEvent.builder()
             .id(0)
             .oldStatus(EXPOSED)
-            .nextStatus(SYMPTOMATIC)
+            .nextStatus(PRESYMPTOMATIC)
             .time(1)
             .build();
     var = eventProcessor.determineNextStatus(commonVirusEvent);
 
-    Assert.assertTrue(SYMPTOMATIC.getValidTransitions().contains(var));
+    Assert.assertTrue(PRESYMPTOMATIC.getValidTransitions().contains(var));
 
     commonVirusEvent =
         ImmutableVirusEvent.builder()
             .id(0)
-            .oldStatus(EXPOSED)
+            .oldStatus(SYMPTOMATIC)
             .nextStatus(SEVERELY_SYMPTOMATIC)
             .time(1)
             .build();

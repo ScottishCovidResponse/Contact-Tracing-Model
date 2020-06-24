@@ -32,15 +32,24 @@ public class ProcessedEventsGrouper {
         mapToList(processedEventResults, ProcessedEventResult::newInfectionEvents);
     List<VirusEvent> newVirusEvents =
         mapToList(processedEventResults, ProcessedEventResult::newVirusEvents);
-    List<Event> completedEvents =
-        mapToList(processedEventResults, ProcessedEventResult::completedEvents);
+    List<AlertEvent> newCompletedAlertEvents =
+        mapToList(processedEventResults, ProcessedEventResult::newCompletedAlertEvents);
+    List<ContactEvent> newCompletedContactEvents =
+        mapToList(processedEventResults, ProcessedEventResult::newCompletedContactEvents);
+    List<InfectionEvent> newCompletedInfectionEvents =
+        mapToList(processedEventResults, ProcessedEventResult::newCompletedInfectionEvents);
+    List<VirusEvent> newCompletedVirusEvents =
+        mapToList(processedEventResults, ProcessedEventResult::newCompletedVirusEvents);
 
     return ImmutableProcessedEventResult.builder()
         .addAllNewAlertEvents(newAlertEvents)
         .addAllNewContactEvents(newContactEvents)
         .addAllNewInfectionEvents(newInfectionEvents)
         .addAllNewVirusEvents(newVirusEvents)
-        .addAllCompletedEvents(completedEvents)
+        .addAllNewCompletedAlertEvents(newCompletedAlertEvents)
+        .addAllNewCompletedContactEvents(newCompletedContactEvents)
+        .addAllNewCompletedInfectionEvents(newCompletedInfectionEvents)
+        .addAllNewCompletedVirusEvents(newCompletedVirusEvents)
         .build();
   }
 }

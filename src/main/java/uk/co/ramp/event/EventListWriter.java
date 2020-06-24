@@ -4,12 +4,11 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.Writer;
 import java.util.*;
-import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
+import java.util.stream.Stream;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import uk.co.ramp.event.types.Event;
 import uk.co.ramp.event.types.ImmutableFormattedEvent;
 import uk.co.ramp.io.csv.CsvException;
 import uk.co.ramp.io.csv.CsvWriter;
@@ -19,27 +18,41 @@ public class EventListWriter {
   private static final Logger LOGGER = LogManager.getLogger(EventListWriter.class);
 
   private final FormattedEventFactory formattedEventFactory;
-  private final EventList<Event> completedEvents;
+  private final CompletionEventListGroup eventList;
 
-  EventListWriter(FormattedEventFactory formattedEventFactory, EventList<Event> completedEvents) {
+  EventListWriter(FormattedEventFactory formattedEventFactory, CompletionEventListGroup eventList) {
     this.formattedEventFactory = formattedEventFactory;
-    this.completedEvents = completedEvents;
+    this.eventList = eventList;
   }
 
   public void output() {
-    Map<Integer, List<Event>> completedMap =
-        IntStream.rangeClosed(0, completedEvents.lastEventTime())
+    var alertEvents =
+        IntStream.rangeClosed(0, eventList.lastAlertTime())
             .boxed()
-            .collect(Collectors.toMap(Function.identity(), completedEvents::getForTime));
-
-    List<Integer> timeStamps = new ArrayList<>(completedMap.keySet());
-    timeStamps.sort(Comparator.naturalOrder());
-    List<ImmutableFormattedEvent> finalList =
-        timeStamps.stream()
-            .map(completedMap::get)
+            .map(eventList::getNewAlertEvents)
             .flatMap(Collection::stream)
-            .map(formattedEventFactory::create)
-            .filter(Objects::nonNull)
+            .map(formattedEventFactory::create);
+
+    var infectionEvents =
+        IntStream.rangeClosed(0, eventList.lastInfectionTime())
+            .boxed()
+            .map(eventList::getNewInfectionEvents)
+            .flatMap(Collection::stream)
+            .map(formattedEventFactory::create);
+
+    var virusEvents =
+        IntStream.rangeClosed(0, eventList.lastVirusTime())
+            .boxed()
+            .map(eventList::getNewVirusEvents)
+            .flatMap(Collection::stream)
+            .map(formattedEventFactory::create);
+
+    // Skipping contact events for now to retain current implementation functionality
+
+    List<ImmutableFormattedEvent> finalList =
+        Stream.of(alertEvents, infectionEvents, virusEvents)
+            .flatMap(s -> s)
+            .sorted(Comparator.comparingInt(ImmutableFormattedEvent::time))
             .collect(Collectors.toList());
 
     try (Writer writer = new FileWriter(EVENTS_CSV)) {

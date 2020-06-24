@@ -1,4 +1,4 @@
-package uk.co.ramp.policy;
+package uk.co.ramp.policy.isolation;
 
 import com.google.common.base.Preconditions;
 import java.util.Optional;
@@ -16,6 +16,8 @@ interface IsolationProperty {
 
   Optional<Distribution> isolationTimeDistribution();
 
+  Optional<Boolean> overrideCompliance();
+  //    IsolationStartTime startTime();
   int priority();
 
   @Check

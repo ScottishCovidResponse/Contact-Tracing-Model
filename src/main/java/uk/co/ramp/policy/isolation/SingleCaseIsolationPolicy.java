@@ -1,4 +1,4 @@
-package uk.co.ramp.policy;
+package uk.co.ramp.policy.isolation;
 
 import static uk.co.ramp.distribution.ProgressionDistribution.FLAT;
 
@@ -155,10 +155,10 @@ class SingleCaseIsolationPolicy {
             matchingIsolationProperty.isolationProbabilityDistribution());
     boolean timedPolicy = matchingIsolationProperty.isolationTimeDistribution().isPresent();
     boolean isDefaultPolicy = isolationProperties.defaultPolicy().equals(matchingIsolationProperty);
-
+    boolean overrideCompliance = matchingIsolationProperty.overrideCompliance().orElse(false);
+    boolean isCompliant = distributionSampler.uniformBetweenZeroAndOne() < compliance;
     boolean willIsolate =
-        (threshold < requiredIsolationFactor)
-            && (distributionSampler.uniformBetweenZeroAndOne() < compliance);
+        (threshold < requiredIsolationFactor) && (overrideCompliance || isCompliant);
     if (timedPolicy || isDefaultPolicy) {
       currentlyInIsolationMap.compute(
           id,

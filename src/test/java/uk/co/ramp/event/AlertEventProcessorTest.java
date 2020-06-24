@@ -1,14 +1,13 @@
 package uk.co.ramp.event;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.*;
 import static uk.co.ramp.people.AlertStatus.*;
 import static uk.co.ramp.people.AlertStatus.TESTED_POSITIVE;
-import static uk.co.ramp.people.VirusStatus.SUSCEPTIBLE;
+import static uk.co.ramp.people.VirusStatus.*;
 
-import java.util.HashMap;
-import java.util.Map;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Rule;
@@ -23,11 +22,8 @@ import uk.co.ramp.Population;
 import uk.co.ramp.TestConfig;
 import uk.co.ramp.TestUtils;
 import uk.co.ramp.distribution.DistributionSampler;
-import uk.co.ramp.event.types.AlertEvent;
-import uk.co.ramp.event.types.ImmutableAlertEvent;
-import uk.co.ramp.event.types.ProcessedEventResult;
+import uk.co.ramp.event.types.*;
 import uk.co.ramp.io.types.DiseaseProperties;
-import uk.co.ramp.people.Case;
 
 @RunWith(SpringRunner.class)
 @DirtiesContext
@@ -74,18 +70,11 @@ public class AlertEventProcessorTest {
 
   @Test
   public void runAlertEvents() {
-    int infector = 0;
+    when(population.getVirusStatus(eq(0))).thenReturn(SUSCEPTIBLE);
+    when(population.isInfectious(eq(0))).thenReturn(true);
+    when(population.getAlertStatus(eq(0))).thenReturn(NONE);
 
-    Case mock0 = mock(Case.class);
-    when(mock0.virusStatus()).thenReturn(SUSCEPTIBLE);
-    when(mock0.isInfectious()).thenReturn(true);
-    when(mock0.id()).thenReturn(infector);
-
-    Map<Integer, Case> population = new HashMap<>();
-    population.put(0, mock0);
-
-    eventProcessor =
-        new AlertEventProcessor(new Population(population), diseaseProperties, distributionSampler);
+    eventProcessor = new AlertEventProcessor(population, diseaseProperties, distributionSampler);
 
     AlertEvent event =
         ImmutableAlertEvent.builder().time(0).id(0).oldStatus(NONE).nextStatus(ALERTED).build();
@@ -98,12 +87,37 @@ public class AlertEventProcessorTest {
     Assert.assertEquals(0, eventResult.newContactEvents().size());
     Assert.assertEquals(0, eventResult.newInfectionEvents().size());
     Assert.assertEquals(0, eventResult.newVirusEvents().size());
-    Assert.assertEquals(1, eventResult.completedEvents().size());
+    Assert.assertEquals(1, eventResult.newCompletedAlertEvents().size());
+    Assert.assertEquals(0, eventResult.newCompletedContactEvents().size());
+    Assert.assertEquals(0, eventResult.newCompletedInfectionEvents().size());
+    Assert.assertEquals(0, eventResult.newCompletedVirusEvents().size());
     AlertEvent evnt = eventResult.newAlertEvents().get(0);
 
     Assert.assertEquals(1, evnt.time());
     Assert.assertEquals(0, evnt.id());
     Assert.assertEquals(ALERTED, evnt.oldStatus());
     Assert.assertEquals(REQUESTED_TEST, evnt.nextStatus());
+  }
+
+  @Test
+  public void testClashingAlertStatus() {
+    AlertEvent event =
+        ImmutableAlertEvent.builder().time(0).id(0).oldStatus(NONE).nextStatus(ALERTED).build();
+
+    when(population.getAlertStatus(eq(0))).thenReturn(REQUESTED_TEST);
+    eventProcessor = new AlertEventProcessor(population, diseaseProperties, distributionSampler);
+
+    var processedEvents = eventProcessor.processEvent(event);
+    assertThat(processedEvents.newCompletedAlertEvents()).isEmpty();
+    assertThat(processedEvents.newCompletedContactEvents()).isEmpty();
+    assertThat(processedEvents.newCompletedVirusEvents()).isEmpty();
+    assertThat(processedEvents.newCompletedInfectionEvents()).isEmpty();
+    assertThat(processedEvents.newAlertEvents()).isEmpty();
+    assertThat(processedEvents.newContactEvents()).isEmpty();
+    assertThat(processedEvents.newInfectionEvents()).isEmpty();
+    assertThat(processedEvents.newVirusEvents()).isEmpty();
+    verify(population, times(1)).getAlertStatus(0);
+    verify(population, never()).setAlertStatus(0, ALERTED);
+    verifyNoMoreInteractions(population);
   }
 }

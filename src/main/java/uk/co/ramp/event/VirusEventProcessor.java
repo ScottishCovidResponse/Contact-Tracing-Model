@@ -1,10 +1,6 @@
 package uk.co.ramp.event;
 
-import static uk.co.ramp.people.AlertStatus.NONE;
-import static uk.co.ramp.people.AlertStatus.REQUESTED_TEST;
-import static uk.co.ramp.people.VirusStatus.*;
-
-import java.util.Optional;
+import java.util.List;
 import java.util.stream.Collectors;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -14,25 +10,31 @@ import uk.co.ramp.event.types.*;
 import uk.co.ramp.io.types.DiseaseProperties;
 import uk.co.ramp.people.Case;
 import uk.co.ramp.people.VirusStatus;
+import uk.co.ramp.policy.alert.AlertChecker;
 
 @Service
 public class VirusEventProcessor extends CommonVirusEventProcessor<VirusEvent> {
   private final Population population;
+  private final AlertChecker alertChecker;
 
   @Autowired
   public VirusEventProcessor(
       Population population,
       DiseaseProperties diseaseProperties,
-      DistributionSampler distributionSampler) {
+      DistributionSampler distributionSampler,
+      AlertChecker alertChecker) {
     super(population, diseaseProperties, distributionSampler);
     this.population = population;
+    this.alertChecker = alertChecker;
   }
 
   @Override
   public ProcessedEventResult processEvent(VirusEvent event) {
+    // process current event
     Case thisCase = population.get(event.id());
     thisCase.setVirusStatus(thisCase.virusStatus().transitionTo(event.nextStatus()));
 
+    // determine and return next events with time of when they will be processed
     VirusStatus nextStatus = determineNextStatus(event);
 
     // will return self if at DEAD or RECOVERED
@@ -48,29 +50,20 @@ public class VirusEventProcessor extends CommonVirusEventProcessor<VirusEvent> {
               .time(event.time() + deltaTime)
               .build();
 
-      Optional<AlertEvent> e = checkForAlert(subsequentEvent);
+      List<AlertEvent> alertEvents = checkForAlert(subsequentEvent);
 
       return ImmutableProcessedEventResult.builder()
           .addNewVirusEvents(subsequentEvent)
-          .addAllNewAlertEvents(e.stream().collect(Collectors.toList()))
-          .addCompletedEvents(event)
+          .addAllNewAlertEvents(alertEvents)
+          .addNewCompletedVirusEvents(event)
           .build();
     }
     return ImmutableProcessedEventResult.builder().build();
   }
 
-  Optional<AlertEvent> checkForAlert(VirusEvent trigger) {
-
-    if (trigger.nextStatus() == SYMPTOMATIC) {
-      return Optional.of(
-          ImmutableAlertEvent.builder()
-              .id(trigger.id())
-              .time(trigger.time() + 1)
-              .oldStatus(NONE)
-              .nextStatus(REQUESTED_TEST)
-              .build());
-    }
-
-    return Optional.empty();
+  List<AlertEvent> checkForAlert(VirusEvent trigger) {
+    return alertChecker
+        .checkForAlert(trigger.id(), trigger.nextStatus(), trigger.time())
+        .collect(Collectors.toList());
   }
 }

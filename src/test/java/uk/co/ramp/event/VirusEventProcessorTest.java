@@ -1,15 +1,16 @@
 package uk.co.ramp.event;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
-import static uk.co.ramp.people.AlertStatus.NONE;
-import static uk.co.ramp.people.AlertStatus.REQUESTED_TEST;
+import static uk.co.ramp.people.AlertStatus.*;
 import static uk.co.ramp.people.VirusStatus.*;
 
 import java.io.FileNotFoundException;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Optional;
+import java.util.stream.Stream;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -28,13 +29,23 @@ import uk.co.ramp.event.types.*;
 import uk.co.ramp.io.types.DiseaseProperties;
 import uk.co.ramp.people.Case;
 import uk.co.ramp.people.Human;
+import uk.co.ramp.policy.alert.AlertChecker;
+import uk.co.ramp.policy.alert.AlertPolicyContext;
 
 @RunWith(SpringRunner.class)
 @DirtiesContext
-@Import({TestUtils.class, AppConfig.class, TestConfig.class})
+@Import({TestUtils.class, AppConfig.class, TestConfig.class, AlertPolicyContext.class})
 public class VirusEventProcessorTest {
   private VirusEventProcessor eventProcessor;
-  DiseaseProperties diseaseProperties;
+  private DiseaseProperties diseaseProperties;
+
+  private final AlertEvent alertEvent =
+      ImmutableAlertEvent.builder()
+          .id(0)
+          .oldStatus(NONE)
+          .nextStatus(REQUESTED_TEST)
+          .time(2)
+          .build();
 
   @Autowired DistributionSampler distributionSampler;
 
@@ -49,8 +60,13 @@ public class VirusEventProcessorTest {
     Map<Integer, Case> population = new HashMap<>();
     population.put(0, aCase);
 
+    AlertChecker alertChecker = mock(AlertChecker.class);
+    when(alertChecker.checkForAlert(eq(0), eq(SYMPTOMATIC), eq(1)))
+        .thenReturn(Stream.of(alertEvent));
+
     this.eventProcessor =
-        new VirusEventProcessor(new Population(population), diseaseProperties, distributionSampler);
+        new VirusEventProcessor(
+            new Population(population), diseaseProperties, distributionSampler, alertChecker);
   }
 
   @Test
@@ -63,28 +79,16 @@ public class VirusEventProcessorTest {
             .nextStatus(PRESYMPTOMATIC)
             .time(1)
             .build();
+    assertThat(eventProcessor.checkForAlert(virusEvent)).isEmpty();
 
-    Assert.assertTrue(eventProcessor.checkForAlert(virusEvent).isEmpty());
-    int time = 1;
-    int id = 0;
     virusEvent =
         ImmutableVirusEvent.builder()
-            .id(id)
+            .id(0)
             .oldStatus(PRESYMPTOMATIC)
             .nextStatus(SYMPTOMATIC)
-            .time(time)
+            .time(1)
             .build();
-
-    Optional<AlertEvent> var = eventProcessor.checkForAlert(virusEvent);
-
-    Assert.assertFalse(var.isEmpty());
-
-    AlertEvent event = var.get();
-
-    Assert.assertEquals(time + 1, event.time());
-    Assert.assertEquals(NONE, event.oldStatus());
-    Assert.assertEquals(REQUESTED_TEST, event.nextStatus());
-    Assert.assertEquals(id, event.id());
+    assertThat(eventProcessor.checkForAlert(virusEvent)).containsExactly(alertEvent);
   }
 
   @Test
@@ -116,7 +120,10 @@ public class VirusEventProcessorTest {
     Assert.assertEquals(0, processedEventResult.newAlertEvents().size());
     Assert.assertEquals(0, processedEventResult.newContactEvents().size());
     Assert.assertEquals(0, processedEventResult.newInfectionEvents().size());
-    Assert.assertEquals(1, processedEventResult.completedEvents().size());
+    Assert.assertEquals(1, processedEventResult.newCompletedVirusEvents().size());
+    Assert.assertEquals(0, processedEventResult.newCompletedInfectionEvents().size());
+    Assert.assertEquals(0, processedEventResult.newCompletedAlertEvents().size());
+    Assert.assertEquals(0, processedEventResult.newCompletedContactEvents().size());
 
     VirusEvent evnt = processedEventResult.newVirusEvents().get(0);
 

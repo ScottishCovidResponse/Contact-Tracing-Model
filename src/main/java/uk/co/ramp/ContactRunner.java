@@ -10,7 +10,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Service;
-import uk.co.ramp.event.EventListGroup;
+import uk.co.ramp.event.CompletionEventListGroup;
 import uk.co.ramp.io.CompartmentWriter;
 import uk.co.ramp.io.ContactReader;
 import uk.co.ramp.io.csv.CsvException;
@@ -41,9 +41,9 @@ public class ContactRunner implements CommandLineRunner {
     try (Reader reader = new FileReader(inputFileLocation.contactData())) {
 
       ContactReader contactReader = ctx.getBean(ContactReader.class);
-      EventListGroup eventListGroup = ctx.getBean(EventListGroup.class);
+      CompletionEventListGroup eventList = ctx.getBean(CompletionEventListGroup.class);
 
-      eventListGroup.addContactEvents(contactReader.readEvents(reader));
+      eventList.addNewContactEvents(contactReader.readEvents(reader));
 
       LOGGER.info("Generated Population and Parsed Contact data");
 

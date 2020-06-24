@@ -1,4 +1,4 @@
-package uk.co.ramp.policy;
+package uk.co.ramp.policy.isolation;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatIllegalStateException;
@@ -50,6 +50,30 @@ public class SingleCaseIsolationPolicyTest {
                   .priority(1)
                   .isolationProbabilityDistribution(flatHundredPercent)
                   .isolationTimeDistribution(flatOneDay)
+                  .build())
+          .build();
+
+  private final VirusStatusIsolationProperty recoveredZeroPercentIsolationProperty =
+      ImmutableVirusStatusIsolationProperty.builder()
+          .virusStatus(RECOVERED)
+          .isolationProperty(
+              ImmutableIsolationProperty.builder()
+                  .id("Recovered Policy")
+                  .priority(1)
+                  .isolationProbabilityDistribution(flatZeroPercent)
+                  .overrideCompliance(true)
+                  .build())
+          .build();
+
+  private final VirusStatusIsolationProperty deadZeroPercentIsolationProperty =
+      ImmutableVirusStatusIsolationProperty.builder()
+          .virusStatus(DEAD)
+          .isolationProperty(
+              ImmutableIsolationProperty.builder()
+                  .id("Dead Policy")
+                  .priority(1)
+                  .isolationProbabilityDistribution(flatHundredPercent)
+                  .overrideCompliance(true)
                   .build())
           .build();
 
@@ -120,6 +144,8 @@ public class SingleCaseIsolationPolicyTest {
         ImmutableIsolationProperties.builder()
             .defaultPolicy(defaultZeroIsolationProperty)
             .addVirusStatusPolicies(infectedSymptomaticHundredPercentIsolationProperty)
+            .addVirusStatusPolicies(recoveredZeroPercentIsolationProperty)
+            .addVirusStatusPolicies(deadZeroPercentIsolationProperty)
             .addAlertStatusPolicies(testedPositiveHundredPercentIsolationProperty)
             .addAlertStatusPolicies(alertedHundredPercentIsolationProperty)
             .addGlobalIsolationPolicies(twentyPercentInfectedHundredPercentIsolationProperty)
@@ -226,6 +252,40 @@ public class SingleCaseIsolationPolicyTest {
             isolationPolicy.isIndividualInIsolation(
                 id, SUSCEPTIBLE, NONE, compliance, proportionOfPopulationInfected, currentTime))
         .isFalse();
+  }
+
+  @Test
+  public void testShouldIsolate_RecoveredAndAlerted() {
+    assertThat(
+            isolationPolicy.isIndividualInIsolation(
+                id, RECOVERED, ALERTED, compliance, proportionOfPopulationInfected, currentTime))
+        .isFalse();
+  }
+
+  @Test
+  public void testShouldIsolate_RecoveredAndAlerted_LowCompliance() {
+    var compliance = 0.1;
+    assertThat(
+            isolationPolicy.isIndividualInIsolation(
+                id, RECOVERED, ALERTED, compliance, proportionOfPopulationInfected, currentTime))
+        .isFalse();
+  }
+
+  @Test
+  public void testShouldIsolate_DeadAndAlerted() {
+    assertThat(
+            isolationPolicy.isIndividualInIsolation(
+                id, DEAD, ALERTED, compliance, proportionOfPopulationInfected, currentTime))
+        .isTrue();
+  }
+
+  @Test
+  public void testShouldIsolate_DeadAndAlerted_LowCompliance() {
+    var compliance = 0.1;
+    assertThat(
+            isolationPolicy.isIndividualInIsolation(
+                id, DEAD, ALERTED, compliance, proportionOfPopulationInfected, currentTime))
+        .isTrue();
   }
 
   @Test

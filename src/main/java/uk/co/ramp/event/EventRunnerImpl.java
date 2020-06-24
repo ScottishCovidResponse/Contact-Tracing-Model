@@ -12,7 +12,7 @@ public class EventRunnerImpl implements EventRunner {
   private final EventProcessorRunner<VirusEvent> virusEventRunner;
   private final ProcessedEventsGrouper processedEventsGrouper;
   private final InfectionCreator infectionCreator;
-  private final EventListGroup eventListGroup;
+  private final CompletionEventListGroup eventList;
 
   public EventRunnerImpl(
       EventProcessorRunner<AlertEvent> alertEventRunner,
@@ -21,50 +21,48 @@ public class EventRunnerImpl implements EventRunner {
       EventProcessorRunner<VirusEvent> virusEventRunner,
       ProcessedEventsGrouper processedEventsGrouper,
       InfectionCreator infectionCreator,
-      EventListGroup eventListGroup) {
+      CompletionEventListGroup eventList) {
     this.alertEventRunner = alertEventRunner;
     this.contactEventRunner = contactEventRunner;
     this.infectionEventRunner = infectionEventRunner;
     this.virusEventRunner = virusEventRunner;
     this.processedEventsGrouper = processedEventsGrouper;
     this.infectionCreator = infectionCreator;
-    this.eventListGroup = eventListGroup;
+    this.eventList = eventList;
   }
 
   @Override
   public void run(int time, double randomInfectionRate, double randomCutOff) {
     List<ProcessedEventResult> processedResults =
         Stream.of(
-                generateInitialInfection(time),
-                alertEventRunner.run(eventListGroup.getAlertEvents(time)),
-                contactEventRunner.run(eventListGroup.getContactEvents(time)),
-                infectionEventRunner.run(eventListGroup.getInfectionEvents(time)),
-                virusEventRunner.run(eventListGroup.getVirusEvents(time)),
-                createRandomInfections(time, randomInfectionRate, randomCutOff))
+                infectionEventRunner.run(generateInitialInfection(time)),
+                alertEventRunner.run(eventList.getNewAlertEvents(time)),
+                contactEventRunner.run(eventList.getNewContactEvents(time)),
+                infectionEventRunner.run(eventList.getNewInfectionEvents(time)),
+                virusEventRunner.run(eventList.getNewVirusEvents(time)),
+                infectionEventRunner.run(
+                    createRandomInfections(time, randomInfectionRate, randomCutOff)))
             .collect(Collectors.toList());
 
     ProcessedEventResult eventResults =
         processedEventsGrouper.groupProcessedEventResults(processedResults);
 
-    eventListGroup.addContactEvents(eventResults.newContactEvents());
-    eventListGroup.addAlertEvents(eventResults.newAlertEvents());
-    eventListGroup.addInfectionEvents(eventResults.newInfectionEvents());
-    eventListGroup.addVirusEvents(eventResults.newVirusEvents());
-    eventListGroup.completed(eventResults.completedEvents());
+    eventList.addNewContactEvents(eventResults.newContactEvents());
+    eventList.addNewAlertEvents(eventResults.newAlertEvents());
+    eventList.addNewInfectionEvents(eventResults.newInfectionEvents());
+    eventList.addNewVirusEvents(eventResults.newVirusEvents());
+    eventList.addCompletedContactEvents(eventResults.newCompletedContactEvents());
+    eventList.addCompletedAlertEvents(eventResults.newCompletedAlertEvents());
+    eventList.addCompletedInfectionEvents(eventResults.newCompletedInfectionEvents());
+    eventList.addCompletedVirusEvents(eventResults.newCompletedVirusEvents());
   }
 
-  ProcessedEventResult createRandomInfections(
+  List<InfectionEvent> createRandomInfections(
       int time, double randomInfectionRate, double randomCutOff) {
-    List<InfectionEvent> randomInfections =
-        infectionCreator.createRandomInfections(time, randomInfectionRate, randomCutOff);
-    return ImmutableProcessedEventResult.builder()
-        .addAllNewInfectionEvents(randomInfections)
-        .build();
+    return infectionCreator.createRandomInfections(time, randomInfectionRate, randomCutOff);
   }
 
-  ProcessedEventResult generateInitialInfection(int time) {
-    return ImmutableProcessedEventResult.builder()
-        .addAllNewInfectionEvents(infectionCreator.generateInitialInfections(time))
-        .build();
+  List<InfectionEvent> generateInitialInfection(int time) {
+    return infectionCreator.generateInitialInfections(time);
   }
 }

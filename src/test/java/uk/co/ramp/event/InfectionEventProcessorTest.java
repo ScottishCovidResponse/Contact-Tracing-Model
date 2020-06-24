@@ -1,7 +1,12 @@
 package uk.co.ramp.event;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 import static uk.co.ramp.people.VirusStatus.EXPOSED;
 import static uk.co.ramp.people.VirusStatus.SUSCEPTIBLE;
@@ -78,12 +83,13 @@ public class InfectionEventProcessorTest {
 
     Case mock0 = mock(Case.class);
     when(mock0.virusStatus()).thenReturn(SUSCEPTIBLE);
-    when(mock0.isInfectious()).thenReturn(true);
+    when(mock0.isInfectious()).thenReturn(false);
     when(mock0.id()).thenReturn(infector);
 
     Case mock1 = mock(Case.class);
     when(mock1.id()).thenReturn(infectee);
     when(mock1.virusStatus()).thenReturn(SYMPTOMATIC);
+    when(mock1.isInfectious()).thenReturn(true);
 
     Map<Integer, Case> population = new HashMap<>();
     population.put(0, mock0);
@@ -106,7 +112,10 @@ public class InfectionEventProcessorTest {
     Assert.assertEquals(0, processedEventResult.newInfectionEvents().size());
     Assert.assertEquals(0, processedEventResult.newContactEvents().size());
     Assert.assertEquals(0, processedEventResult.newAlertEvents().size());
-    Assert.assertEquals(1, processedEventResult.completedEvents().size());
+    Assert.assertEquals(1, processedEventResult.newCompletedInfectionEvents().size());
+    Assert.assertEquals(0, processedEventResult.newCompletedVirusEvents().size());
+    Assert.assertEquals(0, processedEventResult.newCompletedContactEvents().size());
+    Assert.assertEquals(0, processedEventResult.newCompletedAlertEvents().size());
     VirusEvent evnt = processedEventResult.newVirusEvents().get(0);
 
     Assert.assertEquals(diseaseProperties.timeLatent().mean(), evnt.time());
@@ -131,5 +140,37 @@ public class InfectionEventProcessorTest {
   public void testInfectionEventVirusStatusSetInCase() {
     eventProcessor.processEvent(event);
     verify(thisCase).setVirusStatus(EXPOSED);
+  }
+
+  @Test
+  public void testClashingInfectionEvents() {
+    InfectionEvent event =
+        ImmutableInfectionEvent.builder()
+            .time(3)
+            .exposedBy(1)
+            .id(2)
+            .exposedTime(1)
+            .oldStatus(SUSCEPTIBLE)
+            .nextStatus(EXPOSED)
+            .build();
+
+    var population = mock(Population.class);
+    when(population.getVirusStatus(eq(2))).thenReturn(EXPOSED);
+    when(population.isInfectious(eq(2))).thenReturn(true);
+    this.eventProcessor =
+        new InfectionEventProcessor(population, diseaseProperties, distributionSampler);
+
+    var processedEvents = eventProcessor.processEvent(event);
+    assertThat(processedEvents.newVirusEvents()).isEmpty();
+    assertThat(processedEvents.newInfectionEvents()).isEmpty();
+    assertThat(processedEvents.newContactEvents()).isEmpty();
+    assertThat(processedEvents.newAlertEvents()).isEmpty();
+    assertThat(processedEvents.newCompletedInfectionEvents()).isEmpty();
+    assertThat(processedEvents.newCompletedVirusEvents()).isEmpty();
+    assertThat(processedEvents.newCompletedContactEvents()).isEmpty();
+    assertThat(processedEvents.newCompletedAlertEvents()).isEmpty();
+    verify(population, times(1)).getVirusStatus(2);
+    verify(population, never()).setVirusStatus(2, EXPOSED);
+    verifyNoMoreInteractions(population);
   }
 }

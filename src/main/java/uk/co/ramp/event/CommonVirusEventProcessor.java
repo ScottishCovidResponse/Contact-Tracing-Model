@@ -13,7 +13,6 @@ import uk.co.ramp.event.types.CommonVirusEvent;
 import uk.co.ramp.event.types.Event;
 import uk.co.ramp.event.types.EventProcessor;
 import uk.co.ramp.io.types.DiseaseProperties;
-import uk.co.ramp.people.Case;
 import uk.co.ramp.people.VirusStatus;
 import uk.co.ramp.utilities.MeanMax;
 
@@ -98,27 +97,25 @@ public abstract class CommonVirusEventProcessor<T extends Event> implements Even
 
   VirusStatus determineInfection(CommonVirusEvent e) {
     // TODO add real logic
-    Case p = population.get(e.id());
+    double health = population.getHealth(e.id());
     VirusStatus proposedVirusStatus =
-        p.health() > distributionSampler.uniformBetweenZeroAndOne() ? ASYMPTOMATIC : PRESYMPTOMATIC;
+        health > distributionSampler.uniformBetweenZeroAndOne() ? ASYMPTOMATIC : PRESYMPTOMATIC;
     return e.nextStatus().transitionTo(proposedVirusStatus);
   }
 
   VirusStatus determineSeverity(CommonVirusEvent e) {
     // TODO add real logic
-    Case p = population.get(e.id());
+    double health = population.getHealth(e.id());
     VirusStatus proposedVirusStatus =
-        p.health() > distributionSampler.uniformBetweenZeroAndOne()
-            ? RECOVERED
-            : SEVERELY_SYMPTOMATIC;
+        health > distributionSampler.uniformBetweenZeroAndOne() ? RECOVERED : SEVERELY_SYMPTOMATIC;
     return e.nextStatus().transitionTo(proposedVirusStatus);
   }
 
   VirusStatus determineOutcome(CommonVirusEvent e) {
     // TODO add real logic
-    Case p = population.get(e.id());
+    double health = population.getHealth(e.id());
     VirusStatus proposedVirusStatus =
-        p.health() > distributionSampler.uniformBetweenZeroAndOne() ? RECOVERED : DEAD;
+        health > distributionSampler.uniformBetweenZeroAndOne() ? RECOVERED : DEAD;
     return e.nextStatus().transitionTo(proposedVirusStatus);
   }
 }

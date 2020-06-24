@@ -1,4 +1,4 @@
-package uk.co.ramp.policy;
+package uk.co.ramp.policy.isolation;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static uk.co.ramp.distribution.ProgressionDistribution.FLAT;
@@ -72,6 +72,7 @@ public class IsolationPropertiesReaderTest {
           + "          'mean': 10,"
           + "          'max': 14"
           + "        },"
+          + "        'overrideCompliance': true,"
           + "        'priority': 1"
           + "      }"
           + "    }"
@@ -186,6 +187,7 @@ public class IsolationPropertiesReaderTest {
                                     .mean(10)
                                     .max(14)
                                     .build())
+                            .overrideCompliance(true)
                             .priority(1)
                             .build())
                     .build())

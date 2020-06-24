@@ -23,11 +23,12 @@ import uk.co.ramp.event.types.*;
 import uk.co.ramp.io.types.DiseaseProperties;
 import uk.co.ramp.people.Case;
 import uk.co.ramp.people.Human;
-import uk.co.ramp.policy.IsolationPolicy;
+import uk.co.ramp.policy.alert.AlertPolicyContext;
+import uk.co.ramp.policy.isolation.IsolationPolicy;
 
 @RunWith(SpringRunner.class)
 @DirtiesContext
-@Import({TestUtils.class, AppConfig.class, TestConfig.class})
+@Import({TestUtils.class, AppConfig.class, TestConfig.class, AlertPolicyContext.class})
 public class ContactEventProcessorTest {
   @Rule public LogSpy logSpy = new LogSpy();
 
@@ -200,7 +201,13 @@ public class ContactEventProcessorTest {
     ProcessedEventResult processedEventResult = eventProcessor.processEvent(event);
 
     Assert.assertEquals(1, processedEventResult.newInfectionEvents().size());
-    Assert.assertEquals(1, processedEventResult.completedEvents().size());
+    Assert.assertEquals(0, processedEventResult.newVirusEvents().size());
+    Assert.assertEquals(0, processedEventResult.newContactEvents().size());
+    Assert.assertEquals(0, processedEventResult.newAlertEvents().size());
+    Assert.assertEquals(1, processedEventResult.newCompletedContactEvents().size());
+    Assert.assertEquals(0, processedEventResult.newCompletedAlertEvents().size());
+    Assert.assertEquals(0, processedEventResult.newCompletedInfectionEvents().size());
+    Assert.assertEquals(0, processedEventResult.newCompletedVirusEvents().size());
     InfectionEvent evnt = processedEventResult.newInfectionEvents().get(0);
 
     Assert.assertEquals(1, evnt.time());

@@ -1,13 +1,13 @@
-package uk.co.ramp.policy;
+package uk.co.ramp.policy.isolation;
 
 import org.immutables.gson.Gson;
 import org.immutables.value.Value;
-import uk.co.ramp.utilities.MinMax;
+import uk.co.ramp.people.VirusStatus;
 
 @Gson.TypeAdapters
 @Value.Immutable
-interface ProportionInfectedIsolationProperty {
-  MinMax proportionInfected();
+interface VirusStatusIsolationProperty {
+  VirusStatus virusStatus();
 
   IsolationProperty isolationProperty();
 }

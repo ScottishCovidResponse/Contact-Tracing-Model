@@ -1,4 +1,4 @@
-package uk.co.ramp.policy;
+package uk.co.ramp.policy.isolation;
 
 import com.google.common.base.Preconditions;
 import java.util.List;
