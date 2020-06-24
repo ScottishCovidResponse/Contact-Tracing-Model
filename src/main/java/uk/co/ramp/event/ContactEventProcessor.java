@@ -105,16 +105,16 @@ public class ContactEventProcessor implements EventProcessor<ContactEvent> {
    * @return
    */
   Optional<InfectionEvent> evaluateExposures(ContactEvent c, int time) {
-    final Case personA = getMostSevere(population.get(c.to()), population.get(c.from()));
-    final Case personB =
+    Case personA = getMostSevere(population.get(c.to()), population.get(c.from()));
+    Case personB =
         personA == population.get(c.to()) ? population.get(c.from()) : population.get(c.to());
 
-    final boolean dangerMix = personA.isInfectious() && personB.virusStatus() == SUSCEPTIBLE;
+    boolean dangerMix = personA.isInfectious() && personB.virusStatus() == SUSCEPTIBLE;
 
-    final double expBias =
+    double expBias =
         diseaseProperties.exposureProbability4UnitContact()
             / (1.0 - diseaseProperties.exposureProbability4UnitContact());
-    final double exposureProb =
+    double exposureProb =
         1. / (1. + 1. / (expBias * FastMath.pow(c.weight(), diseaseProperties.exposureExponent())));
 
     if (dangerMix && distributionSampler.uniformBetweenZeroAndOne() < exposureProb) {
