@@ -3,7 +3,12 @@ package uk.co.ramp.event;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
-import uk.co.ramp.event.types.*;
+import uk.co.ramp.event.types.AlertEvent;
+import uk.co.ramp.event.types.ContactEvent;
+import uk.co.ramp.event.types.EventRunner;
+import uk.co.ramp.event.types.InfectionEvent;
+import uk.co.ramp.event.types.ProcessedEventResult;
+import uk.co.ramp.event.types.VirusEvent;
 
 public class EventRunnerImpl implements EventRunner {
   private final EventProcessorRunner<AlertEvent> alertEventRunner;
@@ -35,13 +40,13 @@ public class EventRunnerImpl implements EventRunner {
   public void run(int time, double randomInfectionRate, double randomCutOff) {
     List<ProcessedEventResult> processedResults =
         Stream.of(
-                infectionEventRunner.run(generateInitialInfection(time)),
-                alertEventRunner.run(eventListGroup.getAlertEvents(time)),
-                contactEventRunner.run(eventListGroup.getContactEvents(time)),
-                infectionEventRunner.run(eventListGroup.getInfectionEvents(time)),
-                virusEventRunner.run(eventListGroup.getVirusEvents(time)),
-                infectionEventRunner.run(
-                    createRandomInfections(time, randomInfectionRate, randomCutOff)))
+            infectionEventRunner.run(generateInitialInfection(time)),
+            alertEventRunner.run(eventList.getNewAlertEvents(time)),
+            contactEventRunner.run(eventList.getNewContactEvents(time)),
+            infectionEventRunner.run(eventList.getNewInfectionEvents(time)),
+            virusEventRunner.run(eventList.getNewVirusEvents(time)),
+            infectionEventRunner.run(
+                createRandomInfections(time, randomInfectionRate, randomCutOff)))
             .collect(Collectors.toList());
 
     ProcessedEventResult eventResults =
