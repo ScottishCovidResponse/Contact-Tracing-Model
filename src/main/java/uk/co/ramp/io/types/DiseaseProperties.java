@@ -33,9 +33,11 @@ public interface DiseaseProperties {
 
   double randomInfectionRate();
 
-  double exposureTuning();
-
   double exposureThreshold();
+
+  double exposureProbability4UnitContact();
+
+  double exposureExponent();
 
   ProgressionDistribution progressionDistribution();
 
@@ -46,6 +48,11 @@ public interface DiseaseProperties {
     Preconditions.checkState(
         randomInfectionRate() >= 0 && randomInfectionRate() <= 1,
         "Random infection rate should be between 0 and 1");
-    Preconditions.checkState(exposureTuning() >= 0, "Exposure tuning value should be positive");
+    Preconditions.checkState(
+        exposureExponent() > 0,
+        "Power exponent to determine the sensitivity of exposure probability to contact weight  should be positive");
+    Preconditions.checkState(
+        exposureProbability4UnitContact() > 0 && exposureProbability4UnitContact() < 1,
+        "Exposure probability when contact weight is one should be between 0 and 1");
   }
 }

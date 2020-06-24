@@ -97,8 +97,11 @@ public class AppConfigTest {
     Assert.assertTrue(diseaseProperties.timeTestResult().max() > 0);
 
     Assert.assertTrue(diseaseProperties.testAccuracy() > 0);
-    Assert.assertTrue(diseaseProperties.exposureTuning() > 0);
     Assert.assertTrue(diseaseProperties.exposureThreshold() > 0);
+    Assert.assertTrue(
+        diseaseProperties.exposureProbability4UnitContact() > 0.
+            && diseaseProperties.exposureProbability4UnitContact() < 1.);
+    Assert.assertTrue(diseaseProperties.exposureExponent() > 0.);
     Assert.assertTrue(diseaseProperties.randomInfectionRate() >= 0);
     Assert.assertNotNull(diseaseProperties.progressionDistribution());
   }

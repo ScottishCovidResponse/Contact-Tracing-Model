@@ -36,8 +36,9 @@
     "max": 3
   },
   "testAccuracy": 0.95,
-  "exposureTuning": 100,
   "exposureThreshold": 50,
+  "exposureProbability4UnitContact": 0.1,
+  "exposureExponent": 1.0,
   "randomInfectionRate": 0.05,
   "progressionDistribution": "EXPONENTIAL"
 }

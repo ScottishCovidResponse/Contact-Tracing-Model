@@ -38,7 +38,8 @@ public class DiseasePropertiesReader {
             .timeTestResult(meanMax)
             .testAccuracy(0.95)
             .exposureThreshold(500)
-            .exposureTuning(5)
+            .exposureProbability4UnitContact(0.1)
+            .exposureExponent(1.)
             .progressionDistribution(FLAT)
             .randomInfectionRate(0.05)
             .build();
