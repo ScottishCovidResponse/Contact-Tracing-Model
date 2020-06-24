@@ -35,12 +35,12 @@ public class EventRunnerImpl implements EventRunner {
   public void run(int time, double randomInfectionRate, double randomCutOff) {
     List<ProcessedEventResult> processedResults =
         Stream.of(
-                generateInitialInfection(time),
+                infectionEventRunner.run(generateInitialInfection(time)),
                 alertEventRunner.run(eventListGroup.getAlertEvents(time)),
                 contactEventRunner.run(eventListGroup.getContactEvents(time)),
                 infectionEventRunner.run(eventListGroup.getInfectionEvents(time)),
                 virusEventRunner.run(eventListGroup.getVirusEvents(time)),
-                createRandomInfections(time, randomInfectionRate, randomCutOff))
+                infectionEventRunner.run(createRandomInfections(time, randomInfectionRate, randomCutOff)))
             .collect(Collectors.toList());
 
     ProcessedEventResult eventResults =
@@ -53,18 +53,12 @@ public class EventRunnerImpl implements EventRunner {
     eventListGroup.completed(eventResults.completedEvents());
   }
 
-  ProcessedEventResult createRandomInfections(
+  List<InfectionEvent> createRandomInfections(
       int time, double randomInfectionRate, double randomCutOff) {
-    List<InfectionEvent> randomInfections =
-        infectionCreator.createRandomInfections(time, randomInfectionRate, randomCutOff);
-    return ImmutableProcessedEventResult.builder()
-        .addAllNewInfectionEvents(randomInfections)
-        .build();
+    return infectionCreator.createRandomInfections(time, randomInfectionRate, randomCutOff);
   }
 
-  ProcessedEventResult generateInitialInfection(int time) {
-    return ImmutableProcessedEventResult.builder()
-        .addAllNewInfectionEvents(infectionCreator.generateInitialInfections(time))
-        .build();
+  List<InfectionEvent> generateInitialInfection(int time) {
+    return infectionCreator.generateInitialInfections(time);
   }
 }
