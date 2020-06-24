@@ -40,7 +40,8 @@ public class EventRunnerImpl implements EventRunner {
                 contactEventRunner.run(eventListGroup.getContactEvents(time)),
                 infectionEventRunner.run(eventListGroup.getInfectionEvents(time)),
                 virusEventRunner.run(eventListGroup.getVirusEvents(time)),
-                infectionEventRunner.run(createRandomInfections(time, randomInfectionRate, randomCutOff)))
+                infectionEventRunner.run(
+                    createRandomInfections(time, randomInfectionRate, randomCutOff)))
             .collect(Collectors.toList());
 
     ProcessedEventResult eventResults =

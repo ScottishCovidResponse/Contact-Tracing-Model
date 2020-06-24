@@ -12,7 +12,6 @@ import uk.co.ramp.event.types.AlertEvent;
 import uk.co.ramp.event.types.ContactEvent;
 import uk.co.ramp.event.types.Event;
 import uk.co.ramp.event.types.EventProcessor;
-import uk.co.ramp.event.types.ImmutableProcessedEventResult;
 import uk.co.ramp.event.types.InfectionEvent;
 import uk.co.ramp.event.types.ProcessedEventResult;
 import uk.co.ramp.event.types.VirusEvent;
@@ -118,16 +117,17 @@ public class EventRunnerImplTest {
     when(eventListGroup.getInfectionEvents(eq(0))).thenReturn(infectionEvents);
     when(eventListGroup.getVirusEvents(eq(0))).thenReturn(virusEvents);
 
-    when(infectionCreator.generateInitialInfections(eq(0)))
-        .thenReturn(initialInfectionEvents);
+    when(infectionCreator.generateInitialInfections(eq(0))).thenReturn(initialInfectionEvents);
     when(infectionCreator.createRandomInfections(eq(0), eq(0D), eq(0D)))
         .thenReturn(randomInfectionEvents);
 
     when(alertEventRunner.run(eq(alertEvents))).thenReturn(mockProcessedAlertEventValue1);
     when(contactEventRunner.run(eq(contactEvents))).thenReturn(mockProcessedAlertEventValue2);
     when(infectionEventRunner.run(eq(infectionEvents))).thenReturn(mockProcessedAlertEventValue3);
-    when(infectionEventRunner.run(eq(initialInfectionEvents))).thenReturn(mockProcessedAlertEventValue5);
-    when(infectionEventRunner.run(eq(randomInfectionEvents))).thenReturn(mockProcessedAlertEventValue6);
+    when(infectionEventRunner.run(eq(initialInfectionEvents)))
+        .thenReturn(mockProcessedAlertEventValue5);
+    when(infectionEventRunner.run(eq(randomInfectionEvents)))
+        .thenReturn(mockProcessedAlertEventValue6);
     when(virusEventRunner.run(eq(virusEvents))).thenReturn(mockProcessedAlertEventValue4);
 
     when(mockAggregatedProcessedEvent.newAlertEvents())
