@@ -1,1 +1,7 @@
-{"runSettings": "/home/rikiya/project/covid-19/tmpcfg/runSettings.2616.json", "populationSettings": "/home/rikiya/project/covid-19/tmpcfg/populationSettings.2616.json", "diseaseSettings": "/home/rikiya/project/covid-19/tmpcfg/diseaseSettings.2616.json", "contactData": "/home/rikiya/git/Contact-Tracing-Model/input/homogeneous_contacts.csv", "initialExposures": "/home/rikiya/git/Contact-Tracing-Model/input/initialExposures.csv"}
+{
+  "runSettings": "input/runSettings.json",
+  "populationSettings": "input/populationSettings.json",
+  "diseaseSettings": "input/diseaseSettings.json",
+  "contactData": "input/homogeneous_contacts.csv",
+  "initialExposures": "input/initialExposures.csv"
+}
