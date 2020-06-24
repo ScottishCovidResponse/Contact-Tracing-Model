@@ -69,6 +69,7 @@ public class OutbreakTest {
     int days = 11;
     int popSize = 500;
     double randomInfection = 0.1;
+    int initialInfections = 1 + popSize / 10;
 
     Map<Integer, Case> population = new HashMap<>();
 
@@ -78,6 +79,9 @@ public class OutbreakTest {
       Case thisCase = new Case(human);
       population.put(i, thisCase);
     }
+
+    Set<Integer> cases = generateTestCases(initialInfections, popSize);
+    ReflectionTestUtils.setField(this.initialCaseReader, "cases", cases);
 
     List<ContactEvent> contacts = createContactRecords(days, population);
     eventListGroup.addContactEvents(contacts);
@@ -287,6 +291,8 @@ public class OutbreakTest {
       Case thisCase = new Case(human);
       population.put(i, thisCase);
     }
+
+    ReflectionTestUtils.setField(this.initialCaseReader, "cases", Set.of());
 
     List<ContactEvent> contacts = createContactRecords(days, population);
     eventListGroup.addContactEvents(contacts);
