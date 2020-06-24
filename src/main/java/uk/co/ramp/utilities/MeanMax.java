@@ -12,14 +12,14 @@ import org.immutables.value.Value.Immutable;
 @JsonDeserialize
 @Immutable
 public interface MeanMax {
-    int mean();
+  int mean();
 
-    int max();
+  int max();
 
-    @Check
-    default void check() {
-        Preconditions.checkState(mean() >= 0, "Mean should not be negative");
-        Preconditions.checkState(max() >= 0, "Max should not be negative");
-        Preconditions.checkState(mean() <= max(), "Mean should be less than or equal to max");
-    }
+  @Check
+  default void check() {
+    Preconditions.checkState(mean() >= 0, "Mean should not be negative");
+    Preconditions.checkState(max() >= 0, "Max should not be negative");
+    Preconditions.checkState(mean() <= max(), "Mean should be less than or equal to max");
+  }
 }

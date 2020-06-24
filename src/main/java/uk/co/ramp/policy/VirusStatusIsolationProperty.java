@@ -7,6 +7,7 @@ import uk.co.ramp.people.VirusStatus;
 @Gson.TypeAdapters
 @Value.Immutable
 interface VirusStatusIsolationProperty {
-    VirusStatus virusStatus();
-    IsolationProperty isolationProperty();
+  VirusStatus virusStatus();
+
+  IsolationProperty isolationProperty();
 }

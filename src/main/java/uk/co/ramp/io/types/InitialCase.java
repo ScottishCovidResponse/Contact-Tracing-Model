@@ -9,6 +9,5 @@ import org.immutables.value.Value;
 @JsonDeserialize
 public interface InitialCase {
 
-    int id();
-
+  int id();
 }

@@ -7,5 +7,4 @@ import org.immutables.value.Value;
 @Value.Immutable
 @JsonSerialize
 @JsonDeserialize
-public interface VirusEvent extends CommonVirusEvent {
-}
+public interface VirusEvent extends CommonVirusEvent {}

@@ -1,21 +1,21 @@
-//package uk.co.ramp;
+// package uk.co.ramp;
 //
-//import org.apache.commons.math3.random.RandomDataGenerator;
-//import org.junit.Assert;
-//import org.junit.Before;
-//import org.junit.Rule;
-//import org.junit.Test;
-//import uk.co.ramp.io.types.DiseaseProperties;
-//import uk.co.ramp.people.*;
-//import uk.co.ramp.utilities.ForbiddenAccessException;
+// import org.apache.commons.math3.random.RandomDataGenerator;
+// import org.junit.Assert;
+// import org.junit.Before;
+// import org.junit.Rule;
+// import org.junit.Test;
+// import uk.co.ramp.io.types.DiseaseProperties;
+// import uk.co.ramp.people.*;
+// import uk.co.ramp.utilities.ForbiddenAccessException;
 //
-//import java.util.Optional;
-//import java.util.Random;
+// import java.util.Optional;
+// import java.util.Random;
 //
-//import static org.hamcrest.CoreMatchers.containsString;
-//import static uk.co.ramp.people.VirusStatus.*;
+// import static org.hamcrest.CoreMatchers.containsString;
+// import static uk.co.ramp.people.VirusStatus.*;
 //
-//public class EvaluateCaseTest {
+// public class EvaluateCaseTest {
 //
 //    @Rule
 //    public LogSpy logSpy = new LogSpy();
@@ -27,7 +27,8 @@
 //    public void setup() throws ConfigurationException {
 //
 //        AppConfig appConfig = new AppConfig();
-//        Human human = ImmutableHuman.builder().health(0.5).gender(Gender.MALE).age(50).compliance(0.5).id(0).build();
+//        Human human =
+// ImmutableHuman.builder().health(0.5).gender(Gender.MALE).age(50).compliance(0.5).id(0).build();
 //        aCase = new Case(human);
 //        DiseaseProperties d = appConfig.diseaseProperties();
 //
@@ -64,7 +65,8 @@
 //        try {
 //            evaluateCase.initialExposure(EXPOSED, t);
 //        } catch (ForbiddenAccessException e) {
-//            Assert.assertThat(logSpy.getOutput(), containsString("Unable to set an initial exposure at t > 0"));
+//            Assert.assertThat(logSpy.getOutput(), containsString("Unable to set an initial
+// exposure at t > 0"));
 //            throw e;
 //        }
 //
@@ -120,7 +122,8 @@
 //        try {
 //            evaluateCase.randomExposure(t);
 //        } catch (InvalidStatusTransitionException e) {
-//            Assert.assertThat(logSpy.getOutput(), containsString("The person with id: 0 should not be able to transition from EXPOSED to EXPOSED"));
+//            Assert.assertThat(logSpy.getOutput(), containsString("The person with id: 0 should not
+// be able to transition from EXPOSED to EXPOSED"));
 //            throw e;
 //        }
 //    }
@@ -144,4 +147,4 @@
 //
 //
 //    }
-//}
+// }

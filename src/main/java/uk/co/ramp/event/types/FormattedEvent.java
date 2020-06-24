@@ -1,6 +1,5 @@
 package uk.co.ramp.event.types;
 
-
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
@@ -12,14 +11,13 @@ import org.immutables.value.Value;
 @JsonPropertyOrder({"time", "eventType", "id", "newStatus", "additionalInfo"})
 public interface FormattedEvent {
 
-    int time();
+  int time();
 
-    String eventType();
+  String eventType();
 
-    int id();
+  int id();
 
-    String newStatus();
+  String newStatus();
 
-    String additionalInfo();
-
+  String additionalInfo();
 }

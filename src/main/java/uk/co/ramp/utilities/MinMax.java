@@ -8,18 +8,16 @@ import org.immutables.value.Value.Immutable;
 @TypeAdapters
 @Immutable
 public abstract class MinMax {
-    public abstract int min();
-    public abstract int max();
+  public abstract int min();
 
-    public static MinMax of(int a, int b) {
-        return ImmutableMinMax.builder()
-                .min(Math.min(a, b))
-                .max(Math.max(a, b))
-                .build();
-    }
+  public abstract int max();
 
-    @Value.Check
-    protected void check() {
-        Preconditions.checkState(min() <= max(), "Min should be less than or equal to max");
-    }
+  public static MinMax of(int a, int b) {
+    return ImmutableMinMax.builder().min(Math.min(a, b)).max(Math.max(a, b)).build();
+  }
+
+  @Value.Check
+  protected void check() {
+    Preconditions.checkState(min() <= max(), "Min should be less than or equal to max");
+  }
 }

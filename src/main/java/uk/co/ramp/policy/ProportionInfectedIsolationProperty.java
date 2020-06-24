@@ -7,6 +7,7 @@ import uk.co.ramp.utilities.MinMax;
 @Gson.TypeAdapters
 @Value.Immutable
 interface ProportionInfectedIsolationProperty {
-    MinMax proportionInfected();
-    IsolationProperty isolationProperty();
+  MinMax proportionInfected();
+
+  IsolationProperty isolationProperty();
 }

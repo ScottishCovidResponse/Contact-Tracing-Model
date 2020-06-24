@@ -1,21 +1,21 @@
-//package uk.co.ramp.people;
+// package uk.co.ramp.people;
 //
-//import org.junit.Assert;
-//import org.junit.Before;
-//import org.junit.Rule;
-//import org.junit.Test;
-//import uk.co.ramp.LogSpy;
-//import uk.co.ramp.TestUtils;
-//import uk.co.ramp.event.types.ContactEvent;
-//import uk.co.ramp.event.types.ImmutableContactEvent;
+// import org.junit.Assert;
+// import org.junit.Before;
+// import org.junit.Rule;
+// import org.junit.Test;
+// import uk.co.ramp.LogSpy;
+// import uk.co.ramp.TestUtils;
+// import uk.co.ramp.event.types.ContactEvent;
+// import uk.co.ramp.event.types.ImmutableContactEvent;
 //
-//import java.util.*;
+// import java.util.*;
 //
-//import static org.hamcrest.core.StringContains.containsString;
-//import static uk.co.ramp.people.AlertStatus.*;
-//import static uk.co.ramp.people.VirusStatus.*;
+// import static org.hamcrest.core.StringContains.containsString;
+// import static uk.co.ramp.people.AlertStatus.*;
+// import static uk.co.ramp.people.VirusStatus.*;
 //
-//public class CaseTest {
+// public class CaseTest {
 //
 //    private Case person;
 //    @Rule
@@ -25,7 +25,8 @@
 //
 //    @Before
 //    public void setup() {
-//        human = ImmutableHuman.builder().age(random.nextInt(100)).compliance(random.nextDouble()).health(random.nextDouble()).gender(Gender.FEMALE).id(1).build();
+//        human =
+// ImmutableHuman.builder().age(random.nextInt(100)).compliance(random.nextDouble()).health(random.nextDouble()).gender(Gender.FEMALE).id(1).build();
 //        person = new Case(human);
 //    }
 //
@@ -142,7 +143,8 @@
 //        try {
 //            person.setAlertStatus(ALERTED);
 //        } catch (InvalidStatusTransitionException e) {
-//            Assert.assertThat(logSpy.getOutput(), containsString("It is not valid to transition between statuses TESTED_POSITIVE -> ALERTED"));
+//            Assert.assertThat(logSpy.getOutput(), containsString("It is not valid to transition
+// between statuses TESTED_POSITIVE -> ALERTED"));
 //            throw e;
 //        }
 //
@@ -158,7 +160,8 @@
 //            int weight = random.nextInt(100);
 //            int time = random.nextInt(100);
 //
-//            ContactEvent cr = ImmutableContactEvent.builder().from(id).to(person.id()).label("").weight(weight).time(time).build();
+//            ContactEvent cr =
+// ImmutableContactEvent.builder().from(id).to(person.id()).label("").weight(weight).time(time).build();
 //            if (!contacts.containsKey(id)) {
 //                contacts.put(id, cr);
 //                person.addContact(cr);
@@ -235,7 +238,8 @@
 //        try {
 //            person.setVirusStatus(DEAD);
 //        } catch (InvalidStatusTransitionException e) {
-//            Assert.assertThat(logSpy.getOutput(), containsString("It is not valid to transition between statuses RECOVERED -> DEAD"));
+//            Assert.assertThat(logSpy.getOutput(), containsString("It is not valid to transition
+// between statuses RECOVERED -> DEAD"));
 //            throw e;
 //        }
 //
@@ -268,4 +272,4 @@
 //
 //
 //    }
-//}
+// }

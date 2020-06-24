@@ -12,11 +12,11 @@ import org.immutables.value.Value;
 @SuppressWarnings("immutables:from")
 public interface ContactEvent extends Event {
 
-    int from();
+  int from();
 
-    int to();
+  int to();
 
-    double weight();
+  double weight();
 
-    String label();
+  String label();
 }

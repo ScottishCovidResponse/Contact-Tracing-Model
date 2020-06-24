@@ -1,5 +1,9 @@
 package uk.co.ramp;
 
+import java.io.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -13,65 +17,59 @@ import uk.co.ramp.io.csv.CsvException;
 import uk.co.ramp.io.types.CmptRecord;
 import uk.co.ramp.io.types.InputFiles;
 
-import java.io.*;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-
 @Service
 public class ContactRunner implements CommandLineRunner {
 
-    private static final Logger LOGGER = LogManager.getLogger(ContactRunner.class);
-    public static final String COMPARTMENTS_CSV = "Compartments.csv";
-    private InputFiles inputFileLocation;
-    private ApplicationContext ctx;
+  private static final Logger LOGGER = LogManager.getLogger(ContactRunner.class);
+  public static final String COMPARTMENTS_CSV = "Compartments.csv";
+  private InputFiles inputFileLocation;
+  private ApplicationContext ctx;
 
-    @Autowired
-    public void setApplicationContext(ApplicationContext applicationContext) {
-        this.ctx = applicationContext;
+  @Autowired
+  public void setApplicationContext(ApplicationContext applicationContext) {
+    this.ctx = applicationContext;
+  }
+
+  @Autowired
+  public void setInputFileLocation(InputFiles inputFileLocation) {
+    this.inputFileLocation = inputFileLocation;
+  }
+
+  @Override
+  public void run(String... args) throws IOException {
+
+    try (Reader reader = new FileReader(inputFileLocation.contactData())) {
+
+      ContactReader contactReader = ctx.getBean(ContactReader.class);
+      EventListGroup eventListGroup = ctx.getBean(EventListGroup.class);
+
+      eventListGroup.addContactEvents(contactReader.readEvents(reader));
+
+      LOGGER.info("Generated Population and Parsed Contact data");
+
+      Outbreak infection = ctx.getBean(Outbreak.class);
+
+      LOGGER.info("Initialised Outbreak");
+
+      Map<Integer, CmptRecord> records = infection.propagate();
+
+      LOGGER.info("Writing Compartment Records");
+      writeCompartments(new ArrayList<>(records.values()), new File(COMPARTMENTS_CSV));
+      LOGGER.info("Completed. Tidying up.");
     }
+  }
 
-    @Autowired
-    public void setInputFileLocation(InputFiles inputFileLocation) {
-        this.inputFileLocation = inputFileLocation;
+  void writeCompartments(List<CmptRecord> cmptRecords, File file) {
+    try (FileWriter fw = new FileWriter(file);
+        BufferedWriter bw = new BufferedWriter(fw)) {
+      ctx.getBean(CompartmentWriter.class).write(bw, cmptRecords);
+    } catch (IOException e) {
+      String message =
+          "An IO error occured when trying to write to "
+              + COMPARTMENTS_CSV
+              + ". Please ensure the file is not locked or open.";
+      LOGGER.fatal(message);
+      throw new CsvException(message);
     }
-
-
-    @Override
-    public void run(String... args) throws IOException {
-
-        try (Reader reader = new FileReader(inputFileLocation.contactData())) {
-
-            ContactReader contactReader = ctx.getBean(ContactReader.class);
-            EventListGroup eventListGroup = ctx.getBean(EventListGroup.class);
-
-            eventListGroup.addContactEvents(contactReader.readEvents(reader));
-
-            LOGGER.info("Generated Population and Parsed Contact data");
-
-            Outbreak infection = ctx.getBean(Outbreak.class);
-
-            LOGGER.info("Initialised Outbreak");
-
-            Map<Integer, CmptRecord> records = infection.propagate();
-
-            LOGGER.info("Writing Compartment Records");
-            writeCompartments(new ArrayList<>(records.values()), new File(COMPARTMENTS_CSV));
-            LOGGER.info("Completed. Tidying up.");
-        }
-
-    }
-
-    void writeCompartments(List<CmptRecord> cmptRecords, File file) {
-        try (FileWriter fw = new FileWriter(file);
-             BufferedWriter bw = new BufferedWriter(fw)) {
-            ctx.getBean(CompartmentWriter.class).write(bw, cmptRecords);
-        } catch (IOException e) {
-            String message = "An IO error occured when trying to write to " + COMPARTMENTS_CSV + ". Please ensure the file is not locked or open.";
-            LOGGER.fatal(message);
-            throw new CsvException(message);
-        }
-    }
-
-
+  }
 }

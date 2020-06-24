@@ -6,14 +6,13 @@ import org.immutables.value.Value;
 @Gson.TypeAdapters
 @Value.Immutable
 public interface Human {
-    int id();
+  int id();
 
-    int age();
+  int age();
 
-    Gender gender();
+  Gender gender();
 
-    double compliance();
+  double compliance();
 
-    double health();
-
+  double health();
 }
