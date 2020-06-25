@@ -51,7 +51,6 @@ public class DiseasePropertiesReaderTest {
           + "    \"max\": 8\n"
           + "  },\n"
           + "  \"testAccuracy\": 0.95,\n"
-          + "  \"exposureTuning\": 5,\n"
           + "  \"exposureThreshold\": 500,\n"
           + "  \"exposureProbability4UnitContact\": 0.1,\n"
           + "  \"exposureExponent\": 1.0,\n"
