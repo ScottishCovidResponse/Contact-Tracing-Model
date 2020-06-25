@@ -28,6 +28,11 @@ public class EventList<T extends Event> {
   }
 
   public List<T> getEventsInPeriod(int startTime, int endTime, Predicate<T> filter) {
+    /*
+     * Creates a stream of integers from start time to end time
+     * maps to events at each time step
+     * collects all relevant events (already sorted by time) into list
+     */
     return IntStream.rangeClosed(startTime, endTime)
         .mapToObj(i -> map.getOrDefault(i, List.of()))
         .flatMap(Collection::stream)

@@ -13,6 +13,11 @@ import uk.co.ramp.event.types.ProcessedEventResult;
 import uk.co.ramp.event.types.VirusEvent;
 
 public class ProcessedEventsGrouper {
+  /*
+   * Takes a list of ProcessedEventResult objects,
+   * then maps each object to the specified internal list i.e. contactEvents,
+   * and then collates the mapped events into a single list
+   */
   private <X extends Event> List<X> mapToList(
       List<ProcessedEventResult> combinedProcessedResults,
       Function<ProcessedEventResult, List<X>> newEventsFunc) {

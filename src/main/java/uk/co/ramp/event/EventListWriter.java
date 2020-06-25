@@ -26,6 +26,12 @@ public class EventListWriter {
   }
 
   public void output() {
+    /*
+     * Creates a stream of integers from time=0 to last event time
+     * then maps each time to events at that time
+     * then we pass those events (which are sorted by time) into formattedEventFactory
+     * which outputs the data
+     */
     var alertEvents =
         IntStream.rangeClosed(0, eventList.lastAlertTime())
             .boxed()
