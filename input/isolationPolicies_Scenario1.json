@@ -51,6 +51,7 @@
           "mean": 14,
           "max": 14
         },
+        "startOfIsolationTime": "CONTACT_TIME",
         "priority": 2
       }
     },
@@ -68,6 +69,7 @@
           "mean": 14,
           "max": 14
         },
+        "startOfIsolationTime": "CONTACT_TIME",
         "priority": 2
       }
     },
@@ -85,6 +87,7 @@
           "mean": 14,
           "max": 14
         },
+        "startOfIsolationTime": "CONTACT_TIME",
         "priority": 2
       }
     },
@@ -102,6 +105,7 @@
           "mean": 14,
           "max": 14
         },
+        "startOfIsolationTime": "CONTACT_TIME",
         "priority": 2
       }
     },
@@ -119,6 +123,7 @@
           "mean": 14,
           "max": 14
         },
+        "startOfIsolationTime": "CONTACT_TIME",
         "priority": 2
       }
     }

@@ -103,7 +103,8 @@ class SingleCaseIsolationPolicy {
         aCase.alertStatus(),
         aCase.compliance(),
         actualInfectedProportion,
-        currentTime);
+        currentTime,
+        aCase.exposedTime());
   }
 
   boolean isIndividualInIsolation(
@@ -112,7 +113,8 @@ class SingleCaseIsolationPolicy {
       AlertStatus alertStatus,
       double compliance,
       double actualInfectedProportion,
-      int currentTime) {
+      int currentTime,
+      int exposedTime) {
     IsolationMapValue isolationInfo = currentlyInIsolationMap.get(id);
     IsolationProperty matchingIsolationProperty =
         findRelevantIsolationProperty(actualInfectedProportion, virusStatus, alertStatus);
@@ -124,7 +126,7 @@ class SingleCaseIsolationPolicy {
       return currentTime - isolationInfo.startTime() < isolationInfo.maxIsolationTime();
     }
 
-    return populateAndGet(id, compliance, matchingIsolationProperty, currentTime);
+    return populateAndGet(id, compliance, matchingIsolationProperty, currentTime, exposedTime);
   }
 
   private IsolationMapValue updatedMapValue(
@@ -142,8 +144,30 @@ class SingleCaseIsolationPolicy {
         .build();
   }
 
+  private int startTime(
+      IsolationStartTimeType policyStartTimeType, int currentTime, int contactTime) {
+    if (policyStartTimeType == IsolationStartTimeType.ABSOLUTE) {
+      return currentTime;
+    } else if (policyStartTimeType == IsolationStartTimeType.CONTACT_TIME) {
+      return contactTime;
+    } else {
+      throw new IllegalStateException("Isolation Start Time type is invalid.");
+    }
+  }
+
   private boolean populateAndGet(
-      int id, double compliance, IsolationProperty matchingIsolationProperty, int currentTime) {
+      int id,
+      double compliance,
+      IsolationProperty matchingIsolationProperty,
+      int currentTime,
+      int exposedTime) {
+    int startOfIsolationTime =
+        startTime(
+            matchingIsolationProperty
+                .startOfIsolationTime()
+                .orElse(IsolationStartTimeType.ABSOLUTE),
+            currentTime,
+            exposedTime);
     int requiredIsolationTime =
         distributionSampler.getDistributionValue(
             matchingIsolationProperty.isolationTimeDistribution().orElse(infinityDistribution));
@@ -155,17 +179,21 @@ class SingleCaseIsolationPolicy {
             matchingIsolationProperty.isolationProbabilityDistribution());
     boolean timedPolicy = matchingIsolationProperty.isolationTimeDistribution().isPresent();
     boolean isDefaultPolicy = isolationProperties.defaultPolicy().equals(matchingIsolationProperty);
-    boolean overrideCompliance = matchingIsolationProperty.overrideCompliance().orElse(false);
+    boolean overrideComplianceAndForcePolicy =
+        matchingIsolationProperty.overrideComplianceAndForcePolicy().orElse(false);
     boolean isCompliant = distributionSampler.uniformBetweenZeroAndOne() < compliance;
+    boolean isInIsolationPeriod = startOfIsolationTime + requiredIsolationTime >= currentTime;
     boolean willIsolate =
-        (threshold < requiredIsolationFactor) && (overrideCompliance || isCompliant);
+        (threshold < requiredIsolationFactor)
+            && (overrideComplianceAndForcePolicy || isCompliant)
+            && (!timedPolicy || isInIsolationPeriod);
     if (timedPolicy || isDefaultPolicy) {
       currentlyInIsolationMap.compute(
           id,
           (i, val) ->
               willIsolate
                   ? updatedMapValue(
-                      val, matchingIsolationProperty, currentTime, requiredIsolationTime)
+                      val, matchingIsolationProperty, startOfIsolationTime, requiredIsolationTime)
                   : null);
     }
     return willIsolate;

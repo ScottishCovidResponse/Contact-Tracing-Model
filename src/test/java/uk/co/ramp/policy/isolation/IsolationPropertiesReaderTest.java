@@ -3,6 +3,7 @@ package uk.co.ramp.policy.isolation;
 import static org.assertj.core.api.Assertions.assertThat;
 import static uk.co.ramp.distribution.ProgressionDistribution.FLAT;
 import static uk.co.ramp.distribution.ProgressionDistribution.LINEAR;
+import static uk.co.ramp.policy.isolation.IsolationStartTimeType.CONTACT_TIME;
 
 import java.io.BufferedReader;
 import java.io.StringReader;
@@ -72,6 +73,7 @@ public class IsolationPropertiesReaderTest {
           + "          'mean': 10,"
           + "          'max': 14"
           + "        },"
+          + "        'startOfIsolationTime': 'CONTACT_TIME',"
           + "        'overrideCompliance': true,"
           + "        'priority': 1"
           + "      }"
@@ -92,6 +94,7 @@ public class IsolationPropertiesReaderTest {
           + "          'mean': 10,"
           + "          'max': 14"
           + "        },"
+          + "        'startOfIsolationTime': 'CONTACT_TIME',"
           + "        'priority': 1"
           + "      }"
           + "    },"
@@ -109,6 +112,7 @@ public class IsolationPropertiesReaderTest {
           + "          'mean': 10,"
           + "          'max': 14"
           + "        },"
+          + "        'startOfIsolationTime': 'CONTACT_TIME',"
           + "        'priority': 1"
           + "      }"
           + "    }"
@@ -187,7 +191,7 @@ public class IsolationPropertiesReaderTest {
                                     .mean(10)
                                     .max(14)
                                     .build())
-                            .overrideCompliance(true)
+                            .startOfIsolationTime(CONTACT_TIME)
                             .priority(1)
                             .build())
                     .build())
@@ -209,6 +213,7 @@ public class IsolationPropertiesReaderTest {
                                     .mean(10)
                                     .max(14)
                                     .build())
+                            .startOfIsolationTime(CONTACT_TIME)
                             .priority(1)
                             .build())
                     .build())
@@ -230,6 +235,7 @@ public class IsolationPropertiesReaderTest {
                                     .mean(10)
                                     .max(14)
                                     .build())
+                            .startOfIsolationTime(CONTACT_TIME)
                             .priority(1)
                             .build())
                     .build())

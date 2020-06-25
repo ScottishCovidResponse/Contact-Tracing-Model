@@ -16,8 +16,10 @@ interface IsolationProperty {
 
   Optional<Distribution> isolationTimeDistribution();
 
-  Optional<Boolean> overrideCompliance();
-  //    IsolationStartTime startTime();
+  Optional<Boolean> overrideComplianceAndForcePolicy();
+
+  Optional<IsolationStartTimeType> startOfIsolationTime();
+
   int priority();
 
   @Check

@@ -1,6 +1,6 @@
 package uk.co.ramp.policy.isolation;
 
-enum IsolationStartTime {
+enum IsolationStartTimeType {
   ABSOLUTE,
   CONTACT_TIME
 }

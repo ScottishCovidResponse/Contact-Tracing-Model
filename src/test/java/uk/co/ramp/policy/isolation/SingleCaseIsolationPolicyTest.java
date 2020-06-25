@@ -61,7 +61,7 @@ public class SingleCaseIsolationPolicyTest {
                   .id("Recovered Policy")
                   .priority(1)
                   .isolationProbabilityDistribution(flatZeroPercent)
-                  .overrideCompliance(true)
+                  .overrideComplianceAndForcePolicy(true)
                   .build())
           .build();
 
@@ -73,7 +73,7 @@ public class SingleCaseIsolationPolicyTest {
                   .id("Dead Policy")
                   .priority(1)
                   .isolationProbabilityDistribution(flatHundredPercent)
-                  .overrideCompliance(true)
+                  .overrideComplianceAndForcePolicy(true)
                   .build())
           .build();
 
@@ -132,6 +132,7 @@ public class SingleCaseIsolationPolicyTest {
       ImmutableDistribution.builder().mean(50).max(100).type(LINEAR).build();
 
   private final int currentTime = 0;
+  private final int exposedTime = 0;
   private final int id = 0;
   private final double compliance = 1.0;
   private final double proportionOfPopulationInfected = 0.0;
@@ -171,7 +172,8 @@ public class SingleCaseIsolationPolicyTest {
                 TESTED_POSITIVE,
                 compliance,
                 proportionOfPopulationInfected,
-                currentTime))
+                currentTime,
+                exposedTime))
         .isTrue();
   }
 
@@ -179,7 +181,13 @@ public class SingleCaseIsolationPolicyTest {
   public void testShouldIsolate_UsesIndividualPolicy_InfectedAndNoneTestedPositive() {
     assertThat(
             isolationPolicy.isIndividualInIsolation(
-                id, PRESYMPTOMATIC, NONE, compliance, proportionOfPopulationInfected, currentTime))
+                id,
+                PRESYMPTOMATIC,
+                NONE,
+                compliance,
+                proportionOfPopulationInfected,
+                currentTime,
+                exposedTime))
         .isFalse();
   }
 
@@ -187,7 +195,13 @@ public class SingleCaseIsolationPolicyTest {
   public void testShouldIsolate_UsesIndividualPolicy_ExposedInfectiousAndNoneAlerted() {
     assertThat(
             isolationPolicy.isIndividualInIsolation(
-                id, PRESYMPTOMATIC, NONE, compliance, proportionOfPopulationInfected, currentTime))
+                id,
+                PRESYMPTOMATIC,
+                NONE,
+                compliance,
+                proportionOfPopulationInfected,
+                currentTime,
+                exposedTime))
         .isFalse();
   }
 
@@ -200,7 +214,8 @@ public class SingleCaseIsolationPolicyTest {
                 ALERTED,
                 compliance,
                 proportionOfPopulationInfected,
-                currentTime))
+                currentTime,
+                exposedTime))
         .isTrue();
   }
 
@@ -208,7 +223,13 @@ public class SingleCaseIsolationPolicyTest {
   public void testShouldIsolate_UsesIndividualPolicy_ExposedUninfectiousAndNoneAlerted() {
     assertThat(
             isolationPolicy.isIndividualInIsolation(
-                id, EXPOSED, NONE, compliance, proportionOfPopulationInfected, currentTime))
+                id,
+                EXPOSED,
+                NONE,
+                compliance,
+                proportionOfPopulationInfected,
+                currentTime,
+                exposedTime))
         .isFalse();
   }
 
@@ -216,7 +237,13 @@ public class SingleCaseIsolationPolicyTest {
   public void testShouldIsolate_UsesIndividualPolicy_ExposedUninfectiousAndBothAlerted() {
     assertThat(
             isolationPolicy.isIndividualInIsolation(
-                id, EXPOSED, ALERTED, compliance, proportionOfPopulationInfected, currentTime))
+                id,
+                EXPOSED,
+                ALERTED,
+                compliance,
+                proportionOfPopulationInfected,
+                currentTime,
+                exposedTime))
         .isTrue();
   }
 
@@ -224,7 +251,13 @@ public class SingleCaseIsolationPolicyTest {
   public void testShouldIsolate_UsesIndividualPolicy_ExposedSuceptibleAndBothAlerted() {
     assertThat(
             isolationPolicy.isIndividualInIsolation(
-                id, SUSCEPTIBLE, ALERTED, compliance, proportionOfPopulationInfected, currentTime))
+                id,
+                SUSCEPTIBLE,
+                ALERTED,
+                compliance,
+                proportionOfPopulationInfected,
+                currentTime,
+                exposedTime))
         .isTrue();
   }
 
@@ -232,7 +265,13 @@ public class SingleCaseIsolationPolicyTest {
   public void testShouldIsolate_UsesIndividualPolicy_ExposedSuceptibleAndNoneAlerted() {
     assertThat(
             isolationPolicy.isIndividualInIsolation(
-                id, SUSCEPTIBLE, NONE, compliance, proportionOfPopulationInfected, currentTime))
+                id,
+                SUSCEPTIBLE,
+                NONE,
+                compliance,
+                proportionOfPopulationInfected,
+                currentTime,
+                exposedTime))
         .isFalse();
   }
 
@@ -241,7 +280,13 @@ public class SingleCaseIsolationPolicyTest {
     var proportionOfPopulationInfected = 0.25;
     assertThat(
             isolationPolicy.isIndividualInIsolation(
-                id, SUSCEPTIBLE, NONE, compliance, proportionOfPopulationInfected, currentTime))
+                id,
+                SUSCEPTIBLE,
+                NONE,
+                compliance,
+                proportionOfPopulationInfected,
+                currentTime,
+                exposedTime))
         .isTrue();
   }
 
@@ -250,7 +295,13 @@ public class SingleCaseIsolationPolicyTest {
     var proportionOfPopulationInfected = 0.15;
     assertThat(
             isolationPolicy.isIndividualInIsolation(
-                id, SUSCEPTIBLE, NONE, compliance, proportionOfPopulationInfected, currentTime))
+                id,
+                SUSCEPTIBLE,
+                NONE,
+                compliance,
+                proportionOfPopulationInfected,
+                currentTime,
+                exposedTime))
         .isFalse();
   }
 
@@ -258,7 +309,13 @@ public class SingleCaseIsolationPolicyTest {
   public void testShouldIsolate_RecoveredAndAlerted() {
     assertThat(
             isolationPolicy.isIndividualInIsolation(
-                id, RECOVERED, ALERTED, compliance, proportionOfPopulationInfected, currentTime))
+                id,
+                RECOVERED,
+                ALERTED,
+                compliance,
+                proportionOfPopulationInfected,
+                currentTime,
+                exposedTime))
         .isFalse();
   }
 
@@ -267,7 +324,13 @@ public class SingleCaseIsolationPolicyTest {
     var compliance = 0.1;
     assertThat(
             isolationPolicy.isIndividualInIsolation(
-                id, RECOVERED, ALERTED, compliance, proportionOfPopulationInfected, currentTime))
+                id,
+                RECOVERED,
+                ALERTED,
+                compliance,
+                proportionOfPopulationInfected,
+                currentTime,
+                exposedTime))
         .isFalse();
   }
 
@@ -275,7 +338,13 @@ public class SingleCaseIsolationPolicyTest {
   public void testShouldIsolate_DeadAndAlerted() {
     assertThat(
             isolationPolicy.isIndividualInIsolation(
-                id, DEAD, ALERTED, compliance, proportionOfPopulationInfected, currentTime))
+                id,
+                DEAD,
+                ALERTED,
+                compliance,
+                proportionOfPopulationInfected,
+                currentTime,
+                exposedTime))
         .isTrue();
   }
 
@@ -284,7 +353,13 @@ public class SingleCaseIsolationPolicyTest {
     var compliance = 0.1;
     assertThat(
             isolationPolicy.isIndividualInIsolation(
-                id, DEAD, ALERTED, compliance, proportionOfPopulationInfected, currentTime))
+                id,
+                DEAD,
+                ALERTED,
+                compliance,
+                proportionOfPopulationInfected,
+                currentTime,
+                exposedTime))
         .isTrue();
   }
 
@@ -313,7 +388,13 @@ public class SingleCaseIsolationPolicyTest {
     var proportionOfPopulationInfected = 0.25;
     assertThat(
             isolationPolicy.isIndividualInIsolation(
-                id, SYMPTOMATIC, NONE, compliance, proportionOfPopulationInfected, currentTime))
+                id,
+                SYMPTOMATIC,
+                NONE,
+                compliance,
+                proportionOfPopulationInfected,
+                currentTime,
+                exposedTime))
         .isTrue();
   }
 
@@ -341,7 +422,13 @@ public class SingleCaseIsolationPolicyTest {
     var proportionOfPopulationInfected = 0.25;
     assertThat(
             isolationPolicy.isIndividualInIsolation(
-                id, SYMPTOMATIC, NONE, compliance, proportionOfPopulationInfected, currentTime))
+                id,
+                SYMPTOMATIC,
+                NONE,
+                compliance,
+                proportionOfPopulationInfected,
+                currentTime,
+                exposedTime))
         .isFalse();
   }
 
@@ -371,19 +458,43 @@ public class SingleCaseIsolationPolicyTest {
 
     assertThat(
             isolationPolicy.isIndividualInIsolation(
-                id, SYMPTOMATIC, NONE, compliance, proportionOfPopulationInfected, currentTime))
+                id,
+                SYMPTOMATIC,
+                NONE,
+                compliance,
+                proportionOfPopulationInfected,
+                currentTime,
+                exposedTime))
         .isTrue();
     assertThat(
             isolationPolicy.isIndividualInIsolation(
-                id, SYMPTOMATIC, NONE, compliance, proportionOfPopulationInfected, currentTime + 1))
+                id,
+                SYMPTOMATIC,
+                NONE,
+                compliance,
+                proportionOfPopulationInfected,
+                currentTime + 1,
+                exposedTime))
         .isTrue();
     assertThat(
             isolationPolicy.isIndividualInIsolation(
-                id, SYMPTOMATIC, NONE, compliance, proportionOfPopulationInfected, currentTime + 2))
+                id,
+                SYMPTOMATIC,
+                NONE,
+                compliance,
+                proportionOfPopulationInfected,
+                currentTime + 2,
+                exposedTime))
         .isTrue();
     assertThat(
             isolationPolicy.isIndividualInIsolation(
-                id, SYMPTOMATIC, NONE, compliance, proportionOfPopulationInfected, currentTime + 3))
+                id,
+                SYMPTOMATIC,
+                NONE,
+                compliance,
+                proportionOfPopulationInfected,
+                currentTime + 3,
+                exposedTime))
         .isFalse();
   }
 
@@ -418,7 +529,8 @@ public class SingleCaseIsolationPolicyTest {
                 AWAITING_RESULT,
                 compliance,
                 proportionOfPopulationInfected,
-                currentTime))
+                currentTime,
+                exposedTime))
         .isTrue();
     assertThat(
             isolationPolicy.isIndividualInIsolation(
@@ -427,7 +539,8 @@ public class SingleCaseIsolationPolicyTest {
                 AWAITING_RESULT,
                 compliance,
                 proportionOfPopulationInfected,
-                currentTime + 1))
+                currentTime + 1,
+                exposedTime))
         .isTrue();
     assertThat(
             isolationPolicy.isIndividualInIsolation(
@@ -436,7 +549,8 @@ public class SingleCaseIsolationPolicyTest {
                 TESTED_POSITIVE,
                 compliance,
                 proportionOfPopulationInfected,
-                currentTime + 2))
+                currentTime + 2,
+                exposedTime))
         .isTrue();
     assertThat(
             isolationPolicy.isIndividualInIsolation(
@@ -445,7 +559,8 @@ public class SingleCaseIsolationPolicyTest {
                 TESTED_POSITIVE,
                 compliance,
                 proportionOfPopulationInfected,
-                currentTime + 3))
+                currentTime + 3,
+                exposedTime))
         .isFalse();
   }
 
@@ -480,7 +595,8 @@ public class SingleCaseIsolationPolicyTest {
                 AWAITING_RESULT,
                 compliance,
                 proportionOfPopulationInfected,
-                currentTime))
+                currentTime,
+                exposedTime))
         .isTrue();
     assertThat(
             isolationPolicy.isIndividualInIsolation(
@@ -489,15 +605,28 @@ public class SingleCaseIsolationPolicyTest {
                 AWAITING_RESULT,
                 compliance,
                 proportionOfPopulationInfected,
-                currentTime + 1))
+                currentTime + 1,
+                exposedTime))
         .isTrue();
     assertThat(
             isolationPolicy.isIndividualInIsolation(
-                id, RECOVERED, NONE, compliance, proportionOfPopulationInfected, currentTime + 2))
+                id,
+                RECOVERED,
+                NONE,
+                compliance,
+                proportionOfPopulationInfected,
+                currentTime + 2,
+                exposedTime))
         .isFalse();
     assertThat(
             isolationPolicy.isIndividualInIsolation(
-                id, RECOVERED, NONE, compliance, proportionOfPopulationInfected, currentTime + 3))
+                id,
+                RECOVERED,
+                NONE,
+                compliance,
+                proportionOfPopulationInfected,
+                currentTime + 3,
+                exposedTime))
         .isFalse();
   }
 
@@ -532,7 +661,8 @@ public class SingleCaseIsolationPolicyTest {
                 AWAITING_RESULT,
                 compliance,
                 proportionOfPopulationInfected,
-                currentTime))
+                currentTime,
+                exposedTime))
         .isTrue();
     assertThat(
             isolationPolicy.isIndividualInIsolation(
@@ -541,7 +671,8 @@ public class SingleCaseIsolationPolicyTest {
                 AWAITING_RESULT,
                 compliance,
                 proportionOfPopulationInfected,
-                currentTime + 1))
+                currentTime + 1,
+                exposedTime))
         .isTrue();
     assertThat(
             isolationPolicy.isIndividualInIsolation(
@@ -550,7 +681,8 @@ public class SingleCaseIsolationPolicyTest {
                 AWAITING_RESULT,
                 compliance,
                 proportionOfPopulationInfected,
-                currentTime + 2))
+                currentTime + 2,
+                exposedTime))
         .isTrue();
     assertThat(
             isolationPolicy.isIndividualInIsolation(
@@ -559,31 +691,68 @@ public class SingleCaseIsolationPolicyTest {
                 AWAITING_RESULT,
                 compliance,
                 proportionOfPopulationInfected,
-                currentTime + 3))
+                currentTime + 3,
+                exposedTime))
         .isFalse();
     assertThat(
             isolationPolicy.isIndividualInIsolation(
-                id, RECOVERED, NONE, compliance, proportionOfPopulationInfected, currentTime + 4))
+                id,
+                RECOVERED,
+                NONE,
+                compliance,
+                proportionOfPopulationInfected,
+                currentTime + 4,
+                exposedTime))
         .isFalse();
     assertThat(
             isolationPolicy.isIndividualInIsolation(
-                id, SYMPTOMATIC, NONE, compliance, proportionOfPopulationInfected, currentTime + 5))
+                id,
+                SYMPTOMATIC,
+                NONE,
+                compliance,
+                proportionOfPopulationInfected,
+                currentTime + 5,
+                exposedTime))
         .isTrue();
     assertThat(
             isolationPolicy.isIndividualInIsolation(
-                id, SYMPTOMATIC, NONE, compliance, proportionOfPopulationInfected, currentTime + 6))
+                id,
+                SYMPTOMATIC,
+                NONE,
+                compliance,
+                proportionOfPopulationInfected,
+                currentTime + 6,
+                exposedTime))
         .isTrue();
     assertThat(
             isolationPolicy.isIndividualInIsolation(
-                id, SYMPTOMATIC, NONE, compliance, proportionOfPopulationInfected, currentTime + 7))
+                id,
+                SYMPTOMATIC,
+                NONE,
+                compliance,
+                proportionOfPopulationInfected,
+                currentTime + 7,
+                exposedTime))
         .isTrue();
     assertThat(
             isolationPolicy.isIndividualInIsolation(
-                id, SYMPTOMATIC, NONE, compliance, proportionOfPopulationInfected, currentTime + 8))
+                id,
+                SYMPTOMATIC,
+                NONE,
+                compliance,
+                proportionOfPopulationInfected,
+                currentTime + 8,
+                exposedTime))
         .isFalse();
     assertThat(
             isolationPolicy.isIndividualInIsolation(
-                id, SYMPTOMATIC, NONE, compliance, proportionOfPopulationInfected, currentTime + 9))
+                id,
+                SYMPTOMATIC,
+                NONE,
+                compliance,
+                proportionOfPopulationInfected,
+                currentTime + 9,
+                exposedTime))
         .isFalse();
   }
 
@@ -618,31 +787,68 @@ public class SingleCaseIsolationPolicyTest {
                 AWAITING_RESULT,
                 compliance,
                 proportionOfPopulationInfected,
-                currentTime))
+                currentTime,
+                exposedTime))
         .isTrue();
     assertThat(
             isolationPolicy.isIndividualInIsolation(
-                id, RECOVERED, NONE, compliance, proportionOfPopulationInfected, currentTime + 1))
+                id,
+                RECOVERED,
+                NONE,
+                compliance,
+                proportionOfPopulationInfected,
+                currentTime + 1,
+                exposedTime))
         .isFalse();
     assertThat(
             isolationPolicy.isIndividualInIsolation(
-                id, SYMPTOMATIC, NONE, compliance, proportionOfPopulationInfected, currentTime + 2))
+                id,
+                SYMPTOMATIC,
+                NONE,
+                compliance,
+                proportionOfPopulationInfected,
+                currentTime + 2,
+                exposedTime))
         .isTrue();
     assertThat(
             isolationPolicy.isIndividualInIsolation(
-                id, SYMPTOMATIC, NONE, compliance, proportionOfPopulationInfected, currentTime + 3))
+                id,
+                SYMPTOMATIC,
+                NONE,
+                compliance,
+                proportionOfPopulationInfected,
+                currentTime + 3,
+                exposedTime))
         .isTrue();
     assertThat(
             isolationPolicy.isIndividualInIsolation(
-                id, SYMPTOMATIC, NONE, compliance, proportionOfPopulationInfected, currentTime + 4))
+                id,
+                SYMPTOMATIC,
+                NONE,
+                compliance,
+                proportionOfPopulationInfected,
+                currentTime + 4,
+                exposedTime))
         .isTrue();
     assertThat(
             isolationPolicy.isIndividualInIsolation(
-                id, SYMPTOMATIC, NONE, compliance, proportionOfPopulationInfected, currentTime + 5))
+                id,
+                SYMPTOMATIC,
+                NONE,
+                compliance,
+                proportionOfPopulationInfected,
+                currentTime + 5,
+                exposedTime))
         .isFalse();
     assertThat(
             isolationPolicy.isIndividualInIsolation(
-                id, SYMPTOMATIC, NONE, compliance, proportionOfPopulationInfected, currentTime + 6))
+                id,
+                SYMPTOMATIC,
+                NONE,
+                compliance,
+                proportionOfPopulationInfected,
+                currentTime + 6,
+                exposedTime))
         .isFalse();
   }
 
@@ -685,7 +891,13 @@ public class SingleCaseIsolationPolicyTest {
 
     assertThat(
             isolationPolicy.isIndividualInIsolation(
-                id, SUSCEPTIBLE, ALERTED, compliance, proportionOfPopulationInfected, currentTime))
+                id,
+                SUSCEPTIBLE,
+                ALERTED,
+                compliance,
+                proportionOfPopulationInfected,
+                currentTime,
+                exposedTime))
         .isTrue();
     assertThat(
             isolationPolicy.isIndividualInIsolation(
@@ -694,27 +906,58 @@ public class SingleCaseIsolationPolicyTest {
                 ALERTED,
                 compliance,
                 proportionOfPopulationInfected,
-                currentTime + 1))
+                currentTime + 1,
+                exposedTime))
         .isTrue();
     assertThat(
             isolationPolicy.isIndividualInIsolation(
-                id, SUSCEPTIBLE, NONE, compliance, proportionOfPopulationInfected, currentTime + 2))
+                id,
+                SUSCEPTIBLE,
+                NONE,
+                compliance,
+                proportionOfPopulationInfected,
+                currentTime + 2,
+                exposedTime))
         .isFalse();
     assertThat(
             isolationPolicy.isIndividualInIsolation(
-                id, SYMPTOMATIC, NONE, compliance, proportionOfPopulationInfected, currentTime + 3))
+                id,
+                SYMPTOMATIC,
+                NONE,
+                compliance,
+                proportionOfPopulationInfected,
+                currentTime + 3,
+                exposedTime))
         .isTrue();
     assertThat(
             isolationPolicy.isIndividualInIsolation(
-                id, SYMPTOMATIC, NONE, compliance, proportionOfPopulationInfected, currentTime + 4))
+                id,
+                SYMPTOMATIC,
+                NONE,
+                compliance,
+                proportionOfPopulationInfected,
+                currentTime + 4,
+                exposedTime))
         .isTrue();
     assertThat(
             isolationPolicy.isIndividualInIsolation(
-                id, SYMPTOMATIC, NONE, compliance, proportionOfPopulationInfected, currentTime + 5))
+                id,
+                SYMPTOMATIC,
+                NONE,
+                compliance,
+                proportionOfPopulationInfected,
+                currentTime + 5,
+                exposedTime))
         .isTrue();
     assertThat(
             isolationPolicy.isIndividualInIsolation(
-                id, SYMPTOMATIC, NONE, compliance, proportionOfPopulationInfected, currentTime + 6))
+                id,
+                SYMPTOMATIC,
+                NONE,
+                compliance,
+                proportionOfPopulationInfected,
+                currentTime + 6,
+                exposedTime))
         .isFalse();
   }
 
@@ -757,27 +1000,63 @@ public class SingleCaseIsolationPolicyTest {
 
     assertThat(
             isolationPolicy.isIndividualInIsolation(
-                id, SUSCEPTIBLE, ALERTED, compliance, proportionOfPopulationInfected, currentTime))
+                id,
+                SUSCEPTIBLE,
+                ALERTED,
+                compliance,
+                proportionOfPopulationInfected,
+                currentTime,
+                exposedTime))
         .isTrue();
     assertThat(
             isolationPolicy.isIndividualInIsolation(
-                id, SUSCEPTIBLE, NONE, compliance, proportionOfPopulationInfected, currentTime + 1))
+                id,
+                SUSCEPTIBLE,
+                NONE,
+                compliance,
+                proportionOfPopulationInfected,
+                currentTime + 1,
+                exposedTime))
         .isFalse();
     assertThat(
             isolationPolicy.isIndividualInIsolation(
-                id, SYMPTOMATIC, NONE, compliance, proportionOfPopulationInfected, currentTime + 2))
+                id,
+                SYMPTOMATIC,
+                NONE,
+                compliance,
+                proportionOfPopulationInfected,
+                currentTime + 2,
+                exposedTime))
         .isTrue();
     assertThat(
             isolationPolicy.isIndividualInIsolation(
-                id, SYMPTOMATIC, NONE, compliance, proportionOfPopulationInfected, currentTime + 3))
+                id,
+                SYMPTOMATIC,
+                NONE,
+                compliance,
+                proportionOfPopulationInfected,
+                currentTime + 3,
+                exposedTime))
         .isTrue();
     assertThat(
             isolationPolicy.isIndividualInIsolation(
-                id, SYMPTOMATIC, NONE, compliance, proportionOfPopulationInfected, currentTime + 4))
+                id,
+                SYMPTOMATIC,
+                NONE,
+                compliance,
+                proportionOfPopulationInfected,
+                currentTime + 4,
+                exposedTime))
         .isTrue();
     assertThat(
             isolationPolicy.isIndividualInIsolation(
-                id, SYMPTOMATIC, NONE, compliance, proportionOfPopulationInfected, currentTime + 5))
+                id,
+                SYMPTOMATIC,
+                NONE,
+                compliance,
+                proportionOfPopulationInfected,
+                currentTime + 5,
+                exposedTime))
         .isFalse();
   }
 
@@ -786,7 +1065,13 @@ public class SingleCaseIsolationPolicyTest {
     var compliance = 0.25;
     assertThat(
             isolationPolicy.isIndividualInIsolation(
-                id, SUSCEPTIBLE, ALERTED, compliance, proportionOfPopulationInfected, currentTime))
+                id,
+                SUSCEPTIBLE,
+                ALERTED,
+                compliance,
+                proportionOfPopulationInfected,
+                currentTime,
+                exposedTime))
         .isFalse();
   }
 
@@ -813,7 +1098,13 @@ public class SingleCaseIsolationPolicyTest {
     var proportionOfPopulationInfectious = 0.0;
     assertThat(
             isolationPolicy.isIndividualInIsolation(
-                id, SYMPTOMATIC, NONE, compliance, proportionOfPopulationInfectious, currentTime))
+                id,
+                SYMPTOMATIC,
+                NONE,
+                compliance,
+                proportionOfPopulationInfectious,
+                currentTime,
+                exposedTime))
         .isTrue();
     proportionOfPopulationInfectious = 0.3;
     assertThat(
@@ -823,7 +1114,8 @@ public class SingleCaseIsolationPolicyTest {
                 NONE,
                 compliance,
                 proportionOfPopulationInfectious,
-                currentTime + 1))
+                currentTime + 1,
+                exposedTime))
         .isTrue();
     assertThat(
             isolationPolicy.isIndividualInIsolation(
@@ -832,7 +1124,8 @@ public class SingleCaseIsolationPolicyTest {
                 NONE,
                 compliance,
                 proportionOfPopulationInfectious,
-                currentTime + 2))
+                currentTime + 2,
+                exposedTime))
         .isTrue();
     assertThat(
             isolationPolicy.isIndividualInIsolation(
@@ -841,7 +1134,8 @@ public class SingleCaseIsolationPolicyTest {
                 NONE,
                 compliance,
                 proportionOfPopulationInfectious,
-                currentTime + 3))
+                currentTime + 3,
+                exposedTime))
         .isTrue();
     assertThat(
             isolationPolicy.isIndividualInIsolation(
@@ -850,7 +1144,8 @@ public class SingleCaseIsolationPolicyTest {
                 NONE,
                 compliance,
                 proportionOfPopulationInfectious,
-                currentTime + 4))
+                currentTime + 4,
+                exposedTime))
         .isTrue();
     assertThat(
             isolationPolicy.isIndividualInIsolation(
@@ -859,7 +1154,8 @@ public class SingleCaseIsolationPolicyTest {
                 NONE,
                 compliance,
                 proportionOfPopulationInfectious,
-                currentTime + 5))
+                currentTime + 5,
+                exposedTime))
         .isTrue();
     proportionOfPopulationInfectious = 0.0;
     assertThat(
@@ -869,7 +1165,8 @@ public class SingleCaseIsolationPolicyTest {
                 NONE,
                 compliance,
                 proportionOfPopulationInfectious,
-                currentTime + 6))
+                currentTime + 6,
+                exposedTime))
         .isFalse();
     assertThat(
             isolationPolicy.isIndividualInIsolation(
@@ -878,7 +1175,8 @@ public class SingleCaseIsolationPolicyTest {
                 NONE,
                 compliance,
                 proportionOfPopulationInfectious,
-                currentTime + 7))
+                currentTime + 7,
+                exposedTime))
         .isFalse();
     assertThat(
             isolationPolicy.isIndividualInIsolation(
@@ -887,7 +1185,8 @@ public class SingleCaseIsolationPolicyTest {
                 NONE,
                 compliance,
                 proportionOfPopulationInfectious,
-                currentTime + 8))
+                currentTime + 8,
+                exposedTime))
         .isFalse();
   }
 
@@ -896,7 +1195,13 @@ public class SingleCaseIsolationPolicyTest {
     var proportionOfPopulationInfectious = 0.0;
     assertThat(
             isolationPolicy.isIndividualInIsolation(
-                id, SUSCEPTIBLE, NONE, compliance, proportionOfPopulationInfectious, currentTime))
+                id,
+                SUSCEPTIBLE,
+                NONE,
+                compliance,
+                proportionOfPopulationInfectious,
+                currentTime,
+                exposedTime))
         .isFalse();
     proportionOfPopulationInfectious = 0.3;
     assertThat(
@@ -906,7 +1211,8 @@ public class SingleCaseIsolationPolicyTest {
                 NONE,
                 compliance,
                 proportionOfPopulationInfectious,
-                currentTime + 1))
+                currentTime + 1,
+                exposedTime))
         .isTrue();
     assertThat(
             isolationPolicy.isIndividualInIsolation(
@@ -915,7 +1221,8 @@ public class SingleCaseIsolationPolicyTest {
                 NONE,
                 compliance,
                 proportionOfPopulationInfectious,
-                currentTime + 2))
+                currentTime + 2,
+                exposedTime))
         .isTrue();
     assertThat(
             isolationPolicy.isIndividualInIsolation(
@@ -924,7 +1231,8 @@ public class SingleCaseIsolationPolicyTest {
                 NONE,
                 compliance,
                 proportionOfPopulationInfectious,
-                currentTime + 3))
+                currentTime + 3,
+                exposedTime))
         .isTrue();
     assertThat(
             isolationPolicy.isIndividualInIsolation(
@@ -933,7 +1241,8 @@ public class SingleCaseIsolationPolicyTest {
                 NONE,
                 compliance,
                 proportionOfPopulationInfectious,
-                currentTime + 4))
+                currentTime + 4,
+                exposedTime))
         .isTrue();
     assertThat(
             isolationPolicy.isIndividualInIsolation(
@@ -942,7 +1251,8 @@ public class SingleCaseIsolationPolicyTest {
                 NONE,
                 compliance,
                 proportionOfPopulationInfectious,
-                currentTime + 5))
+                currentTime + 5,
+                exposedTime))
         .isTrue();
   }
 
@@ -956,7 +1266,8 @@ public class SingleCaseIsolationPolicyTest {
                 ALERTED,
                 compliance,
                 proportionOfPopulationInfectious,
-                currentTime))
+                currentTime,
+                exposedTime))
         .isTrue();
     assertThat(
             isolationPolicy.isIndividualInIsolation(
@@ -965,7 +1276,8 @@ public class SingleCaseIsolationPolicyTest {
                 NONE,
                 compliance,
                 proportionOfPopulationInfectious,
-                currentTime + 1))
+                currentTime + 1,
+                exposedTime))
         .isFalse();
     assertThat(
             isolationPolicy.isIndividualInIsolation(
@@ -974,7 +1286,8 @@ public class SingleCaseIsolationPolicyTest {
                 ALERTED,
                 compliance,
                 proportionOfPopulationInfectious,
-                currentTime + 2))
+                currentTime + 2,
+                exposedTime))
         .isTrue();
   }
 
@@ -988,7 +1301,8 @@ public class SingleCaseIsolationPolicyTest {
                 ALERTED,
                 compliance,
                 proportionOfPopulationInfectious,
-                currentTime))
+                currentTime,
+                exposedTime))
         .isTrue();
     assertThat(
             isolationPolicy.isIndividualInIsolation(
@@ -997,7 +1311,8 @@ public class SingleCaseIsolationPolicyTest {
                 NONE,
                 compliance,
                 proportionOfPopulationInfectious,
-                currentTime + 5))
+                currentTime + 5,
+                exposedTime))
         .isFalse();
     assertThat(
             isolationPolicy.isIndividualInIsolation(
@@ -1006,7 +1321,8 @@ public class SingleCaseIsolationPolicyTest {
                 ALERTED,
                 compliance,
                 proportionOfPopulationInfectious,
-                currentTime + 9))
+                currentTime + 9,
+                exposedTime))
         .isTrue();
   }
 
@@ -1056,7 +1372,8 @@ public class SingleCaseIsolationPolicyTest {
                     ALERTED,
                     compliance,
                     proportionOfPopulationInfected,
-                    currentTime))
+                    currentTime,
+                    exposedTime))
         .withMessageContaining("Policy outcome description is not deterministic");
   }
 
@@ -1096,43 +1413,232 @@ public class SingleCaseIsolationPolicyTest {
 
     assertThat(
             isolationPolicy.isIndividualInIsolation(
-                id, SUSCEPTIBLE, NONE, compliance, proportionOfPopulationInfectious, currentTime))
+                id,
+                SUSCEPTIBLE,
+                NONE,
+                compliance,
+                proportionOfPopulationInfectious,
+                currentTime,
+                exposedTime))
         .isTrue();
     assertThat(
             isolationPolicy.isIndividualInIsolation(
-                id, SUSCEPTIBLE, NONE, compliance, proportionOfPopulationInfectious, currentTime))
+                id,
+                SUSCEPTIBLE,
+                NONE,
+                compliance,
+                proportionOfPopulationInfectious,
+                currentTime,
+                exposedTime))
         .isTrue();
     assertThat(
             isolationPolicy.isIndividualInIsolation(
-                id, SUSCEPTIBLE, NONE, compliance, proportionOfPopulationInfectious, currentTime))
+                id,
+                SUSCEPTIBLE,
+                NONE,
+                compliance,
+                proportionOfPopulationInfectious,
+                currentTime,
+                exposedTime))
         .isTrue();
     assertThat(
             isolationPolicy.isIndividualInIsolation(
-                id, SUSCEPTIBLE, NONE, compliance, proportionOfPopulationInfectious, currentTime))
+                id,
+                SUSCEPTIBLE,
+                NONE,
+                compliance,
+                proportionOfPopulationInfectious,
+                currentTime,
+                exposedTime))
         .isTrue();
     assertThat(
             isolationPolicy.isIndividualInIsolation(
-                id, SUSCEPTIBLE, NONE, compliance, proportionOfPopulationInfectious, currentTime))
+                id,
+                SUSCEPTIBLE,
+                NONE,
+                compliance,
+                proportionOfPopulationInfectious,
+                currentTime,
+                exposedTime))
         .isTrue();
     assertThat(
             isolationPolicy.isIndividualInIsolation(
-                id, SUSCEPTIBLE, NONE, compliance, proportionOfPopulationInfectious, currentTime))
+                id,
+                SUSCEPTIBLE,
+                NONE,
+                compliance,
+                proportionOfPopulationInfectious,
+                currentTime,
+                exposedTime))
         .isTrue();
     assertThat(
             isolationPolicy.isIndividualInIsolation(
-                id, SUSCEPTIBLE, NONE, compliance, proportionOfPopulationInfectious, currentTime))
+                id,
+                SUSCEPTIBLE,
+                NONE,
+                compliance,
+                proportionOfPopulationInfectious,
+                currentTime,
+                exposedTime))
         .isTrue();
     assertThat(
             isolationPolicy.isIndividualInIsolation(
-                id, SUSCEPTIBLE, NONE, compliance, proportionOfPopulationInfectious, currentTime))
+                id,
+                SUSCEPTIBLE,
+                NONE,
+                compliance,
+                proportionOfPopulationInfectious,
+                currentTime,
+                exposedTime))
         .isFalse();
     assertThat(
             isolationPolicy.isIndividualInIsolation(
-                id, SUSCEPTIBLE, NONE, compliance, proportionOfPopulationInfectious, currentTime))
+                id,
+                SUSCEPTIBLE,
+                NONE,
+                compliance,
+                proportionOfPopulationInfectious,
+                currentTime,
+                exposedTime))
         .isFalse();
     assertThat(
             isolationPolicy.isIndividualInIsolation(
-                id, SUSCEPTIBLE, NONE, compliance, proportionOfPopulationInfectious, currentTime))
+                id,
+                SUSCEPTIBLE,
+                NONE,
+                compliance,
+                proportionOfPopulationInfectious,
+                currentTime,
+                exposedTime))
         .isFalse();
+  }
+
+  @Test
+  public void testStartIsolationFromExposedTime() {
+    IsolationProperties isolationProperties =
+        ImmutableIsolationProperties.builder()
+            .defaultPolicy(defaultZeroIsolationProperty)
+            .addGlobalIsolationPolicies(twentyPercentInfectedHundredPercentIsolationProperty)
+            .addVirusStatusPolicies(
+                ImmutableVirusStatusIsolationProperty.builder()
+                    .virusStatus(SYMPTOMATIC)
+                    .isolationProperty(
+                        ImmutableIsolationProperty.builder()
+                            .id("policy name")
+                            .priority(2)
+                            .isolationProbabilityDistribution(flatHundredPercent)
+                            .isolationTimeDistribution(flatOneDay)
+                            .startOfIsolationTime(IsolationStartTimeType.CONTACT_TIME)
+                            .build())
+                    .build())
+            .isolationProbabilityDistributionThreshold(thresholdLinearDistribution)
+            .build();
+
+    var isolationPolicy = new SingleCaseIsolationPolicy(isolationProperties, distributionSampler);
+    var exposedTime = 0;
+    var currentTime = 0;
+    assertThat(
+            isolationPolicy.isIndividualInIsolation(
+                id,
+                SYMPTOMATIC,
+                NONE,
+                compliance,
+                proportionOfPopulationInfected,
+                currentTime,
+                exposedTime))
+        .isTrue();
+
+    isolationPolicy = new SingleCaseIsolationPolicy(isolationProperties, distributionSampler);
+    exposedTime = 0;
+    currentTime = 1;
+    assertThat(
+            isolationPolicy.isIndividualInIsolation(
+                id,
+                SYMPTOMATIC,
+                NONE,
+                compliance,
+                proportionOfPopulationInfected,
+                currentTime,
+                exposedTime))
+        .isTrue();
+
+    isolationPolicy = new SingleCaseIsolationPolicy(isolationProperties, distributionSampler);
+    exposedTime = 0;
+    currentTime = 2;
+    assertThat(
+            isolationPolicy.isIndividualInIsolation(
+                id,
+                SYMPTOMATIC,
+                NONE,
+                compliance,
+                proportionOfPopulationInfected,
+                currentTime,
+                exposedTime))
+        .isFalse();
+  }
+
+  @Test
+  public void testStartIsolationFromAbsoluteCurrentTime() {
+    IsolationProperties isolationProperties =
+        ImmutableIsolationProperties.builder()
+            .defaultPolicy(defaultZeroIsolationProperty)
+            .addGlobalIsolationPolicies(twentyPercentInfectedHundredPercentIsolationProperty)
+            .addVirusStatusPolicies(
+                ImmutableVirusStatusIsolationProperty.builder()
+                    .virusStatus(SYMPTOMATIC)
+                    .isolationProperty(
+                        ImmutableIsolationProperty.builder()
+                            .id("policy name")
+                            .priority(2)
+                            .isolationProbabilityDistribution(flatHundredPercent)
+                            .isolationTimeDistribution(flatOneDay)
+                            .startOfIsolationTime(IsolationStartTimeType.ABSOLUTE)
+                            .build())
+                    .build())
+            .isolationProbabilityDistributionThreshold(thresholdLinearDistribution)
+            .build();
+
+    var isolationPolicy = new SingleCaseIsolationPolicy(isolationProperties, distributionSampler);
+
+    var exposedTime = 0;
+    var currentTime = 0;
+    assertThat(
+            isolationPolicy.isIndividualInIsolation(
+                id,
+                SYMPTOMATIC,
+                NONE,
+                compliance,
+                proportionOfPopulationInfected,
+                currentTime,
+                exposedTime))
+        .isTrue();
+
+    isolationPolicy = new SingleCaseIsolationPolicy(isolationProperties, distributionSampler);
+    exposedTime = 0;
+    currentTime = 1;
+    assertThat(
+            isolationPolicy.isIndividualInIsolation(
+                id,
+                SYMPTOMATIC,
+                NONE,
+                compliance,
+                proportionOfPopulationInfected,
+                currentTime,
+                exposedTime))
+        .isTrue();
+
+    isolationPolicy = new SingleCaseIsolationPolicy(isolationProperties, distributionSampler);
+    exposedTime = 0;
+    currentTime = 2;
+    assertThat(
+            isolationPolicy.isIndividualInIsolation(
+                id,
+                SYMPTOMATIC,
+                NONE,
+                compliance,
+                proportionOfPopulationInfected,
+                currentTime,
+                exposedTime))
+        .isTrue();
   }
 }
