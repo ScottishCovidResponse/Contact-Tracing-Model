@@ -5,4 +5,6 @@ import org.immutables.value.Value.Immutable;
 @Immutable
 interface AlertPolicy {
   int recentContactsLookBackTime();
+
+  int noOfTracingLevels();
 }

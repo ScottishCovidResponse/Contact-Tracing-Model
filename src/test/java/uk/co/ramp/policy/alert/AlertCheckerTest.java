@@ -5,44 +5,26 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-import java.util.List;
+import java.util.Set;
 import org.junit.Before;
 import org.junit.Test;
 import uk.co.ramp.Population;
-import uk.co.ramp.event.CompletionEventListGroup;
 import uk.co.ramp.event.types.ImmutableAlertEvent;
-import uk.co.ramp.event.types.ImmutableContactEvent;
 import uk.co.ramp.people.AlertStatus;
 import uk.co.ramp.people.VirusStatus;
 
 public class AlertCheckerTest {
-  private CompletionEventListGroup eventList;
+  private AlertContactTracer contactTracer;
   private AlertPolicy alertPolicy;
   private Population population;
 
   @Before
   public void setUp() {
-    eventList = mock(CompletionEventListGroup.class);
+    contactTracer = mock(AlertContactTracer.class);
     alertPolicy = mock(AlertPolicy.class);
     population = mock(Population.class);
 
-    when(eventList.getCompletedContactEventsInPeriod(eq(7), eq(20), eq(1)))
-        .thenReturn(
-            List.of(
-                ImmutableContactEvent.builder()
-                    .from(1)
-                    .to(2)
-                    .time(18)
-                    .label("school")
-                    .weight(0.5)
-                    .build(),
-                ImmutableContactEvent.builder()
-                    .from(3)
-                    .to(1)
-                    .time(19)
-                    .weight(0.5)
-                    .label("home")
-                    .build()));
+    when(contactTracer.traceRecentContacts(eq(7), eq(20), eq(1))).thenReturn(Set.of(2, 3));
     when(alertPolicy.recentContactsLookBackTime()).thenReturn(14);
     when(population.getVirusStatus(eq(1))).thenReturn(VirusStatus.SYMPTOMATIC);
     when(population.getVirusStatus(eq(2))).thenReturn(VirusStatus.SUSCEPTIBLE);
@@ -54,7 +36,7 @@ public class AlertCheckerTest {
 
   @Test
   public void testFindRecentContacts() {
-    var alertChecker = new AlertChecker(alertPolicy, eventList, population);
+    var alertChecker = new AlertChecker(alertPolicy, contactTracer, population);
 
     var event =
         ImmutableAlertEvent.builder()
@@ -64,7 +46,7 @@ public class AlertCheckerTest {
             .nextStatus(AlertStatus.ALERTED)
             .build();
     assertThat(alertChecker.checkForAlert(1, VirusStatus.SYMPTOMATIC, 20))
-        .containsExactly(
+        .containsExactlyInAnyOrder(
             event.withNextStatus(AlertStatus.REQUESTED_TEST), event.withId(2), event.withId(3));
   }
 }
