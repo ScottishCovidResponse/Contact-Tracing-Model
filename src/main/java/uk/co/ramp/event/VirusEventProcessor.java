@@ -50,7 +50,7 @@ public class VirusEventProcessor extends CommonVirusEventProcessor<VirusEvent> {
               .time(event.time() + deltaTime)
               .build();
 
-      List<AlertEvent> alertEvents = checkForAlert(subsequentEvent);
+      List<AlertEvent> alertEvents = checkForAlert(event);
 
       return ImmutableProcessedEventResult.builder()
           .addNewVirusEvents(subsequentEvent)
