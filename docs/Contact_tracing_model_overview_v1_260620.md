@@ -1,7 +1,7 @@
 Contact-Tracing-Model for COVID-19
 ================
 Author: Sibylle Mohr
-15/06/2020
+Updated: 26/06/2020
 
 
 # Model team
@@ -69,7 +69,7 @@ The Contact-Tracing-Model is a compartmental model which includes the following 
 
 
 
-![](media/schema_new.png)
+![](schema_new.png)
 
 **Figure 1.** Epidemiological flow chart of the COVID-19
 Contact-Tracing-Model.
@@ -91,7 +91,7 @@ Contact-Tracing-Model.
       - Links will be switched on and off based on mixing probabilities
 
 
-![](media/image2.png)
+![](image2.png)
 
 
 **Figure 2.** Age-specific contact patterns by location as obtained by
