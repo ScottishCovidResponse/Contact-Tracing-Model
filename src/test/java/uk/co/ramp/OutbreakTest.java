@@ -97,7 +97,8 @@ public class OutbreakTest {
             .filter(status -> status == SUSCEPTIBLE)
             .count();
 
-    // We expect this to roughly follow an exp decay, and the error is calibrated in geometric rate space.
+    // We expect this to roughly follow an exp decay, and the error is calibrated in geometric rate
+    // space.
     //
     // If r='randomInfection' ratio of people become other status than SUSCEPTIBLE,
     // after T days, remaining population of SUSCEPTIBLE persons should be
