@@ -69,7 +69,7 @@ The Contact-Tracing-Model is a compartmental model which includes the following 
 
 
 
-![](schema_new.png)
+![](schema_updated.png)
 
 **Figure 1.** Epidemiological flow chart of the COVID-19
 Contact-Tracing-Model.
