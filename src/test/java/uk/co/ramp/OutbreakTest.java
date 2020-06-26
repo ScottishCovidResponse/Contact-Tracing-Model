@@ -97,18 +97,15 @@ public class OutbreakTest {
             .filter(status -> status == SUSCEPTIBLE)
             .count();
 
-    // We expect this to roughly follow an exp decay, but with a large tolerance.
+    // We expect this to roughly follow an exp decay, and the error is calibrated in geometric rate space.
     //
     // If r='randomInfection' ratio of people become other status than SUSCEPTIBLE,
     // after T days, remaining population of SUSCEPTIBLE persons should be
     // (1-r)^T = exp(T log(1-r))
-    // Previously, an approximation log(1-r)=r was applied but this is valid only
-    // when r is small
-    // double test = popSize * Math.exp(Math.log(1. - randomInfection) * days);
-
-    // Calibrate the error not in the population itself but in the logarithmic rate space.
+    // Hence the first argument of the next line is the actual geometric rate,
+    // while the second argument is the assumed one when no contact-based infections happen.
     Assert.assertEquals(
-        -Math.log(sus / (double) popSize) / days, -Math.log(1 - randomInfection), 0.1);
+        -Math.log(sus / (double) popSize) / days, -Math.log(1 - randomInfection), 0.05);
   }
 
   // @Test
