@@ -1,5 +1,8 @@
 package uk.co.ramp.event;
 
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyDouble;
+import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.Mockito.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
@@ -37,6 +40,8 @@ public class EventRunnerImplTest {
   private ContactEvent mockContactEvent4;
   private InfectionEvent mockInfectionEvent3;
   private InfectionEvent mockInfectionEvent4;
+  private InfectionEvent mockInfectionEvent5;
+  private InfectionEvent mockInfectionEvent6;
   private VirusEvent mockVirusEvent3;
   private VirusEvent mockVirusEvent4;
 
@@ -92,8 +97,8 @@ public class EventRunnerImplTest {
     this.mockInfectionEvent2 = mock(InfectionEvent.class);
     this.mockInfectionEvent3 = mock(InfectionEvent.class);
     this.mockInfectionEvent4 = mock(InfectionEvent.class);
-    var mockInfectionEvent5 = mock(InfectionEvent.class);
-    var mockInfectionEvent6 = mock(InfectionEvent.class);
+    this.mockInfectionEvent5 = mock(InfectionEvent.class);
+    this.mockInfectionEvent6 = mock(InfectionEvent.class);
     this.mockVirusEvent1 = mock(VirusEvent.class);
     this.mockVirusEvent2 = mock(VirusEvent.class);
     this.mockVirusEvent3 = mock(VirusEvent.class);
@@ -102,33 +107,23 @@ public class EventRunnerImplTest {
     var mockProcessedAlertEventValue2 = mock(ProcessedEventResult.class);
     var mockProcessedAlertEventValue3 = mock(ProcessedEventResult.class);
     var mockProcessedAlertEventValue4 = mock(ProcessedEventResult.class);
-    var mockProcessedAlertEventValue5 = mock(ProcessedEventResult.class);
-    var mockProcessedAlertEventValue6 = mock(ProcessedEventResult.class);
     var mockAggregatedProcessedEvent = mock(ProcessedEventResult.class);
-
     var alertEvents = List.of(mockAlertEvent1, mockAlertEvent2);
     var contactEvents = List.of(mockContactEvent1, mockContactEvent2);
-    var infectionEvents = List.of(mockInfectionEvent1, mockInfectionEvent2);
-    var initialInfectionEvents = List.of(mockInfectionEvent5);
+    var infectionEvents = List.of(mockInfectionEvent5, mockInfectionEvent6, mockInfectionEvent1, mockInfectionEvent2);
     var virusEvents = List.of(mockVirusEvent1, mockVirusEvent2);
-    var randomInfectionEvents = List.of(mockInfectionEvent6);
+
+    when(infectionCreator.generateInitialInfections(eq(0))).thenReturn(List.of(mockInfectionEvent5));
+    when(infectionCreator.createRandomInfections(eq(0), anyDouble(), anyDouble())).thenReturn(List.of(mockInfectionEvent6));
 
     when(eventList.getNewAlertEvents(eq(0))).thenReturn(alertEvents);
     when(eventList.getNewContactEvents(eq(0))).thenReturn(contactEvents);
     when(eventList.getNewInfectionEvents(eq(0))).thenReturn(infectionEvents);
     when(eventList.getNewVirusEvents(eq(0))).thenReturn(virusEvents);
 
-    when(infectionCreator.generateInitialInfections(eq(0))).thenReturn(initialInfectionEvents);
-    when(infectionCreator.createRandomInfections(eq(0), eq(0D), eq(0D)))
-        .thenReturn(randomInfectionEvents);
-
     when(alertEventRunner.run(eq(alertEvents))).thenReturn(mockProcessedAlertEventValue1);
     when(contactEventRunner.run(eq(contactEvents))).thenReturn(mockProcessedAlertEventValue2);
     when(infectionEventRunner.run(eq(infectionEvents))).thenReturn(mockProcessedAlertEventValue3);
-    when(infectionEventRunner.run(eq(initialInfectionEvents)))
-        .thenReturn(mockProcessedAlertEventValue5);
-    when(infectionEventRunner.run(eq(randomInfectionEvents)))
-        .thenReturn(mockProcessedAlertEventValue6);
     when(virusEventRunner.run(eq(virusEvents))).thenReturn(mockProcessedAlertEventValue4);
 
     when(mockAggregatedProcessedEvent.newAlertEvents())
@@ -146,12 +141,10 @@ public class EventRunnerImplTest {
 
     var processedEvents =
         List.of(
-            mockProcessedAlertEventValue5,
             mockProcessedAlertEventValue1,
             mockProcessedAlertEventValue2,
             mockProcessedAlertEventValue3,
-            mockProcessedAlertEventValue4,
-            mockProcessedAlertEventValue6);
+            mockProcessedAlertEventValue4);
     when(processedEventsGrouper.groupProcessedEventResults(eq(processedEvents)))
         .thenReturn(mockAggregatedProcessedEvent);
   }
@@ -171,13 +164,15 @@ public class EventRunnerImplTest {
     eventRunner.run(0, 0, 0);
 
     verify(eventList).addNewContactEvents(List.of(mockContactEvent3, mockContactEvent4));
+    verify(eventList).addNewInfectionEvents(List.of(mockInfectionEvent5));
+    verify(eventList).addNewInfectionEvents(List.of(mockInfectionEvent6));
     verify(eventList).addNewInfectionEvents(List.of(mockInfectionEvent3, mockInfectionEvent4));
     verify(eventList).addNewAlertEvents(List.of(mockAlertEvent3, mockAlertEvent4));
     verify(eventList).addNewVirusEvents(List.of(mockVirusEvent3, mockVirusEvent4));
     verify(eventList).addCompletedAlertEvents(List.of(mockAlertEvent1, mockAlertEvent2));
     verify(eventList).addCompletedContactEvents(List.of(mockContactEvent1, mockContactEvent2));
     verify(eventList)
-        .addCompletedInfectionEvents(List.of(mockInfectionEvent1, mockInfectionEvent2));
+        .addCompletedInfectionEvents(List.of(mockInfectionEvent5, mockInfectionEvent6, mockInfectionEvent1, mockInfectionEvent2));
     verify(eventList).addCompletedVirusEvents(List.of(mockVirusEvent1, mockVirusEvent2));
   }
 }

@@ -38,15 +38,17 @@ public class EventRunnerImpl implements EventRunner {
 
   @Override
   public void run(int time, double randomInfectionRate, double randomCutOff) {
+    // generate new infections
+    eventList.addNewInfectionEvents(generateInitialInfection(time));
+    eventList.addNewInfectionEvents(createRandomInfections(time, randomInfectionRate, randomCutOff));
+
+    // process existing events
     List<ProcessedEventResult> processedResults =
         Stream.of(
-                infectionEventRunner.run(generateInitialInfection(time)),
                 alertEventRunner.run(eventList.getNewAlertEvents(time)),
                 contactEventRunner.run(eventList.getNewContactEvents(time)),
                 infectionEventRunner.run(eventList.getNewInfectionEvents(time)),
-                virusEventRunner.run(eventList.getNewVirusEvents(time)),
-                infectionEventRunner.run(
-                    createRandomInfections(time, randomInfectionRate, randomCutOff)))
+                virusEventRunner.run(eventList.getNewVirusEvents(time)))
             .collect(Collectors.toList());
 
     ProcessedEventResult eventResults =
