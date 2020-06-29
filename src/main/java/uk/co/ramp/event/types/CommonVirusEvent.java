@@ -15,8 +15,7 @@ public interface CommonVirusEvent extends Event {
   @Value.Check
   default void check() {
     Preconditions.checkState(
-        checkValidTransition(),
-        "Transition from %s to %s is not valid", oldStatus(), nextStatus());
+        checkValidTransition(), "Transition from %s to %s is not valid", oldStatus(), nextStatus());
   }
 
   private boolean checkValidTransition() {

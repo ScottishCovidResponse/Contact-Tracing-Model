@@ -19,7 +19,9 @@ public class IsolationPolicyContext {
 
   @Bean
   public IsolationPolicy isolationPolicy(
-      DiseaseProperties diseaseProperties, DistributionSampler distributionSampler, IsolationProperties isolationProperties) {
+      DiseaseProperties diseaseProperties,
+      DistributionSampler distributionSampler,
+      IsolationProperties isolationProperties) {
     var singleCaseIsolationPolicy =
         new SingleCaseIsolationPolicy(isolationProperties, distributionSampler);
     return new ContactIsolationPolicy(singleCaseIsolationPolicy, diseaseProperties);
@@ -32,8 +34,7 @@ public class IsolationPolicyContext {
       return new IsolationPropertiesReader().read(reader);
     } catch (IOException e) {
       String message =
-          "An error occurred while parsing the isolation policy properties at "
-              + location;
+          "An error occurred while parsing the isolation policy properties at " + location;
       LOGGER.error(message);
       throw new ConfigurationException(message, e);
     }

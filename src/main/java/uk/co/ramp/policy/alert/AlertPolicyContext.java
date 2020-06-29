@@ -35,9 +35,7 @@ public class AlertPolicyContext {
     try (Reader reader = new FileReader(new File(location))) {
       return new AlertPolicyReader().read(reader);
     } catch (IOException e) {
-      String message =
-          "An error occurred while parsing the alert policy properties at "
-              + location;
+      String message = "An error occurred while parsing the alert policy properties at " + location;
       LOGGER.error(message);
       throw new ConfigurationException(message, e);
     }
