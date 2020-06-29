@@ -104,45 +104,52 @@ public class OutbreakTest {
             .filter(status -> status == SUSCEPTIBLE)
             .count();
 
-    // we expect this to roughly follow an exp decay
-    double test = popSize * Math.exp(-randomInfection * days);
-    Assert.assertEquals(test / (double) popSize, sus / (double) popSize, 0.1);
+    // We expect this to roughly follow an exp decay, and the error is calibrated in geometric rate
+    // space.
+    //
+    // If r='randomInfection' ratio of people become other status than SUSCEPTIBLE,
+    // after T days, remaining population of SUSCEPTIBLE persons should be
+    // (1-r)^T = exp(T log(1-r))
+    // Hence the first argument of the next line is the actual geometric rate,
+    // while the second argument is the assumed one when no contact-based infections happen.
+    Assert.assertEquals(
+        -Math.log(sus / (double) popSize) / days, -Math.log(1 - randomInfection), 0.05);
   }
 
-  //    @Test
-  //    public void getMostSevere() {
-  //        // case 1, person 2 worse
-  //        Case person1 = mock(Case.class);
-  //        Case person2 = mock(Case.class);
+  // @Test
+  // public void getMostSevere() {
+  // // case 1, person 2 worse
+  // Case person1 = mock(Case.class);
+  // Case person2 = mock(Case.class);
   //
-  //        when(person1.status()).thenReturn(SUSCEPTIBLE);
-  //        when(person2.status()).thenReturn(EXPOSED);
+  // when(person1.status()).thenReturn(SUSCEPTIBLE);
+  // when(person2.status()).thenReturn(EXPOSED);
   //
-  //        Case mostSevere = utils.getMostSevere(person1, person2);
-  //        Assert.assertEquals(person2, mostSevere);
+  // Case mostSevere = utils.getMostSevere(person1, person2);
+  // Assert.assertEquals(person2, mostSevere);
   //
-  //        // case 2, equal, defaults to person 2
-  //        when(person2.status()).thenReturn(SUSCEPTIBLE);
-  //        mostSevere = utils.getMostSevere(person1, person2);
-  //        Assert.assertEquals(person2, mostSevere);
+  // // case 2, equal, defaults to person 2
+  // when(person2.status()).thenReturn(SUSCEPTIBLE);
+  // mostSevere = utils.getMostSevere(person1, person2);
+  // Assert.assertEquals(person2, mostSevere);
   //
-  //        // case 3, equal, defaults to person 2
-  //        when(person1.status()).thenReturn(PRESYMPTOMATIC);
-  //        when(person2.status()).thenReturn(PRESYMPTOMATIC);
+  // // case 3, equal, defaults to person 2
+  // when(person1.status()).thenReturn(PRESYMPTOMATIC);
+  // when(person2.status()).thenReturn(PRESYMPTOMATIC);
   //
-  //        mostSevere = utils.getMostSevere(person1, person2);
-  //        Assert.assertEquals(person2, mostSevere);
-  //
-  //
-  //        // case 2, person 1 worse, behaves correctly
-  //        when(person1.status()).thenReturn(PRESYMPTOMATIC);
-  //        when(person2.status()).thenReturn(EXPOSED);
-  //
-  //        mostSevere = utils.getMostSevere(person1, person2);
-  //        Assert.assertEquals(person1, mostSevere);
+  // mostSevere = utils.getMostSevere(person1, person2);
+  // Assert.assertEquals(person2, mostSevere);
   //
   //
-  //    }
+  // // case 2, person 1 worse, behaves correctly
+  // when(person1.status()).thenReturn(PRESYMPTOMATIC);
+  // when(person2.status()).thenReturn(EXPOSED);
+  //
+  // mostSevere = utils.getMostSevere(person1, person2);
+  // Assert.assertEquals(person1, mostSevere);
+  //
+  //
+  // }
 
   @Test
   @DirtiesContext
@@ -150,8 +157,8 @@ public class OutbreakTest {
     int popSize = 100;
 
     DiseaseProperties d = TestUtils.diseaseProperties();
-    //        outbreak.setDiseaseProperties(d);
-    //        outbreak.setEventProcessor(eventProcessor);
+    // outbreak.setDiseaseProperties(d);
+    // outbreak.setEventProcessor(eventProcessor);
 
     ReflectionTestUtils.setField(standardProperties, "timeLimit", 100);
     ReflectionTestUtils.setField(standardProperties, "initialExposures", 10);

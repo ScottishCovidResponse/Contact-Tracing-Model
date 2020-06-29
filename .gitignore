@@ -11,3 +11,7 @@ build
 /Compartments.csv
 /events.csv
 /infectionMapSaved.txt
+
+# Ignore Eclipse build output directory
+bin
+
