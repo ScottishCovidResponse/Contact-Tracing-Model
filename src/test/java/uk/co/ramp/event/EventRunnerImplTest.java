@@ -1,8 +1,6 @@
 package uk.co.ramp.event;
 
-import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyDouble;
-import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.Mockito.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
@@ -110,11 +108,14 @@ public class EventRunnerImplTest {
     var mockAggregatedProcessedEvent = mock(ProcessedEventResult.class);
     var alertEvents = List.of(mockAlertEvent1, mockAlertEvent2);
     var contactEvents = List.of(mockContactEvent1, mockContactEvent2);
-    var infectionEvents = List.of(mockInfectionEvent5, mockInfectionEvent6, mockInfectionEvent1, mockInfectionEvent2);
+    var infectionEvents =
+        List.of(mockInfectionEvent5, mockInfectionEvent6, mockInfectionEvent1, mockInfectionEvent2);
     var virusEvents = List.of(mockVirusEvent1, mockVirusEvent2);
 
-    when(infectionCreator.generateInitialInfections(eq(0))).thenReturn(List.of(mockInfectionEvent5));
-    when(infectionCreator.createRandomInfections(eq(0), anyDouble(), anyDouble())).thenReturn(List.of(mockInfectionEvent6));
+    when(infectionCreator.generateInitialInfections(eq(0)))
+        .thenReturn(List.of(mockInfectionEvent5));
+    when(infectionCreator.createRandomInfections(eq(0), anyDouble(), anyDouble()))
+        .thenReturn(List.of(mockInfectionEvent6));
 
     when(eventList.getNewAlertEvents(eq(0))).thenReturn(alertEvents);
     when(eventList.getNewContactEvents(eq(0))).thenReturn(contactEvents);
@@ -172,7 +173,12 @@ public class EventRunnerImplTest {
     verify(eventList).addCompletedAlertEvents(List.of(mockAlertEvent1, mockAlertEvent2));
     verify(eventList).addCompletedContactEvents(List.of(mockContactEvent1, mockContactEvent2));
     verify(eventList)
-        .addCompletedInfectionEvents(List.of(mockInfectionEvent5, mockInfectionEvent6, mockInfectionEvent1, mockInfectionEvent2));
+        .addCompletedInfectionEvents(
+            List.of(
+                mockInfectionEvent5,
+                mockInfectionEvent6,
+                mockInfectionEvent1,
+                mockInfectionEvent2));
     verify(eventList).addCompletedVirusEvents(List.of(mockVirusEvent1, mockVirusEvent2));
   }
 }

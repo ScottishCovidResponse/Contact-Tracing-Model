@@ -40,7 +40,8 @@ public class EventRunnerImpl implements EventRunner {
   public void run(int time, double randomInfectionRate, double randomCutOff) {
     // generate new infections
     eventList.addNewInfectionEvents(generateInitialInfection(time));
-    eventList.addNewInfectionEvents(createRandomInfections(time, randomInfectionRate, randomCutOff));
+    eventList.addNewInfectionEvents(
+        createRandomInfections(time, randomInfectionRate, randomCutOff));
 
     // process existing events
     List<ProcessedEventResult> processedResults =
