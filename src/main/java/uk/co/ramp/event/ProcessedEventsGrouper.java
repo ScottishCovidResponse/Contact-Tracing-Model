@@ -13,6 +13,11 @@ import uk.co.ramp.event.types.ProcessedEventResult;
 import uk.co.ramp.event.types.VirusEvent;
 
 public class ProcessedEventsGrouper {
+  /*
+   * Takes a list of ProcessedEventResult objects,
+   * then maps each object to the specified internal list i.e. contactEvents,
+   * and then collates the mapped events into a single list
+   */
   private <X extends Event> List<X> mapToList(
       List<ProcessedEventResult> combinedProcessedResults,
       Function<ProcessedEventResult, List<X>> newEventsFunc) {
@@ -32,15 +37,24 @@ public class ProcessedEventsGrouper {
         mapToList(processedEventResults, ProcessedEventResult::newInfectionEvents);
     List<VirusEvent> newVirusEvents =
         mapToList(processedEventResults, ProcessedEventResult::newVirusEvents);
-    List<Event> completedEvents =
-        mapToList(processedEventResults, ProcessedEventResult::completedEvents);
+    List<AlertEvent> newCompletedAlertEvents =
+        mapToList(processedEventResults, ProcessedEventResult::newCompletedAlertEvents);
+    List<ContactEvent> newCompletedContactEvents =
+        mapToList(processedEventResults, ProcessedEventResult::newCompletedContactEvents);
+    List<InfectionEvent> newCompletedInfectionEvents =
+        mapToList(processedEventResults, ProcessedEventResult::newCompletedInfectionEvents);
+    List<VirusEvent> newCompletedVirusEvents =
+        mapToList(processedEventResults, ProcessedEventResult::newCompletedVirusEvents);
 
     return ImmutableProcessedEventResult.builder()
         .addAllNewAlertEvents(newAlertEvents)
         .addAllNewContactEvents(newContactEvents)
         .addAllNewInfectionEvents(newInfectionEvents)
         .addAllNewVirusEvents(newVirusEvents)
-        .addAllCompletedEvents(completedEvents)
+        .addAllNewCompletedAlertEvents(newCompletedAlertEvents)
+        .addAllNewCompletedContactEvents(newCompletedContactEvents)
+        .addAllNewCompletedInfectionEvents(newCompletedInfectionEvents)
+        .addAllNewCompletedVirusEvents(newCompletedVirusEvents)
         .build();
   }
 }

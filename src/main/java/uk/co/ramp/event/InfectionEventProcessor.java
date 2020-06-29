@@ -8,7 +8,6 @@ import uk.co.ramp.Population;
 import uk.co.ramp.distribution.DistributionSampler;
 import uk.co.ramp.event.types.*;
 import uk.co.ramp.io.types.DiseaseProperties;
-import uk.co.ramp.people.Case;
 import uk.co.ramp.people.VirusStatus;
 
 @Service
@@ -26,11 +25,10 @@ public class InfectionEventProcessor extends CommonVirusEventProcessor<Infection
 
   @Override
   public ProcessedEventResult processEvent(InfectionEvent event) {
-    Case thisCase = population.get(event.id());
-    if (thisCase.virusStatus() == SUSCEPTIBLE) {
-      thisCase.setVirusStatus(thisCase.virusStatus().transitionTo(event.nextStatus()));
-      thisCase.setExposedBy(event.exposedBy());
-      thisCase.setExposedTime(event.exposedTime());
+    if (population.getVirusStatus(event.id()) == SUSCEPTIBLE) {
+      population.setVirusStatus(event.id(), event.nextStatus());
+      population.setExposedBy(event.id(), event.exposedBy());
+      population.setExposedTime(event.id(), event.exposedTime());
 
       VirusStatus nextStatus = determineNextStatus(event);
       int deltaTime = timeInCompartment(event.nextStatus(), nextStatus);
@@ -45,7 +43,7 @@ public class InfectionEventProcessor extends CommonVirusEventProcessor<Infection
 
       return ImmutableProcessedEventResult.builder()
           .addNewVirusEvents(subsequentEvent)
-          .addCompletedEvents(event)
+          .addNewCompletedInfectionEvents(event)
           .build();
     }
     return ImmutableProcessedEventResult.builder().build();

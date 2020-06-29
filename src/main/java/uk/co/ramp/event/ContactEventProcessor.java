@@ -11,7 +11,7 @@ import uk.co.ramp.distribution.DistributionSampler;
 import uk.co.ramp.event.types.*;
 import uk.co.ramp.io.types.DiseaseProperties;
 import uk.co.ramp.people.Case;
-import uk.co.ramp.policy.IsolationPolicy;
+import uk.co.ramp.policy.isolation.IsolationPolicy;
 
 public class ContactEventProcessor implements EventProcessor<ContactEvent> {
   private static final Logger LOGGER = LogManager.getLogger(ContactEventProcessor.class);
@@ -41,7 +41,7 @@ public class ContactEventProcessor implements EventProcessor<ContactEvent> {
             e ->
                 ImmutableProcessedEventResult.builder()
                     .addNewInfectionEvents(e)
-                    .addCompletedEvents(event)
+                    .addNewCompletedContactEvents(event)
                     .build())
         .orElseGet(() -> ImmutableProcessedEventResult.builder().build());
   }

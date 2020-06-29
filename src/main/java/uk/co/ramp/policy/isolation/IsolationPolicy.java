@@ -1,4 +1,4 @@
-package uk.co.ramp.policy;
+package uk.co.ramp.policy.isolation;
 
 import uk.co.ramp.people.Case;
 

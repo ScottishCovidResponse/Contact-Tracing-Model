@@ -1,4 +1,4 @@
-package uk.co.ramp.policy;
+package uk.co.ramp.policy.isolation;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.anyDouble;

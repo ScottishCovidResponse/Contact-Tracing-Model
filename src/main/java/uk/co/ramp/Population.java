@@ -8,6 +8,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import uk.co.ramp.people.AlertStatus;
 import uk.co.ramp.people.Case;
 import uk.co.ramp.people.PopulationGenerator;
 import uk.co.ramp.people.VirusStatus;
@@ -30,6 +31,30 @@ public class Population {
 
   public Case get(int id) {
     return population.get(id);
+  }
+
+  public double getHealth(int id) {
+    return population.get(id).health();
+  }
+
+  public VirusStatus getVirusStatus(int id) {
+    return population.get(id).virusStatus();
+  }
+
+  public void setVirusStatus(int id, VirusStatus virusStatus) {
+    population.get(id).setVirusStatus(virusStatus);
+  }
+
+  public AlertStatus getAlertStatus(int id) {
+    return population.get(id).alertStatus();
+  }
+
+  public void setAlertStatus(int id, AlertStatus alertStatus) {
+    population.get(id).setAlertStatus(alertStatus);
+  }
+
+  public boolean isInfectious(int id) {
+    return population.get(id).isInfectious();
   }
 
   double proportionInfectious() {
@@ -55,5 +80,13 @@ public class Population {
     Stream.of(VirusStatus.values()).forEach(vs -> stats.putIfAbsent(vs, 0));
 
     return stats;
+  }
+
+  public void setExposedBy(int id, int exposedBy) {
+    population.get(id).setExposedBy(exposedBy);
+  }
+
+  public void setExposedTime(int id, int exposedTime) {
+    population.get(id).setExposedTime(exposedTime);
   }
 }

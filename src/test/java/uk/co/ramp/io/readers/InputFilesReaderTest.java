@@ -16,7 +16,9 @@ public class InputFilesReaderTest {
           + "  \"populationSettings\": \"input/populationSettings.json\",\n"
           + "  \"diseaseSettings\": \"input/diseaseSettings.json\",\n"
           + "  \"contactData\": \"input/contactData.csv\",\n"
-          + "  \"initialExposures\": \"input/initialExposures.csv\"\n"
+          + "  \"initialExposures\": \"input/initialExposures.csv\",\n"
+          + "  \"alertPolicies\": \"input/alertPolicies.json\",\n"
+          + "  \"isolationPolicies\": \"input/isolationPolicies.json\"\n"
           + "}";
 
   @Test
@@ -33,6 +35,8 @@ public class InputFilesReaderTest {
             .initialExposures("input/initialExposures.csv")
             .populationSettings("input/populationSettings.json")
             .runSettings("input/runSettings.json")
+            .alertPolicies("input/alertPolicies.json")
+            .isolationPolicies("input/isolationPolicies.json")
             .build();
     assertThat(actualInputLocations).isEqualTo(expectedInputLocation);
   }

@@ -7,20 +7,31 @@ import uk.co.ramp.distribution.DistributionSampler;
 import uk.co.ramp.event.types.*;
 import uk.co.ramp.io.InitialCaseReader;
 import uk.co.ramp.io.types.DiseaseProperties;
-import uk.co.ramp.policy.IsolationPolicy;
+import uk.co.ramp.policy.alert.AlertChecker;
+import uk.co.ramp.policy.isolation.IsolationPolicy;
 
 @SpringBootConfiguration
 public class EventContext {
-  private final EventList<Event> completedEventList = new EventList<>();
 
   @Bean
-  public EventListGroup eventListGroup() {
+  public CompletionEventListGroup eventList() {
     EventList<AlertEvent> alertEventList = new EventList<>();
     EventList<ContactEvent> contactEventList = new EventList<>();
     EventList<InfectionEvent> infectionEventList = new EventList<>();
     EventList<VirusEvent> virusEventList = new EventList<>();
-    return new EventListGroup(
-        alertEventList, contactEventList, infectionEventList, virusEventList, completedEventList);
+    EventList<AlertEvent> completedAlertEventList = new EventList<>();
+    EventList<ContactEvent> completedContactEventList = new EventList<>();
+    EventList<InfectionEvent> completedInfectionEventList = new EventList<>();
+    EventList<VirusEvent> completedVirusEventList = new EventList<>();
+    EventListGroup newEventListGroup =
+        new EventListGroup(alertEventList, contactEventList, infectionEventList, virusEventList);
+    EventListGroup completedEventListGroup =
+        new EventListGroup(
+            completedAlertEventList,
+            completedContactEventList,
+            completedInfectionEventList,
+            completedVirusEventList);
+    return new CompletionEventListGroup(newEventListGroup, completedEventListGroup);
   }
 
   @Bean
@@ -30,11 +41,12 @@ public class EventContext {
       DistributionSampler distributionSampler,
       IsolationPolicy isolationPolicy,
       InitialCaseReader initialCaseReader,
-      EventListGroup eventListGroup) {
+      AlertChecker alertChecker,
+      CompletionEventListGroup eventList) {
     AlertEventProcessor alertEventProcessor =
         new AlertEventProcessor(population, diseaseProperties, distributionSampler);
     VirusEventProcessor virusEventProcessor =
-        new VirusEventProcessor(population, diseaseProperties, distributionSampler);
+        new VirusEventProcessor(population, diseaseProperties, distributionSampler, alertChecker);
     InfectionEventProcessor infectionEventProcessor =
         new InfectionEventProcessor(population, diseaseProperties, distributionSampler);
     ContactEventProcessor contactEventProcessor =
@@ -61,17 +73,17 @@ public class EventContext {
         virusEventRunner,
         processedEventsGrouper,
         infectionCreator,
-        eventListGroup);
+        eventList);
   }
 
   @Bean
-  public EventListWriter eventListWriter() {
+  public EventListWriter eventListWriter(CompletionEventListGroup eventList) {
     FormattedEventFactory formattedEventFactory = new FormattedEventFactory();
-    return new EventListWriter(formattedEventFactory, completedEventList);
+    return new EventListWriter(formattedEventFactory, eventList);
   }
 
   @Bean
-  public LastContactTime lastContactTime(EventListGroup eventListGroup) {
-    return new LastContactTime(eventListGroup);
+  public LastContactTime lastContactTime(CompletionEventListGroup eventList) {
+    return new LastContactTime(eventList);
   }
 }

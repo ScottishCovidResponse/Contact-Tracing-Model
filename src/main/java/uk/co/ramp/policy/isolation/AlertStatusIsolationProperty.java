@@ -1,13 +1,13 @@
-package uk.co.ramp.policy;
+package uk.co.ramp.policy.isolation;
 
 import org.immutables.gson.Gson;
 import org.immutables.value.Value;
-import uk.co.ramp.people.VirusStatus;
+import uk.co.ramp.people.AlertStatus;
 
 @Gson.TypeAdapters
 @Value.Immutable
-interface VirusStatusIsolationProperty {
-  VirusStatus virusStatus();
+interface AlertStatusIsolationProperty {
+  AlertStatus alertStatus();
 
   IsolationProperty isolationProperty();
 }

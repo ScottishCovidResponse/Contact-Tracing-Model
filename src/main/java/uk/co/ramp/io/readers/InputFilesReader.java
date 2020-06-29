@@ -26,6 +26,8 @@ public class InputFilesReader {
             .populationSettings("input/populationSettings.json")
             .contactData("input/contactData.csv")
             .initialExposures("input/initialExposures.csv")
+            .alertPolicies("input/alertPolicies.json")
+            .isolationPolicies("input/isolationPolicies.json")
             .build();
 
     Gson gson = new GsonBuilder().setPrettyPrinting().create();

@@ -31,12 +31,19 @@ import uk.co.ramp.io.types.DiseaseProperties;
 import uk.co.ramp.io.types.StandardProperties;
 import uk.co.ramp.people.Case;
 import uk.co.ramp.people.Human;
-import uk.co.ramp.policy.IsolationPolicyContext;
+import uk.co.ramp.policy.alert.AlertPolicyContext;
+import uk.co.ramp.policy.isolation.IsolationPolicyContext;
 
 @SuppressWarnings("unchecked")
 @DirtiesContext
 @RunWith(SpringRunner.class)
-@Import({TestConfig.class, TestUtils.class, AppConfig.class, IsolationPolicyContext.class})
+@Import({
+  TestConfig.class,
+  TestUtils.class,
+  AppConfig.class,
+  IsolationPolicyContext.class,
+  AlertPolicyContext.class
+})
 public class OutbreakTest {
 
   private final Random random = TestUtils.getRandom();
@@ -49,7 +56,7 @@ public class OutbreakTest {
 
   @Autowired private Outbreak outbreak;
 
-  @Autowired private EventListGroup eventListGroup;
+  @Autowired private CompletionEventListGroup eventListGroup;
 
   @Autowired Population population;
 
@@ -84,7 +91,7 @@ public class OutbreakTest {
     ReflectionTestUtils.setField(this.initialCaseReader, "cases", cases);
 
     List<ContactEvent> contacts = createContactRecords(days, population);
-    eventListGroup.addContactEvents(contacts);
+    eventListGroup.addNewContactEvents(contacts);
 
     ReflectionTestUtils.setField(this.diseaseProperties, "randomInfectionRate", randomInfection);
     ReflectionTestUtils.setField(this.population, "population", population);
@@ -163,7 +170,7 @@ public class OutbreakTest {
     }
 
     List<ContactEvent> contacts = createContactRecords(200, population);
-    eventListGroup.addContactEvents(contacts);
+    eventListGroup.addNewContactEvents(contacts);
 
     ReflectionTestUtils.setField(this.population, "population", population);
 
@@ -213,7 +220,7 @@ public class OutbreakTest {
     ReflectionTestUtils.setField(standardProperties, "steadyState", false);
 
     List<ContactEvent> contacts = createContactRecords(500, population);
-    eventListGroup.addContactEvents(contacts);
+    eventListGroup.addNewContactEvents(contacts);
 
     ReflectionTestUtils.setField(this.population, "population", population);
 
@@ -253,7 +260,7 @@ public class OutbreakTest {
     ReflectionTestUtils.setField(this.initialCaseReader, "cases", cases);
 
     List<ContactEvent> contacts = createContactRecords(5, population);
-    eventListGroup.addContactEvents(contacts);
+    eventListGroup.addNewContactEvents(contacts);
 
     ReflectionTestUtils.setField(this.population, "population", population);
 
@@ -295,7 +302,7 @@ public class OutbreakTest {
     ReflectionTestUtils.setField(this.initialCaseReader, "cases", Set.of());
 
     List<ContactEvent> contacts = createContactRecords(days, population);
-    eventListGroup.addContactEvents(contacts);
+    eventListGroup.addNewContactEvents(contacts);
 
     ReflectionTestUtils.setField(this.population, "population", population);
 

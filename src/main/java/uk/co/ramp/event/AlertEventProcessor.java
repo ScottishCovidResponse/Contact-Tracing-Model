@@ -1,7 +1,9 @@
 package uk.co.ramp.event;
 
-import static uk.co.ramp.people.AlertStatus.*;
 import static uk.co.ramp.people.AlertStatus.NONE;
+import static uk.co.ramp.people.AlertStatus.TESTED_NEGATIVE;
+import static uk.co.ramp.people.AlertStatus.TESTED_POSITIVE;
+import static uk.co.ramp.people.AlertStatus.getValidTransitions;
 
 import java.util.List;
 import org.apache.logging.log4j.LogManager;
@@ -10,10 +12,13 @@ import uk.co.ramp.Population;
 import uk.co.ramp.distribution.Distribution;
 import uk.co.ramp.distribution.DistributionSampler;
 import uk.co.ramp.distribution.ImmutableDistribution;
-import uk.co.ramp.event.types.*;
+import uk.co.ramp.event.types.AlertEvent;
+import uk.co.ramp.event.types.EventProcessor;
+import uk.co.ramp.event.types.ImmutableAlertEvent;
+import uk.co.ramp.event.types.ImmutableProcessedEventResult;
+import uk.co.ramp.event.types.ProcessedEventResult;
 import uk.co.ramp.io.types.DiseaseProperties;
 import uk.co.ramp.people.AlertStatus;
-import uk.co.ramp.people.Case;
 import uk.co.ramp.utilities.ImmutableMeanMax;
 import uk.co.ramp.utilities.MeanMax;
 
@@ -35,8 +40,11 @@ public class AlertEventProcessor implements EventProcessor<AlertEvent> {
 
   @Override
   public ProcessedEventResult processEvent(AlertEvent event) {
-    Case thisCase = population.get(event.id());
-    thisCase.setAlertStatus(event.nextStatus());
+    if (population.getAlertStatus(event.id()) != event.oldStatus()) {
+      return ImmutableProcessedEventResult.builder().build();
+    }
+
+    population.setAlertStatus(event.id(), event.nextStatus());
 
     AlertStatus proposedStatus = determineNextAlertStatus(event);
     AlertStatus nextStatus = event.nextStatus().transitionTo(proposedStatus);
@@ -54,14 +62,13 @@ public class AlertEventProcessor implements EventProcessor<AlertEvent> {
 
       return ImmutableProcessedEventResult.builder()
           .addNewAlertEvents(subsequentEvent)
-          .addCompletedEvents(event)
+          .addNewCompletedAlertEvents(event)
           .build();
     }
     return ImmutableProcessedEventResult.builder().build();
   }
 
   private AlertStatus determineNextAlertStatus(AlertEvent event) {
-    Case thisCase = population.get(event.id());
     List<AlertStatus> newStatus = getValidTransitions(event.nextStatus());
 
     if (newStatus.isEmpty()) return event.nextStatus();
@@ -69,7 +76,7 @@ public class AlertEventProcessor implements EventProcessor<AlertEvent> {
 
     switch (event.nextStatus()) {
       case AWAITING_RESULT:
-        return thisCase.isInfectious() ? TESTED_POSITIVE : TESTED_NEGATIVE;
+        return population.isInfectious(event.id()) ? TESTED_POSITIVE : TESTED_NEGATIVE;
       case NONE:
         return NONE;
       default:

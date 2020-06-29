@@ -14,7 +14,7 @@ import java.util.Map;
 import org.junit.*;
 import org.mockito.Mockito;
 import org.springframework.context.ApplicationContext;
-import uk.co.ramp.event.EventListGroup;
+import uk.co.ramp.event.CompletionEventListGroup;
 import uk.co.ramp.event.types.ContactEvent;
 import uk.co.ramp.io.CompartmentWriter;
 import uk.co.ramp.io.ContactReader;
@@ -54,7 +54,7 @@ public class ContactRunnerTest {
     ContactReader reader = Mockito.mock(ContactReader.class);
     CompartmentWriter compartmentWriter = Mockito.mock(CompartmentWriter.class);
     InputFiles inputFiles = Mockito.mock(InputFiles.class);
-    EventListGroup eventListGroup = Mockito.mock(EventListGroup.class);
+    CompletionEventListGroup eventList = Mockito.mock(CompletionEventListGroup.class);
 
     // provide junk file for reader
     File temp = File.createTempFile("test", "file");
@@ -68,12 +68,12 @@ public class ContactRunnerTest {
     when(reader.readEvents(any())).thenReturn(testData2);
     when(populationGenerator.generate()).thenReturn(testData);
 
-    when(eventListGroup.lastContactTime()).thenReturn(10);
+    when(eventList.lastContactTime()).thenReturn(10);
 
     // setting context
     when(applicationContext.getBean(PopulationGenerator.class)).thenReturn(populationGenerator);
     when(applicationContext.getBean(ContactReader.class)).thenReturn(reader);
-    when(applicationContext.getBean(EventListGroup.class)).thenReturn(eventListGroup);
+    when(applicationContext.getBean(CompletionEventListGroup.class)).thenReturn(eventList);
     when(applicationContext.getBean(Outbreak.class)).thenReturn(outbreak);
     when(applicationContext.getBean(CompartmentWriter.class)).thenReturn(compartmentWriter);
 
