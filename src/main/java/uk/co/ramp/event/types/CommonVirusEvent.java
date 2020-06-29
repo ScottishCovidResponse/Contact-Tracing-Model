@@ -16,7 +16,7 @@ public interface CommonVirusEvent extends Event {
   default void check() {
     Preconditions.checkState(
         checkValidTransition(),
-        "Transition from " + oldStatus() + " to " + nextStatus() + " is not valid");
+        "Transition from %s to %s is not valid", oldStatus(), nextStatus());
   }
 
   private boolean checkValidTransition() {

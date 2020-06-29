@@ -146,12 +146,13 @@ class SingleCaseIsolationPolicy {
 
   private int startTime(
       IsolationStartTimeType policyStartTimeType, int currentTime, int contactTime) {
-    if (policyStartTimeType == IsolationStartTimeType.ABSOLUTE) {
-      return currentTime;
-    } else if (policyStartTimeType == IsolationStartTimeType.CONTACT_TIME) {
-      return contactTime;
-    } else {
-      throw new IllegalStateException("Isolation Start Time type is invalid.");
+    switch (policyStartTimeType) {
+      case ABSOLUTE:
+        return currentTime;
+      case CONTACT_TIME:
+        return contactTime;
+      default:
+        throw new IllegalStateException("Isolation Start Time type is invalid.");
     }
   }
 

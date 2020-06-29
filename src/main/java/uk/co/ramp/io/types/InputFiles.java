@@ -19,6 +19,10 @@ public interface InputFiles {
 
   String initialExposures();
 
+  String alertPolicies();
+
+  String isolationPolicies();
+
   @Check
   default void check() {
     Preconditions.checkState(!runSettings().isBlank(), "Run settings location should not be blank");
@@ -29,5 +33,9 @@ public interface InputFiles {
     Preconditions.checkState(!contactData().isBlank(), "Contact data location should not be blank");
     Preconditions.checkState(
         !initialExposures().isBlank(), "Initial exposure data location should not be blank");
+    Preconditions.checkState(
+        !alertPolicies().isBlank(), "Alert policies location should not be blank");
+    Preconditions.checkState(
+        !isolationPolicies().isBlank(), "Isolation policies location should not be blank");
   }
 }

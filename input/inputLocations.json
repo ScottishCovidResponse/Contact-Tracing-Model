@@ -3,5 +3,7 @@
   "populationSettings": "input/populationSettings.json",
   "diseaseSettings": "input/diseaseSettings.json",
   "contactData": "input/homogeneous_contacts.csv",
-  "initialExposures": "input/initialExposures.csv"
+  "initialExposures": "input/initialExposures.csv",
+  "alertPolicies": "input/alertPolicies.json",
+  "isolationPolicies": "input/isolationPolicies.json"
 }

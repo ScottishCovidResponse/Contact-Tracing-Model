@@ -12,7 +12,6 @@ import uk.co.ramp.policy.isolation.IsolationPolicy;
 
 @SpringBootConfiguration
 public class EventContext {
-  private final EventList<Event> completedEventList = new EventList<>();
 
   @Bean
   public CompletionEventListGroup eventList() {

@@ -11,10 +11,10 @@ import org.springframework.context.annotation.Bean;
 import uk.co.ramp.ConfigurationException;
 import uk.co.ramp.Population;
 import uk.co.ramp.event.CompletionEventListGroup;
+import uk.co.ramp.io.types.InputFiles;
 
 @SpringBootConfiguration
 public class AlertPolicyContext {
-  private static final String ALERT_SETTINGS_LOCATION = "input/alertPolicies.json";
   private static final Logger LOGGER = LogManager.getLogger(AlertPolicyContext.class);
 
   @Bean
@@ -30,13 +30,14 @@ public class AlertPolicyContext {
   }
 
   @Bean
-  AlertPolicy alertPolicy() {
-    try (Reader reader = new FileReader(new File(ALERT_SETTINGS_LOCATION))) {
+  AlertPolicy alertPolicy(InputFiles inputFiles) {
+    String location = inputFiles.alertPolicies();
+    try (Reader reader = new FileReader(new File(location))) {
       return new AlertPolicyReader().read(reader);
     } catch (IOException e) {
       String message =
           "An error occurred while parsing the alert policy properties at "
-              + ALERT_SETTINGS_LOCATION;
+              + location;
       LOGGER.error(message);
       throw new ConfigurationException(message, e);
     }
