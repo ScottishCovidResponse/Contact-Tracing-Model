@@ -1,7 +1,6 @@
 package uk.co.ramp;
 
 import static org.hamcrest.core.StringContains.containsString;
-import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -9,7 +8,6 @@ import static org.mockito.Mockito.when;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.util.Optional;
 import java.util.Random;
 import org.apache.commons.math3.random.RandomDataGenerator;
 import org.junit.*;
@@ -26,17 +24,11 @@ public class AppConfigTest {
 
   @Before
   public void setUp() {
-    appConfig = new AppConfig();
-  }
-
-  @After
-  public void tearDown() {
-    appConfig = null;
+    appConfig = new AppConfig(null, null);
   }
 
   @Test
   public void standardProperties() throws ConfigurationException {
-
     StandardProperties standardProperties = appConfig.standardProperties();
 
     Assert.assertNotNull(standardProperties);
@@ -44,7 +36,7 @@ public class AppConfigTest {
     Assert.assertNotNull(standardProperties.steadyState());
     Assert.assertTrue(standardProperties.initialExposures() > 0);
     Assert.assertTrue(standardProperties.populationSize() > 0);
-    Assert.assertTrue(standardProperties.seed() >= 0);
+    Assert.assertTrue(standardProperties.seed().isEmpty());
     Assert.assertTrue(standardProperties.timeLimit() > 0);
     Assert.assertTrue(standardProperties.populationSize() > standardProperties.initialExposures());
   }
@@ -159,12 +151,11 @@ public class AppConfigTest {
   @Test
   public void randomDataGeneratorNoArgs() throws ConfigurationException {
 
-    RandomDataGenerator r = appConfig.randomDataGenerator(Optional.empty());
-    int seed = appConfig.standardProperties().seed();
+    RandomDataGenerator r = appConfig.randomDataGenerator();
     Assert.assertNotNull(r);
     Assert.assertThat(
         appender.getOutput(),
-        containsString("Additional Seed information not provided, defaulting to " + seed));
+        containsString("Additional Seed information not provided, using internal random seed."));
   }
 
   @Test
@@ -173,11 +164,10 @@ public class AppConfigTest {
     Random random = TestUtils.getRandom();
 
     int arg = random.nextInt(10);
-    String[] args = {arg + ""};
-    System.out.println(args[0]);
+    appConfig = new AppConfig(String.valueOf(arg), "src/test/resources/testSeedOverride");
 
-    RandomDataGenerator r = appConfig.randomDataGenerator(Optional.of(args));
-    int seed = appConfig.standardProperties().seed();
+    RandomDataGenerator r = appConfig.randomDataGenerator();
+    int seed = appConfig.standardProperties().seed().orElseThrow();
     Assert.assertNotNull(r);
     Assert.assertThat(
         appender.getOutput(),
@@ -187,16 +177,14 @@ public class AppConfigTest {
   @Test(expected = ConfigurationException.class)
   public void randomDataGeneratorWithInvalidArgs() throws ConfigurationException {
 
-    String[] args = {"seed"};
+    appConfig = new AppConfig("seed", null);
     try {
-      appConfig.randomDataGenerator(Optional.of(args));
+      appConfig.randomDataGenerator();
     } catch (ConfigurationException e) {
       Assert.assertThat(
           appender.getOutput(),
           containsString(
-              "An error occurred while creating the random generator. The command line arg, \""
-                  + args[0]
-                  + "\", could not be parsed as an integer."));
+              "An error occurred while creating the random generator. The command line arg, \"seed\", could not be parsed as an integer."));
       throw e;
     }
   }
@@ -205,9 +193,9 @@ public class AppConfigTest {
   public void randomDataGeneratorWithInvalidSystemProperties() throws ConfigurationException {
 
     AppConfig appConfig = Mockito.mock(AppConfig.class);
-    when(appConfig.randomDataGenerator(any())).thenCallRealMethod();
+    when(appConfig.randomDataGenerator()).thenCallRealMethod();
     try {
-      appConfig.randomDataGenerator(Optional.empty());
+      appConfig.randomDataGenerator();
 
     } catch (ConfigurationException e) {
       Assert.assertThat(

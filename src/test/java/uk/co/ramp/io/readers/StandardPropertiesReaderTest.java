@@ -32,7 +32,7 @@ public class StandardPropertiesReaderTest {
 
     assertThat(standardProperties.initialExposures()).isEqualTo(1000);
     assertThat(standardProperties.populationSize()).isEqualTo(10000);
-    assertThat(standardProperties.seed()).isZero();
+    assertThat(standardProperties.seed()).hasValue(0);
     assertThat(standardProperties.timeLimit()).isEqualTo(100);
     assertThat(standardProperties.steadyState()).isTrue();
   }
