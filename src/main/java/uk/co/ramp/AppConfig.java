@@ -16,6 +16,7 @@ import org.springframework.boot.SpringBootConfiguration;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import uk.co.ramp.distribution.DistributionSampler;
+import uk.co.ramp.io.readers.AgeDataReader;
 import uk.co.ramp.io.readers.DirectoryList;
 import uk.co.ramp.io.readers.DiseasePropertiesReader;
 import uk.co.ramp.io.readers.FullPathInputFilesReader;
@@ -26,6 +27,7 @@ import uk.co.ramp.io.types.DiseaseProperties;
 import uk.co.ramp.io.types.InputFiles;
 import uk.co.ramp.io.types.PopulationProperties;
 import uk.co.ramp.io.types.StandardProperties;
+import uk.co.ramp.people.AgeRetriever;
 
 @SpringBootConfiguration
 @ComponentScan
@@ -97,6 +99,19 @@ public class AppConfig {
       String message =
           "An error occurred while parsing the population properties at "
               + inputFiles().populationSettings();
+      LOGGER.error(message);
+      throw new ConfigurationException(message, e);
+    }
+  }
+
+  @Bean
+  public AgeRetriever ageRetriever(
+      PopulationProperties populationProperties, RandomDataGenerator randomDataGenerator) {
+    try (Reader reader = getReader(inputFiles().ageData())) {
+      var ageData = new AgeDataReader().read(reader);
+      return new AgeRetriever(populationProperties, randomDataGenerator, ageData);
+    } catch (IOException e) {
+      String message = "An error occurred while parsing the age data at " + inputFiles().ageData();
       LOGGER.error(message);
       throw new ConfigurationException(message, e);
     }

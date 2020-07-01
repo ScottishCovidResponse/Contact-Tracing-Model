@@ -2,17 +2,20 @@ package uk.co.ramp;
 
 import java.io.FileNotFoundException;
 import java.io.FileReader;
+import java.io.IOException;
 import java.io.Reader;
 import java.util.Random;
 import org.apache.commons.math3.random.RandomDataGenerator;
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.context.annotation.Bean;
+import uk.co.ramp.io.readers.AgeDataReader;
 import uk.co.ramp.io.readers.DiseasePropertiesReader;
 import uk.co.ramp.io.readers.PopulationPropertiesReader;
 import uk.co.ramp.io.types.DiseaseProperties;
 import uk.co.ramp.io.types.ImmutableStandardProperties;
 import uk.co.ramp.io.types.PopulationProperties;
 import uk.co.ramp.io.types.StandardProperties;
+import uk.co.ramp.people.AgeRetriever;
 
 @TestConfiguration
 public class TestUtils {
@@ -51,5 +54,13 @@ public class TestUtils {
         .steadyState(true)
         .timeLimit(100)
         .build();
+  }
+
+  @Bean
+  public static AgeRetriever ageRetriever() throws IOException {
+    String file = TestUtils.class.getResource("/ageData.csv").getFile();
+    Reader reader = new FileReader(file);
+    var agesData = new AgeDataReader().read(reader);
+    return new AgeRetriever(populationProperties(), dataGenerator(), agesData);
   }
 }

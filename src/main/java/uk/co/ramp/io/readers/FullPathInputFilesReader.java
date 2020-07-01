@@ -30,6 +30,7 @@ public class FullPathInputFilesReader {
     var inputFiles =
         ImmutableInputFiles.builder()
             .contactData(getFilePath(baseInputFiles.contactData()))
+            .ageData(getFilePath(baseInputFiles.ageData()))
             .diseaseSettings(getFilePath(baseInputFiles.diseaseSettings()))
             .initialExposures(getFilePath(baseInputFiles.initialExposures()))
             .isolationPolicies(getFilePath(baseInputFiles.isolationPolicies()))

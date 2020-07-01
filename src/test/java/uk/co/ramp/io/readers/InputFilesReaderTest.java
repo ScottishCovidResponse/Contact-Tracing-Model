@@ -16,6 +16,7 @@ public class InputFilesReaderTest {
           + "  \"populationSettings\": \"populationSettings.json\",\n"
           + "  \"diseaseSettings\": \"diseaseSettings.json\",\n"
           + "  \"contactData\": \"contactData.csv\",\n"
+          + "  \"ageData\": \"ageData.csv\",\n"
           + "  \"initialExposures\": \"initialExposures.csv\",\n"
           + "  \"tracingPolicies\": \"tracingPolicies.json\",\n"
           + "  \"isolationPolicies\": \"isolationPolicies.json\"\n"
@@ -32,6 +33,7 @@ public class InputFilesReaderTest {
         ImmutableInputFiles.builder()
             .diseaseSettings("diseaseSettings.json")
             .contactData("contactData.csv")
+            .ageData("ageData.csv")
             .initialExposures("initialExposures.csv")
             .populationSettings("populationSettings.json")
             .runSettings("runSettings.json")
