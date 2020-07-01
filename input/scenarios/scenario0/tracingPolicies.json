@@ -1,5 +1,5 @@
 {
-  "id": "No tracing",
+  "description": "No tracing",
   "reporterAlertStatus": "NONE",
   "reporterVirusStatus": "SYMPTOMATIC",
   "recentContactsLookBackTime": 0,
