@@ -19,8 +19,9 @@ public interface PopulationProperties {
 
   @Check
   default void check() {
+    final double eps = 1e-6;
     Preconditions.checkState(
-        populationDistribution().values().stream().mapToDouble(d -> d).sum() == 1,
+        Math.abs(populationDistribution().values().stream().mapToDouble(d -> d).sum() - 1.0) < eps,
         "Sum of population distribution should be 1");
     Preconditions.checkState(
         populationDistribution().keySet().equals(populationAges().keySet()),
