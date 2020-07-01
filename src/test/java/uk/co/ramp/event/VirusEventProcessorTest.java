@@ -30,11 +30,11 @@ import uk.co.ramp.io.types.DiseaseProperties;
 import uk.co.ramp.people.Case;
 import uk.co.ramp.people.Human;
 import uk.co.ramp.policy.alert.AlertChecker;
-import uk.co.ramp.policy.alert.AlertPolicyContext;
+import uk.co.ramp.policy.alert.TracingPolicyContext;
 
 @RunWith(SpringRunner.class)
 @DirtiesContext
-@Import({TestUtils.class, AppConfig.class, TestConfig.class, AlertPolicyContext.class})
+@Import({TestUtils.class, AppConfig.class, TestConfig.class, TracingPolicyContext.class})
 public class VirusEventProcessorTest {
   private VirusEventProcessor eventProcessor;
   private DiseaseProperties diseaseProperties;

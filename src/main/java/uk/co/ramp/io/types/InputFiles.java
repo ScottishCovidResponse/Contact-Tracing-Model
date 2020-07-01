@@ -19,7 +19,7 @@ public interface InputFiles {
 
   String initialExposures();
 
-  String alertPolicies();
+  String tracingPolicies();
 
   String isolationPolicies();
 
@@ -34,7 +34,7 @@ public interface InputFiles {
     Preconditions.checkState(
         !initialExposures().isBlank(), "Initial exposure data location should not be blank");
     Preconditions.checkState(
-        !alertPolicies().isBlank(), "Alert policies location should not be blank");
+        !tracingPolicies().isBlank(), "Tracing policies location should not be blank");
     Preconditions.checkState(
         !isolationPolicies().isBlank(), "Isolation policies location should not be blank");
   }

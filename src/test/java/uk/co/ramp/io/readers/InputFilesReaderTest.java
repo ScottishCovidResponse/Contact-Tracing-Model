@@ -12,13 +12,13 @@ public class InputFilesReaderTest {
 
   private static final String mockInputLocations =
       "{\n"
-          + "  \"runSettings\": \"input/runSettings.json\",\n"
-          + "  \"populationSettings\": \"input/populationSettings.json\",\n"
-          + "  \"diseaseSettings\": \"input/diseaseSettings.json\",\n"
-          + "  \"contactData\": \"input/contactData.csv\",\n"
-          + "  \"initialExposures\": \"input/initialExposures.csv\",\n"
-          + "  \"alertPolicies\": \"input/alertPolicies.json\",\n"
-          + "  \"isolationPolicies\": \"input/isolationPolicies.json\"\n"
+          + "  \"runSettings\": \"runSettings.json\",\n"
+          + "  \"populationSettings\": \"populationSettings.json\",\n"
+          + "  \"diseaseSettings\": \"diseaseSettings.json\",\n"
+          + "  \"contactData\": \"contactData.csv\",\n"
+          + "  \"initialExposures\": \"initialExposures.csv\",\n"
+          + "  \"tracingPolicies\": \"tracingPolicies.json\",\n"
+          + "  \"isolationPolicies\": \"isolationPolicies.json\"\n"
           + "}";
 
   @Test
@@ -30,13 +30,13 @@ public class InputFilesReaderTest {
 
     var expectedInputLocation =
         ImmutableInputFiles.builder()
-            .diseaseSettings("input/diseaseSettings.json")
-            .contactData("input/contactData.csv")
-            .initialExposures("input/initialExposures.csv")
-            .populationSettings("input/populationSettings.json")
-            .runSettings("input/runSettings.json")
-            .alertPolicies("input/alertPolicies.json")
-            .isolationPolicies("input/isolationPolicies.json")
+            .diseaseSettings("diseaseSettings.json")
+            .contactData("contactData.csv")
+            .initialExposures("initialExposures.csv")
+            .populationSettings("populationSettings.json")
+            .runSettings("runSettings.json")
+            .tracingPolicies("tracingPolicies.json")
+            .isolationPolicies("isolationPolicies.json")
             .build();
     assertThat(actualInputLocations).isEqualTo(expectedInputLocation);
   }

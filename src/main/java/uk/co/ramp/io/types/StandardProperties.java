@@ -1,6 +1,7 @@
 package uk.co.ramp.io.types;
 
 import com.google.common.base.Preconditions;
+import java.util.OptionalInt;
 import org.immutables.gson.Gson.TypeAdapters;
 import org.immutables.value.Value.Check;
 import org.immutables.value.Value.Immutable;
@@ -14,7 +15,7 @@ public interface StandardProperties {
 
   int initialExposures();
 
-  int seed();
+  OptionalInt seed();
 
   boolean steadyState();
 
