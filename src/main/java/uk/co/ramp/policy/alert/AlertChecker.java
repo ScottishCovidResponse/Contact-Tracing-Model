@@ -27,34 +27,35 @@ public class AlertChecker {
     var currentReporterAlertStatus = population.getAlertStatus(personId);
     var tracingPolicyReporterVirusStatus = tracingPolicy.reporterVirusStatus();
     var tracingPolicyReporterAlertStatus = tracingPolicy.reporterAlertStatus();
-    if (nextVirusStatus == tracingPolicyReporterVirusStatus
-        && currentReporterAlertStatus == tracingPolicyReporterAlertStatus) {
-      Stream<AlertEvent> requestTestForReporterEvent =
-          Stream.of(currentReporterAlertStatus)
-              .filter(alertStatus -> alertStatus == NONE)
-              .map(
-                  alertStatus ->
-                      ImmutableAlertEvent.builder()
-                          .id(personId)
-                          .time(currentTime + 1)
-                          .oldStatus(NONE)
-                          .nextStatus(REQUESTED_TEST)
-                          .build());
 
-      var startTime = currentTime - tracingPolicy.recentContactsLookBackTime() + 1;
+    var requestTestForReporterEvent =
+        Stream.of(currentReporterAlertStatus)
+            .filter(alertStatus -> alertStatus == NONE)
+            .filter(a -> nextVirusStatus == VirusStatus.SYMPTOMATIC)
+            .map(
+                alertStatus ->
+                    ImmutableAlertEvent.builder()
+                        .id(personId)
+                        .time(currentTime + 1)
+                        .oldStatus(NONE)
+                        .nextStatus(REQUESTED_TEST)
+                        .build());
 
-      Stream<AlertEvent> alertsFromRecentContacts =
-          alertContactTracer.traceRecentContacts(startTime, currentTime, personId).stream()
-              .map(
-                  id ->
-                      ImmutableAlertEvent.builder()
-                          .id(id)
-                          .time(currentTime + 1)
-                          .oldStatus(NONE)
-                          .nextStatus(ALERTED)
-                          .build());
-      return Stream.concat(requestTestForReporterEvent, alertsFromRecentContacts);
-    }
-    return Stream.empty();
+    var startTime = currentTime - tracingPolicy.recentContactsLookBackTime() + 1;
+
+    var alertsFromRecentContacts =
+        alertContactTracer.traceRecentContacts(startTime, currentTime, personId).stream()
+            .filter(a -> currentReporterAlertStatus == tracingPolicyReporterAlertStatus)
+            .filter(a -> nextVirusStatus == tracingPolicyReporterVirusStatus)
+            .map(
+                id ->
+                    ImmutableAlertEvent.builder()
+                        .id(id)
+                        .time(currentTime + 1)
+                        .oldStatus(NONE)
+                        .nextStatus(ALERTED)
+                        .build());
+
+    return Stream.concat(requestTestForReporterEvent, alertsFromRecentContacts);
   }
 }
