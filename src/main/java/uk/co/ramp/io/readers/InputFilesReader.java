@@ -25,6 +25,7 @@ public class InputFilesReader {
             .diseaseSettings("diseaseSettings.json")
             .populationSettings("populationSettings.json")
             .contactData("contactData.csv")
+            .ageData("ageData.csv")
             .initialExposures("initialExposures.csv")
             .tracingPolicies("tracingPolicies.json")
             .isolationPolicies("isolationPolicies.json")

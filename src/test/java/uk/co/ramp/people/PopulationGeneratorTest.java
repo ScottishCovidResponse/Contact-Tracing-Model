@@ -4,7 +4,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static uk.co.ramp.people.VirusStatus.*;
 
-import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.util.*;
 import org.junit.Assert;
 import org.junit.Before;
@@ -19,10 +19,11 @@ public class PopulationGeneratorTest {
   private final Random random = TestUtils.getRandom();
 
   @Before
-  public void setup() throws FileNotFoundException {
+  public void setup() throws IOException {
     populationGenerator = new PopulationGenerator();
     populationGenerator.setProperties(TestUtils.populationProperties());
     populationGenerator.setDataGenerator(TestUtils.dataGenerator());
+    populationGenerator.setAgeRetriever(TestUtils.ageRetriever());
   }
 
   @Test
@@ -60,38 +61,6 @@ public class PopulationGeneratorTest {
     Assert.assertEquals(e, result.get(EXPOSED).intValue());
     Assert.assertEquals(i, result.get(PRESYMPTOMATIC).intValue());
     Assert.assertEquals(r, result.get(RECOVERED).intValue());
-  }
-
-  @Test
-  public void findAge() {
-
-    int n = 10000;
-    List<Integer> ages = new ArrayList<>();
-    for (int i = 0; i < n; i++) {
-      ages.add(populationGenerator.findAge());
-    }
-
-    double sum = ages.stream().mapToInt(Integer::intValue).average().orElseThrow();
-    int max = ages.stream().mapToInt(Integer::intValue).max().orElseThrow();
-    int min = ages.stream().mapToInt(Integer::intValue).min().orElseThrow();
-
-    Assert.assertEquals(50d, sum, 0.5);
-    Assert.assertTrue(max <= 100);
-    Assert.assertTrue(max > 80);
-    Assert.assertTrue(min < 20);
-    Assert.assertTrue(min >= 0);
-
-    long group0 = ages.stream().filter(a -> a < 20).count();
-    long group1 = ages.stream().filter(a -> a >= 20 && a < 40).count();
-    long group2 = ages.stream().filter(a -> a >= 40 && a < 60).count();
-    long group3 = ages.stream().filter(a -> a >= 60 && a < 80).count();
-    long group4 = ages.stream().filter(a -> a >= 80 && a < 100).count();
-
-    Assert.assertEquals(0.2, group0 / (double) n, 0.01);
-    Assert.assertEquals(0.2, group1 / (double) n, 0.01);
-    Assert.assertEquals(0.2, group2 / (double) n, 0.01);
-    Assert.assertEquals(0.2, group3 / (double) n, 0.01);
-    Assert.assertEquals(0.2, group4 / (double) n, 0.01);
   }
 
   @Test

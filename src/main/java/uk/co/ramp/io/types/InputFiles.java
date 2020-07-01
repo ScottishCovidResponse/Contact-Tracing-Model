@@ -17,6 +17,8 @@ public interface InputFiles {
 
   String contactData();
 
+  String ageData();
+
   String initialExposures();
 
   String tracingPolicies();
