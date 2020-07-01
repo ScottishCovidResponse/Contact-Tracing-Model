@@ -35,11 +35,15 @@ public class AppConfig {
   private static final String DEFAULT_INPUT_FOLDER = "input";
   private static final String INPUT_FILE_LOCATION = "input/inputLocations.json";
 
-  @Value("${seed:#{null}}")
-  private String seed;
+  private final String seed;
+  private final String overrideInputFolderLocation;
 
-  @Value("${overrideInputFolderLocation:#{null}}")
-  private String overrideInputFolderLocation;
+  AppConfig(
+      @Value("${seed:#{null}}") String seed,
+      @Value("${overrideInputFolderLocation:#{null}}") String overrideInputFolderLocation) {
+    this.seed = seed;
+    this.overrideInputFolderLocation = overrideInputFolderLocation;
+  }
 
   @Bean
   public InputFiles inputFiles() {

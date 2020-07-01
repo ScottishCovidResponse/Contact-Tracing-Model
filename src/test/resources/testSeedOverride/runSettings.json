@@ -1,0 +1,8 @@
+{
+  "populationSize": 10000,
+  "timeLimit": 200,
+  "initialExposures": 1000,
+  "seed": 3,
+  "steadyState": true
+}
+
