@@ -10,6 +10,7 @@ import org.springframework.boot.SpringBootConfiguration;
 import org.springframework.context.annotation.Bean;
 import uk.co.ramp.ConfigurationException;
 import uk.co.ramp.Population;
+import uk.co.ramp.distribution.DistributionSampler;
 import uk.co.ramp.event.CompletionEventListGroup;
 import uk.co.ramp.io.types.InputFiles;
 
@@ -25,8 +26,11 @@ public class TracingPolicyContext {
 
   @Bean
   public AlertChecker alertChecker(
-      AlertContactTracer alertContactTracer, Population population, TracingPolicy tracingPolicy) {
-    return new AlertChecker(tracingPolicy, alertContactTracer, population);
+      AlertContactTracer alertContactTracer,
+      Population population,
+      TracingPolicy tracingPolicy,
+      DistributionSampler distributionSampler) {
+    return new AlertChecker(tracingPolicy, alertContactTracer, population, distributionSampler);
   }
 
   @Bean
