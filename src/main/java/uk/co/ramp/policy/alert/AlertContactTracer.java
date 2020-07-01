@@ -12,13 +12,13 @@ import uk.co.ramp.Population;
 import uk.co.ramp.event.CompletionEventListGroup;
 
 public class AlertContactTracer {
-  private final AlertPolicy alertPolicy;
+  private final TracingPolicy tracingPolicy;
   private final CompletionEventListGroup eventList;
   private final Population population;
 
   AlertContactTracer(
-      AlertPolicy alertPolicy, CompletionEventListGroup eventList, Population population) {
-    this.alertPolicy = alertPolicy;
+      TracingPolicy tracingPolicy, CompletionEventListGroup eventList, Population population) {
+    this.tracingPolicy = tracingPolicy;
     this.eventList = eventList;
     this.population = population;
   }
@@ -29,7 +29,7 @@ public class AlertContactTracer {
 
   private Set<Integer> traceRecentContacts(
       int startTime, int currentTime, int personId, int currentLevel) {
-    int noOfLevelsToTrace = alertPolicy.noOfTracingLevels();
+    int noOfLevelsToTrace = tracingPolicy.noOfTracingLevels();
     if (currentLevel > noOfLevelsToTrace) {
       return Set.of();
     }

@@ -1,9 +1,9 @@
 {
-  "runSettings": "input/runSettings.json",
-  "populationSettings": "input/populationSettings.json",
-  "diseaseSettings": "input/diseaseSettings.json",
-  "contactData": "input/homogeneous_contacts.csv",
-  "initialExposures": "input/initialExposures.csv",
-  "alertPolicies": "input/alertPolicies.json",
-  "isolationPolicies": "input/isolationPolicies.json"
+  "runSettings": "runSettings.json",
+  "populationSettings": "populationSettings.json",
+  "diseaseSettings": "diseaseSettings.json",
+  "contactData": "homogeneous_contacts.csv",
+  "initialExposures": "initialExposures.csv",
+  "tracingPolicies": "tracingPolicies.json",
+  "isolationPolicies": "isolationPolicies.json"
 }

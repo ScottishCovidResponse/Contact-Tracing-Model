@@ -1,0 +1,1 @@
+Alerting is based on reporting by symptomatic individuals. Contacts of reportee from last 14 days alerted and asked to isolate for 14 days from the time of **alert**.

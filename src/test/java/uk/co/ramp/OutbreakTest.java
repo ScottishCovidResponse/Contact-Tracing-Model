@@ -31,7 +31,7 @@ import uk.co.ramp.io.types.DiseaseProperties;
 import uk.co.ramp.io.types.StandardProperties;
 import uk.co.ramp.people.Case;
 import uk.co.ramp.people.Human;
-import uk.co.ramp.policy.alert.AlertPolicyContext;
+import uk.co.ramp.policy.alert.TracingPolicyContext;
 import uk.co.ramp.policy.isolation.IsolationPolicyContext;
 
 @SuppressWarnings("unchecked")
@@ -42,7 +42,7 @@ import uk.co.ramp.policy.isolation.IsolationPolicyContext;
   TestUtils.class,
   AppConfig.class,
   IsolationPolicyContext.class,
-  AlertPolicyContext.class
+  TracingPolicyContext.class
 })
 public class OutbreakTest {
 

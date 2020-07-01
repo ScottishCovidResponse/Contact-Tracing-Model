@@ -14,28 +14,29 @@ import uk.co.ramp.event.CompletionEventListGroup;
 import uk.co.ramp.io.types.InputFiles;
 
 @SpringBootConfiguration
-public class AlertPolicyContext {
-  private static final Logger LOGGER = LogManager.getLogger(AlertPolicyContext.class);
+public class TracingPolicyContext {
+  private static final Logger LOGGER = LogManager.getLogger(TracingPolicyContext.class);
 
   @Bean
   AlertContactTracer contactTracer(
-      CompletionEventListGroup eventList, Population population, AlertPolicy alertPolicy) {
-    return new AlertContactTracer(alertPolicy, eventList, population);
+      CompletionEventListGroup eventList, Population population, TracingPolicy tracingPolicy) {
+    return new AlertContactTracer(tracingPolicy, eventList, population);
   }
 
   @Bean
   public AlertChecker alertChecker(
-      AlertContactTracer alertContactTracer, Population population, AlertPolicy alertPolicy) {
-    return new AlertChecker(alertPolicy, alertContactTracer, population);
+      AlertContactTracer alertContactTracer, Population population, TracingPolicy tracingPolicy) {
+    return new AlertChecker(tracingPolicy, alertContactTracer, population);
   }
 
   @Bean
-  AlertPolicy alertPolicy(InputFiles inputFiles) {
-    String location = inputFiles.alertPolicies();
+  TracingPolicy tracingPolicy(InputFiles inputFiles) {
+    String location = inputFiles.tracingPolicies();
     try (Reader reader = new FileReader(new File(location))) {
-      return new AlertPolicyReader().read(reader);
+      return new TracingPolicyReader().read(reader);
     } catch (IOException e) {
-      String message = "An error occurred while parsing the alert policy properties at " + location;
+      String message =
+          "An error occurred while parsing the tracing policy properties at " + location;
       LOGGER.error(message);
       throw new ConfigurationException(message, e);
     }

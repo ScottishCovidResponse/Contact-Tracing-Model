@@ -23,12 +23,12 @@ import uk.co.ramp.event.types.*;
 import uk.co.ramp.io.types.DiseaseProperties;
 import uk.co.ramp.people.Case;
 import uk.co.ramp.people.Human;
-import uk.co.ramp.policy.alert.AlertPolicyContext;
+import uk.co.ramp.policy.alert.TracingPolicyContext;
 import uk.co.ramp.policy.isolation.IsolationPolicy;
 
 @RunWith(SpringRunner.class)
 @DirtiesContext
-@Import({TestUtils.class, AppConfig.class, TestConfig.class, AlertPolicyContext.class})
+@Import({TestUtils.class, AppConfig.class, TestConfig.class, TracingPolicyContext.class})
 public class ContactEventProcessorTest {
   @Rule public LogSpy logSpy = new LogSpy();
 

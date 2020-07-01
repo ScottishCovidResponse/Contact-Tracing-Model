@@ -1,0 +1,147 @@
+{
+  "globalIsolationPolicies": [],
+  "virusStatusPolicies": [
+    {
+      "virusStatus": "SYMPTOMATIC",
+      "isolationProperty": {
+        "id": "Symptomatic Policy",
+        "isolationProbabilityDistribution": {
+          "type": "FLAT",
+          "mean": 100,
+          "max": 100
+        },
+        "isolationTimeDistribution": {
+          "type": "FLAT",
+          "mean": 12,
+          "max": 12
+        },
+        "startOfIsolationTime": "CONTACT_TIME",
+        "priority": 2
+      }
+    },
+    {
+      "virusStatus": "SEVERELY_SYMPTOMATIC",
+      "isolationProperty": {
+        "id": "Severely Symptomatic Policy",
+        "isolationProbabilityDistribution": {
+          "type": "FLAT",
+          "mean": 100,
+          "max": 100
+        },
+        "isolationTimeDistribution": {
+          "type": "FLAT",
+          "mean": 12,
+          "max": 12
+        },
+        "startOfIsolationTime": "CONTACT_TIME",
+        "priority": 2
+      }
+    }
+  ],
+  "alertStatusPolicies": [
+    {
+      "alertStatus": "ALERTED",
+      "isolationProperty": {
+        "id": "Alerted Policy",
+        "isolationProbabilityDistribution": {
+          "type": "FLAT",
+          "mean": 100,
+          "max": 100
+        },
+        "isolationTimeDistribution": {
+          "type": "FLAT",
+          "mean": 12,
+          "max": 12
+        },
+        "startOfIsolationTime": "CONTACT_TIME",
+        "priority": 2
+      }
+    },
+    {
+      "alertStatus": "REQUESTED_TEST",
+      "isolationProperty": {
+        "id": "Requested Test Policy",
+        "isolationProbabilityDistribution": {
+          "type": "FLAT",
+          "mean": 100,
+          "max": 100
+        },
+        "isolationTimeDistribution": {
+          "type": "FLAT",
+          "mean": 12,
+          "max": 12
+        },
+        "startOfIsolationTime": "CONTACT_TIME",
+        "priority": 2
+      }
+    },
+    {
+      "alertStatus": "AWAITING_RESULT",
+      "isolationProperty": {
+        "id": "Awaiting Result Policy",
+        "isolationProbabilityDistribution": {
+          "type": "FLAT",
+          "mean": 100,
+          "max": 100
+        },
+        "isolationTimeDistribution": {
+          "type": "FLAT",
+          "mean": 12,
+          "max": 12
+        },
+        "startOfIsolationTime": "CONTACT_TIME",
+        "priority": 2
+      }
+    },
+    {
+      "alertStatus": "TESTED_POSITIVE",
+      "isolationProperty": {
+        "id": "Tested Positive Policy",
+        "isolationProbabilityDistribution": {
+          "type": "FLAT",
+          "mean": 100,
+          "max": 100
+        },
+        "isolationTimeDistribution": {
+          "type": "FLAT",
+          "mean": 12,
+          "max": 12
+        },
+        "startOfIsolationTime": "CONTACT_TIME",
+        "priority": 2
+      }
+    },
+    {
+      "alertStatus": "TESTED_NEGATIVE",
+      "isolationProperty": {
+        "id": "Tested Negative Policy",
+        "isolationProbabilityDistribution": {
+          "type": "FLAT",
+          "mean": 100,
+          "max": 100
+        },
+        "isolationTimeDistribution": {
+          "type": "FLAT",
+          "mean": 12,
+          "max": 12
+        },
+        "startOfIsolationTime": "CONTACT_TIME",
+        "priority": 2
+      }
+    }
+  ],
+  "defaultPolicy": {
+    "id": "Default Policy",
+    "isolationProbabilityDistribution": {
+      "type": "FLAT",
+      "mean": 0,
+      "max": 0
+    },
+    "priority": 0
+  },
+  "isolationProbabilityDistributionThreshold": {
+    "type": "LINEAR",
+    "mean": 50,
+    "max": 100
+  }
+}

@@ -17,7 +17,7 @@ import uk.co.ramp.people.AlertStatus;
 import uk.co.ramp.people.VirusStatus;
 
 public class AlertContactTracerTest {
-  private AlertPolicy alertPolicy;
+  private TracingPolicy tracingPolicy;
   private CompletionEventListGroup eventList;
   private Population population;
 
@@ -38,26 +38,26 @@ public class AlertContactTracerTest {
 
   @Before
   public void setUp() {
-    this.alertPolicy = mock(AlertPolicy.class);
+    this.tracingPolicy = mock(TracingPolicy.class);
     this.eventList = mock(CompletionEventListGroup.class);
     this.population = mock(Population.class);
   }
 
   @Test
   public void testPrimaryLevelTrace() {
-    when(alertPolicy.noOfTracingLevels()).thenReturn(1);
+    when(tracingPolicy.noOfTracingLevels()).thenReturn(1);
     when(eventList.getCompletedContactEventsInPeriod(eq(0), eq(2), eq(1)))
         .thenReturn(List.of(event1, event2, event3));
     when(population.getAlertStatus(anyInt())).thenReturn(AlertStatus.NONE);
     when(population.getVirusStatus(anyInt())).thenReturn(VirusStatus.EXPOSED);
-    var contactTracer = new AlertContactTracer(alertPolicy, eventList, population);
+    var contactTracer = new AlertContactTracer(tracingPolicy, eventList, population);
 
     assertThat(contactTracer.traceRecentContacts(0, 2, 1)).containsExactlyInAnyOrder(2, 3);
   }
 
   @Test
   public void testSecondaryLevelTrace() {
-    when(alertPolicy.noOfTracingLevels()).thenReturn(2);
+    when(tracingPolicy.noOfTracingLevels()).thenReturn(2);
     when(eventList.getCompletedContactEventsInPeriod(eq(0), eq(2), eq(1)))
         .thenReturn(List.of(event1, event2, event3));
     when(eventList.getCompletedContactEventsInPeriod(eq(0), eq(2), eq(2)))
@@ -66,14 +66,14 @@ public class AlertContactTracerTest {
         .thenReturn(List.of(event2, event4));
     when(population.getAlertStatus(anyInt())).thenReturn(AlertStatus.NONE);
     when(population.getVirusStatus(anyInt())).thenReturn(VirusStatus.EXPOSED);
-    var contactTracer = new AlertContactTracer(alertPolicy, eventList, population);
+    var contactTracer = new AlertContactTracer(tracingPolicy, eventList, population);
 
     assertThat(contactTracer.traceRecentContacts(0, 2, 1)).containsExactlyInAnyOrder(2, 3, 4);
   }
 
   @Test
   public void testTertiaryLevelTrace() {
-    when(alertPolicy.noOfTracingLevels()).thenReturn(3);
+    when(tracingPolicy.noOfTracingLevels()).thenReturn(3);
     when(eventList.getCompletedContactEventsInPeriod(eq(0), eq(2), eq(1)))
         .thenReturn(List.of(event1, event2, event3));
     when(eventList.getCompletedContactEventsInPeriod(eq(0), eq(2), eq(2)))
@@ -86,7 +86,7 @@ public class AlertContactTracerTest {
         .thenReturn(List.of(event5));
     when(population.getAlertStatus(anyInt())).thenReturn(AlertStatus.NONE);
     when(population.getVirusStatus(anyInt())).thenReturn(VirusStatus.EXPOSED);
-    var contactTracer = new AlertContactTracer(alertPolicy, eventList, population);
+    var contactTracer = new AlertContactTracer(tracingPolicy, eventList, population);
 
     assertThat(contactTracer.traceRecentContacts(0, 2, 1)).containsExactlyInAnyOrder(2, 3, 4, 5);
   }

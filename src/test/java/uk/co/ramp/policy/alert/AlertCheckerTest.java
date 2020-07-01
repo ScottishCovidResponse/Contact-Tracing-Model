@@ -15,17 +15,19 @@ import uk.co.ramp.people.VirusStatus;
 
 public class AlertCheckerTest {
   private AlertContactTracer contactTracer;
-  private AlertPolicy alertPolicy;
+  private TracingPolicy tracingPolicy;
   private Population population;
 
   @Before
   public void setUp() {
     contactTracer = mock(AlertContactTracer.class);
-    alertPolicy = mock(AlertPolicy.class);
+    tracingPolicy = mock(TracingPolicy.class);
     population = mock(Population.class);
 
     when(contactTracer.traceRecentContacts(eq(7), eq(20), eq(1))).thenReturn(Set.of(2, 3));
-    when(alertPolicy.recentContactsLookBackTime()).thenReturn(14);
+    when(tracingPolicy.recentContactsLookBackTime()).thenReturn(14);
+    when(tracingPolicy.reporterAlertStatus()).thenReturn(AlertStatus.NONE);
+    when(tracingPolicy.reporterVirusStatus()).thenReturn(VirusStatus.SYMPTOMATIC);
     when(population.getVirusStatus(eq(1))).thenReturn(VirusStatus.SYMPTOMATIC);
     when(population.getVirusStatus(eq(2))).thenReturn(VirusStatus.SUSCEPTIBLE);
     when(population.getVirusStatus(eq(3))).thenReturn(VirusStatus.SYMPTOMATIC);
@@ -36,7 +38,7 @@ public class AlertCheckerTest {
 
   @Test
   public void testFindRecentContacts() {
-    var alertChecker = new AlertChecker(alertPolicy, contactTracer, population);
+    var alertChecker = new AlertChecker(tracingPolicy, contactTracer, population);
 
     var event =
         ImmutableAlertEvent.builder()

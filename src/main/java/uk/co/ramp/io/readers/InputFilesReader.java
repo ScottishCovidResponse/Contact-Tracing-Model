@@ -21,13 +21,13 @@ public class InputFilesReader {
 
     InputFiles properties =
         ImmutableInputFiles.builder()
-            .runSettings("input/runSettings.json")
-            .diseaseSettings("input/diseaseSettings.json")
-            .populationSettings("input/populationSettings.json")
-            .contactData("input/contactData.csv")
-            .initialExposures("input/initialExposures.csv")
-            .alertPolicies("input/alertPolicies.json")
-            .isolationPolicies("input/isolationPolicies.json")
+            .runSettings("runSettings.json")
+            .diseaseSettings("diseaseSettings.json")
+            .populationSettings("populationSettings.json")
+            .contactData("contactData.csv")
+            .initialExposures("initialExposures.csv")
+            .tracingPolicies("tracingPolicies.json")
+            .isolationPolicies("isolationPolicies.json")
             .build();
 
     Gson gson = new GsonBuilder().setPrettyPrinting().create();

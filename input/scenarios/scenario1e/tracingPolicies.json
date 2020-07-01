@@ -1,0 +1,7 @@
+{
+  "description": "Tracing based on Symptomatic individuals reporting with secondary tracing and look back time of 11",
+  "reporterAlertStatus": "NONE",
+  "reporterVirusStatus": "SYMPTOMATIC",
+  "recentContactsLookBackTime": 11,
+  "noOfTracingLevels": 2
+}
