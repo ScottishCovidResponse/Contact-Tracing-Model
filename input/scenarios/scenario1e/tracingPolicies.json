@@ -3,5 +3,10 @@
   "reporterAlertStatus": "NONE",
   "reporterVirusStatus": "SYMPTOMATIC",
   "recentContactsLookBackTime": 11,
-  "noOfTracingLevels": 2
+  "noOfTracingLevels": 2,
+  "delayPerTraceLink": {
+    "mean": 1,
+    "max": 1,
+    "type": "FLAT"
+  }
 }
