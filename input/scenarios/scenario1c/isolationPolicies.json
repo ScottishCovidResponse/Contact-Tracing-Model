@@ -25,13 +25,13 @@
         "id": "Severely Symptomatic Policy",
         "isolationProbabilityDistribution": {
           "type": "FLAT",
-          "mean": 12,
-          "max": 12
+          "mean": 100,
+          "max": 100
         },
         "isolationTimeDistribution": {
           "type": "FLAT",
-          "mean": 14,
-          "max": 14
+          "mean": 12,
+          "max": 12
         },
         "startOfIsolationTime": "CONTACT_TIME",
         "priority": 2
@@ -45,13 +45,13 @@
         "id": "Alerted Policy",
         "isolationProbabilityDistribution": {
           "type": "FLAT",
-          "mean": 12,
-          "max": 12
+          "mean": 100,
+          "max": 100
         },
         "isolationTimeDistribution": {
           "type": "FLAT",
-          "mean": 14,
-          "max": 14
+          "mean": 12,
+          "max": 12
         },
         "startOfIsolationTime": "CONTACT_TIME",
         "priority": 2
@@ -63,13 +63,13 @@
         "id": "Requested Test Policy",
         "isolationProbabilityDistribution": {
           "type": "FLAT",
-          "mean": 12,
-          "max": 12
+          "mean": 100,
+          "max": 100
         },
         "isolationTimeDistribution": {
           "type": "FLAT",
-          "mean": 14,
-          "max": 14
+          "mean": 12,
+          "max": 12
         },
         "startOfIsolationTime": "CONTACT_TIME",
         "priority": 2
@@ -81,13 +81,13 @@
         "id": "Awaiting Result Policy",
         "isolationProbabilityDistribution": {
           "type": "FLAT",
-          "mean": 12,
-          "max": 12
+          "mean": 100,
+          "max": 100
         },
         "isolationTimeDistribution": {
           "type": "FLAT",
-          "mean": 14,
-          "max": 14
+          "mean": 12,
+          "max": 12
         },
         "startOfIsolationTime": "CONTACT_TIME",
         "priority": 2
@@ -99,13 +99,13 @@
         "id": "Tested Positive Policy",
         "isolationProbabilityDistribution": {
           "type": "FLAT",
-          "mean": 12,
-          "max": 12
+          "mean": 100,
+          "max": 100
         },
         "isolationTimeDistribution": {
           "type": "FLAT",
-          "mean": 14,
-          "max": 14
+          "mean": 12,
+          "max": 12
         },
         "startOfIsolationTime": "CONTACT_TIME",
         "priority": 2
@@ -117,13 +117,13 @@
         "id": "Tested Negative Policy",
         "isolationProbabilityDistribution": {
           "type": "FLAT",
-          "mean": 12,
-          "max": 12
+          "mean": 100,
+          "max": 100
         },
         "isolationTimeDistribution": {
           "type": "FLAT",
-          "mean": 14,
-          "max": 14
+          "mean": 12,
+          "max": 12
         },
         "startOfIsolationTime": "CONTACT_TIME",
         "priority": 2
