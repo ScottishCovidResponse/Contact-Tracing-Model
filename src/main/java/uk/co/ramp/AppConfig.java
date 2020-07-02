@@ -6,8 +6,6 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.io.Reader;
 import java.util.Optional;
-import java.util.OptionalInt;
-import java.util.stream.Stream;
 import org.apache.commons.math3.random.RandomDataGenerator;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -131,7 +129,7 @@ public class AppConfig {
     RandomDataGenerator rdg = new RandomDataGenerator();
 
     try {
-      if(seed == null && standardProperties().seed().isEmpty()) {
+      if (seed == null && standardProperties().seed().isEmpty()) {
         logUsingDefaultSeed();
       } else {
         int cmdLineSeed = seed == null ? 0 : Integer.parseInt(seed);
