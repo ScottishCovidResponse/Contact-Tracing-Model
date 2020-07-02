@@ -27,10 +27,9 @@ public class TracingPolicyContext {
   @Bean
   public AlertChecker alertChecker(
       AlertContactTracer alertContactTracer,
-      Population population,
       TracingPolicy tracingPolicy,
       DistributionSampler distributionSampler) {
-    return new AlertChecker(tracingPolicy, alertContactTracer, population, distributionSampler);
+    return new AlertChecker(tracingPolicy, alertContactTracer, distributionSampler);
   }
 
   @Bean

@@ -28,7 +28,6 @@ import uk.co.ramp.distribution.DistributionSampler;
 import uk.co.ramp.event.types.*;
 import uk.co.ramp.io.types.DiseaseProperties;
 import uk.co.ramp.people.Case;
-import uk.co.ramp.people.Human;
 import uk.co.ramp.policy.alert.AlertChecker;
 import uk.co.ramp.policy.alert.TracingPolicyContext;
 
@@ -38,7 +37,7 @@ import uk.co.ramp.policy.alert.TracingPolicyContext;
 public class VirusEventProcessorTest {
   private VirusEventProcessor eventProcessor;
   private DiseaseProperties diseaseProperties;
-
+  private Population population;
   private final AlertEvent alertEvent =
       ImmutableAlertEvent.builder()
           .id(0)
@@ -52,43 +51,25 @@ public class VirusEventProcessorTest {
   @Before
   public void setUp() throws FileNotFoundException {
     diseaseProperties = TestUtils.diseaseProperties();
-
-    Human human = mock(Human.class);
-    when(human.health()).thenReturn(-1d);
-    Case aCase = new Case(human);
-
-    Map<Integer, Case> population = new HashMap<>();
-    population.put(0, aCase);
+    population = mock(Population.class);
 
     AlertChecker alertChecker = mock(AlertChecker.class);
-    when(alertChecker.checkForAlert(eq(0), eq(SYMPTOMATIC), eq(1)))
+    when(alertChecker.checkForAlert(eq(0), eq(NONE), eq(SYMPTOMATIC), eq(1)))
         .thenReturn(Stream.of(alertEvent));
 
     this.eventProcessor =
-        new VirusEventProcessor(
-            new Population(population), diseaseProperties, distributionSampler, alertChecker);
+        new VirusEventProcessor(population, diseaseProperties, distributionSampler, alertChecker);
   }
 
   @Test
   public void checkForAlert() {
+    when(population.getAlertStatus(eq(0))).thenReturn(NONE);
+    when(population.getVirusStatus(eq(0))).thenReturn(PRESYMPTOMATIC);
+    assertThat(eventProcessor.checkForAlert(0, 1)).isEmpty();
 
-    VirusEvent virusEvent =
-        ImmutableVirusEvent.builder()
-            .id(0)
-            .oldStatus(EXPOSED)
-            .nextStatus(PRESYMPTOMATIC)
-            .time(1)
-            .build();
-    assertThat(eventProcessor.checkForAlert(virusEvent)).isEmpty();
-
-    virusEvent =
-        ImmutableVirusEvent.builder()
-            .id(0)
-            .oldStatus(PRESYMPTOMATIC)
-            .nextStatus(SYMPTOMATIC)
-            .time(1)
-            .build();
-    assertThat(eventProcessor.checkForAlert(virusEvent)).containsExactly(alertEvent);
+    when(population.getAlertStatus(eq(0))).thenReturn(NONE);
+    when(population.getVirusStatus(eq(0))).thenReturn(SYMPTOMATIC);
+    assertThat(eventProcessor.checkForAlert(0, 1)).containsExactly(alertEvent);
   }
 
   @Test
