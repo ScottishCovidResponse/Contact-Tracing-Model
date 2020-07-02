@@ -34,7 +34,6 @@ public class AlertEventProcessorTest {
   private DiseaseProperties diseaseProperties;
   private Population population;
   private DistributionSampler distributionSampler;
-
   private AlertEventProcessor eventProcessor;
 
   @Before
@@ -65,7 +64,7 @@ public class AlertEventProcessorTest {
     Assert.assertEquals(1, time);
 
     time = eventProcessor.timeInStatus(TESTED_POSITIVE);
-    Assert.assertEquals(0, time);
+    Assert.assertEquals(1, time);
   }
 
   @Test

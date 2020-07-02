@@ -6,6 +6,7 @@ import static uk.co.ramp.people.AlertStatus.TESTED_POSITIVE;
 import static uk.co.ramp.people.AlertStatus.getValidTransitions;
 
 import java.util.List;
+import java.util.Optional;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import uk.co.ramp.Population;
@@ -46,17 +47,22 @@ public class AlertEventProcessor implements EventProcessor<AlertEvent> {
 
     population.setAlertStatus(event.id(), event.nextStatus());
 
-    AlertStatus proposedStatus = determineNextAlertStatus(event);
-    AlertStatus nextStatus = event.nextStatus().transitionTo(proposedStatus);
+    Optional<AlertStatus> proposedStatus = determineNextAlertStatus(event);
+    Optional<AlertStatus> nextStatus =
+        proposedStatus.map(ps -> event.nextStatus().transitionTo(ps));
 
-    if (nextStatus != event.nextStatus()) {
-      int deltaTime = timeInStatus(nextStatus);
+    if (nextStatus.isEmpty()) {
+      return ImmutableProcessedEventResult.builder().addNewCompletedAlertEvents(event).build();
+    }
+
+    if (nextStatus.get() != event.nextStatus()) {
+      int deltaTime = timeInStatus(nextStatus.get());
 
       AlertEvent subsequentEvent =
           ImmutableAlertEvent.builder()
               .id(event.id())
               .oldStatus(event.nextStatus())
-              .nextStatus(nextStatus)
+              .nextStatus(nextStatus.get())
               .time(event.time() + deltaTime)
               .build();
 
@@ -68,17 +74,19 @@ public class AlertEventProcessor implements EventProcessor<AlertEvent> {
     return ImmutableProcessedEventResult.builder().build();
   }
 
-  private AlertStatus determineNextAlertStatus(AlertEvent event) {
+  private Optional<AlertStatus> determineNextAlertStatus(AlertEvent event) {
     List<AlertStatus> newStatus = getValidTransitions(event.nextStatus());
 
-    if (newStatus.isEmpty()) return event.nextStatus();
-    if (newStatus.size() == 1) return newStatus.get(0);
+    if (newStatus.isEmpty()) return Optional.empty();
+    if (newStatus.size() == 1) return Optional.of(newStatus.get(0));
 
     switch (event.nextStatus()) {
       case AWAITING_RESULT:
-        return population.isInfectious(event.id()) ? TESTED_POSITIVE : TESTED_NEGATIVE;
+        return population.isInfectious(event.id())
+            ? Optional.of(TESTED_POSITIVE)
+            : Optional.of(TESTED_NEGATIVE);
       case NONE:
-        return NONE;
+        return Optional.of(NONE);
       default:
         LOGGER.error(event);
         throw new EventException("There is no case for the event" + event);
@@ -89,6 +97,9 @@ public class AlertEventProcessor implements EventProcessor<AlertEvent> {
 
     MeanMax progressionData;
     switch (newStatus) {
+      case TESTED_POSITIVE:
+        progressionData = ImmutableMeanMax.builder().mean(1).max(1).build();
+        break;
       case TESTED_NEGATIVE:
         progressionData = ImmutableMeanMax.builder().mean(1).max(1).build();
         break;
@@ -101,8 +112,10 @@ public class AlertEventProcessor implements EventProcessor<AlertEvent> {
       case ALERTED:
         progressionData = ImmutableMeanMax.builder().mean(1).max(1).build();
         break;
-      default:
+      case NONE:
         return 0;
+      default:
+        throw new IllegalStateException("Should not reach this state");
     }
 
     Distribution distribution =

@@ -50,7 +50,7 @@ public class VirusEventProcessor extends CommonVirusEventProcessor<VirusEvent> {
               .time(event.time() + deltaTime)
               .build();
 
-      List<AlertEvent> alertEvents = checkForAlert(event);
+      List<AlertEvent> alertEvents = checkForAlert(event.id(), event.time());
 
       return ImmutableProcessedEventResult.builder()
           .addNewVirusEvents(subsequentEvent)
@@ -61,9 +61,11 @@ public class VirusEventProcessor extends CommonVirusEventProcessor<VirusEvent> {
     return ImmutableProcessedEventResult.builder().build();
   }
 
-  List<AlertEvent> checkForAlert(VirusEvent trigger) {
+  List<AlertEvent> checkForAlert(int personId, int time) {
+    var alertStatus = population.getAlertStatus(personId);
+    var virusStatus = population.getVirusStatus(personId);
     return alertChecker
-        .checkForAlert(trigger.id(), trigger.nextStatus(), trigger.time())
+        .checkForAlert(personId, alertStatus, virusStatus, time)
         .collect(Collectors.toList());
   }
 }

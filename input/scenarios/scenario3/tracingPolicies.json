@@ -1,12 +1,41 @@
 {
   "description": "Tracing based on Symptomatic individuals reporting with secondary tracing and look back time of 11",
-  "reporterAlertStatus": "NONE",
-  "reporterVirusStatus": "SYMPTOMATIC",
-  "recentContactsLookBackTime": 11,
+  "policies": [
+    {
+      "reporterAlertStatus": "NONE",
+      "reporterVirusStatus": "SYMPTOMATIC",
+      "recentContactsLookBackTime": 11,
+      "timeDelayPerTraceLink": {
+        "mean": 1,
+        "max": 1,
+        "type": "FLAT"
+      },
+      "probabilitySkippingTraceLink": {
+        "mean": 10,
+        "max": 10,
+        "type": "FLAT"
+      }
+    },
+    {
+      "reporterAlertStatus": "NONE",
+      "reporterVirusStatus": "SEVERELY_SYMPTOMATIC",
+      "recentContactsLookBackTime": 11,
+      "timeDelayPerTraceLink": {
+        "mean": 1,
+        "max": 1,
+        "type": "FLAT"
+      },
+      "probabilitySkippingTraceLink": {
+        "mean": 10,
+        "max": 10,
+        "type": "FLAT"
+      }
+    }
+  ],
   "noOfTracingLevels": 2,
-  "delayPerTraceLink": {
-    "mean": 1,
-    "max": 1,
-    "type": "FLAT"
+  "probabilitySkippingTraceLinkThreshold": {
+    "mean": 50,
+    "max": 100,
+    "type": "LINEAR"
   }
 }
