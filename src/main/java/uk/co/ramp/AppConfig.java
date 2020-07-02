@@ -131,14 +131,13 @@ public class AppConfig {
     RandomDataGenerator rdg = new RandomDataGenerator();
 
     try {
-      OptionalInt cmdLineSeedOverride =
-          Stream.ofNullable(seed).mapToInt(Integer::parseInt).findAny();
-      OptionalInt propertiesSeedOverride = standardProperties().seed();
-      Stream.of(cmdLineSeedOverride, propertiesSeedOverride)
-          .flatMapToInt(OptionalInt::stream)
-          .reduce(Integer::sum)
-          .ifPresentOrElse(seed -> useSeed(rdg, seed), this::logUsingDefaultSeed);
-
+      if(seed == null && standardProperties().seed().isEmpty()) {
+        logUsingDefaultSeed();
+      } else {
+        int cmdLineSeed = seed == null ? 0 : Integer.parseInt(seed);
+        int propertiesSeed = standardProperties().seed().orElse(0);
+        useSeed(rdg, cmdLineSeed + propertiesSeed);
+      }
       return rdg;
     } catch (NullPointerException | ConfigurationException e) {
       String message =
