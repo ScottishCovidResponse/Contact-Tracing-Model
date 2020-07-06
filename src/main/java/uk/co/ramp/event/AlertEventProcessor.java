@@ -98,9 +98,8 @@ public class AlertEventProcessor implements EventProcessor<AlertEvent> {
     MeanMax progressionData;
     switch (newStatus) {
       case TESTED_POSITIVE:
-        progressionData = ImmutableMeanMax.builder().mean(1).max(1).build();
-        break;
       case TESTED_NEGATIVE:
+      case ALERTED:
         progressionData = ImmutableMeanMax.builder().mean(1).max(1).build();
         break;
       case AWAITING_RESULT:
@@ -108,9 +107,6 @@ public class AlertEventProcessor implements EventProcessor<AlertEvent> {
         break;
       case REQUESTED_TEST:
         progressionData = diseaseProperties.timeTestAdministered();
-        break;
-      case ALERTED:
-        progressionData = ImmutableMeanMax.builder().mean(1).max(1).build();
         break;
       case NONE:
         return 0;
