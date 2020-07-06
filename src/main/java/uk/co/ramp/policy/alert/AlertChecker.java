@@ -58,14 +58,13 @@ public class AlertChecker {
 
     var tracingPolicyItem = findPolicyItem(currentReporterVirusStatus, currentReporterAlertStatus);
 
-    if (tracingPolicyItem.isEmpty()) {
+    if (tracingPolicyItem.map(policy -> !shouldPerformTracingForThisLink(policy)).orElse(true)) {
       return requestTestForReporterEvent;
     }
     var startTime = currentTime - tracingPolicyItem.get().recentContactsLookBackTime() + 1;
 
     var alertsFromRecentContacts =
         alertContactTracer.traceRecentContacts(startTime, currentTime, personId).stream()
-            .filter(a -> shouldPerformTracingForThisLink(tracingPolicyItem.get()))
             .map(
                 id ->
                     ImmutableAlertEvent.builder()
