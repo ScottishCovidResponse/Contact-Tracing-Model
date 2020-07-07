@@ -62,7 +62,7 @@ public class PopulationGenerator {
           dataGenerator.nextUniform(0, 1) > properties.genderBalance() / 2d
               ? Gender.FEMALE
               : Gender.MALE;
-      double compliance = dataGenerator.nextUniform(0, 1);
+      double isolationCompliance = dataGenerator.nextUniform(0, 1);
       double health = dataGenerator.nextUniform(0, 1);
 
       population.put(
@@ -71,7 +71,7 @@ public class PopulationGenerator {
               ImmutableHuman.builder()
                   .id(i)
                   .age(age)
-                  .compliance(compliance)
+                  .isolationCompliance(isolationCompliance)
                   .gender(gender)
                   .health(health)
                   .build()));

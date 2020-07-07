@@ -79,7 +79,7 @@ public class Case {
   // derived values
 
   public double compliance() {
-    return human.compliance();
+    return human.isolationCompliance();
   }
 
   public Gender gender() {
