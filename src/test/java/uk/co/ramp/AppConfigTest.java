@@ -24,7 +24,7 @@ public class AppConfigTest {
 
   @Before
   public void setUp() {
-    appConfig = new AppConfig(null, null);
+    appConfig = new AppConfig(null, null, null);
   }
 
   @Test
@@ -164,7 +164,7 @@ public class AppConfigTest {
     Random random = TestUtils.getRandom();
 
     int arg = random.nextInt(10);
-    appConfig = new AppConfig(String.valueOf(arg), "src/test/resources/testSeedOverride");
+    appConfig = new AppConfig(String.valueOf(arg), "src/test/resources/testSeedOverride", "src/test/resources/testSeedOverride");
 
     RandomDataGenerator r = appConfig.randomDataGenerator();
     int seed = appConfig.standardProperties().seed().orElseThrow();
@@ -177,7 +177,7 @@ public class AppConfigTest {
   @Test(expected = ConfigurationException.class)
   public void randomDataGeneratorWithInvalidArgs() throws ConfigurationException {
 
-    appConfig = new AppConfig("seed", null);
+    appConfig = new AppConfig("seed", null, null);
     try {
       appConfig.randomDataGenerator();
     } catch (ConfigurationException e) {
