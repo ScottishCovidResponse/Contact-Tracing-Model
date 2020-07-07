@@ -75,7 +75,7 @@ public class PopulationGeneratorTest {
     Assert.assertEquals(popSize, population.size());
 
     double compliance =
-        population.values().stream().mapToDouble(Case::compliance).average().orElseThrow();
+        population.values().stream().mapToDouble(Case::isolationCompliance).average().orElseThrow();
     double health = population.values().stream().mapToDouble(Case::health).average().orElseThrow();
     double age = population.values().stream().mapToDouble(Case::age).average().orElseThrow();
     double men =

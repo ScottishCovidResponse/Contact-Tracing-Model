@@ -33,13 +33,13 @@ public class ContactIsolationPolicyTest {
     when(caseA.id()).thenReturn(0);
     when(caseA.virusStatus()).thenReturn(VirusStatus.SYMPTOMATIC);
     when(caseA.alertStatus()).thenReturn(AlertStatus.NONE);
-    when(caseA.compliance()).thenReturn(1.0);
+    when(caseA.isolationCompliance()).thenReturn(1.0);
 
     this.caseB = mock(Case.class);
     when(caseB.id()).thenReturn(1);
     when(caseB.virusStatus()).thenReturn(VirusStatus.SUSCEPTIBLE);
     when(caseB.alertStatus()).thenReturn(AlertStatus.NONE);
-    when(caseB.compliance()).thenReturn(1.0);
+    when(caseB.isolationCompliance()).thenReturn(1.0);
   }
 
   @Test
