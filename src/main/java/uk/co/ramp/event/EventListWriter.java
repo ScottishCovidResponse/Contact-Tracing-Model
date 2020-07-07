@@ -24,7 +24,9 @@ public class EventListWriter {
   private final CompletionEventListGroup eventList;
   private final File outputFolder;
 
-  EventListWriter(FormattedEventFactory formattedEventFactory, CompletionEventListGroup eventList,
+  EventListWriter(
+      FormattedEventFactory formattedEventFactory,
+      CompletionEventListGroup eventList,
       File outputFolder) {
     this.formattedEventFactory = formattedEventFactory;
     this.eventList = eventList;

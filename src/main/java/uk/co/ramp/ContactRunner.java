@@ -65,8 +65,8 @@ public class ContactRunner implements CommandLineRunner {
       Map<Integer, CmptRecord> records = infection.propagate();
 
       LOGGER.info("Writing Compartment Records");
-      writeCompartments(new ArrayList<>(records.values()),
-          new File(outputFileLocation, COMPARTMENTS_CSV));
+      writeCompartments(
+          new ArrayList<>(records.values()), new File(outputFileLocation, COMPARTMENTS_CSV));
       LOGGER.info("Completed. Tidying up.");
     }
   }
