@@ -1,6 +1,11 @@
 package uk.co.ramp;
 
-import java.io.*;
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileReader;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.io.Reader;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -23,6 +28,7 @@ public class ContactRunner implements CommandLineRunner {
   private static final Logger LOGGER = LogManager.getLogger(ContactRunner.class);
   public static final String COMPARTMENTS_CSV = "Compartments.csv";
   private InputFiles inputFileLocation;
+  private File outputFileLocation;
   private ApplicationContext ctx;
 
   @Autowired
@@ -33,6 +39,11 @@ public class ContactRunner implements CommandLineRunner {
   @Autowired
   public void setInputFileLocation(InputFiles inputFileLocation) {
     this.inputFileLocation = inputFileLocation;
+  }
+
+  @Autowired
+  public void setOutputFolder(File file) {
+    this.outputFileLocation = file;
   }
 
   @Override
@@ -54,7 +65,8 @@ public class ContactRunner implements CommandLineRunner {
       Map<Integer, CmptRecord> records = infection.propagate();
 
       LOGGER.info("Writing Compartment Records");
-      writeCompartments(new ArrayList<>(records.values()), new File(COMPARTMENTS_CSV));
+      writeCompartments(new ArrayList<>(records.values()),
+          new File(outputFileLocation, COMPARTMENTS_CSV));
       LOGGER.info("Completed. Tidying up.");
     }
   }

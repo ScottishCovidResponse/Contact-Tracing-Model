@@ -1,9 +1,12 @@
 package uk.co.ramp.event;
 
+import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.Writer;
-import java.util.*;
+import java.util.Collection;
+import java.util.Comparator;
+import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
@@ -19,10 +22,13 @@ public class EventListWriter {
 
   private final FormattedEventFactory formattedEventFactory;
   private final CompletionEventListGroup eventList;
+  private final File outputFolder;
 
-  EventListWriter(FormattedEventFactory formattedEventFactory, CompletionEventListGroup eventList) {
+  EventListWriter(FormattedEventFactory formattedEventFactory, CompletionEventListGroup eventList,
+      File outputFolder) {
     this.formattedEventFactory = formattedEventFactory;
     this.eventList = eventList;
+    this.outputFolder = outputFolder;
   }
 
   public void output() {
@@ -61,7 +67,7 @@ public class EventListWriter {
             .sorted(Comparator.comparingInt(ImmutableFormattedEvent::time))
             .collect(Collectors.toList());
 
-    try (Writer writer = new FileWriter(EVENTS_CSV)) {
+    try (Writer writer = new FileWriter(new File(outputFolder, EVENTS_CSV))) {
       new CsvWriter().write(writer, finalList, ImmutableFormattedEvent.class);
 
     } catch (IOException e) {
