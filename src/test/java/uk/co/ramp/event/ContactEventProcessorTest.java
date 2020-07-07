@@ -124,7 +124,7 @@ public class ContactEventProcessorTest {
             .label("")
             .build();
 
-    Optional<InfectionEvent> var = eventProcessor.evaluateExposures(contactEvent, time);
+    Optional<InfectionEvent> var = eventProcessor.evaluateExposures(mock0, contactEvent, time);
 
     Assert.assertTrue(var.isPresent());
 
@@ -166,7 +166,7 @@ public class ContactEventProcessorTest {
             .label("")
             .build();
 
-    Optional<InfectionEvent> var = eventProcessor.evaluateExposures(contactEvent, time);
+    Optional<InfectionEvent> var = eventProcessor.evaluateExposures(mock0, contactEvent, time);
 
     System.out.println(logSpy.getOutput());
     Assert.assertFalse(var.isPresent());
