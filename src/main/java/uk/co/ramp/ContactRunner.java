@@ -21,6 +21,7 @@ import uk.co.ramp.io.ContactReader;
 import uk.co.ramp.io.csv.CsvException;
 import uk.co.ramp.io.types.CmptRecord;
 import uk.co.ramp.io.types.InputFiles;
+import uk.co.ramp.io.types.OutputFolder;
 
 @Service
 public class ContactRunner implements CommandLineRunner {
@@ -28,7 +29,7 @@ public class ContactRunner implements CommandLineRunner {
   private static final Logger LOGGER = LogManager.getLogger(ContactRunner.class);
   public static final String COMPARTMENTS_CSV = "Compartments.csv";
   private InputFiles inputFileLocation;
-  private File outputFileLocation;
+  private File outputFolder;
   private ApplicationContext ctx;
 
   @Autowired
@@ -42,8 +43,8 @@ public class ContactRunner implements CommandLineRunner {
   }
 
   @Autowired
-  public void setOutputFolder(File file) {
-    this.outputFileLocation = file;
+  public void setOutputFolder(OutputFolder outputFolder) {
+    this.outputFolder = outputFolder.outputFolder();
   }
 
   @Override
@@ -66,7 +67,7 @@ public class ContactRunner implements CommandLineRunner {
 
       LOGGER.info("Writing Compartment Records");
       writeCompartments(
-          new ArrayList<>(records.values()), new File(outputFileLocation, COMPARTMENTS_CSV));
+          new ArrayList<>(records.values()), new File(outputFolder, COMPARTMENTS_CSV));
       LOGGER.info("Completed. Tidying up.");
     }
   }

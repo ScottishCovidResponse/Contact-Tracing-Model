@@ -24,6 +24,7 @@ import uk.co.ramp.io.InfectionMapException;
 import uk.co.ramp.io.LogDailyOutput;
 import uk.co.ramp.io.types.CmptRecord;
 import uk.co.ramp.io.types.DiseaseProperties;
+import uk.co.ramp.io.types.OutputFolder;
 import uk.co.ramp.io.types.StandardProperties;
 import uk.co.ramp.people.VirusStatus;
 
@@ -53,7 +54,7 @@ public class Outbreak {
       EventRunner eventRunner,
       EventListWriter eventListWriter,
       LastContactTime lastContactTime,
-      File outputFolder) {
+      OutputFolder outputFolder) {
 
     this.population = population;
     this.diseaseProperties = diseaseProperties;
@@ -62,7 +63,7 @@ public class Outbreak {
     this.eventRunner = eventRunner;
     this.eventListWriter = eventListWriter;
     this.lastContactTime = lastContactTime;
-    this.outputFolder = outputFolder;
+    this.outputFolder = outputFolder.outputFolder();
   }
 
   public Map<Integer, CmptRecord> propagate() {
