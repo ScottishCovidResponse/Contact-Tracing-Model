@@ -164,7 +164,11 @@ public class AppConfigTest {
     Random random = TestUtils.getRandom();
 
     int arg = random.nextInt(10);
-    appConfig = new AppConfig(String.valueOf(arg), "src/test/resources/testSeedOverride", "src/test/resources/testSeedOverride");
+    appConfig =
+        new AppConfig(
+            String.valueOf(arg),
+            "src/test/resources/testSeedOverride",
+            "src/test/resources/testSeedOverride");
 
     RandomDataGenerator r = appConfig.randomDataGenerator();
     int seed = appConfig.standardProperties().seed().orElseThrow();
