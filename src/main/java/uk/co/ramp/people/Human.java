@@ -12,7 +12,7 @@ public interface Human {
 
   Gender gender();
 
-  double compliance();
+  double isolationCompliance();
 
   double health();
 }
