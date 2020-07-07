@@ -101,7 +101,7 @@ class SingleCaseIsolationPolicy {
         aCase.id(),
         aCase.virusStatus(),
         aCase.alertStatus(),
-        aCase.compliance(),
+        aCase.isolationCompliance(),
         actualInfectedProportion,
         currentTime,
         aCase.exposedTime());

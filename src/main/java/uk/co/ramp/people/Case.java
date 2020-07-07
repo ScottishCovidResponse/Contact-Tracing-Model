@@ -78,7 +78,7 @@ public class Case {
 
   // derived values
 
-  public double compliance() {
+  public double isolationCompliance() {
     return human.isolationCompliance();
   }
 
@@ -104,34 +104,4 @@ public class Case {
   public void setExposedTime(int exposedTime) {
     this.exposedTime = exposedTime;
   }
-
-  //    // Event handling
-  //    private void processInfectionEvent(InfectionEvent event) {
-  //        virusStatus = virusStatus.transitionTo(event.nextStatus());
-  //        exposedTime = event.exposedTime();
-  //        exposedBy = event.exposedBy();
-  //    }
-  //
-  //    private void processVirusEvent(VirusEvent event) {
-  //        virusStatus = virusStatus.transitionTo(event.nextStatus());
-  //    }
-  //
-  //    public void processEvent(Event event) {
-  //
-  //        if (event instanceof VirusEvent) {
-  //            processVirusEvent((VirusEvent) event);
-  //        } else if (event instanceof InfectionEvent) {
-  //            processInfectionEvent((InfectionEvent) event);
-  //        } else if (event instanceof AlertEvent) {
-  //            processAlertEvent((AlertEvent) event);
-  //        } else {
-  //            throw new EventException("uncovered condition");
-  //        }
-  //
-  //    }
-
-  //    private void processAlertEvent(AlertEvent event) {
-  //        alertStatus = event.nextStatus();
-  //    }
-
 }
