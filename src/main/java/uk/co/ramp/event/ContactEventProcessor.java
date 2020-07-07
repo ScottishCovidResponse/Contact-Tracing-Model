@@ -75,20 +75,13 @@ public class ContactEventProcessor implements EventProcessor<ContactEvent> {
     boolean shouldIsolateContact =
         isContactIsolated(contacts, potentialSpreader, victim, proportionInfectious, time);
 
-    boolean compliesWithIsolation = true;
-    // check for whether infector would isolate
-    if (distributionSampler.uniformBetweenZeroAndOne() < potentialSpreader.isolationCompliance()) {
-      LOGGER.info("person with id %d is not complying with isolation policy for this contact.");
-      compliesWithIsolation = false;
-    }
-
-    if (shouldIsolateContact && compliesWithIsolation) {
+    if (shouldIsolateContact) {
       LOGGER.trace("Skipping contact due to isolation");
       return Optional.empty();
     }
 
     if (potentialSpreader.virusStatus() != victim.virusStatus()) {
-      return evaluateExposures(potentialSpreader, contacts, time);
+      return evaluateExposures(potentialSpreader, victim, contacts.weight(), time);
     }
 
     return Optional.empty();
@@ -118,13 +111,12 @@ public class ContactEventProcessor implements EventProcessor<ContactEvent> {
    * U.
    *
    * @param personA the most severe case
-   * @param c
+   * @param personB the least severe case
+   * @param weight
    * @param time
    * @return
    */
-  Optional<InfectionEvent> evaluateExposures(Case personA, ContactEvent c, int time) {
-    Case personB =
-        personA == population.get(c.to()) ? population.get(c.from()) : population.get(c.to());
+  Optional<InfectionEvent> evaluateExposures(Case personA, Case personB, double weight, int time) {
 
     boolean dangerMix = personA.isInfectious() && personB.virusStatus() == SUSCEPTIBLE;
 
@@ -132,7 +124,7 @@ public class ContactEventProcessor implements EventProcessor<ContactEvent> {
         diseaseProperties.exposureProbability4UnitContact()
             / (1.0 - diseaseProperties.exposureProbability4UnitContact());
     double exposureProb =
-        1. / (1. + 1. / (expBias * FastMath.pow(c.weight(), diseaseProperties.exposureExponent())));
+        1. / (1. + 1. / (expBias * FastMath.pow(weight, diseaseProperties.exposureExponent())));
 
     if (dangerMix && distributionSampler.uniformBetweenZeroAndOne() < exposureProb) {
       LOGGER.debug("       DANGER MIX");
@@ -140,7 +132,7 @@ public class ContactEventProcessor implements EventProcessor<ContactEvent> {
       InfectionEvent infectionEvent =
           ImmutableInfectionEvent.builder()
               .id(personB.id())
-              .time(c.time() + 1)
+              .time(time + 1)
               .oldStatus(SUSCEPTIBLE)
               .nextStatus(EXPOSED)
               .exposedTime(time)
