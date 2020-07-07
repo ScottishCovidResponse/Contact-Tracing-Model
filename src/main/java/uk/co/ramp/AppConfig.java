@@ -5,6 +5,8 @@ import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.Reader;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.Optional;
 import org.apache.commons.math3.random.RandomDataGenerator;
 import org.apache.logging.log4j.LogManager;
@@ -22,7 +24,9 @@ import uk.co.ramp.io.readers.InputFilesReader;
 import uk.co.ramp.io.readers.PopulationPropertiesReader;
 import uk.co.ramp.io.readers.StandardPropertiesReader;
 import uk.co.ramp.io.types.DiseaseProperties;
+import uk.co.ramp.io.types.ImmutableOutputFolder;
 import uk.co.ramp.io.types.InputFiles;
+import uk.co.ramp.io.types.OutputFolder;
 import uk.co.ramp.io.types.PopulationProperties;
 import uk.co.ramp.io.types.StandardProperties;
 import uk.co.ramp.people.AgeRetriever;
@@ -33,16 +37,34 @@ public class AppConfig {
 
   private static final Logger LOGGER = LogManager.getLogger(AppConfig.class);
   private static final String DEFAULT_INPUT_FOLDER = "input";
+  private static final String DEFAULT_OUTPUT_FOLDER = "output";
   private static final String INPUT_FILE_LOCATION = "input/inputLocations.json";
 
   private final String seed;
   private final String overrideInputFolderLocation;
+  private final String overrideOutputFolderLocation;
 
   AppConfig(
       @Value("${seed:#{null}}") String seed,
-      @Value("${overrideInputFolderLocation:#{null}}") String overrideInputFolderLocation) {
+      @Value("${overrideInputFolderLocation:#{null}}") String overrideInputFolderLocation,
+      @Value("${overrideOutputFolderLocation:#{null}}") String overrideOutputFolderLocation) {
     this.seed = seed;
     this.overrideInputFolderLocation = overrideInputFolderLocation;
+    this.overrideOutputFolderLocation = overrideOutputFolderLocation;
+  }
+
+  @Bean
+  public OutputFolder outputFolder() {
+    String overrideOutputFolder =
+        Optional.ofNullable(overrideOutputFolderLocation).orElse(DEFAULT_OUTPUT_FOLDER);
+    try {
+      Files.createDirectories(Paths.get(overrideOutputFolder));
+      return ImmutableOutputFolder.builder().outputFolder(new File(overrideOutputFolder)).build();
+    } catch (IOException e) {
+      String message = "An error occurred creating output folder at " + overrideOutputFolder;
+      LOGGER.error(message);
+      throw new ConfigurationException(message, e);
+    }
   }
 
   @Bean

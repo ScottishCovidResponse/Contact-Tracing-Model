@@ -4,9 +4,14 @@ import org.springframework.boot.SpringBootConfiguration;
 import org.springframework.context.annotation.Bean;
 import uk.co.ramp.Population;
 import uk.co.ramp.distribution.DistributionSampler;
-import uk.co.ramp.event.types.*;
+import uk.co.ramp.event.types.AlertEvent;
+import uk.co.ramp.event.types.ContactEvent;
+import uk.co.ramp.event.types.EventRunner;
+import uk.co.ramp.event.types.InfectionEvent;
+import uk.co.ramp.event.types.VirusEvent;
 import uk.co.ramp.io.InitialCaseReader;
 import uk.co.ramp.io.types.DiseaseProperties;
+import uk.co.ramp.io.types.OutputFolder;
 import uk.co.ramp.policy.alert.AlertChecker;
 import uk.co.ramp.policy.isolation.IsolationPolicy;
 
@@ -77,9 +82,10 @@ public class EventContext {
   }
 
   @Bean
-  public EventListWriter eventListWriter(CompletionEventListGroup eventList) {
+  public EventListWriter eventListWriter(
+      CompletionEventListGroup eventList, OutputFolder outputFolder) {
     FormattedEventFactory formattedEventFactory = new FormattedEventFactory();
-    return new EventListWriter(formattedEventFactory, eventList);
+    return new EventListWriter(formattedEventFactory, eventList, outputFolder.outputFolder());
   }
 
   @Bean

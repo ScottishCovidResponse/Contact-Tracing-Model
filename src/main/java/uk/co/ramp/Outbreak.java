@@ -1,12 +1,17 @@
 package uk.co.ramp;
 
-import static uk.co.ramp.people.VirusStatus.*;
+import static uk.co.ramp.people.VirusStatus.ASYMPTOMATIC;
+import static uk.co.ramp.people.VirusStatus.EXPOSED;
+import static uk.co.ramp.people.VirusStatus.PRESYMPTOMATIC;
+import static uk.co.ramp.people.VirusStatus.SEVERELY_SYMPTOMATIC;
+import static uk.co.ramp.people.VirusStatus.SYMPTOMATIC;
 
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.Writer;
-import java.util.*;
+import java.util.HashMap;
+import java.util.Map;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,6 +24,7 @@ import uk.co.ramp.io.InfectionMapException;
 import uk.co.ramp.io.LogDailyOutput;
 import uk.co.ramp.io.types.CmptRecord;
 import uk.co.ramp.io.types.DiseaseProperties;
+import uk.co.ramp.io.types.OutputFolder;
 import uk.co.ramp.io.types.StandardProperties;
 import uk.co.ramp.people.VirusStatus;
 
@@ -33,6 +39,7 @@ public class Outbreak {
   private final EventListWriter eventListWriter;
   private final LogDailyOutput outputLog;
   private final LastContactTime lastContactTime;
+  private final File outputFolder;
 
   private final Population population;
   private final Map<Integer, CmptRecord> records = new HashMap<>();
@@ -46,7 +53,8 @@ public class Outbreak {
       LogDailyOutput outputLog,
       EventRunner eventRunner,
       EventListWriter eventListWriter,
-      LastContactTime lastContactTime) {
+      LastContactTime lastContactTime,
+      OutputFolder outputFolder) {
 
     this.population = population;
     this.diseaseProperties = diseaseProperties;
@@ -55,6 +63,7 @@ public class Outbreak {
     this.eventRunner = eventRunner;
     this.eventListWriter = eventListWriter;
     this.lastContactTime = lastContactTime;
+    this.outputFolder = outputFolder.outputFolder();
   }
 
   public Map<Integer, CmptRecord> propagate() {
@@ -69,7 +78,7 @@ public class Outbreak {
 
     runContactData(timeLimit, randomInfectionRate);
 
-    try (Writer writer = new FileWriter(new File(INFECTION_MAP))) {
+    try (Writer writer = new FileWriter(new File(outputFolder, INFECTION_MAP))) {
       new InfectionMap(population.view()).outputMap(writer);
       eventListWriter.output();
     } catch (IOException e) {
