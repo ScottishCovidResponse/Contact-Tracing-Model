@@ -62,8 +62,7 @@ public class VirusEventProcessor extends CommonVirusEventProcessor<VirusEvent> {
               .build();
 
       List<AlertEvent> alertEvents;
-      if (event.nextStatus() == VirusStatus.SYMPTOMATIC
-          && thisCase.reportingCompliance() > distributionSampler.uniformBetweenZeroAndOne()) {
+      if (thisCase.reportingCompliance() > distributionSampler.uniformBetweenZeroAndOne()) {
         alertEvents = checkForAlert(event);
       } else {
         LOGGER.debug("Person with id: {} is not complying with infection reporting", thisCase.id());
