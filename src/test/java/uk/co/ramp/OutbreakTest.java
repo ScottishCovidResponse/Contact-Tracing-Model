@@ -172,6 +172,7 @@ public class OutbreakTest {
     for (int i = 0; i < popSize; i++) {
       Human human = mock(Human.class);
       when(human.id()).thenReturn(i);
+      when(human.reportingCompliance()).thenReturn(1d);
       Case thisCase = new Case(human);
       population.put(i, thisCase);
     }
@@ -215,6 +216,7 @@ public class OutbreakTest {
     for (int i = 0; i < popSize; i++) {
       Human h = mock(Human.class);
       when(h.id()).thenReturn(i);
+      when(h.reportingCompliance()).thenReturn(1d);
       Case thisCase = new Case(h);
       population.put(i, thisCase);
     }
@@ -260,6 +262,7 @@ public class OutbreakTest {
     for (int i = 0; i < popSize; i++) {
       Human h = mock(Human.class);
       when(h.id()).thenReturn(i);
+      when(h.reportingCompliance()).thenReturn(1d);
       Case thisCase = new Case(h);
       population.put(i, thisCase);
     }

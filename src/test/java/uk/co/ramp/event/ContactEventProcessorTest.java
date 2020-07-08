@@ -114,17 +114,7 @@ public class ContactEventProcessorTest {
     population.put(1, mock1);
     ReflectionTestUtils.setField(eventProcessor, "population", new Population(population));
 
-    // outer empty return
-    ContactEvent contactEvent =
-        ImmutableContactEvent.builder()
-            .from(infector)
-            .to(infectee)
-            .time(time)
-            .weight(5000)
-            .label("")
-            .build();
-
-    Optional<InfectionEvent> var = eventProcessor.evaluateExposures(contactEvent, time);
+    Optional<InfectionEvent> var = eventProcessor.evaluateExposures(mock0, mock1, 5000, time);
 
     Assert.assertTrue(var.isPresent());
 
@@ -156,17 +146,7 @@ public class ContactEventProcessorTest {
     population.put(1, mock1);
     ReflectionTestUtils.setField(eventProcessor, "population", new Population(population));
 
-    // outer empty return
-    ContactEvent contactEvent =
-        ImmutableContactEvent.builder()
-            .from(infector)
-            .to(infectee)
-            .time(time)
-            .weight(5000)
-            .label("")
-            .build();
-
-    Optional<InfectionEvent> var = eventProcessor.evaluateExposures(contactEvent, time);
+    Optional<InfectionEvent> var = eventProcessor.evaluateExposures(mock0, mock1, 5000, time);
 
     System.out.println(logSpy.getOutput());
     Assert.assertFalse(var.isPresent());

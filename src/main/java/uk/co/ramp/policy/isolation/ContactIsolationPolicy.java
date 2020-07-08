@@ -43,8 +43,8 @@ class ContactIsolationPolicy implements IsolationPolicy {
           isCaseAInIsolation,
           isCaseBInIsolation,
           contactWeight,
-          caseA.compliance(),
-          caseB.compliance());
+          caseA.isolationCompliance(),
+          caseB.isolationCompliance());
     }
     return shouldIsolate;
   }

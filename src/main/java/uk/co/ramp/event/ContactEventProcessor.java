@@ -9,7 +9,12 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import uk.co.ramp.Population;
 import uk.co.ramp.distribution.DistributionSampler;
-import uk.co.ramp.event.types.*;
+import uk.co.ramp.event.types.ContactEvent;
+import uk.co.ramp.event.types.EventProcessor;
+import uk.co.ramp.event.types.ImmutableInfectionEvent;
+import uk.co.ramp.event.types.ImmutableProcessedEventResult;
+import uk.co.ramp.event.types.InfectionEvent;
+import uk.co.ramp.event.types.ProcessedEventResult;
 import uk.co.ramp.io.types.DiseaseProperties;
 import uk.co.ramp.people.Case;
 import uk.co.ramp.policy.isolation.IsolationPolicy;
@@ -59,8 +64,13 @@ public class ContactEventProcessor implements EventProcessor<ContactEvent> {
 
   Optional<InfectionEvent> evaluateContact(ContactEvent contacts, double proportionInfectious) {
     int time = contacts.time();
-    Case potentialSpreader = population.get(contacts.to());
-    Case victim = population.get(contacts.from());
+
+    Case potentialSpreader =
+        getMostSevere(population.get(contacts.to()), population.get(contacts.from()));
+    Case victim =
+        potentialSpreader == population.get(contacts.to())
+            ? population.get(contacts.from())
+            : population.get(contacts.to());
 
     boolean shouldIsolateContact =
         isContactIsolated(contacts, potentialSpreader, victim, proportionInfectious, time);
@@ -71,7 +81,7 @@ public class ContactEventProcessor implements EventProcessor<ContactEvent> {
     }
 
     if (potentialSpreader.virusStatus() != victim.virusStatus()) {
-      return evaluateExposures(contacts, time);
+      return evaluateExposures(potentialSpreader, victim, contacts.weight(), time);
     }
 
     return Optional.empty();
@@ -100,14 +110,13 @@ public class ContactEventProcessor implements EventProcessor<ContactEvent> {
    * provided. Then it is automatically converted into exp(bias) = U/(1-U) based on Sigmoid(bias) =
    * U.
    *
-   * @param c
+   * @param personA the most severe case
+   * @param personB the least severe case
+   * @param weight
    * @param time
    * @return
    */
-  Optional<InfectionEvent> evaluateExposures(ContactEvent c, int time) {
-    Case personA = getMostSevere(population.get(c.to()), population.get(c.from()));
-    Case personB =
-        personA == population.get(c.to()) ? population.get(c.from()) : population.get(c.to());
+  Optional<InfectionEvent> evaluateExposures(Case personA, Case personB, double weight, int time) {
 
     boolean dangerMix = personA.isInfectious() && personB.virusStatus() == SUSCEPTIBLE;
 
@@ -115,7 +124,7 @@ public class ContactEventProcessor implements EventProcessor<ContactEvent> {
         diseaseProperties.exposureProbability4UnitContact()
             / (1.0 - diseaseProperties.exposureProbability4UnitContact());
     double exposureProb =
-        1. / (1. + 1. / (expBias * FastMath.pow(c.weight(), diseaseProperties.exposureExponent())));
+        1. / (1. + 1. / (expBias * FastMath.pow(weight, diseaseProperties.exposureExponent())));
 
     if (dangerMix && distributionSampler.uniformBetweenZeroAndOne() < exposureProb) {
       LOGGER.debug("       DANGER MIX");
@@ -123,7 +132,7 @@ public class ContactEventProcessor implements EventProcessor<ContactEvent> {
       InfectionEvent infectionEvent =
           ImmutableInfectionEvent.builder()
               .id(personB.id())
-              .time(c.time() + 1)
+              .time(time + 1)
               .oldStatus(SUSCEPTIBLE)
               .nextStatus(EXPOSED)
               .exposedTime(time)

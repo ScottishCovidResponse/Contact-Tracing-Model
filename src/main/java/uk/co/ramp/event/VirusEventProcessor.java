@@ -1,12 +1,20 @@
 package uk.co.ramp.event;
 
+import static java.util.Collections.EMPTY_LIST;
+
 import java.util.List;
 import java.util.stream.Collectors;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import uk.co.ramp.Population;
 import uk.co.ramp.distribution.DistributionSampler;
-import uk.co.ramp.event.types.*;
+import uk.co.ramp.event.types.AlertEvent;
+import uk.co.ramp.event.types.ImmutableProcessedEventResult;
+import uk.co.ramp.event.types.ImmutableVirusEvent;
+import uk.co.ramp.event.types.ProcessedEventResult;
+import uk.co.ramp.event.types.VirusEvent;
 import uk.co.ramp.io.types.DiseaseProperties;
 import uk.co.ramp.people.Case;
 import uk.co.ramp.people.VirusStatus;
@@ -16,6 +24,8 @@ import uk.co.ramp.policy.alert.AlertChecker;
 public class VirusEventProcessor extends CommonVirusEventProcessor<VirusEvent> {
   private final Population population;
   private final AlertChecker alertChecker;
+  private final DistributionSampler distributionSampler;
+  private static final Logger LOGGER = LogManager.getLogger(VirusEventProcessor.class);
 
   @Autowired
   public VirusEventProcessor(
@@ -26,6 +36,7 @@ public class VirusEventProcessor extends CommonVirusEventProcessor<VirusEvent> {
     super(population, diseaseProperties, distributionSampler);
     this.population = population;
     this.alertChecker = alertChecker;
+    this.distributionSampler = distributionSampler;
   }
 
   @Override
@@ -50,8 +61,13 @@ public class VirusEventProcessor extends CommonVirusEventProcessor<VirusEvent> {
               .time(event.time() + deltaTime)
               .build();
 
-      List<AlertEvent> alertEvents = checkForAlert(event.id(), event.time());
-
+      List<AlertEvent> alertEvents;
+      if (thisCase.reportingCompliance() > distributionSampler.uniformBetweenZeroAndOne()) {
+        alertEvents = checkForAlert(event);
+      } else {
+        LOGGER.debug("Person with id: {} is not complying with infection reporting", thisCase.id());
+        alertEvents = EMPTY_LIST;
+      }
       return ImmutableProcessedEventResult.builder()
           .addNewVirusEvents(subsequentEvent)
           .addAllNewAlertEvents(alertEvents)
@@ -61,11 +77,11 @@ public class VirusEventProcessor extends CommonVirusEventProcessor<VirusEvent> {
     return ImmutableProcessedEventResult.builder().build();
   }
 
-  List<AlertEvent> checkForAlert(int personId, int time) {
-    var alertStatus = population.getAlertStatus(personId);
-    var virusStatus = population.getVirusStatus(personId);
+  List<AlertEvent> checkForAlert(VirusEvent event) {
+    var alertStatus = population.getAlertStatus(event.id());
+    var virusStatus = event.nextStatus();
     return alertChecker
-        .checkForAlert(personId, alertStatus, virusStatus, time)
+        .checkForAlert(event.id(), alertStatus, virusStatus, event.time())
         .collect(Collectors.toList());
   }
 }
