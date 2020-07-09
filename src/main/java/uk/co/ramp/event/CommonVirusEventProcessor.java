@@ -13,6 +13,7 @@ import uk.co.ramp.event.types.CommonVirusEvent;
 import uk.co.ramp.event.types.Event;
 import uk.co.ramp.event.types.EventProcessor;
 import uk.co.ramp.io.types.DiseaseProperties;
+import uk.co.ramp.io.types.StandardProperties;
 import uk.co.ramp.people.VirusStatus;
 import uk.co.ramp.utilities.MeanMax;
 
@@ -20,16 +21,19 @@ public abstract class CommonVirusEventProcessor<T extends Event> implements Even
   private static final Logger LOGGER = LogManager.getLogger(CommonVirusEventProcessor.class);
 
   private final Population population;
+  private final StandardProperties properties;
   private final DiseaseProperties diseaseProperties;
   private final DistributionSampler distributionSampler;
 
   CommonVirusEventProcessor(
       Population population,
+      StandardProperties properties,
       DiseaseProperties diseaseProperties,
       DistributionSampler distributionSampler) {
     this.population = population;
     this.diseaseProperties = diseaseProperties;
     this.distributionSampler = distributionSampler;
+    this.properties = properties;
   }
 
   VirusStatus determineNextStatus(CommonVirusEvent event) {
@@ -89,8 +93,8 @@ public abstract class CommonVirusEventProcessor<T extends Event> implements Even
     Distribution distribution =
         ImmutableDistribution.builder()
             .type(diseaseProperties.progressionDistribution())
-            .mean(progressionData.mean())
-            .max(progressionData.max())
+            .mean(progressionData.mean()*properties.timeStepsPerDay())
+            .max(progressionData.max()*properties.timeStepsPerDay())
             .build();
     return distributionSampler.getDistributionValue(distribution);
   }

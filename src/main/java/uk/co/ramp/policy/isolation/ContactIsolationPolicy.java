@@ -3,6 +3,7 @@ package uk.co.ramp.policy.isolation;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import uk.co.ramp.io.types.DiseaseProperties;
+import uk.co.ramp.io.types.StandardProperties;
 import uk.co.ramp.people.Case;
 
 class ContactIsolationPolicy implements IsolationPolicy {
@@ -11,8 +12,9 @@ class ContactIsolationPolicy implements IsolationPolicy {
   private final SingleCaseIsolationPolicy singleCaseIsolationPolicy;
   private final DiseaseProperties diseaseProperties;
 
+
   ContactIsolationPolicy(
-      SingleCaseIsolationPolicy singleCaseIsolationPolicy, DiseaseProperties diseaseProperties) {
+          SingleCaseIsolationPolicy singleCaseIsolationPolicy, DiseaseProperties diseaseProperties) {
     this.singleCaseIsolationPolicy = singleCaseIsolationPolicy;
     this.diseaseProperties = diseaseProperties;
   }

@@ -9,12 +9,14 @@ import org.immutables.value.Value;
 import uk.co.ramp.distribution.Distribution;
 import uk.co.ramp.distribution.DistributionSampler;
 import uk.co.ramp.distribution.ImmutableDistribution;
+import uk.co.ramp.io.types.StandardProperties;
 import uk.co.ramp.people.AlertStatus;
 import uk.co.ramp.people.Case;
 import uk.co.ramp.people.VirusStatus;
 
 class SingleCaseIsolationPolicy {
   private final IsolationProperties isolationProperties;
+  private final StandardProperties properties;
   private final DistributionSampler distributionSampler;
   private final Distribution infinityDistribution =
       ImmutableDistribution.builder()
@@ -35,9 +37,11 @@ class SingleCaseIsolationPolicy {
   private final Map<Integer, IsolationMapValue> currentlyInIsolationMap = new HashMap<>();
 
   SingleCaseIsolationPolicy(
-      IsolationProperties isolationProperties, DistributionSampler distributionSampler) {
+          IsolationProperties isolationProperties, DistributionSampler distributionSampler, StandardProperties properties) {
     this.isolationProperties = isolationProperties;
     this.distributionSampler = distributionSampler;
+    this.properties = properties;
+
   }
 
   private IsolationProperty findRelevantIsolationProperty(
@@ -171,7 +175,8 @@ class SingleCaseIsolationPolicy {
             exposedTime);
     int requiredIsolationTime =
         distributionSampler.getDistributionValue(
-            matchingIsolationProperty.isolationTimeDistribution().orElse(infinityDistribution));
+            matchingIsolationProperty.isolationTimeDistribution().orElse(infinityDistribution))
+                * properties.timeStepsPerDay();
     double threshold =
         distributionSampler.getDistributionValue(
             isolationProperties.isolationProbabilityDistributionThreshold());

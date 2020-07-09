@@ -8,6 +8,7 @@ import uk.co.ramp.Population;
 import uk.co.ramp.distribution.DistributionSampler;
 import uk.co.ramp.event.types.*;
 import uk.co.ramp.io.types.DiseaseProperties;
+import uk.co.ramp.io.types.StandardProperties;
 import uk.co.ramp.people.VirusStatus;
 
 @Service
@@ -17,9 +18,10 @@ public class InfectionEventProcessor extends CommonVirusEventProcessor<Infection
   @Autowired
   public InfectionEventProcessor(
       Population population,
+          StandardProperties properties,
       DiseaseProperties diseaseProperties,
       DistributionSampler distributionSampler) {
-    super(population, diseaseProperties, distributionSampler);
+    super(population, properties, diseaseProperties, distributionSampler);
     this.population = population;
   }
 

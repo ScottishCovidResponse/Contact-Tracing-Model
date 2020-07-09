@@ -12,6 +12,7 @@ import uk.co.ramp.event.types.VirusEvent;
 import uk.co.ramp.io.InitialCaseReader;
 import uk.co.ramp.io.types.DiseaseProperties;
 import uk.co.ramp.io.types.OutputFolder;
+import uk.co.ramp.io.types.StandardProperties;
 import uk.co.ramp.policy.alert.AlertChecker;
 import uk.co.ramp.policy.isolation.IsolationPolicy;
 
@@ -42,6 +43,7 @@ public class EventContext {
   @Bean
   public EventRunner eventRunner(
       Population population,
+      StandardProperties properties,
       DiseaseProperties diseaseProperties,
       DistributionSampler distributionSampler,
       IsolationPolicy isolationPolicy,
@@ -51,9 +53,9 @@ public class EventContext {
     AlertEventProcessor alertEventProcessor =
         new AlertEventProcessor(population, diseaseProperties, distributionSampler);
     VirusEventProcessor virusEventProcessor =
-        new VirusEventProcessor(population, diseaseProperties, distributionSampler, alertChecker);
+        new VirusEventProcessor(population, properties, diseaseProperties, distributionSampler, alertChecker);
     InfectionEventProcessor infectionEventProcessor =
-        new InfectionEventProcessor(population, diseaseProperties, distributionSampler);
+        new InfectionEventProcessor(population, properties, diseaseProperties, distributionSampler);
     ContactEventProcessor contactEventProcessor =
         new ContactEventProcessor(
             population, diseaseProperties, distributionSampler, isolationPolicy);

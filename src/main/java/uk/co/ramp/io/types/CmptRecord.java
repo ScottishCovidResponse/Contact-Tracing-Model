@@ -29,7 +29,7 @@ public interface CmptRecord {
         .build();
   }
 
-  int time();
+  double time();
 
   int s();
 

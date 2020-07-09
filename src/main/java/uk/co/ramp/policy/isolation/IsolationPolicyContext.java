@@ -1,9 +1,5 @@
 package uk.co.ramp.policy.isolation;
 
-import java.io.File;
-import java.io.FileReader;
-import java.io.IOException;
-import java.io.Reader;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.boot.SpringBootConfiguration;
@@ -12,6 +8,12 @@ import uk.co.ramp.ConfigurationException;
 import uk.co.ramp.distribution.DistributionSampler;
 import uk.co.ramp.io.types.DiseaseProperties;
 import uk.co.ramp.io.types.InputFiles;
+import uk.co.ramp.io.types.StandardProperties;
+
+import java.io.File;
+import java.io.FileReader;
+import java.io.IOException;
+import java.io.Reader;
 
 @SpringBootConfiguration
 public class IsolationPolicyContext {
@@ -19,11 +21,12 @@ public class IsolationPolicyContext {
 
   @Bean
   public IsolationPolicy isolationPolicy(
+          StandardProperties standardProperties,
       DiseaseProperties diseaseProperties,
       DistributionSampler distributionSampler,
       IsolationProperties isolationProperties) {
     var singleCaseIsolationPolicy =
-        new SingleCaseIsolationPolicy(isolationProperties, distributionSampler);
+        new SingleCaseIsolationPolicy(isolationProperties, distributionSampler, standardProperties);
     return new ContactIsolationPolicy(singleCaseIsolationPolicy, diseaseProperties);
   }
 
