@@ -1,5 +1,13 @@
 package uk.co.ramp;
 
+import static uk.co.ramp.people.VirusStatus.*;
+
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.io.Writer;
+import java.util.HashMap;
+import java.util.Map;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,15 +23,6 @@ import uk.co.ramp.io.types.DiseaseProperties;
 import uk.co.ramp.io.types.OutputFolder;
 import uk.co.ramp.io.types.StandardProperties;
 import uk.co.ramp.people.VirusStatus;
-
-import java.io.File;
-import java.io.FileWriter;
-import java.io.IOException;
-import java.io.Writer;
-import java.util.HashMap;
-import java.util.Map;
-
-import static uk.co.ramp.people.VirusStatus.*;
 
 @Service
 public class Outbreak {
@@ -71,9 +70,10 @@ public class Outbreak {
   void runToCompletion() {
     // the latest time to run to
     int timeLimit = properties.timeLimit();
-    double randomInfectionRate = diseaseProperties.randomInfectionRate()/(double) properties.timeStepsPerDay();
+    double randomInfectionRate =
+        diseaseProperties.randomInfectionRate() / (double) properties.timeStepsPerDay();
 
-    runContactData(timeLimit*properties.timeStepsPerDay(), randomInfectionRate);
+    runContactData(timeLimit * properties.timeStepsPerDay(), randomInfectionRate);
 
     try (Writer writer = new FileWriter(new File(outputFolder, INFECTION_MAP))) {
       new InfectionMap(population.view()).outputMap(writer);
@@ -114,7 +114,7 @@ public class Outbreak {
   void updateLogActiveCases(int time) {
     Map<VirusStatus, Integer> stats = population.getCmptCounts();
     CmptRecord cmptRecord = outputLog.log(time, stats, properties.timeStepsPerDay());
-    records.put(time/(double)properties.timeStepsPerDay(), cmptRecord);
+    records.put(time / (double) properties.timeStepsPerDay(), cmptRecord);
   }
 
   private int activeCases() {

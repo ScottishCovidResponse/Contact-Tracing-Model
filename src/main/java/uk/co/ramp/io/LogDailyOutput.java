@@ -1,15 +1,14 @@
 package uk.co.ramp.io;
 
+import static uk.co.ramp.people.VirusStatus.*;
+
+import java.util.Map;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.stereotype.Service;
 import uk.co.ramp.io.types.CmptRecord;
 import uk.co.ramp.io.types.ImmutableCmptRecord;
 import uk.co.ramp.people.VirusStatus;
-
-import java.util.Map;
-
-import static uk.co.ramp.people.VirusStatus.*;
 
 @Service
 public class LogDailyOutput {
@@ -27,7 +26,7 @@ public class LogDailyOutput {
 
     CmptRecord cmptRecord =
         ImmutableCmptRecord.builder()
-            .time(time / (double)timeStepsPerDay)
+            .time(time / (double) timeStepsPerDay)
             .s(stats.get(SUSCEPTIBLE))
             .e(stats.get(EXPOSED))
             .a(stats.get(ASYMPTOMATIC))

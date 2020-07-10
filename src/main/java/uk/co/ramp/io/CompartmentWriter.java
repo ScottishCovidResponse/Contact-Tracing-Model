@@ -16,7 +16,7 @@ public class CompartmentWriter {
     List<ImmutableCmptRecord> wrappedImmutableRecords =
         records.stream()
             .map(r -> ImmutableCmptRecord.builder().from(r).build())
-                .sorted(Comparator.comparing(ImmutableCmptRecord::time, Comparator.naturalOrder()))
+            .sorted(Comparator.comparing(ImmutableCmptRecord::time, Comparator.naturalOrder()))
             .collect(Collectors.toList());
     new CsvWriter().write(writer, wrappedImmutableRecords, ImmutableCmptRecord.class);
   }

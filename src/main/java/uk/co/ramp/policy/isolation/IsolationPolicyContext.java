@@ -1,5 +1,9 @@
 package uk.co.ramp.policy.isolation;
 
+import java.io.File;
+import java.io.FileReader;
+import java.io.IOException;
+import java.io.Reader;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.boot.SpringBootConfiguration;
@@ -10,18 +14,13 @@ import uk.co.ramp.io.types.DiseaseProperties;
 import uk.co.ramp.io.types.InputFiles;
 import uk.co.ramp.io.types.StandardProperties;
 
-import java.io.File;
-import java.io.FileReader;
-import java.io.IOException;
-import java.io.Reader;
-
 @SpringBootConfiguration
 public class IsolationPolicyContext {
   private static final Logger LOGGER = LogManager.getLogger(IsolationPolicyContext.class);
 
   @Bean
   public IsolationPolicy isolationPolicy(
-          StandardProperties standardProperties,
+      StandardProperties standardProperties,
       DiseaseProperties diseaseProperties,
       DistributionSampler distributionSampler,
       IsolationProperties isolationProperties) {

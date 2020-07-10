@@ -37,11 +37,12 @@ class SingleCaseIsolationPolicy {
   private final Map<Integer, IsolationMapValue> currentlyInIsolationMap = new HashMap<>();
 
   SingleCaseIsolationPolicy(
-          IsolationProperties isolationProperties, DistributionSampler distributionSampler, StandardProperties properties) {
+      IsolationProperties isolationProperties,
+      DistributionSampler distributionSampler,
+      StandardProperties properties) {
     this.isolationProperties = isolationProperties;
     this.distributionSampler = distributionSampler;
     this.properties = properties;
-
   }
 
   private IsolationProperty findRelevantIsolationProperty(
@@ -175,8 +176,8 @@ class SingleCaseIsolationPolicy {
             exposedTime);
     int requiredIsolationTime =
         distributionSampler.getDistributionValue(
-            matchingIsolationProperty.isolationTimeDistribution().orElse(infinityDistribution))
-                * properties.timeStepsPerDay();
+                matchingIsolationProperty.isolationTimeDistribution().orElse(infinityDistribution))
+            * properties.timeStepsPerDay();
     double threshold =
         distributionSampler.getDistributionValue(
             isolationProperties.isolationProbabilityDistributionThreshold());

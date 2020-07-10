@@ -1,12 +1,5 @@
 package uk.co.ramp.event;
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-import uk.co.ramp.event.types.ImmutableFormattedEvent;
-import uk.co.ramp.io.csv.CsvException;
-import uk.co.ramp.io.csv.CsvWriter;
-import uk.co.ramp.io.types.StandardProperties;
-
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
@@ -17,6 +10,12 @@ import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import uk.co.ramp.event.types.ImmutableFormattedEvent;
+import uk.co.ramp.io.csv.CsvException;
+import uk.co.ramp.io.csv.CsvWriter;
+import uk.co.ramp.io.types.StandardProperties;
 
 public class EventListWriter {
   public static final String EVENTS_CSV = "events.csv";
@@ -71,7 +70,10 @@ public class EventListWriter {
     List<ImmutableFormattedEvent> finalList =
         Stream.of(alertEvents, infectionEvents, virusEvents)
             .flatMap(s -> s)
-                .map(e -> ImmutableFormattedEvent.copyOf(e).withTime(e.time()/(double) properties.timeStepsPerDay()))
+            .map(
+                e ->
+                    ImmutableFormattedEvent.copyOf(e)
+                        .withTime(e.time() / (double) properties.timeStepsPerDay()))
             .sorted(Comparator.comparingDouble(ImmutableFormattedEvent::time))
             .collect(Collectors.toList());
 

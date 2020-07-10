@@ -18,7 +18,7 @@ public class InfectionEventProcessor extends CommonVirusEventProcessor<Infection
   @Autowired
   public InfectionEventProcessor(
       Population population,
-          StandardProperties properties,
+      StandardProperties properties,
       DiseaseProperties diseaseProperties,
       DistributionSampler distributionSampler) {
     super(population, properties, diseaseProperties, distributionSampler);

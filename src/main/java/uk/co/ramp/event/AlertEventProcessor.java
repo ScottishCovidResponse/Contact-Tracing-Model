@@ -1,5 +1,9 @@
 package uk.co.ramp.event;
 
+import static uk.co.ramp.people.AlertStatus.*;
+
+import java.util.List;
+import java.util.Optional;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import uk.co.ramp.Population;
@@ -12,11 +16,6 @@ import uk.co.ramp.io.types.StandardProperties;
 import uk.co.ramp.people.AlertStatus;
 import uk.co.ramp.utilities.ImmutableMeanMax;
 import uk.co.ramp.utilities.MeanMax;
-
-import java.util.List;
-import java.util.Optional;
-
-import static uk.co.ramp.people.AlertStatus.*;
 
 public class AlertEventProcessor implements EventProcessor<AlertEvent> {
   private static final Logger LOGGER = LogManager.getLogger(AlertEventProcessor.class);
@@ -118,6 +117,6 @@ public class AlertEventProcessor implements EventProcessor<AlertEvent> {
             .mean(progressionData.mean())
             .max(progressionData.max())
             .build();
-    return distributionSampler.getDistributionValue(distribution)*properties.timeStepsPerDay();
+    return distributionSampler.getDistributionValue(distribution) * properties.timeStepsPerDay();
   }
 }

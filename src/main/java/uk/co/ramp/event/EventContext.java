@@ -53,7 +53,8 @@ public class EventContext {
     AlertEventProcessor alertEventProcessor =
         new AlertEventProcessor(population, properties, diseaseProperties, distributionSampler);
     VirusEventProcessor virusEventProcessor =
-        new VirusEventProcessor(population, properties, diseaseProperties, distributionSampler, alertChecker);
+        new VirusEventProcessor(
+            population, properties, diseaseProperties, distributionSampler, alertChecker);
     InfectionEventProcessor infectionEventProcessor =
         new InfectionEventProcessor(population, properties, diseaseProperties, distributionSampler);
     ContactEventProcessor contactEventProcessor =
@@ -85,9 +86,12 @@ public class EventContext {
 
   @Bean
   public EventListWriter eventListWriter(
-      CompletionEventListGroup eventList, OutputFolder outputFolder, StandardProperties properties) {
+      CompletionEventListGroup eventList,
+      OutputFolder outputFolder,
+      StandardProperties properties) {
     FormattedEventFactory formattedEventFactory = new FormattedEventFactory();
-    return new EventListWriter(formattedEventFactory, eventList, properties, outputFolder.outputFolder());
+    return new EventListWriter(
+        formattedEventFactory, eventList, properties, outputFolder.outputFolder());
   }
 
   @Bean
