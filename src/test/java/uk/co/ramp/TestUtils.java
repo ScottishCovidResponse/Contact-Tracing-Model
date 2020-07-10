@@ -53,6 +53,8 @@ public class TestUtils {
         .seed(123)
         .steadyState(true)
         .timeLimit(100)
+        .timeStepsPerDay(1)
+        .timeStepSpread(1)
         .build();
   }
 

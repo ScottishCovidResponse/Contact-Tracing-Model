@@ -15,7 +15,7 @@ import uk.co.ramp.people.VirusStatus;
 @JsonPropertyOrder({"time", "s", "e", "a", "p", "sym", "sev", "r", "d"})
 public interface CmptRecord {
 
-  static CmptRecord of(int time, Map<VirusStatus, Integer> counts) {
+  static CmptRecord of(double time, Map<VirusStatus, Integer> counts) {
     return ImmutableCmptRecord.builder()
         .time(time)
         .s(counts.get(SUSCEPTIBLE))

@@ -6,6 +6,7 @@ import java.io.IOException;
 import java.io.StringReader;
 import java.util.List;
 import org.junit.Test;
+import uk.co.ramp.TestUtils;
 import uk.co.ramp.event.types.ContactEvent;
 import uk.co.ramp.event.types.ImmutableContactEvent;
 import uk.co.ramp.io.ContactReader;
@@ -13,6 +14,7 @@ import uk.co.ramp.io.types.ImmutableStandardProperties;
 import uk.co.ramp.io.types.StandardProperties;
 
 public class ContactReaderTest {
+
   private final String csv =
       ""
           + "\"time\",\"from\",\"to\",\"weight\",\"label\"\n"
@@ -26,6 +28,8 @@ public class ContactReaderTest {
           .initialExposures(1000)
           .seed(0)
           .steadyState(true)
+          .timeStepsPerDay(1)
+          .timeStepSpread(1)
           .build();
 
   private final ContactEvent record1 =
@@ -37,7 +41,8 @@ public class ContactReaderTest {
   @Test
   public void testRead() throws IOException {
     StringReader stringReader = new StringReader(csv);
-    List<ContactEvent> dailyContactRecords = new ContactReader(properties).readEvents(stringReader);
+    List<ContactEvent> dailyContactRecords =
+        new ContactReader(properties, TestUtils.dataGenerator()).readEvents(stringReader);
 
     assertThat(dailyContactRecords).containsExactly(record1, record2);
   }
@@ -51,7 +56,8 @@ public class ContactReaderTest {
             + "2,10000,10001,8.2, label\n";
     StringReader stringReader = new StringReader(csvOverPersonLimit);
 
-    List<ContactEvent> dailyContactRecords = new ContactReader(properties).readEvents(stringReader);
+    List<ContactEvent> dailyContactRecords =
+        new ContactReader(properties, TestUtils.dataGenerator()).readEvents(stringReader);
 
     assertThat(dailyContactRecords).isEmpty();
   }

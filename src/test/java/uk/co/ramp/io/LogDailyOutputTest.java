@@ -41,30 +41,34 @@ public class LogDailyOutputTest {
             .filter(e -> active.contains(e.getKey()))
             .mapToInt(Map.Entry::getValue)
             .sum();
-    logger.log(time, map);
+    logger.log(time, map, 1);
+
+    String log = logSpy.getOutput();
+
+    int secondPipe = log.indexOf("|", log.indexOf("|") + 1);
+
+    double timeExtract =
+        Double.parseDouble(log.substring(0, secondPipe).substring(log.indexOf("|") + 1));
+    String logOut = log.substring(secondPipe);
 
     int[] numbers =
         Arrays.stream(
-                logSpy
-                    .getOutput()
-                    .replace("[INFO]", "")
-                    .replaceAll("(?m:\\||$)", "")
-                    .trim()
-                    .split("\\s+"))
+                logOut.replace("[INFO]", "").replaceAll("(?m:\\||$)", "").trim().split("\\s+"))
             .mapToInt(Integer::parseInt)
             .toArray();
+    int i = 0;
 
-    Assert.assertEquals(values().length + 2, numbers.length);
-    Assert.assertEquals(time, numbers[0]);
-    Assert.assertEquals(map.get(SUSCEPTIBLE).intValue(), numbers[1]);
-    Assert.assertEquals(map.get(EXPOSED).intValue(), numbers[2]);
-    Assert.assertEquals(map.get(ASYMPTOMATIC).intValue(), numbers[3]);
-    Assert.assertEquals(map.get(PRESYMPTOMATIC).intValue(), numbers[4]);
-    Assert.assertEquals(map.get(SYMPTOMATIC).intValue(), numbers[5]);
-    Assert.assertEquals(map.get(SEVERELY_SYMPTOMATIC).intValue(), numbers[6]);
-    Assert.assertEquals(map.get(RECOVERED).intValue(), numbers[7]);
-    Assert.assertEquals(map.get(DEAD).intValue(), numbers[8]);
-    Assert.assertEquals(dActive, numbers[9]);
+    Assert.assertEquals(values().length + 1, numbers.length);
+    Assert.assertEquals(time, timeExtract, 1e-6);
+    Assert.assertEquals(map.get(SUSCEPTIBLE).intValue(), numbers[i++]);
+    Assert.assertEquals(map.get(EXPOSED).intValue(), numbers[i++]);
+    Assert.assertEquals(map.get(ASYMPTOMATIC).intValue(), numbers[i++]);
+    Assert.assertEquals(map.get(PRESYMPTOMATIC).intValue(), numbers[i++]);
+    Assert.assertEquals(map.get(SYMPTOMATIC).intValue(), numbers[i++]);
+    Assert.assertEquals(map.get(SEVERELY_SYMPTOMATIC).intValue(), numbers[i++]);
+    Assert.assertEquals(map.get(RECOVERED).intValue(), numbers[i++]);
+    Assert.assertEquals(map.get(DEAD).intValue(), numbers[i++]);
+    Assert.assertEquals(dActive, numbers[i++]);
   }
 
   @Test
@@ -77,7 +81,7 @@ public class LogDailyOutputTest {
       map.put(v, random.nextInt(100));
     }
     //        int previousActiveCases = 0;
-    logger.log(time, map);
+    logger.log(time, map, 1);
     //        logger.log(time, map, previousActiveCases);
     Assert.assertThat(
         logSpy.getOutput(),

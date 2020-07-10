@@ -33,6 +33,7 @@ import uk.co.ramp.event.types.ImmutableVirusEvent;
 import uk.co.ramp.event.types.ProcessedEventResult;
 import uk.co.ramp.event.types.VirusEvent;
 import uk.co.ramp.io.types.DiseaseProperties;
+import uk.co.ramp.io.types.StandardProperties;
 import uk.co.ramp.people.Case;
 import uk.co.ramp.policy.alert.AlertChecker;
 import uk.co.ramp.policy.alert.TracingPolicyContext;
@@ -52,6 +53,7 @@ public class VirusEventProcessorTest {
           .time(2)
           .build();
 
+  @Autowired private StandardProperties properties;
   @Autowired DistributionSampler distributionSampler;
 
   @Before
@@ -64,7 +66,8 @@ public class VirusEventProcessorTest {
         .thenReturn(Stream.of(alertEvent));
 
     this.eventProcessor =
-        new VirusEventProcessor(population, diseaseProperties, distributionSampler, alertChecker);
+        new VirusEventProcessor(
+            population, properties, diseaseProperties, distributionSampler, alertChecker);
   }
 
   @Test

@@ -18,6 +18,7 @@ import uk.co.ramp.people.VirusStatus;
 
 public class FormattedEventFactoryTest {
 
+  private static final double DELTA = 1e-6;
   private final Random random = TestUtils.getRandom();
 
   private final FormattedEventFactory formattedEventFactory = new FormattedEventFactory();
@@ -38,7 +39,7 @@ public class FormattedEventFactoryTest {
     ImmutableFormattedEvent formatted = formattedEventFactory.create(virusEvent);
 
     Assert.assertEquals(id, formatted.id());
-    Assert.assertEquals(time, formatted.time());
+    Assert.assertEquals(time, formatted.time(), DELTA);
     Assert.assertEquals(next.toString(), formatted.newStatus());
     Assert.assertThat(formatted.additionalInfo(), containsString(old.toString()));
   }
@@ -66,7 +67,7 @@ public class FormattedEventFactoryTest {
     ImmutableFormattedEvent formatted = formattedEventFactory.create(infectionEvent);
 
     Assert.assertEquals(id, formatted.id());
-    Assert.assertEquals(time, formatted.time());
+    Assert.assertEquals(time, formatted.time(), DELTA);
     Assert.assertEquals(next.toString(), formatted.newStatus());
     Assert.assertThat(formatted.additionalInfo(), containsString("" + exposer));
     Assert.assertThat(formatted.additionalInfo(), containsString("" + exposedTime));
@@ -93,7 +94,7 @@ public class FormattedEventFactoryTest {
     ImmutableFormattedEvent formatted = formattedEventFactory.create(policyEvent);
 
     Assert.assertEquals(0, formatted.id());
-    Assert.assertEquals(time, formatted.time());
+    Assert.assertEquals(time, formatted.time(), DELTA);
     Assert.assertEquals("TODO will need to fill out", formatted.additionalInfo());
   }
 
@@ -113,7 +114,7 @@ public class FormattedEventFactoryTest {
     ImmutableFormattedEvent formatted = formattedEventFactory.create(alertEvent);
 
     Assert.assertEquals(id, formatted.id());
-    Assert.assertEquals(time, formatted.time());
+    Assert.assertEquals(time, formatted.time(), DELTA);
     Assert.assertEquals(next.toString(), formatted.newStatus());
   }
 
@@ -138,7 +139,7 @@ public class FormattedEventFactoryTest {
 
     System.out.println(formatted);
     Assert.assertEquals(id, formatted.id());
-    Assert.assertEquals(time, formatted.time());
+    Assert.assertEquals(time, formatted.time(), DELTA);
     Assert.assertEquals(label, formatted.newStatus());
     Assert.assertThat(formatted.additionalInfo(), containsString("" + weight));
   }

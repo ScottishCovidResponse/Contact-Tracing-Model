@@ -34,6 +34,7 @@ import uk.co.ramp.event.types.InfectionEvent;
 import uk.co.ramp.event.types.ProcessedEventResult;
 import uk.co.ramp.event.types.VirusEvent;
 import uk.co.ramp.io.types.DiseaseProperties;
+import uk.co.ramp.io.types.StandardProperties;
 import uk.co.ramp.people.Case;
 
 @RunWith(SpringRunner.class)
@@ -43,6 +44,7 @@ public class InfectionEventProcessorTest {
   private InfectionEventProcessor eventProcessor;
   private DiseaseProperties diseaseProperties;
 
+  @Autowired private StandardProperties properties;
   @Autowired private DistributionSampler distributionSampler;
 
   private Case thisCase;
@@ -62,7 +64,7 @@ public class InfectionEventProcessorTest {
 
     this.eventProcessor =
         new InfectionEventProcessor(
-            new Population(population), diseaseProperties, distributionSampler);
+            new Population(population), properties, diseaseProperties, distributionSampler);
 
     event =
         ImmutableInfectionEvent.builder()
@@ -158,7 +160,7 @@ public class InfectionEventProcessorTest {
     when(population.getVirusStatus(eq(2))).thenReturn(EXPOSED);
     when(population.isInfectious(eq(2))).thenReturn(true);
     this.eventProcessor =
-        new InfectionEventProcessor(population, diseaseProperties, distributionSampler);
+        new InfectionEventProcessor(population, properties, diseaseProperties, distributionSampler);
 
     var processedEvents = eventProcessor.processEvent(event);
     assertThat(processedEvents.newVirusEvents()).isEmpty();

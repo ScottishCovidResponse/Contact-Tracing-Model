@@ -4,7 +4,6 @@ import static org.hamcrest.CoreMatchers.containsString;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static uk.co.ramp.people.VirusStatus.*;
-import static uk.co.ramp.people.VirusStatus.SEVERELY_SYMPTOMATIC;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -22,8 +21,12 @@ import org.springframework.test.util.ReflectionTestUtils;
 import uk.co.ramp.*;
 import uk.co.ramp.distribution.DistributionSampler;
 import uk.co.ramp.distribution.ProgressionDistribution;
-import uk.co.ramp.event.types.*;
+import uk.co.ramp.event.types.CommonVirusEvent;
+import uk.co.ramp.event.types.Event;
+import uk.co.ramp.event.types.ImmutableVirusEvent;
+import uk.co.ramp.event.types.ProcessedEventResult;
 import uk.co.ramp.io.types.DiseaseProperties;
+import uk.co.ramp.io.types.StandardProperties;
 import uk.co.ramp.people.Case;
 import uk.co.ramp.people.Human;
 import uk.co.ramp.people.VirusStatus;
@@ -39,13 +42,13 @@ public class CommonVirusEventProcessorTest {
   private CommonVirusEventProcessor<Event> eventProcessor;
 
   private DiseaseProperties diseaseProperties;
+  @Autowired private StandardProperties properties;
 
   @Autowired public DistributionSampler distributionSampler;
 
   @Before
   public void setUp() throws Exception {
     diseaseProperties = TestUtils.diseaseProperties();
-
     Human human = mock(Human.class);
     when(human.health()).thenReturn(-1d);
     Case aCase = new Case(human);
@@ -55,7 +58,7 @@ public class CommonVirusEventProcessorTest {
 
     eventProcessor =
         new CommonVirusEventProcessor<>(
-            new Population(population), diseaseProperties, distributionSampler) {
+            new Population(population), properties, diseaseProperties, distributionSampler) {
           @Override
           public ProcessedEventResult processEvent(Event event) {
             throw new UnsupportedOperationException();

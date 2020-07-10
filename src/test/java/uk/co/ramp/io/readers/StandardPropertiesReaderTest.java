@@ -15,7 +15,9 @@ public class StandardPropertiesReaderTest {
           + "  'timeLimit': 100,"
           + "  'initialExposures': 1000,"
           + "  'seed': 0,"
-          + "  'steadyState': true"
+          + "  'steadyState': true,"
+          + "  'timeStepsPerDay': 4,"
+          + "  'timeStepSpread': [0.25,0.25,0.25,0.25]"
           + "}";
 
   private StandardPropertiesReader standardPropertiesReader;
