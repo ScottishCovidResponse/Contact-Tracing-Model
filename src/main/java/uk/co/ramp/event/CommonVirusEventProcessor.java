@@ -93,10 +93,10 @@ public abstract class CommonVirusEventProcessor<T extends Event> implements Even
     Distribution distribution =
         ImmutableDistribution.builder()
             .type(diseaseProperties.progressionDistribution())
-            .mean(progressionData.mean()*properties.timeStepsPerDay())
-            .max(progressionData.max()*properties.timeStepsPerDay())
+            .mean(progressionData.mean())
+            .max(progressionData.max())
             .build();
-    return distributionSampler.getDistributionValue(distribution);
+    return distributionSampler.getDistributionValue(distribution)*properties.timeStepsPerDay();
   }
 
   VirusStatus determineInfection(CommonVirusEvent e) {

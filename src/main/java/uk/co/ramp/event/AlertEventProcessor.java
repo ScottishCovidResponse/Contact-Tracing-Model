@@ -1,27 +1,22 @@
 package uk.co.ramp.event;
 
-import static uk.co.ramp.people.AlertStatus.NONE;
-import static uk.co.ramp.people.AlertStatus.TESTED_NEGATIVE;
-import static uk.co.ramp.people.AlertStatus.TESTED_POSITIVE;
-import static uk.co.ramp.people.AlertStatus.getValidTransitions;
-
-import java.util.List;
-import java.util.Optional;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import uk.co.ramp.Population;
 import uk.co.ramp.distribution.Distribution;
 import uk.co.ramp.distribution.DistributionSampler;
 import uk.co.ramp.distribution.ImmutableDistribution;
-import uk.co.ramp.event.types.AlertEvent;
-import uk.co.ramp.event.types.EventProcessor;
-import uk.co.ramp.event.types.ImmutableAlertEvent;
-import uk.co.ramp.event.types.ImmutableProcessedEventResult;
-import uk.co.ramp.event.types.ProcessedEventResult;
+import uk.co.ramp.event.types.*;
 import uk.co.ramp.io.types.DiseaseProperties;
+import uk.co.ramp.io.types.StandardProperties;
 import uk.co.ramp.people.AlertStatus;
 import uk.co.ramp.utilities.ImmutableMeanMax;
 import uk.co.ramp.utilities.MeanMax;
+
+import java.util.List;
+import java.util.Optional;
+
+import static uk.co.ramp.people.AlertStatus.*;
 
 public class AlertEventProcessor implements EventProcessor<AlertEvent> {
   private static final Logger LOGGER = LogManager.getLogger(AlertEventProcessor.class);
@@ -29,14 +24,17 @@ public class AlertEventProcessor implements EventProcessor<AlertEvent> {
   private final Population population;
   private final DiseaseProperties diseaseProperties;
   private final DistributionSampler distributionSampler;
+  private final StandardProperties properties;
 
   public AlertEventProcessor(
       Population population,
+      StandardProperties properties,
       DiseaseProperties diseaseProperties,
       DistributionSampler distributionSampler) {
     this.population = population;
     this.diseaseProperties = diseaseProperties;
     this.distributionSampler = distributionSampler;
+    this.properties = properties;
   }
 
   @Override
@@ -120,6 +118,6 @@ public class AlertEventProcessor implements EventProcessor<AlertEvent> {
             .mean(progressionData.mean())
             .max(progressionData.max())
             .build();
-    return distributionSampler.getDistributionValue(distribution);
+    return distributionSampler.getDistributionValue(distribution)*properties.timeStepsPerDay();
   }
 }

@@ -11,7 +11,7 @@ import org.immutables.value.Value;
 @JsonPropertyOrder({"time", "eventType", "id", "newStatus", "additionalInfo"})
 public interface FormattedEvent {
 
-  int time();
+  double time();
 
   String eventType();
 
