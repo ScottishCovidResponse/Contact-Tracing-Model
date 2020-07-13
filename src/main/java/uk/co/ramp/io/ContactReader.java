@@ -68,29 +68,6 @@ public class ContactReader {
               .map(i -> ImmutableContactEvent.copyOf(i).withTime(distribution.sample()))
               .collect(Collectors.toList()));
     }
-
-    //   System.out.println( events.stream().mapToInt(ImmutableContactEvent::time).min());
-    //   System.out.println( events.stream().mapToInt(ImmutableContactEvent::time).max());
-    //
-    //   long count = events.stream().filter(event -> event.time() < 4).count();
-    //
-    //   System.out.println(events.stream().filter(event -> event.time() < 4).count());
-    //   System.out.println(contactEvents.stream().filter(event -> event.time() ==0 ).count());
-    //   System.out.println(events.stream().filter(event -> event.time() ==0 ).count());
-    //   System.out.println(events.stream().filter(event -> event.time() ==1 ).count());
-    //   System.out.println(events.stream().filter(event -> event.time() ==2 ).count());
-    //   System.out.println(events.stream().filter(event -> event.time() ==3 ).count());
-    //      System.out.println(events.stream().filter(event -> event.time() ==0
-    // ).count()/(double)count);
-    //      System.out.println(events.stream().filter(event -> event.time() ==1
-    // ).count()/(double)count);
-    //      System.out.println(events.stream().filter(event -> event.time() ==2
-    // ).count()/(double)count);
-    //      System.out.println(events.stream().filter(event -> event.time() ==3
-    // ).count()/(double)count);
-    //
-    //   System.exit(0);
-
     return events;
   }
 }
