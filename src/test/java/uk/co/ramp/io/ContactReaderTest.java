@@ -60,9 +60,11 @@ public class ContactReaderTest {
   public void testReadSpread() throws IOException {
 
     StandardProperties properties =
-        ImmutableStandardProperties.builder().from(defaultProperties)
+        ImmutableStandardProperties.builder()
+            .from(defaultProperties)
             .timeStepsPerDay(4)
-            .timeStepSpread(0.25, 0.25, 0.25, 0.25).build();
+            .timeStepSpread(0.25, 0.25, 0.25, 0.25)
+            .build();
 
     StringReader stringReader = new StringReader(csv);
     List<ContactEvent> dailyContactRecords =
@@ -70,12 +72,13 @@ public class ContactReaderTest {
 
     assertThat(dailyContactRecords).size().isEqualTo(2);
 
-  var spreadRecord1 =  dailyContactRecords.stream().filter(i-> i.from() == 8).findFirst().orElseThrow();
-  var spreadRecord2=  dailyContactRecords.stream().filter(i-> i.from() == 7).findFirst().orElseThrow();
+    var spreadRecord1 =
+        dailyContactRecords.stream().filter(i -> i.from() == 8).findFirst().orElseThrow();
+    var spreadRecord2 =
+        dailyContactRecords.stream().filter(i -> i.from() == 7).findFirst().orElseThrow();
 
-  assertThat(spreadRecord1).isEqualToIgnoringGivenFields(record1, "time");
-  assertThat(spreadRecord2).isEqualToIgnoringGivenFields(record2, "time");
-
+    assertThat(spreadRecord1).isEqualToIgnoringGivenFields(record1, "time");
+    assertThat(spreadRecord2).isEqualToIgnoringGivenFields(record2, "time");
   }
 
   @Test
@@ -101,9 +104,11 @@ public class ContactReaderTest {
     List<ImmutableContactEvent> contactEvents = randomEvents(100, days);
 
     StandardProperties properties =
-        ImmutableStandardProperties.builder().from(defaultProperties)
+        ImmutableStandardProperties.builder()
+            .from(defaultProperties)
             .timeStepsPerDay(4)
-            .timeStepSpread(0.25, 0.25, 0.25, 0.25).build();
+            .timeStepSpread(0.25, 0.25, 0.25, 0.25)
+            .build();
 
     var minTime =
         contactEvents.stream().map(ContactEvent::time).min(Comparator.naturalOrder()).orElseThrow();
@@ -135,7 +140,6 @@ public class ContactReaderTest {
     assertThat(day2).isEqualTo(counted.get(2));
     assertThat(day3).isEqualTo(counted.get(3));
     assertThat(day4).isEqualTo(counted.get(4));
-
   }
 
   @Test
@@ -144,9 +148,12 @@ public class ContactReaderTest {
     List<ImmutableContactEvent> contactEvents = randomEvents(1000, 1);
 
     StandardProperties properties =
-        ImmutableStandardProperties.builder().from(defaultProperties)
+        ImmutableStandardProperties.builder()
+            .from(defaultProperties)
             .timeStepsPerDay(4)
-            .timeStepSpread(0.1, 0.4, 0.3, 0.2).build();;
+            .timeStepSpread(0.1, 0.4, 0.3, 0.2)
+            .build();
+    ;
 
     ContactReader reader = new ContactReader(properties, TestUtils.dataGenerator());
 
@@ -157,12 +164,11 @@ public class ContactReaderTest {
     var period2 = output.stream().map(ContactEvent::time).filter(between(2, 3)).count();
     var period3 = output.stream().map(ContactEvent::time).filter(between(3, 4)).count();
 
-    Offset<Long> b = Offset.offset((long)Math.sqrt(1000L));
-    assertThat(period0).isCloseTo((long)(properties.timeStepSpread()[0] * 1000),  b);
-    assertThat(period1).isCloseTo((long)(properties.timeStepSpread()[1] * 1000),  b);
-    assertThat(period2).isCloseTo((long)(properties.timeStepSpread()[2] * 1000),  b);
-    assertThat(period3).isCloseTo((long)(properties.timeStepSpread()[3] * 1000),  b);
-
+    Offset<Long> b = Offset.offset((long) Math.sqrt(1000L));
+    assertThat(period0).isCloseTo((long) (properties.timeStepSpread()[0] * 1000), b);
+    assertThat(period1).isCloseTo((long) (properties.timeStepSpread()[1] * 1000), b);
+    assertThat(period2).isCloseTo((long) (properties.timeStepSpread()[2] * 1000), b);
+    assertThat(period3).isCloseTo((long) (properties.timeStepSpread()[3] * 1000), b);
   }
 
   private Predicate<Integer> between(int min, int max) {
