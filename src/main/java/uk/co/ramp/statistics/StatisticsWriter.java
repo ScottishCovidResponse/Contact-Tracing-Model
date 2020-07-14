@@ -5,37 +5,28 @@ import java.io.Writer;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import org.springframework.stereotype.Service;
 import uk.co.ramp.io.csv.CsvWriter;
 import uk.co.ramp.io.types.StandardProperties;
 import uk.co.ramp.statistics.types.ImmutableRValueOutput;
 import uk.co.ramp.statistics.types.Infection;
 
+@Service
 public class StatisticsWriter {
-  private final int timeLimit;
-  private final Writer statsWriter;
-  private final Writer rValueWriter;
   private final StatisticsRecorder statisticsRecorder;
   private final StandardProperties properties;
 
-  public StatisticsWriter(
-      int timeLimit,
-      Writer statsWriter,
-      Writer rValueWriter,
-      StatisticsRecorder statisticsRecorder,
-      StandardProperties properties) {
-    this.timeLimit = timeLimit;
-    this.statsWriter = statsWriter;
-    this.rValueWriter = rValueWriter;
+  public StatisticsWriter(StatisticsRecorder statisticsRecorder, StandardProperties properties) {
     this.statisticsRecorder = statisticsRecorder;
     this.properties = properties;
   }
 
-  public void output() throws IOException {
-    outputGeneralStats();
-    outputR();
+  public void output(int timeLimit, Writer statsWriter, Writer rValueWriter) throws IOException {
+    outputGeneralStats(statsWriter);
+    outputR(timeLimit, rValueWriter);
   }
 
-  private void outputR() throws IOException {
+  private void outputR(int timeLimit, Writer rValueWriter) throws IOException {
 
     Map<Integer, List<Infection>> inf = statisticsRecorder.getR0Progression();
     MovingAverage movingAverage = new MovingAverage(7);
@@ -46,8 +37,6 @@ public class StatisticsWriter {
         int seeded = orDefault.stream().mapToInt(Infection::infections).sum();
         double r = seeded / (double) orDefault.size();
         movingAverage.add(r);
-        //  System.out.println(i + "  " + orDefault.size() + "  " + seeded + "  " + r + "   " +
-        // movingAverage.getAverage());
 
         rValueOutputs.add(
             ImmutableRValueOutput.builder()
@@ -62,7 +51,7 @@ public class StatisticsWriter {
     new CsvWriter().write(rValueWriter, rValueOutputs, ImmutableRValueOutput.class);
   }
 
-  private void outputGeneralStats() throws IOException {
+  private void outputGeneralStats(Writer statsWriter) throws IOException {
 
     double timeIsolated =
         statisticsRecorder.getPersonDaysIsolation().values().stream()

@@ -15,10 +15,12 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
+import org.mockito.Mockito;
 import uk.co.ramp.LogSpy;
 import uk.co.ramp.TestUtils;
 import uk.co.ramp.people.Case;
 import uk.co.ramp.people.VirusStatus;
+import uk.co.ramp.statistics.StatisticsRecorder;
 
 public class InfectionMapTest {
 
@@ -63,7 +65,7 @@ public class InfectionMapTest {
       }
     }
 
-    infectionMap = new InfectionMap(population);
+    infectionMap = new InfectionMap(population, Mockito.mock(StatisticsRecorder.class));
   }
 
   @Test

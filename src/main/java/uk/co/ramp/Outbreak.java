@@ -39,6 +39,7 @@ public class Outbreak {
   private final LastContactTime lastContactTime;
   private final File outputFolder;
   private final StatisticsRecorder statisticsRecorder;
+  private final StatisticsWriter statisticsWriter;
 
   private final Population population;
   private final Map<Double, CmptRecord> records = new HashMap<>();
@@ -54,7 +55,8 @@ public class Outbreak {
       EventListWriter eventListWriter,
       LastContactTime lastContactTime,
       OutputFolder outputFolder,
-      StatisticsRecorder statisticsRecorder) {
+      StatisticsRecorder statisticsRecorder,
+      StatisticsWriter statisticsWriter) {
 
     this.population = population;
     this.diseaseProperties = diseaseProperties;
@@ -65,6 +67,7 @@ public class Outbreak {
     this.lastContactTime = lastContactTime;
     this.outputFolder = outputFolder.outputFolder();
     this.statisticsRecorder = statisticsRecorder;
+    this.statisticsWriter = statisticsWriter;
   }
 
   public Map<Double, CmptRecord> propagate() {
@@ -79,7 +82,10 @@ public class Outbreak {
         diseaseProperties.randomInfectionRate() / (double) properties.timeStepsPerDay();
 
     runContactData(timeLimit * properties.timeStepsPerDay(), randomInfectionRate);
+    printOutput(timeLimit);
+  }
 
+  private void printOutput(int timeLimit) {
     try (Writer writer = new FileWriter(new File(outputFolder, INFECTION_MAP))) {
       new InfectionMap(population.view(), statisticsRecorder).outputMap(writer);
       eventListWriter.output();
@@ -91,11 +97,9 @@ public class Outbreak {
 
     try (Writer statsWriter = new FileWriter("output/stats.txt");
         Writer rValueWriter = new FileWriter("output/rValue.csv")) {
-      new StatisticsWriter(timeLimit, statsWriter, rValueWriter, statisticsRecorder, properties)
-          .output();
-
+      statisticsWriter.output(timeLimit, statsWriter, rValueWriter);
     } catch (IOException e) {
-      e.printStackTrace();
+      LOGGER.error("An error occurred while outputting the statistics", e);
     }
   }
 

@@ -1,6 +1,7 @@
 package uk.co.ramp.statistics;
 
 import java.util.LinkedList;
+import java.util.List;
 import java.util.Queue;
 
 public class MovingAverage {
@@ -17,7 +18,7 @@ public class MovingAverage {
     sum += num;
     previousDays.add(num);
     if (previousDays.size() > period) {
-      sum = sum -= previousDays.remove();
+      sum -= previousDays.remove();
     }
   }
 
@@ -26,5 +27,9 @@ public class MovingAverage {
     if (sum < 1e-6) return 0d;
     double divisor = previousDays.size();
     return sum / divisor;
+  }
+
+  public List<Double> readData() {
+    return List.copyOf(previousDays);
   }
 }
