@@ -14,10 +14,10 @@ import uk.co.ramp.statistics.types.Infection;
 @Service
 public class StatisticsRecorderImpl implements StatisticsRecorder {
 
-  private Map<Integer, Integer> personDaysIsolation = new HashMap<>();
-  private Map<Integer, Integer> peopleInfected = new HashMap<>();
-  private Map<Integer, Integer> contactsTraced = new HashMap<>();
-  private Map<Integer, List<Infection>> r0Progression = new HashMap<>();
+  private final Map<Integer, Integer> personDaysIsolation = new HashMap<>();
+  private final Map<Integer, Integer> peopleInfected = new HashMap<>();
+  private final Map<Integer, Integer> contactsTraced = new HashMap<>();
+  private final Map<Integer, List<Infection>> r0Progression = new HashMap<>();
 
   public Map<Integer, Integer> getContactsTraced() {
     return contactsTraced;
