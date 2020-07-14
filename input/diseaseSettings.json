@@ -39,7 +39,7 @@
   "exposureThreshold": 50,
   "exposureProbability4UnitContact": 0.01,
   "exposureExponent": 1.0,
-  "randomInfectionRate": 0.05,
+  "randomInfectionRate": 0.0005,
   "progressionDistribution": "EXPONENTIAL"
 }
 

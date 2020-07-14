@@ -13,6 +13,7 @@ import uk.co.ramp.distribution.DistributionSampler;
 import uk.co.ramp.io.types.DiseaseProperties;
 import uk.co.ramp.io.types.InputFiles;
 import uk.co.ramp.io.types.StandardProperties;
+import uk.co.ramp.statistics.StatisticsRecorder;
 
 @SpringBootConfiguration
 public class IsolationPolicyContext {
@@ -23,9 +24,11 @@ public class IsolationPolicyContext {
       StandardProperties standardProperties,
       DiseaseProperties diseaseProperties,
       DistributionSampler distributionSampler,
-      IsolationProperties isolationProperties) {
+      IsolationProperties isolationProperties,
+      StatisticsRecorder statisticsRecorder) {
     var singleCaseIsolationPolicy =
-        new SingleCaseIsolationPolicy(isolationProperties, distributionSampler, standardProperties);
+        new SingleCaseIsolationPolicy(
+            isolationProperties, distributionSampler, standardProperties, statisticsRecorder);
     return new ContactIsolationPolicy(singleCaseIsolationPolicy, diseaseProperties);
   }
 

@@ -10,17 +10,23 @@ import java.util.stream.IntStream;
 import java.util.stream.Stream;
 import uk.co.ramp.Population;
 import uk.co.ramp.event.CompletionEventListGroup;
+import uk.co.ramp.statistics.StatisticsRecorder;
 
 public class AlertContactTracer {
   private final TracingPolicy tracingPolicy;
   private final CompletionEventListGroup eventList;
   private final Population population;
+  private final StatisticsRecorder statisticsRecorder;
 
   AlertContactTracer(
-      TracingPolicy tracingPolicy, CompletionEventListGroup eventList, Population population) {
+      TracingPolicy tracingPolicy,
+      CompletionEventListGroup eventList,
+      Population population,
+      StatisticsRecorder statisticsRecorder) {
     this.tracingPolicy = tracingPolicy;
     this.eventList = eventList;
     this.population = population;
+    this.statisticsRecorder = statisticsRecorder;
   }
 
   Set<Integer> traceRecentContacts(int startTime, int currentTime, int personId) {
@@ -41,6 +47,9 @@ public class AlertContactTracer {
             .map(id -> traceRecentContacts(startTime, currentTime, id, currentLevel + 1))
             .flatMap(Collection::stream)
             .collect(Collectors.toSet());
+
+    statisticsRecorder.recordContactsTraced(currentTime, currentLevelContactsTrace.size());
+
     return Stream.of(currentLevelContactsTrace, nextLevelContactsTrace)
         .flatMap(Collection::stream)
         .filter(id -> id != personId)

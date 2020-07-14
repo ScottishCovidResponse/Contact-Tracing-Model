@@ -23,6 +23,8 @@ import uk.co.ramp.io.types.DiseaseProperties;
 import uk.co.ramp.io.types.OutputFolder;
 import uk.co.ramp.io.types.StandardProperties;
 import uk.co.ramp.people.VirusStatus;
+import uk.co.ramp.statistics.StatisticsRecorder;
+import uk.co.ramp.statistics.StatisticsWriter;
 
 @Service
 public class Outbreak {
@@ -36,6 +38,7 @@ public class Outbreak {
   private final LogDailyOutput outputLog;
   private final LastContactTime lastContactTime;
   private final File outputFolder;
+  private final StatisticsRecorder statisticsRecorder;
 
   private final Population population;
   private final Map<Double, CmptRecord> records = new HashMap<>();
@@ -50,7 +53,8 @@ public class Outbreak {
       EventRunner eventRunner,
       EventListWriter eventListWriter,
       LastContactTime lastContactTime,
-      OutputFolder outputFolder) {
+      OutputFolder outputFolder,
+      StatisticsRecorder statisticsRecorder) {
 
     this.population = population;
     this.diseaseProperties = diseaseProperties;
@@ -60,6 +64,7 @@ public class Outbreak {
     this.eventListWriter = eventListWriter;
     this.lastContactTime = lastContactTime;
     this.outputFolder = outputFolder.outputFolder();
+    this.statisticsRecorder = statisticsRecorder;
   }
 
   public Map<Double, CmptRecord> propagate() {
@@ -76,12 +81,21 @@ public class Outbreak {
     runContactData(timeLimit * properties.timeStepsPerDay(), randomInfectionRate);
 
     try (Writer writer = new FileWriter(new File(outputFolder, INFECTION_MAP))) {
-      new InfectionMap(population.view()).outputMap(writer);
+      new InfectionMap(population.view(), statisticsRecorder).outputMap(writer);
       eventListWriter.output();
     } catch (IOException e) {
       String message = "An error occurred generating the infection map";
       LOGGER.error(message);
       throw new InfectionMapException(message, e);
+    }
+
+    try (Writer statsWriter = new FileWriter("output/stats.txt");
+        Writer rValueWriter = new FileWriter("output/rValue.csv")) {
+      new StatisticsWriter(timeLimit, statsWriter, rValueWriter, statisticsRecorder, properties)
+          .output();
+
+    } catch (IOException e) {
+      e.printStackTrace();
     }
   }
 

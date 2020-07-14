@@ -10,19 +10,23 @@ import uk.co.ramp.event.types.*;
 import uk.co.ramp.io.types.DiseaseProperties;
 import uk.co.ramp.io.types.StandardProperties;
 import uk.co.ramp.people.VirusStatus;
+import uk.co.ramp.statistics.StatisticsRecorder;
 
 @Service
 public class InfectionEventProcessor extends CommonVirusEventProcessor<InfectionEvent> {
   private final Population population;
+  private final StatisticsRecorder statisticsRecorder;
 
   @Autowired
   public InfectionEventProcessor(
       Population population,
       StandardProperties properties,
       DiseaseProperties diseaseProperties,
-      DistributionSampler distributionSampler) {
+      DistributionSampler distributionSampler,
+      StatisticsRecorder statisticsRecorder) {
     super(population, properties, diseaseProperties, distributionSampler);
     this.population = population;
+    this.statisticsRecorder = statisticsRecorder;
   }
 
   @Override
@@ -34,6 +38,8 @@ public class InfectionEventProcessor extends CommonVirusEventProcessor<Infection
 
       VirusStatus nextStatus = determineNextStatus(event);
       int deltaTime = timeInCompartment(event.nextStatus(), nextStatus);
+
+      statisticsRecorder.recordPeopleInfected(event.exposedTime());
 
       VirusEvent subsequentEvent =
           ImmutableVirusEvent.builder()
