@@ -1,15 +1,16 @@
 package uk.co.ramp.statistics;
 
-import java.io.IOException;
-import java.io.Writer;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
 import org.springframework.stereotype.Service;
 import uk.co.ramp.io.csv.CsvWriter;
 import uk.co.ramp.io.types.StandardProperties;
 import uk.co.ramp.statistics.types.ImmutableRValueOutput;
 import uk.co.ramp.statistics.types.Infection;
+
+import java.io.IOException;
+import java.io.Writer;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
 
 @Service
 public class StatisticsWriter {
@@ -26,7 +27,7 @@ public class StatisticsWriter {
     outputR(timeLimit, rValueWriter);
   }
 
-  private void outputR(int timeLimit, Writer rValueWriter) throws IOException {
+  void outputR(int timeLimit, Writer rValueWriter) throws IOException {
 
     Map<Integer, List<Infection>> inf = statisticsRecorder.getR0Progression();
     MovingAverage movingAverage = new MovingAverage(7);
@@ -51,17 +52,17 @@ public class StatisticsWriter {
     new CsvWriter().write(rValueWriter, rValueOutputs, ImmutableRValueOutput.class);
   }
 
-  private void outputGeneralStats(Writer statsWriter) throws IOException {
+  void outputGeneralStats(Writer statsWriter) throws IOException {
 
     double timeIsolated =
-        statisticsRecorder.getPersonDaysIsolation().values().stream()
-                .mapToInt(Integer::intValue)
-                .sum()
-            / (double) properties.timeStepsPerDay();
+            statisticsRecorder.getPersonDaysIsolation().values().stream()
+                    .mapToInt(Integer::intValue)
+                    .sum()
+                    / (double) properties.timeStepsPerDay();
     int totalInfected =
-        statisticsRecorder.getPeopleInfected().values().stream().mapToInt(Integer::intValue).sum();
+            statisticsRecorder.getPeopleInfected().values().stream().mapToInt(Integer::intValue).sum();
     int contactsTraced =
-        statisticsRecorder.getContactsTraced().values().stream().mapToInt(Integer::intValue).sum();
+            statisticsRecorder.getContactsTraced().values().stream().mapToInt(Integer::intValue).sum();
 
     statsWriter.write("Person Days in Isolation , " + timeIsolated);
     statsWriter.write("\nPeople infected , " + totalInfected);
