@@ -82,10 +82,10 @@ public class Outbreak {
         diseaseProperties.randomInfectionRate() / (double) properties.timeStepsPerDay();
 
     runContactData(timeLimit * properties.timeStepsPerDay(), randomInfectionRate);
-    printOutput(timeLimit);
+    printOutput();
   }
 
-  private void printOutput(int timeLimit) {
+  private void printOutput() {
     try (Writer writer = new FileWriter(new File(outputFolder, INFECTION_MAP))) {
       new InfectionMap(population.view(), statisticsRecorder).outputMap(writer);
       eventListWriter.output();
@@ -97,7 +97,7 @@ public class Outbreak {
 
     try (Writer statsWriter = new FileWriter("output/stats.txt");
         Writer rValueWriter = new FileWriter("output/rValue.csv")) {
-      statisticsWriter.output(timeLimit, statsWriter, rValueWriter);
+      statisticsWriter.output(statsWriter, rValueWriter);
     } catch (IOException e) {
       LOGGER.error("An error occurred while outputting the statistics", e);
     }

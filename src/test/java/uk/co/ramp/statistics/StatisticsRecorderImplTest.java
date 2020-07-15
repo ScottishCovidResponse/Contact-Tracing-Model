@@ -10,6 +10,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mockito;
 import uk.co.ramp.TestUtils;
+import uk.co.ramp.io.types.StandardProperties;
 import uk.co.ramp.people.Case;
 import uk.co.ramp.statistics.types.ImmutableInfection;
 import uk.co.ramp.statistics.types.Infection;
@@ -18,11 +19,11 @@ public class StatisticsRecorderImplTest {
 
   StatisticsRecorder recorder;
   Random random = TestUtils.getRandom();
+  StandardProperties properties = TestUtils.standardProperties();
 
   @Before
-  public void setUp() throws Exception {
-
-    recorder = new StatisticsRecorderImpl();
+  public void setUp() {
+    recorder = new StatisticsRecorderImpl(properties);
   }
 
   @Test
@@ -45,7 +46,7 @@ public class StatisticsRecorderImplTest {
       int times = random.nextInt(20);
       dummyData.put(i, times);
 
-      for (int j = 0; j < times; j++) recorder.recordPeopleInfected(i);
+      for (int j = 0; j < times; j++) recorder.recordSinglePersonInfected(i);
     }
 
     assertThat(dummyData).isEqualTo(recorder.getPeopleInfected());

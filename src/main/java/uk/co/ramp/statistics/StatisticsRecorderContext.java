@@ -8,8 +8,8 @@ import uk.co.ramp.io.types.StandardProperties;
 public class StatisticsRecorderContext {
 
   @Bean
-  StatisticsRecorder statisticsRecorder() {
-    return new StatisticsRecorderImpl();
+  StatisticsRecorder statisticsRecorder(StandardProperties properties) {
+    return new StatisticsRecorderImpl(properties);
   }
 
   @Bean

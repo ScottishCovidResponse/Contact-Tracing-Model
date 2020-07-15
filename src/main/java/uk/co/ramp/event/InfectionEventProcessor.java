@@ -39,7 +39,7 @@ public class InfectionEventProcessor extends CommonVirusEventProcessor<Infection
       VirusStatus nextStatus = determineNextStatus(event);
       int deltaTime = timeInCompartment(event.nextStatus(), nextStatus);
 
-      statisticsRecorder.recordPeopleInfected(event.exposedTime());
+      statisticsRecorder.recordSinglePersonInfected(event.exposedTime());
 
       VirusEvent subsequentEvent =
           ImmutableVirusEvent.builder()

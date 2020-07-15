@@ -1,5 +1,6 @@
 package uk.co.ramp.statistics;
 
+import com.google.common.annotations.VisibleForTesting;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Queue;
@@ -29,7 +30,8 @@ public class MovingAverage {
     return sum / divisor;
   }
 
-  public List<Double> readData() {
+  @VisibleForTesting
+  List<Double> readData() {
     return List.copyOf(previousDays);
   }
 }
