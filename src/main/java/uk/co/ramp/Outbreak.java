@@ -95,8 +95,8 @@ public class Outbreak {
       throw new InfectionMapException(message, e);
     }
 
-    try (Writer statsWriter = new FileWriter("output/stats.txt");
-        Writer rValueWriter = new FileWriter("output/rValue.csv")) {
+    try (Writer statsWriter = new FileWriter(new File(outputFolder, "stats.txt"));
+        Writer rValueWriter = new FileWriter(new File(outputFolder, "rValue.csv"))) {
       statisticsWriter.output(statsWriter, rValueWriter);
     } catch (IOException e) {
       LOGGER.error("An error occurred while outputting the statistics", e);
