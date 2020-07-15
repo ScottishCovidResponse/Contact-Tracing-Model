@@ -5,6 +5,6 @@
   "contactData": "homogeneous_contacts.csv",
   "ageData": "ids_Paul.csv",
   "initialExposures": "initialExposures.csv",
-  "tracingPolicies": "tracingPolicies.json",
-  "isolationPolicies": "isolationPolicies.json"
+  "tracingPolicies": "scenarios/scenario1a/tracingPolicies.json",
+  "isolationPolicies": "isolationPolicies_Example.json"
 }

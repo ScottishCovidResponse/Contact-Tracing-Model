@@ -38,7 +38,7 @@ public class Outbreak {
   private final File outputFolder;
 
   private final Population population;
-  private final Map<Double, CmptRecord> records = new HashMap<>();
+  private final Map<Integer, CmptRecord> records = new HashMap<>();
   private static final String INFECTION_MAP = "infectionMap.txt";
 
   @Autowired
@@ -62,7 +62,7 @@ public class Outbreak {
     this.outputFolder = outputFolder.outputFolder();
   }
 
-  public Map<Double, CmptRecord> propagate() {
+  public Map<Integer, CmptRecord> propagate() {
     runToCompletion();
     return records;
   }
@@ -114,7 +114,7 @@ public class Outbreak {
   void updateLogActiveCases(int time) {
     Map<VirusStatus, Integer> stats = population.getCmptCounts();
     CmptRecord cmptRecord = outputLog.log(time, stats, properties.timeStepsPerDay());
-    records.put(time / (double) properties.timeStepsPerDay(), cmptRecord);
+    records.put(time, cmptRecord);
   }
 
   private int activeCases() {

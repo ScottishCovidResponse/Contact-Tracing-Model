@@ -120,7 +120,8 @@ public class InfectionEventProcessorTest {
     Assert.assertEquals(0, processedEventResult.newCompletedAlertEvents().size());
     VirusEvent evnt = processedEventResult.newVirusEvents().get(0);
 
-    Assert.assertEquals(diseaseProperties.timeLatent().mean(), evnt.time());
+    Assert.assertEquals(
+        diseaseProperties.timeLatent().mean() * properties.timeStepsPerDay(), evnt.time());
     Assert.assertEquals(0, evnt.id());
     Assert.assertEquals(EXPOSED, evnt.oldStatus());
     Assert.assertTrue(EXPOSED.getValidTransitions().contains(evnt.nextStatus()));

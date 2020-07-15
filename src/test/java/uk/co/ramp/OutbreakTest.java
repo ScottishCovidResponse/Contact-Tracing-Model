@@ -153,7 +153,7 @@ public class OutbreakTest {
             .filter(status -> status == SUSCEPTIBLE)
             .count();
 
-    Map<Double, CmptRecord> records = outbreak.propagate();
+    Map<Integer, CmptRecord> records = outbreak.propagate();
 
     long susceptiblePost =
         population.values().stream()

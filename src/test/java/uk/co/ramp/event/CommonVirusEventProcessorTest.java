@@ -127,28 +127,28 @@ public class CommonVirusEventProcessorTest {
     ReflectionTestUtils.setField(eventProcessor, "diseaseProperties", diseaseProperties);
 
     Assert.assertEquals(
-        diseaseProperties.timeLatent().mean(),
+        diseaseProperties.timeLatent().mean() * properties.timeStepsPerDay(),
         eventProcessor.timeInCompartment(EXPOSED, ASYMPTOMATIC));
     Assert.assertEquals(
-        diseaseProperties.timeRecoveryAsymp().mean(),
+        diseaseProperties.timeRecoveryAsymp().mean() * properties.timeStepsPerDay(),
         eventProcessor.timeInCompartment(ASYMPTOMATIC, RECOVERED));
     Assert.assertEquals(
-        diseaseProperties.timeLatent().mean(),
+        diseaseProperties.timeLatent().mean() * properties.timeStepsPerDay(),
         eventProcessor.timeInCompartment(EXPOSED, PRESYMPTOMATIC));
     Assert.assertEquals(
-        diseaseProperties.timeSymptomsOnset().mean(),
+        diseaseProperties.timeSymptomsOnset().mean() * properties.timeStepsPerDay(),
         eventProcessor.timeInCompartment(PRESYMPTOMATIC, SYMPTOMATIC));
     Assert.assertEquals(
-        diseaseProperties.timeRecoverySymp().mean(),
+        diseaseProperties.timeRecoverySymp().mean() * properties.timeStepsPerDay(),
         eventProcessor.timeInCompartment(SYMPTOMATIC, RECOVERED));
     Assert.assertEquals(
-        diseaseProperties.timeDecline().mean(),
+        diseaseProperties.timeDecline().mean() * properties.timeStepsPerDay(),
         eventProcessor.timeInCompartment(SYMPTOMATIC, SEVERELY_SYMPTOMATIC));
     Assert.assertEquals(
-        diseaseProperties.timeRecoverySev().mean(),
+        diseaseProperties.timeRecoverySev().mean() * properties.timeStepsPerDay(),
         eventProcessor.timeInCompartment(SEVERELY_SYMPTOMATIC, RECOVERED));
     Assert.assertEquals(
-        diseaseProperties.timeDeath().mean(),
+        diseaseProperties.timeDeath().mean() * properties.timeStepsPerDay(),
         eventProcessor.timeInCompartment(SEVERELY_SYMPTOMATIC, DEAD));
   }
 
