@@ -15,7 +15,7 @@ public interface StatisticsRecorder {
 
   void recordInfectionSpread(Case seed, int infections);
 
-  public List<ImmutableRValueOutput> getRollingAverage(int period);
+  List<ImmutableRValueOutput> getRollingAverage(int period);
 
   Map<Integer, Integer> getContactsTraced();
 
