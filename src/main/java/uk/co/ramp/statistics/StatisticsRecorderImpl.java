@@ -1,10 +1,8 @@
 package uk.co.ramp.statistics;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import uk.co.ramp.io.types.StandardProperties;
+import uk.co.ramp.people.AlertStatus;
 import uk.co.ramp.people.Case;
 import uk.co.ramp.statistics.types.ImmutableInfection;
 import uk.co.ramp.statistics.types.ImmutableRValueOutput;
@@ -16,6 +14,7 @@ public class StatisticsRecorderImpl implements StatisticsRecorder {
   private final Map<Integer, Integer> peopleInfected = new HashMap<>();
   private final Map<Integer, Integer> contactsTraced = new HashMap<>();
   private final Map<Integer, List<Infection>> r0Progression = new HashMap<>();
+  private final Map<AlertStatus, Integer> incorrectTests = new EnumMap<>(AlertStatus.class);
 
   private final StandardProperties properties;
 
@@ -39,6 +38,16 @@ public class StatisticsRecorderImpl implements StatisticsRecorder {
     return r0Progression;
   }
 
+  @Override
+  public int getFalseNegatives() {
+    return incorrectTests.get(AlertStatus.TESTED_NEGATIVE);
+  }
+
+  @Override
+  public int getFalsePositives() {
+    return incorrectTests.get(AlertStatus.TESTED_POSITIVE);
+  }
+
   public void recordDaysInIsolation(int personId, int duration) {
     personDaysIsolation.compute(personId, (k, v) -> (v == null) ? duration : v + duration);
   }
@@ -55,6 +64,11 @@ public class StatisticsRecorderImpl implements StatisticsRecorder {
   public void recordInfectionSpread(Case seed, int infections) {
     Infection i = ImmutableInfection.builder().seed(seed.id()).infections(infections).build();
     r0Progression.computeIfAbsent(seed.exposedTime(), k -> new ArrayList<>()).add(i);
+  }
+
+  @Override
+  public void recordIncorrectTestResult(AlertStatus alertStatus) {
+    incorrectTests.compute(alertStatus, (k, v) -> (v == null) ? 1 : ++v);
   }
 
   public List<ImmutableRValueOutput> getRollingAverage(int period) {

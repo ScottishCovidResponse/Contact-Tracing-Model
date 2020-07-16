@@ -1,24 +1,12 @@
 package uk.co.ramp;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.hamcrest.CoreMatchers.containsString;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
-import static uk.co.ramp.people.VirusStatus.SUSCEPTIBLE;
-
-import java.io.FileNotFoundException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Random;
-import java.util.Set;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Import;
 import org.springframework.test.annotation.DirtiesContext;
@@ -35,39 +23,52 @@ import uk.co.ramp.people.Case;
 import uk.co.ramp.people.Human;
 import uk.co.ramp.policy.alert.TracingPolicyContext;
 import uk.co.ramp.policy.isolation.IsolationPolicyContext;
+import uk.co.ramp.statistics.StatisticsRecorder;
+import uk.co.ramp.statistics.StatisticsRecorderContext;
+import uk.co.ramp.statistics.StatisticsWriter;
+
+import java.io.FileNotFoundException;
+import java.util.*;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.hamcrest.CoreMatchers.containsString;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
+import static uk.co.ramp.people.VirusStatus.SUSCEPTIBLE;
 
 @SuppressWarnings("unchecked")
 @DirtiesContext
 @RunWith(SpringRunner.class)
 @Import({
-  TestConfig.class,
-  TestUtils.class,
-  AppConfig.class,
-  IsolationPolicyContext.class,
-  TracingPolicyContext.class
+        TestConfig.class,
+        AppConfig.class
 })
 public class OutbreakTest {
 
   private final Random random = TestUtils.getRandom();
 
-  @Rule public LogSpy logSpy = new LogSpy();
+  @Rule
+  public LogSpy logSpy = new LogSpy();
 
-  @Autowired private StandardProperties standardProperties;
-  @Autowired private InitialCaseReader initialCaseReader;
-
-  @Autowired private Outbreak outbreak;
-
-  @Autowired private CompletionEventListGroup eventListGroup;
-
-  @Autowired Population population;
+  @Autowired
+  Population population;
+  @Autowired
+  private StandardProperties standardProperties;
+  @Autowired
+  private InitialCaseReader initialCaseReader;
+  @Autowired
+  private Outbreak outbreak;
+  @Autowired
+  private CompletionEventListGroup eventListGroup;
 
   private DiseaseProperties diseaseProperties;
-
-  public OutbreakTest() throws FileNotFoundException {}
 
   @Before
   public void setUp() throws FileNotFoundException {
     this.diseaseProperties = TestUtils.diseaseProperties();
+    StatisticsWriter statisticsWriter = mock(StatisticsWriter.class);
+    ReflectionTestUtils.setField(outbreak, "statisticsWriter", statisticsWriter);
   }
 
   @Test

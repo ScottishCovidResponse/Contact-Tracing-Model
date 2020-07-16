@@ -49,7 +49,8 @@ public class EventContext {
       CompletionEventListGroup eventList,
       StatisticsRecorder statisticsRecorder) {
     AlertEventProcessor alertEventProcessor =
-        new AlertEventProcessor(population, properties, diseaseProperties, distributionSampler);
+        new AlertEventProcessor(
+            population, properties, diseaseProperties, distributionSampler, statisticsRecorder);
     VirusEventProcessor virusEventProcessor =
         new VirusEventProcessor(
             population, properties, diseaseProperties, distributionSampler, alertChecker);

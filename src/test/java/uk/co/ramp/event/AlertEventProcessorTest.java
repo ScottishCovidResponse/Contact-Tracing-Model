@@ -7,6 +7,7 @@ import static org.mockito.Mockito.*;
 import static uk.co.ramp.people.AlertStatus.*;
 import static uk.co.ramp.people.VirusStatus.SUSCEPTIBLE;
 
+import java.util.Optional;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Rule;
@@ -23,6 +24,8 @@ import uk.co.ramp.event.types.ImmutableAlertEvent;
 import uk.co.ramp.event.types.ProcessedEventResult;
 import uk.co.ramp.io.types.DiseaseProperties;
 import uk.co.ramp.io.types.StandardProperties;
+import uk.co.ramp.statistics.StatisticsRecorder;
+import uk.co.ramp.statistics.StatisticsRecorderImpl;
 
 @RunWith(SpringRunner.class)
 @DirtiesContext
@@ -35,19 +38,24 @@ public class AlertEventProcessorTest {
   @Autowired private StandardProperties properties;
   private DistributionSampler distributionSampler;
   private AlertEventProcessor eventProcessor;
+  private StatisticsRecorder statisticsRecorder;
 
   @Before
   public void setUp() throws Exception {
     diseaseProperties = TestUtils.diseaseProperties();
     population = mock(Population.class);
     distributionSampler = mock(DistributionSampler.class);
+    statisticsRecorder = mock(StatisticsRecorderImpl.class);
     when(distributionSampler.getDistributionValue(any())).thenReturn(1);
+    when(statisticsRecorder.getFalsePositives()).thenReturn(0);
+    when(statisticsRecorder.getFalseNegatives()).thenReturn(0);
   }
 
   @Test
   public void timeInStatus() {
     eventProcessor =
-        new AlertEventProcessor(population, properties, diseaseProperties, distributionSampler);
+        new AlertEventProcessor(
+            population, properties, diseaseProperties, distributionSampler, statisticsRecorder);
 
     int time = eventProcessor.timeInStatus(NONE);
     Assert.assertEquals(0, time);
@@ -75,7 +83,8 @@ public class AlertEventProcessorTest {
     when(population.getAlertStatus(eq(0))).thenReturn(NONE);
 
     eventProcessor =
-        new AlertEventProcessor(population, properties, diseaseProperties, distributionSampler);
+        new AlertEventProcessor(
+            population, properties, diseaseProperties, distributionSampler, statisticsRecorder);
 
     AlertEvent event =
         ImmutableAlertEvent.builder().time(0).id(0).oldStatus(NONE).nextStatus(ALERTED).build();
@@ -107,7 +116,8 @@ public class AlertEventProcessorTest {
 
     when(population.getAlertStatus(eq(0))).thenReturn(REQUESTED_TEST);
     eventProcessor =
-        new AlertEventProcessor(population, properties, diseaseProperties, distributionSampler);
+        new AlertEventProcessor(
+            population, properties, diseaseProperties, distributionSampler, statisticsRecorder);
 
     var processedEvents = eventProcessor.processEvent(event);
     assertThat(processedEvents.newCompletedAlertEvents()).isEmpty();
@@ -121,5 +131,33 @@ public class AlertEventProcessorTest {
     verify(population, times(1)).getAlertStatus(0);
     verify(population, never()).setAlertStatus(0, ALERTED);
     verifyNoMoreInteractions(population);
+  }
+
+  @Test
+  public void determineTestResult() {
+
+    eventProcessor =
+        new AlertEventProcessor(
+            population, properties, diseaseProperties, distributionSampler, statisticsRecorder);
+
+    when(distributionSampler.uniformBetweenZeroAndOne()).thenReturn(0.99d);
+    assertThat(eventProcessor.determineTestResult(true))
+        .isNotEmpty()
+        .isEqualTo(Optional.of(TESTED_NEGATIVE));
+
+    when(distributionSampler.uniformBetweenZeroAndOne()).thenReturn(0.90d);
+    assertThat(eventProcessor.determineTestResult(true))
+        .isNotEmpty()
+        .isEqualTo(Optional.of(TESTED_POSITIVE));
+
+    when(distributionSampler.uniformBetweenZeroAndOne()).thenReturn(0.90d);
+    assertThat(eventProcessor.determineTestResult(false))
+        .isNotEmpty()
+        .isEqualTo(Optional.of(TESTED_NEGATIVE));
+
+    when(distributionSampler.uniformBetweenZeroAndOne()).thenReturn(0.99d);
+    assertThat(eventProcessor.determineTestResult(false))
+        .isNotEmpty()
+        .isEqualTo(Optional.of(TESTED_POSITIVE));
   }
 }
