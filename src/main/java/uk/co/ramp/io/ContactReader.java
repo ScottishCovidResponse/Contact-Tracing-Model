@@ -3,14 +3,15 @@ package uk.co.ramp.io;
 import java.io.IOException;
 import java.io.Reader;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import org.apache.commons.math3.distribution.EnumeratedIntegerDistribution;
-import org.apache.commons.math3.random.RandomDataGenerator;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import uk.co.ramp.distribution.DistributionSampler;
 import uk.co.ramp.event.types.ContactEvent;
 import uk.co.ramp.event.types.ImmutableContactEvent;
 import uk.co.ramp.io.csv.CsvReader;
@@ -20,12 +21,13 @@ import uk.co.ramp.io.types.StandardProperties;
 public class ContactReader {
 
   private final StandardProperties properties;
-  private final RandomDataGenerator dataGenerator;
+  private final DistributionSampler distributionSampler;
 
   @Autowired
-  public ContactReader(StandardProperties standardProperties, RandomDataGenerator dataGenerator) {
+  public ContactReader(
+      StandardProperties standardProperties, DistributionSampler distributionSampler) {
     this.properties = standardProperties;
-    this.dataGenerator = dataGenerator;
+    this.distributionSampler = distributionSampler;
   }
 
   public List<ContactEvent> readEvents(Reader reader) throws IOException {
@@ -33,9 +35,7 @@ public class ContactReader {
     List<ImmutableContactEvent> contactEvents =
         new CsvReader().read(reader, ImmutableContactEvent.class);
 
-    if (properties.timeStepsPerDay() > 1) {
-      contactEvents = resampleContacts(contactEvents);
-    }
+    contactEvents = resampleContacts(contactEvents);
 
     return contactEvents.stream()
         .filter(event -> event.from() < properties.populationSize())
@@ -60,14 +60,14 @@ public class ContactReader {
       int[] outcomes = IntStream.rangeClosed(start, end).toArray();
 
       EnumeratedIntegerDistribution distribution =
-          new EnumeratedIntegerDistribution(
-              dataGenerator.getRandomGenerator(), outcomes, properties.timeStepSpread());
+          distributionSampler.resampleDays(outcomes, properties.timeStepSpread());
 
       events.addAll(
           timeEvents.stream()
               .map(i -> ImmutableContactEvent.copyOf(i).withTime(distribution.sample()))
               .collect(Collectors.toList()));
     }
+    events.sort(Comparator.comparingInt(ImmutableContactEvent::time));
     return events;
   }
 }

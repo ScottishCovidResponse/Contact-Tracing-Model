@@ -49,6 +49,8 @@ public class VirusEventProcessorTest {
           .time(2)
           .build();
 
+  private static final double DELTA = 1e-6;;
+
   @Autowired private StandardProperties properties;
   @Autowired DistributionSampler distributionSampler;
 
@@ -127,7 +129,8 @@ public class VirusEventProcessorTest {
 
     Assert.assertEquals(
         event.time() + diseaseProperties.timeSymptomsOnset().mean() * properties.timeStepsPerDay(),
-        evnt.time());
+        evnt.time(),
+        DELTA);
     Assert.assertEquals(0, evnt.id());
     Assert.assertEquals(SYMPTOMATIC, evnt.oldStatus());
     Assert.assertTrue(SYMPTOMATIC.getValidTransitions().contains(evnt.nextStatus()));
@@ -173,7 +176,8 @@ public class VirusEventProcessorTest {
 
     Assert.assertEquals(
         event.time() + diseaseProperties.timeLatent().mean() * properties.timeStepsPerDay(),
-        evnt.time());
+        evnt.time(),
+        DELTA);
     Assert.assertEquals(0, evnt.id());
     Assert.assertEquals(SYMPTOMATIC, evnt.oldStatus());
     Assert.assertTrue(SYMPTOMATIC.getValidTransitions().contains(evnt.nextStatus()));

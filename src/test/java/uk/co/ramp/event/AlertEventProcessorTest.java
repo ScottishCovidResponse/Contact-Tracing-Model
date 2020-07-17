@@ -36,6 +36,8 @@ public class AlertEventProcessorTest {
   private DistributionSampler distributionSampler;
   private AlertEventProcessor eventProcessor;
 
+  private static final double DELTA = 1e-6;;
+
   @Before
   public void setUp() throws Exception {
     diseaseProperties = TestUtils.diseaseProperties();
@@ -57,11 +59,13 @@ public class AlertEventProcessorTest {
 
     time = eventProcessor.timeInStatus(REQUESTED_TEST);
     Assert.assertEquals(
-        diseaseProperties.timeTestAdministered().mean() * properties.timeStepsPerDay(), time);
+        diseaseProperties.timeTestAdministered().mean() * properties.timeStepsPerDay(),
+        time,
+        DELTA);
 
     time = eventProcessor.timeInStatus(AWAITING_RESULT);
     Assert.assertEquals(
-        diseaseProperties.timeTestResult().mean() * properties.timeStepsPerDay(), time);
+        diseaseProperties.timeTestResult().mean() * properties.timeStepsPerDay(), time, DELTA);
 
     time = eventProcessor.timeInStatus(TESTED_NEGATIVE);
     Assert.assertEquals(properties.timeStepsPerDay(), time);

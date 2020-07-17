@@ -126,30 +126,40 @@ public class CommonVirusEventProcessorTest {
 
     ReflectionTestUtils.setField(eventProcessor, "diseaseProperties", diseaseProperties);
 
+    final double delta = 1e-6;
+
     Assert.assertEquals(
         diseaseProperties.timeLatent().mean() * properties.timeStepsPerDay(),
-        eventProcessor.timeInCompartment(EXPOSED, ASYMPTOMATIC));
+        eventProcessor.timeInCompartment(EXPOSED, ASYMPTOMATIC),
+        delta);
     Assert.assertEquals(
         diseaseProperties.timeRecoveryAsymp().mean() * properties.timeStepsPerDay(),
-        eventProcessor.timeInCompartment(ASYMPTOMATIC, RECOVERED));
+        eventProcessor.timeInCompartment(ASYMPTOMATIC, RECOVERED),
+        delta);
     Assert.assertEquals(
         diseaseProperties.timeLatent().mean() * properties.timeStepsPerDay(),
-        eventProcessor.timeInCompartment(EXPOSED, PRESYMPTOMATIC));
+        eventProcessor.timeInCompartment(EXPOSED, PRESYMPTOMATIC),
+        delta);
     Assert.assertEquals(
         diseaseProperties.timeSymptomsOnset().mean() * properties.timeStepsPerDay(),
-        eventProcessor.timeInCompartment(PRESYMPTOMATIC, SYMPTOMATIC));
+        eventProcessor.timeInCompartment(PRESYMPTOMATIC, SYMPTOMATIC),
+        delta);
     Assert.assertEquals(
         diseaseProperties.timeRecoverySymp().mean() * properties.timeStepsPerDay(),
-        eventProcessor.timeInCompartment(SYMPTOMATIC, RECOVERED));
+        eventProcessor.timeInCompartment(SYMPTOMATIC, RECOVERED),
+        delta);
     Assert.assertEquals(
         diseaseProperties.timeDecline().mean() * properties.timeStepsPerDay(),
-        eventProcessor.timeInCompartment(SYMPTOMATIC, SEVERELY_SYMPTOMATIC));
+        eventProcessor.timeInCompartment(SYMPTOMATIC, SEVERELY_SYMPTOMATIC),
+        delta);
     Assert.assertEquals(
         diseaseProperties.timeRecoverySev().mean() * properties.timeStepsPerDay(),
-        eventProcessor.timeInCompartment(SEVERELY_SYMPTOMATIC, RECOVERED));
+        eventProcessor.timeInCompartment(SEVERELY_SYMPTOMATIC, RECOVERED),
+        delta);
     Assert.assertEquals(
         diseaseProperties.timeDeath().mean() * properties.timeStepsPerDay(),
-        eventProcessor.timeInCompartment(SEVERELY_SYMPTOMATIC, DEAD));
+        eventProcessor.timeInCompartment(SEVERELY_SYMPTOMATIC, DEAD),
+        delta);
   }
 
   @Test
