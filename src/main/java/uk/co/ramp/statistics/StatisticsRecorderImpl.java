@@ -1,7 +1,6 @@
 package uk.co.ramp.statistics;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import uk.co.ramp.io.types.StandardProperties;
@@ -12,15 +11,24 @@ import uk.co.ramp.statistics.types.Infection;
 
 public class StatisticsRecorderImpl implements StatisticsRecorder {
 
-  private final Map<Integer, Integer> personDaysIsolation = new HashMap<>();
-  private final Map<Integer, Integer> peopleInfected = new HashMap<>();
-  private final Map<Integer, Integer> contactsTraced = new HashMap<>();
-  private final Map<Integer, List<Infection>> r0Progression = new HashMap<>();
+  private final Map<Integer, Integer> personDaysIsolation;
+  private final Map<Integer, Integer> peopleInfected;
+  private final Map<Integer, Integer> contactsTraced;
+  private final Map<Integer, List<Infection>> r0Progression;
 
   private final StandardProperties properties;
 
-  public StatisticsRecorderImpl(StandardProperties properties) {
+  public StatisticsRecorderImpl(
+      StandardProperties properties,
+      Map<Integer, Integer> personDaysIsolation,
+      Map<Integer, Integer> peopleInfected,
+      Map<Integer, Integer> contactsTraced,
+      Map<Integer, List<Infection>> r0Progression) {
     this.properties = properties;
+    this.personDaysIsolation = personDaysIsolation;
+    this.peopleInfected = peopleInfected;
+    this.contactsTraced = contactsTraced;
+    this.r0Progression = r0Progression;
   }
 
   public Map<Integer, Integer> getContactsTraced() {

@@ -23,7 +23,9 @@ public class StatisticsRecorderImplTest {
 
   @Before
   public void setUp() {
-    recorder = new StatisticsRecorderImpl(properties);
+    recorder =
+        new StatisticsRecorderImpl(
+            properties, new HashMap<>(), new HashMap<>(), new HashMap<>(), new HashMap<>());
   }
 
   @Test
