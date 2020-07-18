@@ -44,7 +44,6 @@ public class OutbreakTest {
   @Autowired private InitialCaseReader initialCaseReader;
   @Autowired private Outbreak outbreak;
   @Autowired private CompletionEventListGroup eventListGroup;
-  @Autowired private StatisticsWriter statisticsWriter;
 
   private DiseaseProperties diseaseProperties;
 
