@@ -4,6 +4,7 @@
   "initialExposures": 1000,
   "steadyState": true,
   "timeStepsPerDay": 1,
+  "seed": 123,
   "timeStepSpread": [1]
 }
 
