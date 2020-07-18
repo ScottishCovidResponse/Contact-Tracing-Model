@@ -7,13 +7,11 @@ import static org.mockito.Mockito.*;
 import static uk.co.ramp.people.AlertStatus.*;
 import static uk.co.ramp.people.VirusStatus.SUSCEPTIBLE;
 
-import java.util.Optional;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Import;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.junit4.SpringRunner;
@@ -35,7 +33,7 @@ public class AlertEventProcessorTest {
 
   private DiseaseProperties diseaseProperties;
   private Population population;
-  @Autowired private StandardProperties properties;
+  private StandardProperties properties;
   private DistributionSampler distributionSampler;
   private AlertEventProcessor eventProcessor;
   private StatisticsRecorder statisticsRecorder;
@@ -141,23 +139,15 @@ public class AlertEventProcessorTest {
             population, properties, diseaseProperties, distributionSampler, statisticsRecorder);
 
     when(distributionSampler.uniformBetweenZeroAndOne()).thenReturn(0.99d);
-    assertThat(eventProcessor.determineTestResult(true))
-        .isNotEmpty()
-        .isEqualTo(Optional.of(TESTED_NEGATIVE));
+    assertThat(eventProcessor.determineTestResult(true)).isNotEmpty().hasValue(TESTED_NEGATIVE);
 
     when(distributionSampler.uniformBetweenZeroAndOne()).thenReturn(0.90d);
-    assertThat(eventProcessor.determineTestResult(true))
-        .isNotEmpty()
-        .isEqualTo(Optional.of(TESTED_POSITIVE));
+    assertThat(eventProcessor.determineTestResult(true)).isNotEmpty().hasValue(TESTED_POSITIVE);
 
     when(distributionSampler.uniformBetweenZeroAndOne()).thenReturn(0.90d);
-    assertThat(eventProcessor.determineTestResult(false))
-        .isNotEmpty()
-        .isEqualTo(Optional.of(TESTED_NEGATIVE));
+    assertThat(eventProcessor.determineTestResult(false)).isNotEmpty().hasValue(TESTED_NEGATIVE);
 
     when(distributionSampler.uniformBetweenZeroAndOne()).thenReturn(0.99d);
-    assertThat(eventProcessor.determineTestResult(false))
-        .isNotEmpty()
-        .isEqualTo(Optional.of(TESTED_POSITIVE));
+    assertThat(eventProcessor.determineTestResult(false)).isNotEmpty().hasValue(TESTED_POSITIVE);
   }
 }

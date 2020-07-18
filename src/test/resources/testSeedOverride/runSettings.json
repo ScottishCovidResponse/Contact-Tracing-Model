@@ -3,6 +3,7 @@
   "timeLimit": 200,
   "initialExposures": 1000,
   "steadyState": true,
+  "seed": 123,
   "timeStepsPerDay": 1,
   "timeStepSpread": [1]
 }
