@@ -35,7 +35,6 @@ public class InfectionEventProcessorTest {
 
   private static final double DELTA = 1e-6;;
 
-
   private Case thisCase;
   private InfectionEvent event;
 
