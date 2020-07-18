@@ -31,6 +31,7 @@ import uk.co.ramp.policy.alert.AlertChecker;
 public class VirusEventProcessorTest {
   private VirusEventProcessor eventProcessor;
   private DiseaseProperties diseaseProperties;
+  private StandardProperties properties;
   private Population population;
   private final AlertEvent alertEvent =
       ImmutableAlertEvent.builder()
@@ -44,7 +45,7 @@ public class VirusEventProcessorTest {
 
   @Before
   public void setUp() throws FileNotFoundException {
-    StandardProperties properties = mock(StandardProperties.class);
+    properties = mock(StandardProperties.class);
     DistributionSampler distributionSampler = mock(DistributionSampler.class);
     AlertChecker alertChecker = mock(AlertChecker.class);
     diseaseProperties = TestUtils.diseaseProperties();
