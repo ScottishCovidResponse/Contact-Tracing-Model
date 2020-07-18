@@ -113,7 +113,7 @@ public class Outbreak {
 
   void updateLogActiveCases(int time) {
     Map<VirusStatus, Integer> stats = population.getCmptCounts();
-    CmptRecord cmptRecord = outputLog.log(time, stats, properties.timeStepsPerDay());
+    CmptRecord cmptRecord = outputLog.log(time, stats);
     records.put(time, cmptRecord);
   }
 
