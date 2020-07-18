@@ -136,15 +136,15 @@ public class AlertEventProcessorTest {
             population, properties, diseaseProperties, distributionSampler, statisticsRecorder);
 
     when(distributionSampler.uniformBetweenZeroAndOne()).thenReturn(0.99d);
-    assertThat(eventProcessor.determineTestResult(true)).isNotEmpty().hasValue(TESTED_NEGATIVE);
+    assertThat(eventProcessor.determineTestResult(true)).hasValue(TESTED_NEGATIVE);
 
     when(distributionSampler.uniformBetweenZeroAndOne()).thenReturn(0.90d);
-    assertThat(eventProcessor.determineTestResult(true)).isNotEmpty().hasValue(TESTED_POSITIVE);
+    assertThat(eventProcessor.determineTestResult(true)).hasValue(TESTED_POSITIVE);
 
     when(distributionSampler.uniformBetweenZeroAndOne()).thenReturn(0.90d);
-    assertThat(eventProcessor.determineTestResult(false)).isNotEmpty().hasValue(TESTED_NEGATIVE);
+    assertThat(eventProcessor.determineTestResult(false)).hasValue(TESTED_NEGATIVE);
 
     when(distributionSampler.uniformBetweenZeroAndOne()).thenReturn(0.99d);
-    assertThat(eventProcessor.determineTestResult(false)).isNotEmpty().hasValue(TESTED_POSITIVE);
+    assertThat(eventProcessor.determineTestResult(false)).hasValue(TESTED_POSITIVE);
   }
 }
