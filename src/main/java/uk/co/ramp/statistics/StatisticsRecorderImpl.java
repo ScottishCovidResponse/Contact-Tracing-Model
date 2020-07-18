@@ -19,6 +19,7 @@ public class StatisticsRecorderImpl implements StatisticsRecorder {
   private final Map<AlertStatus, Integer> incorrectTests;
   private final Map<AlertStatus, Integer> correctTests;
 
+
   private final StandardProperties properties;
 
   public StatisticsRecorderImpl(
@@ -26,6 +27,7 @@ public class StatisticsRecorderImpl implements StatisticsRecorder {
       Map<Integer, Integer> personDaysIsolation,
       Map<Integer, Integer> peopleInfected,
       Map<Integer, Integer> contactsTraced,
+
       Map<Integer, List<Infection>> r0Progression,
       Map<AlertStatus, Integer> incorrectTests,
       Map<AlertStatus, Integer> correctTests) {
@@ -37,6 +39,7 @@ public class StatisticsRecorderImpl implements StatisticsRecorder {
     this.r0Progression = r0Progression;
     this.incorrectTests = incorrectTests;
     this.correctTests = correctTests;
+
   }
 
   public Map<Integer, Integer> getContactsTraced() {

@@ -33,6 +33,8 @@ public class AlertEventProcessorTest {
   private AlertEventProcessor eventProcessor;
   private StatisticsRecorder statisticsRecorder;
 
+  private static final double DELTA = 1e-6;;
+
   @Before
   public void setUp() throws Exception {
     properties = mock(StandardProperties.class);
@@ -56,19 +58,23 @@ public class AlertEventProcessorTest {
     Assert.assertEquals(0, time);
 
     time = eventProcessor.timeInStatus(ALERTED);
-    Assert.assertEquals(1, time);
+    Assert.assertEquals(properties.timeStepsPerDay(), time);
 
     time = eventProcessor.timeInStatus(REQUESTED_TEST);
-    Assert.assertEquals(diseaseProperties.timeTestAdministered().mean(), time);
+    Assert.assertEquals(
+        diseaseProperties.timeTestAdministered().mean() * properties.timeStepsPerDay(),
+        time,
+        DELTA);
 
     time = eventProcessor.timeInStatus(AWAITING_RESULT);
-    Assert.assertEquals(diseaseProperties.timeTestResult().mean(), time);
+    Assert.assertEquals(
+        diseaseProperties.timeTestResult().mean() * properties.timeStepsPerDay(), time, DELTA);
 
     time = eventProcessor.timeInStatus(TESTED_NEGATIVE);
-    Assert.assertEquals(1, time);
+    Assert.assertEquals(properties.timeStepsPerDay(), time);
 
     time = eventProcessor.timeInStatus(TESTED_POSITIVE);
-    Assert.assertEquals(1, time);
+    Assert.assertEquals(properties.timeStepsPerDay(), time);
   }
 
   @Test
@@ -98,7 +104,7 @@ public class AlertEventProcessorTest {
     Assert.assertEquals(0, eventResult.newCompletedVirusEvents().size());
     AlertEvent evnt = eventResult.newAlertEvents().get(0);
 
-    Assert.assertEquals(1, evnt.time());
+    Assert.assertEquals(properties.timeStepsPerDay(), evnt.time());
     Assert.assertEquals(0, evnt.id());
     Assert.assertEquals(ALERTED, evnt.oldStatus());
     Assert.assertEquals(REQUESTED_TEST, evnt.nextStatus());

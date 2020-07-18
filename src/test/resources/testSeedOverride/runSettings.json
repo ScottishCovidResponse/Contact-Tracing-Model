@@ -5,6 +5,7 @@
   "steadyState": true,
   "seed": 123,
   "timeStepsPerDay": 1,
+  "seed": 123,
   "timeStepSpread": [1]
 }
 

@@ -63,7 +63,7 @@ public class ContactRunner implements CommandLineRunner {
 
       LOGGER.info("Initialised Outbreak");
 
-      Map<Double, CmptRecord> records = infection.propagate();
+      Map<Integer, CmptRecord> records = infection.propagate();
 
       LOGGER.info("Writing Compartment Records");
       writeCompartments(

@@ -40,6 +40,8 @@ public class VirusEventProcessorTest {
           .time(2)
           .build();
 
+  private static final double DELTA = 1e-6;;
+
   @Before
   public void setUp() throws FileNotFoundException {
     StandardProperties properties = mock(StandardProperties.class);
@@ -119,7 +121,10 @@ public class VirusEventProcessorTest {
 
     VirusEvent evnt = processedEventResult.newVirusEvents().get(0);
 
-    Assert.assertEquals(event.time() + diseaseProperties.timeSymptomsOnset().mean(), evnt.time());
+    Assert.assertEquals(
+        event.time() + diseaseProperties.timeSymptomsOnset().mean() * properties.timeStepsPerDay(),
+        evnt.time(),
+        DELTA);
     Assert.assertEquals(0, evnt.id());
     Assert.assertEquals(SYMPTOMATIC, evnt.oldStatus());
     Assert.assertTrue(SYMPTOMATIC.getValidTransitions().contains(evnt.nextStatus()));
@@ -163,7 +168,10 @@ public class VirusEventProcessorTest {
 
     VirusEvent evnt = processedEventResult.newVirusEvents().get(0);
 
-    Assert.assertEquals(event.time() + diseaseProperties.timeLatent().mean(), evnt.time());
+    Assert.assertEquals(
+        event.time() + diseaseProperties.timeLatent().mean() * properties.timeStepsPerDay(),
+        evnt.time(),
+        DELTA);
     Assert.assertEquals(0, evnt.id());
     Assert.assertEquals(SYMPTOMATIC, evnt.oldStatus());
     Assert.assertTrue(SYMPTOMATIC.getValidTransitions().contains(evnt.nextStatus()));

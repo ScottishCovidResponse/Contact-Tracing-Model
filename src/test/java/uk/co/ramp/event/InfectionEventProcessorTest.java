@@ -33,6 +33,9 @@ public class InfectionEventProcessorTest {
   private DistributionSampler distributionSampler;
   private StatisticsRecorder statisticsRecorder;
 
+  private static final double DELTA = 1e-6;;
+
+
   private Case thisCase;
   private InfectionEvent event;
 
@@ -119,7 +122,8 @@ public class InfectionEventProcessorTest {
     Assert.assertEquals(0, processedEventResult.newCompletedAlertEvents().size());
     VirusEvent evnt = processedEventResult.newVirusEvents().get(0);
 
-    Assert.assertEquals(diseaseProperties.timeLatent().mean(), evnt.time());
+    Assert.assertEquals(
+        diseaseProperties.timeLatent().mean() * properties.timeStepsPerDay(), evnt.time(), DELTA);
     Assert.assertEquals(0, evnt.id());
     Assert.assertEquals(EXPOSED, evnt.oldStatus());
     Assert.assertTrue(EXPOSED.getValidTransitions().contains(evnt.nextStatus()));
