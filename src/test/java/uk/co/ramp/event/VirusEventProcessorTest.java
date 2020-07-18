@@ -20,6 +20,7 @@ import org.junit.Test;
 import org.springframework.test.util.ReflectionTestUtils;
 import uk.co.ramp.Population;
 import uk.co.ramp.TestUtils;
+import uk.co.ramp.distribution.Distribution;
 import uk.co.ramp.distribution.DistributionSampler;
 import uk.co.ramp.event.types.*;
 import uk.co.ramp.io.types.DiseaseProperties;
@@ -49,7 +50,9 @@ public class VirusEventProcessorTest {
 
     when(alertChecker.checkForAlert(eq(0), eq(NONE), eq(SYMPTOMATIC), eq(1)))
         .thenReturn(Stream.of(alertEvent));
-    when(distributionSampler.getDistributionValue(any())).thenCallRealMethod();
+    when(distributionSampler.getDistributionValue(any()))
+        .thenAnswer(i -> ((int) Math.round(((Distribution) i.getArgument(0)).mean())));
+
     when(properties.timeStepsPerDay()).thenReturn(1);
 
     this.eventProcessor =

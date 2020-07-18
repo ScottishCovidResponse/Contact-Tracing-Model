@@ -45,7 +45,8 @@ public class CommonVirusEventProcessorTest {
     diseaseProperties = TestUtils.diseaseProperties();
     distributionSampler = mock(DistributionSampler.class);
     when(distributionSampler.uniformBetweenZeroAndOne()).thenReturn(0.5d);
-    when(distributionSampler.getDistributionValue(any(Distribution.class))).thenCallRealMethod();
+    when(distributionSampler.getDistributionValue(any()))
+        .thenAnswer(i -> ((int) Math.round(((Distribution) i.getArgument(0)).mean())));
     properties = mock(StandardProperties.class);
     when(properties.timeStepsPerDay()).thenReturn(1);
     Human human = mock(Human.class);

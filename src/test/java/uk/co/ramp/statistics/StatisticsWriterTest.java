@@ -1,5 +1,14 @@
 package uk.co.ramp.statistics;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Mockito.when;
+
+import java.io.IOException;
+import java.io.StringWriter;
+import java.io.Writer;
+import java.util.*;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mockito;
@@ -9,16 +18,6 @@ import uk.co.ramp.people.Case;
 import uk.co.ramp.statistics.types.ImmutableInfection;
 import uk.co.ramp.statistics.types.ImmutableRValueOutput;
 import uk.co.ramp.statistics.types.Infection;
-
-import java.io.IOException;
-import java.io.StringWriter;
-import java.io.Writer;
-import java.util.*;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
-
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.Mockito.when;
 
 public class StatisticsWriterTest {
 
@@ -64,13 +63,13 @@ public class StatisticsWriterTest {
 
     for (int i = 0; i < 5; i++)
       rollingAverage.add(
-              ImmutableRValueOutput.builder()
-                      .r(random.nextDouble())
-                      .sevenDayAverageR(random.nextDouble())
-                      .newInfections(random.nextInt(5))
-                      .newInfectors(random.nextInt(5))
-                      .time(i)
-                      .build());
+          ImmutableRValueOutput.builder()
+              .r(random.nextDouble())
+              .sevenDayAverageR(random.nextDouble())
+              .newInfections(random.nextInt(5))
+              .newInfectors(random.nextInt(5))
+              .time(i)
+              .build());
 
     when(statisticsRecorder.getRollingAverage(7)).thenReturn(rollingAverage);
   }
@@ -90,16 +89,16 @@ public class StatisticsWriterTest {
     statisticsWriter.outputR(writer);
     List<String> output = List.of(writer.toString().split("\n"));
     assertThat(output.get(0))
-            .contains("\"time\",\"newInfectors\",\"newInfections\",\"r\",\"sevenDayAverageR\"");
+        .contains("\"time\",\"newInfectors\",\"newInfections\",\"r\",\"sevenDayAverageR\"");
 
     for (int i = 1; i < output.size(); i++) {
       var outputLine = output.get(i);
-      var data = rollingAverage.get(i-1);
+      var data = rollingAverage.get(i - 1);
       assertThat(outputLine)
-              .contains(String.valueOf(data.r()))
-              .contains(String.valueOf(data.sevenDayAverageR()))
-              .contains(String.valueOf(data.newInfections()))
-              .contains(String.valueOf(data.newInfectors()));
+          .contains(String.valueOf(data.r()))
+          .contains(String.valueOf(data.sevenDayAverageR()))
+          .contains(String.valueOf(data.newInfections()))
+          .contains(String.valueOf(data.newInfectors()));
     }
   }
 

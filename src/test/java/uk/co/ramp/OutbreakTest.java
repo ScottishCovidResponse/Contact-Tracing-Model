@@ -27,7 +27,6 @@ import uk.co.ramp.io.types.DiseaseProperties;
 import uk.co.ramp.io.types.StandardProperties;
 import uk.co.ramp.people.Case;
 import uk.co.ramp.people.Human;
-import uk.co.ramp.statistics.StatisticsWriter;
 
 @SuppressWarnings("unchecked")
 @DirtiesContext

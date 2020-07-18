@@ -14,6 +14,7 @@ import org.junit.Test;
 import org.springframework.test.util.ReflectionTestUtils;
 import uk.co.ramp.Population;
 import uk.co.ramp.TestUtils;
+import uk.co.ramp.distribution.Distribution;
 import uk.co.ramp.distribution.DistributionSampler;
 import uk.co.ramp.event.types.ImmutableInfectionEvent;
 import uk.co.ramp.event.types.InfectionEvent;
@@ -24,10 +25,6 @@ import uk.co.ramp.io.types.StandardProperties;
 import uk.co.ramp.people.Case;
 import uk.co.ramp.statistics.StatisticsRecorder;
 
-//
-// @RunWith(SpringRunner.class)
-// @DirtiesContext
-// @Import({TestUtils.class, AppConfig.class, TestConfig.class})
 public class InfectionEventProcessorTest {
   private InfectionEventProcessor eventProcessor;
   private DiseaseProperties diseaseProperties;
@@ -45,7 +42,10 @@ public class InfectionEventProcessorTest {
     properties = mock(StandardProperties.class);
     when(properties.timeStepsPerDay()).thenReturn(1);
     distributionSampler = mock(DistributionSampler.class);
-    when(distributionSampler.getDistributionValue(any())).thenCallRealMethod();
+
+    when(distributionSampler.getDistributionValue(any()))
+        .thenAnswer(i -> ((int) Math.round(((Distribution) i.getArgument(0)).mean())));
+
     statisticsRecorder = mock(StatisticsRecorder.class);
 
     diseaseProperties = TestUtils.diseaseProperties();
