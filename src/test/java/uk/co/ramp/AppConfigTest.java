@@ -1,5 +1,14 @@
 package uk.co.ramp;
 
+import static org.hamcrest.core.StringContains.containsString;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
+
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.util.Random;
 import org.apache.commons.math3.random.RandomDataGenerator;
 import org.junit.Assert;
 import org.junit.Before;
@@ -10,16 +19,6 @@ import uk.co.ramp.io.types.DiseaseProperties;
 import uk.co.ramp.io.types.InputFiles;
 import uk.co.ramp.io.types.PopulationProperties;
 import uk.co.ramp.io.types.StandardProperties;
-
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.util.Random;
-
-import static org.hamcrest.core.StringContains.containsString;
-import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
 
 public class AppConfigTest {
 

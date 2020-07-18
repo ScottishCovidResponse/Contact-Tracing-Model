@@ -11,11 +11,9 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.springframework.context.annotation.Import;
-import org.springframework.test.annotation.DirtiesContext;
-import org.springframework.test.context.junit4.SpringRunner;
-import uk.co.ramp.*;
+import uk.co.ramp.LogSpy;
+import uk.co.ramp.Population;
+import uk.co.ramp.TestUtils;
 import uk.co.ramp.distribution.DistributionSampler;
 import uk.co.ramp.event.types.AlertEvent;
 import uk.co.ramp.event.types.ImmutableAlertEvent;
@@ -25,9 +23,6 @@ import uk.co.ramp.io.types.StandardProperties;
 import uk.co.ramp.statistics.StatisticsRecorder;
 import uk.co.ramp.statistics.StatisticsRecorderImpl;
 
-@RunWith(SpringRunner.class)
-@DirtiesContext
-@Import({TestUtils.class, AppConfig.class, TestConfig.class})
 public class AlertEventProcessorTest {
   @Rule public LogSpy logSpy = new LogSpy();
 
@@ -40,6 +35,8 @@ public class AlertEventProcessorTest {
 
   @Before
   public void setUp() throws Exception {
+    properties = mock(StandardProperties.class);
+    when(properties.timeStepsPerDay()).thenReturn(1);
     diseaseProperties = TestUtils.diseaseProperties();
     population = mock(Population.class);
     distributionSampler = mock(DistributionSampler.class);

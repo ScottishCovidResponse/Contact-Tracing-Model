@@ -2,15 +2,8 @@ package uk.co.ramp.event;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyNoMoreInteractions;
-import static org.mockito.Mockito.when;
-import static uk.co.ramp.people.VirusStatus.EXPOSED;
-import static uk.co.ramp.people.VirusStatus.SUSCEPTIBLE;
-import static uk.co.ramp.people.VirusStatus.SYMPTOMATIC;
+import static org.mockito.Mockito.*;
+import static uk.co.ramp.people.VirusStatus.*;
 
 import java.io.FileNotFoundException;
 import java.util.HashMap;
@@ -18,15 +11,8 @@ import java.util.Map;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Import;
-import org.springframework.test.annotation.DirtiesContext;
-import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.util.ReflectionTestUtils;
-import uk.co.ramp.AppConfig;
 import uk.co.ramp.Population;
-import uk.co.ramp.TestConfig;
 import uk.co.ramp.TestUtils;
 import uk.co.ramp.distribution.DistributionSampler;
 import uk.co.ramp.event.types.ImmutableInfectionEvent;
@@ -38,23 +24,30 @@ import uk.co.ramp.io.types.StandardProperties;
 import uk.co.ramp.people.Case;
 import uk.co.ramp.statistics.StatisticsRecorder;
 
-@RunWith(SpringRunner.class)
-@DirtiesContext
-@Import({TestUtils.class, AppConfig.class, TestConfig.class})
+//
+// @RunWith(SpringRunner.class)
+// @DirtiesContext
+// @Import({TestUtils.class, AppConfig.class, TestConfig.class})
 public class InfectionEventProcessorTest {
   private InfectionEventProcessor eventProcessor;
   private DiseaseProperties diseaseProperties;
 
-  @Autowired private StandardProperties properties;
-  @Autowired private DistributionSampler distributionSampler;
-  @Autowired private StatisticsRecorder statisticsRecorder;
+  private StandardProperties properties;
+  private DistributionSampler distributionSampler;
+  private StatisticsRecorder statisticsRecorder;
 
   private Case thisCase;
-
   private InfectionEvent event;
 
   @Before
   public void setUp() throws FileNotFoundException {
+
+    properties = mock(StandardProperties.class);
+    when(properties.timeStepsPerDay()).thenReturn(1);
+    distributionSampler = mock(DistributionSampler.class);
+    when(distributionSampler.getDistributionValue(any())).thenCallRealMethod();
+    statisticsRecorder = mock(StatisticsRecorder.class);
+
     diseaseProperties = TestUtils.diseaseProperties();
 
     thisCase = mock(Case.class);

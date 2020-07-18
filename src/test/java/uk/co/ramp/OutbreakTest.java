@@ -46,7 +46,6 @@ public class OutbreakTest {
   @Autowired private CompletionEventListGroup eventListGroup;
   @Autowired private StatisticsWriter statisticsWriter;
 
-
   private DiseaseProperties diseaseProperties;
 
   @Before
