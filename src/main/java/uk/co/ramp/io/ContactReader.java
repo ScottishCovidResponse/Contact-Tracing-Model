@@ -8,7 +8,6 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
-import org.apache.commons.math3.distribution.EnumeratedIntegerDistribution;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import uk.co.ramp.distribution.DistributionSampler;
@@ -59,12 +58,14 @@ public class ContactReader {
       int end = start + steps - 1;
       int[] outcomes = IntStream.rangeClosed(start, end).toArray();
 
-      EnumeratedIntegerDistribution distribution =
-          distributionSampler.resampleDays(outcomes, properties.timeStepSpread());
-
       events.addAll(
           timeEvents.stream()
-              .map(i -> ImmutableContactEvent.copyOf(i).withTime(distribution.sample()))
+              .map(
+                  i ->
+                      ImmutableContactEvent.copyOf(i)
+                          .withTime(
+                              distributionSampler.resampleDays(
+                                  outcomes, properties.timeStepSpread())))
               .collect(Collectors.toList()));
     }
     events.sort(Comparator.comparingInt(ImmutableContactEvent::time));

@@ -50,8 +50,8 @@ public class DistributionSampler {
     return value;
   }
 
-  public EnumeratedIntegerDistribution resampleDays(int[] outcomes, double[] timeSpread) {
-
-    return new EnumeratedIntegerDistribution(rng.getRandomGenerator(), outcomes, timeSpread);
+  public int resampleDays(int[] outcomes, double[] timeSpread) {
+    return new EnumeratedIntegerDistribution(rng.getRandomGenerator(), outcomes, timeSpread)
+        .sample();
   }
 }
