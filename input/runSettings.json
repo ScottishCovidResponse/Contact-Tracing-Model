@@ -1,7 +1,9 @@
 {
-  "populationSize": 10000,
-  "timeLimit": 200,
-  "initialExposures": 1000,
-  "steadyState": true
+  "populationSize": 5000,
+  "timeLimit": 500,
+  "initialExposures": 500,
+  "steadyState": true,
+  "timeStepsPerDay": 2,
+  "timeStepSpread": [0.4,0.6]
 }
 

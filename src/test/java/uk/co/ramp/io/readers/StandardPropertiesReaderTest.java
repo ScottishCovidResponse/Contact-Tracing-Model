@@ -15,7 +15,9 @@ public class StandardPropertiesReaderTest {
           + "  'timeLimit': 100,"
           + "  'initialExposures': 1000,"
           + "  'seed': 0,"
-          + "  'steadyState': true"
+          + "  'steadyState': true,"
+          + "  'timeStepsPerDay': 4,"
+          + "  'timeStepSpread': [0.25,0.25,0.25,0.25]"
           + "}";
 
   private StandardPropertiesReader standardPropertiesReader;
@@ -26,7 +28,7 @@ public class StandardPropertiesReaderTest {
   }
 
   @Test
-  public void testRead() throws IOException {
+  public void testRead() {
     var underlyingReader = new BufferedReader(new StringReader(mockStandardProperties));
     StandardProperties standardProperties = standardPropertiesReader.read(underlyingReader);
 
@@ -35,6 +37,8 @@ public class StandardPropertiesReaderTest {
     assertThat(standardProperties.seed()).hasValue(0);
     assertThat(standardProperties.timeLimit()).isEqualTo(100);
     assertThat(standardProperties.steadyState()).isTrue();
+    assertThat(standardProperties.timeStepsPerDay()).isEqualTo(4);
+    assertThat(standardProperties.timeStepSpread()).containsExactly(0.25, 0.25, 0.25, 0.25);
   }
 
   @Test

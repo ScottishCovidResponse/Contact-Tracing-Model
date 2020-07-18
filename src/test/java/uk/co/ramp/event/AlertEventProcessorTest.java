@@ -5,25 +5,24 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
 import static uk.co.ramp.people.AlertStatus.*;
-import static uk.co.ramp.people.AlertStatus.TESTED_POSITIVE;
-import static uk.co.ramp.people.VirusStatus.*;
+import static uk.co.ramp.people.VirusStatus.SUSCEPTIBLE;
 
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Import;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.junit4.SpringRunner;
-import uk.co.ramp.AppConfig;
-import uk.co.ramp.LogSpy;
-import uk.co.ramp.Population;
-import uk.co.ramp.TestConfig;
-import uk.co.ramp.TestUtils;
+import uk.co.ramp.*;
 import uk.co.ramp.distribution.DistributionSampler;
-import uk.co.ramp.event.types.*;
+import uk.co.ramp.event.types.AlertEvent;
+import uk.co.ramp.event.types.ImmutableAlertEvent;
+import uk.co.ramp.event.types.ProcessedEventResult;
 import uk.co.ramp.io.types.DiseaseProperties;
+import uk.co.ramp.io.types.StandardProperties;
 
 @RunWith(SpringRunner.class)
 @DirtiesContext
@@ -33,8 +32,11 @@ public class AlertEventProcessorTest {
 
   private DiseaseProperties diseaseProperties;
   private Population population;
+  @Autowired private StandardProperties properties;
   private DistributionSampler distributionSampler;
   private AlertEventProcessor eventProcessor;
+
+  private static final double DELTA = 1e-6;;
 
   @Before
   public void setUp() throws Exception {
@@ -46,25 +48,30 @@ public class AlertEventProcessorTest {
 
   @Test
   public void timeInStatus() {
-    eventProcessor = new AlertEventProcessor(population, diseaseProperties, distributionSampler);
+    eventProcessor =
+        new AlertEventProcessor(population, properties, diseaseProperties, distributionSampler);
 
     int time = eventProcessor.timeInStatus(NONE);
     Assert.assertEquals(0, time);
 
     time = eventProcessor.timeInStatus(ALERTED);
-    Assert.assertEquals(1, time);
+    Assert.assertEquals(properties.timeStepsPerDay(), time);
 
     time = eventProcessor.timeInStatus(REQUESTED_TEST);
-    Assert.assertEquals(diseaseProperties.timeTestAdministered().mean(), time);
+    Assert.assertEquals(
+        diseaseProperties.timeTestAdministered().mean() * properties.timeStepsPerDay(),
+        time,
+        DELTA);
 
     time = eventProcessor.timeInStatus(AWAITING_RESULT);
-    Assert.assertEquals(diseaseProperties.timeTestResult().mean(), time);
+    Assert.assertEquals(
+        diseaseProperties.timeTestResult().mean() * properties.timeStepsPerDay(), time, DELTA);
 
     time = eventProcessor.timeInStatus(TESTED_NEGATIVE);
-    Assert.assertEquals(1, time);
+    Assert.assertEquals(properties.timeStepsPerDay(), time);
 
     time = eventProcessor.timeInStatus(TESTED_POSITIVE);
-    Assert.assertEquals(1, time);
+    Assert.assertEquals(properties.timeStepsPerDay(), time);
   }
 
   @Test
@@ -73,7 +80,8 @@ public class AlertEventProcessorTest {
     when(population.isInfectious(eq(0))).thenReturn(true);
     when(population.getAlertStatus(eq(0))).thenReturn(NONE);
 
-    eventProcessor = new AlertEventProcessor(population, diseaseProperties, distributionSampler);
+    eventProcessor =
+        new AlertEventProcessor(population, properties, diseaseProperties, distributionSampler);
 
     AlertEvent event =
         ImmutableAlertEvent.builder().time(0).id(0).oldStatus(NONE).nextStatus(ALERTED).build();
@@ -92,7 +100,7 @@ public class AlertEventProcessorTest {
     Assert.assertEquals(0, eventResult.newCompletedVirusEvents().size());
     AlertEvent evnt = eventResult.newAlertEvents().get(0);
 
-    Assert.assertEquals(1, evnt.time());
+    Assert.assertEquals(properties.timeStepsPerDay(), evnt.time());
     Assert.assertEquals(0, evnt.id());
     Assert.assertEquals(ALERTED, evnt.oldStatus());
     Assert.assertEquals(REQUESTED_TEST, evnt.nextStatus());
@@ -104,7 +112,8 @@ public class AlertEventProcessorTest {
         ImmutableAlertEvent.builder().time(0).id(0).oldStatus(NONE).nextStatus(ALERTED).build();
 
     when(population.getAlertStatus(eq(0))).thenReturn(REQUESTED_TEST);
-    eventProcessor = new AlertEventProcessor(population, diseaseProperties, distributionSampler);
+    eventProcessor =
+        new AlertEventProcessor(population, properties, diseaseProperties, distributionSampler);
 
     var processedEvents = eventProcessor.processEvent(event);
     assertThat(processedEvents.newCompletedAlertEvents()).isEmpty();

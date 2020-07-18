@@ -12,6 +12,7 @@ import uk.co.ramp.ConfigurationException;
 import uk.co.ramp.distribution.DistributionSampler;
 import uk.co.ramp.io.types.DiseaseProperties;
 import uk.co.ramp.io.types.InputFiles;
+import uk.co.ramp.io.types.StandardProperties;
 
 @SpringBootConfiguration
 public class IsolationPolicyContext {
@@ -19,11 +20,12 @@ public class IsolationPolicyContext {
 
   @Bean
   public IsolationPolicy isolationPolicy(
+      StandardProperties standardProperties,
       DiseaseProperties diseaseProperties,
       DistributionSampler distributionSampler,
       IsolationProperties isolationProperties) {
     var singleCaseIsolationPolicy =
-        new SingleCaseIsolationPolicy(isolationProperties, distributionSampler);
+        new SingleCaseIsolationPolicy(isolationProperties, distributionSampler, standardProperties);
     return new ContactIsolationPolicy(singleCaseIsolationPolicy, diseaseProperties);
   }
 

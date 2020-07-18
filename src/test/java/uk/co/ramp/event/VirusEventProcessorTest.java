@@ -27,12 +27,9 @@ import uk.co.ramp.Population;
 import uk.co.ramp.TestConfig;
 import uk.co.ramp.TestUtils;
 import uk.co.ramp.distribution.DistributionSampler;
-import uk.co.ramp.event.types.AlertEvent;
-import uk.co.ramp.event.types.ImmutableAlertEvent;
-import uk.co.ramp.event.types.ImmutableVirusEvent;
-import uk.co.ramp.event.types.ProcessedEventResult;
-import uk.co.ramp.event.types.VirusEvent;
+import uk.co.ramp.event.types.*;
 import uk.co.ramp.io.types.DiseaseProperties;
+import uk.co.ramp.io.types.StandardProperties;
 import uk.co.ramp.people.Case;
 import uk.co.ramp.policy.alert.AlertChecker;
 import uk.co.ramp.policy.alert.TracingPolicyContext;
@@ -52,6 +49,9 @@ public class VirusEventProcessorTest {
           .time(2)
           .build();
 
+  private static final double DELTA = 1e-6;;
+
+  @Autowired private StandardProperties properties;
   @Autowired DistributionSampler distributionSampler;
 
   @Before
@@ -64,7 +64,8 @@ public class VirusEventProcessorTest {
         .thenReturn(Stream.of(alertEvent));
 
     this.eventProcessor =
-        new VirusEventProcessor(population, diseaseProperties, distributionSampler, alertChecker);
+        new VirusEventProcessor(
+            population, properties, diseaseProperties, distributionSampler, alertChecker);
   }
 
   @Test
@@ -126,7 +127,10 @@ public class VirusEventProcessorTest {
 
     VirusEvent evnt = processedEventResult.newVirusEvents().get(0);
 
-    Assert.assertEquals(event.time() + diseaseProperties.timeSymptomsOnset().mean(), evnt.time());
+    Assert.assertEquals(
+        event.time() + diseaseProperties.timeSymptomsOnset().mean() * properties.timeStepsPerDay(),
+        evnt.time(),
+        DELTA);
     Assert.assertEquals(0, evnt.id());
     Assert.assertEquals(SYMPTOMATIC, evnt.oldStatus());
     Assert.assertTrue(SYMPTOMATIC.getValidTransitions().contains(evnt.nextStatus()));
@@ -170,7 +174,10 @@ public class VirusEventProcessorTest {
 
     VirusEvent evnt = processedEventResult.newVirusEvents().get(0);
 
-    Assert.assertEquals(event.time() + diseaseProperties.timeLatent().mean(), evnt.time());
+    Assert.assertEquals(
+        event.time() + diseaseProperties.timeLatent().mean() * properties.timeStepsPerDay(),
+        evnt.time(),
+        DELTA);
     Assert.assertEquals(0, evnt.id());
     Assert.assertEquals(SYMPTOMATIC, evnt.oldStatus());
     Assert.assertTrue(SYMPTOMATIC.getValidTransitions().contains(evnt.nextStatus()));

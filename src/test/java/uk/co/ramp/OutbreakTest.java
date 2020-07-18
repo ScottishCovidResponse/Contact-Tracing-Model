@@ -2,7 +2,8 @@ package uk.co.ramp;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.CoreMatchers.containsString;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 import static uk.co.ramp.people.VirusStatus.SUSCEPTIBLE;
 
 import java.io.FileNotFoundException;
@@ -23,8 +24,9 @@ import org.springframework.context.annotation.Import;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.util.ReflectionTestUtils;
-import uk.co.ramp.event.*;
-import uk.co.ramp.event.types.*;
+import uk.co.ramp.event.CompletionEventListGroup;
+import uk.co.ramp.event.types.ContactEvent;
+import uk.co.ramp.event.types.ImmutableContactEvent;
 import uk.co.ramp.io.InitialCaseReader;
 import uk.co.ramp.io.types.CmptRecord;
 import uk.co.ramp.io.types.DiseaseProperties;
@@ -51,7 +53,6 @@ public class OutbreakTest {
   @Rule public LogSpy logSpy = new LogSpy();
 
   @Autowired private StandardProperties standardProperties;
-
   @Autowired private InitialCaseReader initialCaseReader;
 
   @Autowired private Outbreak outbreak;
@@ -116,53 +117,17 @@ public class OutbreakTest {
         -Math.log(sus / (double) popSize) / days, -Math.log(1 - randomInfection), 0.05);
   }
 
-  // @Test
-  // public void getMostSevere() {
-  // // case 1, person 2 worse
-  // Case person1 = mock(Case.class);
-  // Case person2 = mock(Case.class);
-  //
-  // when(person1.status()).thenReturn(SUSCEPTIBLE);
-  // when(person2.status()).thenReturn(EXPOSED);
-  //
-  // Case mostSevere = utils.getMostSevere(person1, person2);
-  // Assert.assertEquals(person2, mostSevere);
-  //
-  // // case 2, equal, defaults to person 2
-  // when(person2.status()).thenReturn(SUSCEPTIBLE);
-  // mostSevere = utils.getMostSevere(person1, person2);
-  // Assert.assertEquals(person2, mostSevere);
-  //
-  // // case 3, equal, defaults to person 2
-  // when(person1.status()).thenReturn(PRESYMPTOMATIC);
-  // when(person2.status()).thenReturn(PRESYMPTOMATIC);
-  //
-  // mostSevere = utils.getMostSevere(person1, person2);
-  // Assert.assertEquals(person2, mostSevere);
-  //
-  //
-  // // case 2, person 1 worse, behaves correctly
-  // when(person1.status()).thenReturn(PRESYMPTOMATIC);
-  // when(person2.status()).thenReturn(EXPOSED);
-  //
-  // mostSevere = utils.getMostSevere(person1, person2);
-  // Assert.assertEquals(person1, mostSevere);
-  //
-  //
-  // }
-
   @Test
   @DirtiesContext
   public void testPropagate() throws FileNotFoundException {
     int popSize = 100;
-
-    DiseaseProperties d = TestUtils.diseaseProperties();
-    // outbreak.setDiseaseProperties(d);
-    // outbreak.setEventProcessor(eventProcessor);
+    double[] array = {1};
 
     ReflectionTestUtils.setField(standardProperties, "timeLimit", 100);
     ReflectionTestUtils.setField(standardProperties, "initialExposures", 10);
     ReflectionTestUtils.setField(standardProperties, "populationSize", popSize);
+    ReflectionTestUtils.setField(standardProperties, "timeStepsPerDay", 1);
+    ReflectionTestUtils.setField(standardProperties, "timeStepSpread", array);
 
     Set<Integer> cases = generateTestCases(popSize / 10, popSize);
 
@@ -197,6 +162,7 @@ public class OutbreakTest {
             .count();
 
     assertThat(population.size()).isGreaterThan(0);
+
     Assert.assertEquals(records.size(), standardProperties.timeLimit() + 1);
     Assert.assertTrue(susceptiblePost < susceptible);
     Assert.assertThat(

@@ -12,6 +12,7 @@ import uk.co.ramp.event.types.VirusEvent;
 import uk.co.ramp.io.InitialCaseReader;
 import uk.co.ramp.io.types.DiseaseProperties;
 import uk.co.ramp.io.types.OutputFolder;
+import uk.co.ramp.io.types.StandardProperties;
 import uk.co.ramp.policy.alert.AlertChecker;
 import uk.co.ramp.policy.isolation.IsolationPolicy;
 
@@ -42,6 +43,7 @@ public class EventContext {
   @Bean
   public EventRunner eventRunner(
       Population population,
+      StandardProperties properties,
       DiseaseProperties diseaseProperties,
       DistributionSampler distributionSampler,
       IsolationPolicy isolationPolicy,
@@ -49,11 +51,12 @@ public class EventContext {
       AlertChecker alertChecker,
       CompletionEventListGroup eventList) {
     AlertEventProcessor alertEventProcessor =
-        new AlertEventProcessor(population, diseaseProperties, distributionSampler);
+        new AlertEventProcessor(population, properties, diseaseProperties, distributionSampler);
     VirusEventProcessor virusEventProcessor =
-        new VirusEventProcessor(population, diseaseProperties, distributionSampler, alertChecker);
+        new VirusEventProcessor(
+            population, properties, diseaseProperties, distributionSampler, alertChecker);
     InfectionEventProcessor infectionEventProcessor =
-        new InfectionEventProcessor(population, diseaseProperties, distributionSampler);
+        new InfectionEventProcessor(population, properties, diseaseProperties, distributionSampler);
     ContactEventProcessor contactEventProcessor =
         new ContactEventProcessor(
             population, diseaseProperties, distributionSampler, isolationPolicy);
@@ -83,9 +86,12 @@ public class EventContext {
 
   @Bean
   public EventListWriter eventListWriter(
-      CompletionEventListGroup eventList, OutputFolder outputFolder) {
+      CompletionEventListGroup eventList,
+      OutputFolder outputFolder,
+      StandardProperties properties) {
     FormattedEventFactory formattedEventFactory = new FormattedEventFactory();
-    return new EventListWriter(formattedEventFactory, eventList, outputFolder.outputFolder());
+    return new EventListWriter(
+        formattedEventFactory, eventList, properties, outputFolder.outputFolder());
   }
 
   @Bean

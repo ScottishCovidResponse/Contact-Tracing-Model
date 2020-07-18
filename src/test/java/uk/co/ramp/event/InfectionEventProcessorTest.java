@@ -34,6 +34,7 @@ import uk.co.ramp.event.types.InfectionEvent;
 import uk.co.ramp.event.types.ProcessedEventResult;
 import uk.co.ramp.event.types.VirusEvent;
 import uk.co.ramp.io.types.DiseaseProperties;
+import uk.co.ramp.io.types.StandardProperties;
 import uk.co.ramp.people.Case;
 
 @RunWith(SpringRunner.class)
@@ -43,6 +44,8 @@ public class InfectionEventProcessorTest {
   private InfectionEventProcessor eventProcessor;
   private DiseaseProperties diseaseProperties;
 
+  private static final double DELTA = 1e-6;;
+  @Autowired private StandardProperties properties;
   @Autowired private DistributionSampler distributionSampler;
 
   private Case thisCase;
@@ -62,7 +65,7 @@ public class InfectionEventProcessorTest {
 
     this.eventProcessor =
         new InfectionEventProcessor(
-            new Population(population), diseaseProperties, distributionSampler);
+            new Population(population), properties, diseaseProperties, distributionSampler);
 
     event =
         ImmutableInfectionEvent.builder()
@@ -118,7 +121,8 @@ public class InfectionEventProcessorTest {
     Assert.assertEquals(0, processedEventResult.newCompletedAlertEvents().size());
     VirusEvent evnt = processedEventResult.newVirusEvents().get(0);
 
-    Assert.assertEquals(diseaseProperties.timeLatent().mean(), evnt.time());
+    Assert.assertEquals(
+        diseaseProperties.timeLatent().mean() * properties.timeStepsPerDay(), evnt.time(), DELTA);
     Assert.assertEquals(0, evnt.id());
     Assert.assertEquals(EXPOSED, evnt.oldStatus());
     Assert.assertTrue(EXPOSED.getValidTransitions().contains(evnt.nextStatus()));
@@ -158,7 +162,7 @@ public class InfectionEventProcessorTest {
     when(population.getVirusStatus(eq(2))).thenReturn(EXPOSED);
     when(population.isInfectious(eq(2))).thenReturn(true);
     this.eventProcessor =
-        new InfectionEventProcessor(population, diseaseProperties, distributionSampler);
+        new InfectionEventProcessor(population, properties, diseaseProperties, distributionSampler);
 
     var processedEvents = eventProcessor.processEvent(event);
     assertThat(processedEvents.newVirusEvents()).isEmpty();

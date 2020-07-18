@@ -1,6 +1,8 @@
 package uk.co.ramp.io;
 
 import static org.hamcrest.CoreMatchers.containsString;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 import static uk.co.ramp.people.VirusStatus.*;
 
 import java.util.*;
@@ -10,6 +12,7 @@ import org.junit.Rule;
 import org.junit.Test;
 import uk.co.ramp.LogSpy;
 import uk.co.ramp.TestUtils;
+import uk.co.ramp.io.types.StandardProperties;
 import uk.co.ramp.people.VirusStatus;
 
 public class LogDailyOutputTest {
@@ -20,7 +23,9 @@ public class LogDailyOutputTest {
 
   @Before
   public void setup() {
-    logger = new LogDailyOutput();
+    StandardProperties properties = mock(StandardProperties.class);
+    when(properties.timeStepsPerDay()).thenReturn(1);
+    logger = new LogDailyOutput(properties);
   }
 
   @Test
@@ -43,28 +48,32 @@ public class LogDailyOutputTest {
             .sum();
     logger.log(time, map);
 
+    String log = logSpy.getOutput();
+
+    int secondPipe = log.indexOf("|", log.indexOf("|") + 1);
+
+    double timeExtract =
+        Double.parseDouble(log.substring(0, secondPipe).substring(log.indexOf("|") + 1));
+    String logOut = log.substring(secondPipe);
+
     int[] numbers =
         Arrays.stream(
-                logSpy
-                    .getOutput()
-                    .replace("[INFO]", "")
-                    .replaceAll("(?m:\\||$)", "")
-                    .trim()
-                    .split("\\s+"))
+                logOut.replace("[INFO]", "").replaceAll("(?m:\\||$)", "").trim().split("\\s+"))
             .mapToInt(Integer::parseInt)
             .toArray();
+    int i = 0;
 
-    Assert.assertEquals(values().length + 2, numbers.length);
-    Assert.assertEquals(time, numbers[0]);
-    Assert.assertEquals(map.get(SUSCEPTIBLE).intValue(), numbers[1]);
-    Assert.assertEquals(map.get(EXPOSED).intValue(), numbers[2]);
-    Assert.assertEquals(map.get(ASYMPTOMATIC).intValue(), numbers[3]);
-    Assert.assertEquals(map.get(PRESYMPTOMATIC).intValue(), numbers[4]);
-    Assert.assertEquals(map.get(SYMPTOMATIC).intValue(), numbers[5]);
-    Assert.assertEquals(map.get(SEVERELY_SYMPTOMATIC).intValue(), numbers[6]);
-    Assert.assertEquals(map.get(RECOVERED).intValue(), numbers[7]);
-    Assert.assertEquals(map.get(DEAD).intValue(), numbers[8]);
-    Assert.assertEquals(dActive, numbers[9]);
+    Assert.assertEquals(values().length + 1, numbers.length);
+    Assert.assertEquals(time, timeExtract, 1e-6);
+    Assert.assertEquals(map.get(SUSCEPTIBLE).intValue(), numbers[i++]);
+    Assert.assertEquals(map.get(EXPOSED).intValue(), numbers[i++]);
+    Assert.assertEquals(map.get(ASYMPTOMATIC).intValue(), numbers[i++]);
+    Assert.assertEquals(map.get(PRESYMPTOMATIC).intValue(), numbers[i++]);
+    Assert.assertEquals(map.get(SYMPTOMATIC).intValue(), numbers[i++]);
+    Assert.assertEquals(map.get(SEVERELY_SYMPTOMATIC).intValue(), numbers[i++]);
+    Assert.assertEquals(map.get(RECOVERED).intValue(), numbers[i++]);
+    Assert.assertEquals(map.get(DEAD).intValue(), numbers[i++]);
+    Assert.assertEquals(dActive, numbers[i++]);
   }
 
   @Test

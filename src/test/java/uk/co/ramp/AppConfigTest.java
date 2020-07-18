@@ -35,7 +35,6 @@ public class AppConfigTest {
     StandardProperties standardProperties = appConfig.standardProperties();
 
     Assert.assertNotNull(standardProperties);
-    //        Assert.assertFalse(standardProperties.contactsFile().isEmpty());
     Assert.assertNotNull(standardProperties.steadyState());
     Assert.assertTrue(standardProperties.initialExposures() > 0);
     Assert.assertTrue(standardProperties.populationSize() > 0);

@@ -1,10 +1,6 @@
 package uk.co.ramp;
 
-import static uk.co.ramp.people.VirusStatus.ASYMPTOMATIC;
-import static uk.co.ramp.people.VirusStatus.EXPOSED;
-import static uk.co.ramp.people.VirusStatus.PRESYMPTOMATIC;
-import static uk.co.ramp.people.VirusStatus.SEVERELY_SYMPTOMATIC;
-import static uk.co.ramp.people.VirusStatus.SYMPTOMATIC;
+import static uk.co.ramp.people.VirusStatus.*;
 
 import java.io.File;
 import java.io.FileWriter;
@@ -74,9 +70,10 @@ public class Outbreak {
   void runToCompletion() {
     // the latest time to run to
     int timeLimit = properties.timeLimit();
-    double randomInfectionRate = diseaseProperties.randomInfectionRate();
+    double randomInfectionRate =
+        diseaseProperties.randomInfectionRate() / (double) properties.timeStepsPerDay();
 
-    runContactData(timeLimit, randomInfectionRate);
+    runContactData(timeLimit * properties.timeStepsPerDay(), randomInfectionRate);
 
     try (Writer writer = new FileWriter(new File(outputFolder, INFECTION_MAP))) {
       new InfectionMap(population.view()).outputMap(writer);

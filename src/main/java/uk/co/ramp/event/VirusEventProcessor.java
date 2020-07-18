@@ -1,7 +1,6 @@
 package uk.co.ramp.event;
 
-import static java.util.Collections.EMPTY_LIST;
-
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 import org.apache.logging.log4j.LogManager;
@@ -16,6 +15,7 @@ import uk.co.ramp.event.types.ImmutableVirusEvent;
 import uk.co.ramp.event.types.ProcessedEventResult;
 import uk.co.ramp.event.types.VirusEvent;
 import uk.co.ramp.io.types.DiseaseProperties;
+import uk.co.ramp.io.types.StandardProperties;
 import uk.co.ramp.people.Case;
 import uk.co.ramp.people.VirusStatus;
 import uk.co.ramp.policy.alert.AlertChecker;
@@ -30,10 +30,11 @@ public class VirusEventProcessor extends CommonVirusEventProcessor<VirusEvent> {
   @Autowired
   public VirusEventProcessor(
       Population population,
+      StandardProperties properties,
       DiseaseProperties diseaseProperties,
       DistributionSampler distributionSampler,
       AlertChecker alertChecker) {
-    super(population, diseaseProperties, distributionSampler);
+    super(population, properties, diseaseProperties, distributionSampler);
     this.population = population;
     this.alertChecker = alertChecker;
     this.distributionSampler = distributionSampler;
@@ -66,7 +67,7 @@ public class VirusEventProcessor extends CommonVirusEventProcessor<VirusEvent> {
         alertEvents = checkForAlert(event);
       } else {
         LOGGER.debug("Person with id: {} is not complying with infection reporting", thisCase.id());
-        alertEvents = EMPTY_LIST;
+        alertEvents = new ArrayList<>();
       }
       return ImmutableProcessedEventResult.builder()
           .addNewVirusEvents(subsequentEvent)

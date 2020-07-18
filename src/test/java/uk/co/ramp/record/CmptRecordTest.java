@@ -8,21 +8,23 @@ import java.util.Random;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
+import uk.co.ramp.TestUtils;
 import uk.co.ramp.io.types.CmptRecord;
 import uk.co.ramp.people.VirusStatus;
 
 public class CmptRecordTest {
 
+  private static final double DELTA = 1e-6;
   private CmptRecord testRecord;
-  private int time;
+  private double time;
   private Map<VirusStatus, Integer> counts;
   private int s, e, p, a, sym, sev, r, d;
 
   @Before
   public void setup() {
 
-    Random random = new Random();
-    time = random.nextInt(1000);
+    Random random = TestUtils.getRandom();
+    time = ((int) (random.nextDouble() * 100000)) / 100d;
 
     s = random.nextInt(1000);
     e = random.nextInt(1000);
@@ -50,7 +52,7 @@ public class CmptRecordTest {
 
     CmptRecord cmptRecord = useSecondContructor();
 
-    Assert.assertEquals(time, cmptRecord.time());
+    Assert.assertEquals(time, cmptRecord.time(), DELTA);
     Assert.assertEquals((int) counts.get(SUSCEPTIBLE), cmptRecord.s());
     Assert.assertEquals((int) counts.get(EXPOSED), cmptRecord.e());
     Assert.assertEquals((int) counts.get(ASYMPTOMATIC), cmptRecord.a());
@@ -65,7 +67,7 @@ public class CmptRecordTest {
   public void testToString() {
     String expected =
         String.format(
-            "CmptRecord{time=%d, s=%d, e=%d, a=%d, p=%d, sym=%d, sev=%d, r=%d, d=%d}",
+            "CmptRecord{time=%.2f, s=%d, e=%d, a=%d, p=%d, sym=%d, sev=%d, r=%d, d=%d}",
             time, s, e, a, p, sym, sev, r, d);
     Assert.assertEquals(expected, testRecord.toString());
   }
