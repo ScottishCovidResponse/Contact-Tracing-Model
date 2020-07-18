@@ -10,14 +10,17 @@ import java.util.stream.Collectors;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import uk.co.ramp.people.Case;
+import uk.co.ramp.statistics.StatisticsRecorder;
 
 public class InfectionMap {
 
   private static final Logger LOGGER = LogManager.getLogger(InfectionMap.class);
   private final Map<Integer, Case> population;
+  private final StatisticsRecorder statisticsRecorder;
 
-  public InfectionMap(Map<Integer, Case> population) {
+  public InfectionMap(Map<Integer, Case> population, StatisticsRecorder statisticsRecorder) {
     this.population = population;
+    this.statisticsRecorder = statisticsRecorder;
   }
 
   public void outputMap(Writer writer) {
@@ -57,32 +60,27 @@ public class InfectionMap {
     for (Case seed : target) {
       if (infectors.containsKey(seed.id())) {
         List<Case> newSeeds = new ArrayList<>(infectors.get(seed.id()));
+
+        statisticsRecorder.recordInfectionSpread(seed, newSeeds.size());
+        List<String> infections = getInfections(newSeeds);
+
         if (tab == 1) {
-          writer.write(
-              getSource(seed)
-                  + "  ->  "
-                  + newSeeds.stream()
-                      .map(this::getSource)
-                      .map(String::trim)
-                      .collect(Collectors.toList())
-                  + "\n");
+          writer.write(getSource(seed) + "  ->  " + infections + "\n");
         } else {
-          writer.write(
-              spacer
-                  + "   ->  "
-                  + getSource(seed)
-                  + "   ->  "
-                  + newSeeds.stream()
-                      .map(this::getSource)
-                      .map(String::trim)
-                      .collect(Collectors.toList())
-                  + "\n");
+          writer.write(spacer + "   ->  " + getSource(seed) + "   ->  " + infections + "\n");
         }
 
         recurseSet(newSeeds, infectors, writer, tab + 1);
         if (tab == 1) writer.write("\n");
+
+      } else {
+        statisticsRecorder.recordInfectionSpread(seed, 0);
       }
     }
+  }
+
+  private List<String> getInfections(List<Case> newSeeds) {
+    return newSeeds.stream().map(this::getSource).map(String::trim).collect(Collectors.toList());
   }
 
   Map<Integer, List<Case>> collectInfectors() {

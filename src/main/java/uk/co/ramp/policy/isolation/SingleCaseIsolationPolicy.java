@@ -13,6 +13,7 @@ import uk.co.ramp.io.types.StandardProperties;
 import uk.co.ramp.people.AlertStatus;
 import uk.co.ramp.people.Case;
 import uk.co.ramp.people.VirusStatus;
+import uk.co.ramp.statistics.StatisticsRecorder;
 
 class SingleCaseIsolationPolicy {
   private final IsolationProperties isolationProperties;
@@ -35,14 +36,17 @@ class SingleCaseIsolationPolicy {
   }
 
   private final Map<Integer, IsolationMapValue> currentlyInIsolationMap = new HashMap<>();
+  private final StatisticsRecorder statisticsRecorder;
 
   SingleCaseIsolationPolicy(
       IsolationProperties isolationProperties,
       DistributionSampler distributionSampler,
-      StandardProperties properties) {
+      StandardProperties properties,
+      StatisticsRecorder statisticsRecorder) {
     this.isolationProperties = isolationProperties;
     this.distributionSampler = distributionSampler;
     this.properties = properties;
+    this.statisticsRecorder = statisticsRecorder;
   }
 
   private IsolationProperty findRelevantIsolationProperty(
@@ -203,6 +207,10 @@ class SingleCaseIsolationPolicy {
                       val, matchingIsolationProperty, startOfIsolationTime, requiredIsolationTime)
                   : null);
     }
+
+    if (willIsolate && requiredIsolationTime > 0)
+      statisticsRecorder.recordDaysInIsolation(id, requiredIsolationTime);
+
     return willIsolate;
   }
 }

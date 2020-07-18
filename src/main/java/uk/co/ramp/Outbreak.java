@@ -23,6 +23,8 @@ import uk.co.ramp.io.types.DiseaseProperties;
 import uk.co.ramp.io.types.OutputFolder;
 import uk.co.ramp.io.types.StandardProperties;
 import uk.co.ramp.people.VirusStatus;
+import uk.co.ramp.statistics.StatisticsRecorder;
+import uk.co.ramp.statistics.StatisticsWriter;
 
 @Service
 public class Outbreak {
@@ -36,6 +38,8 @@ public class Outbreak {
   private final LogDailyOutput outputLog;
   private final LastContactTime lastContactTime;
   private final File outputFolder;
+  private final StatisticsRecorder statisticsRecorder;
+  private final StatisticsWriter statisticsWriter;
 
   private final Population population;
   private final Map<Integer, CmptRecord> records = new HashMap<>();
@@ -50,7 +54,9 @@ public class Outbreak {
       EventRunner eventRunner,
       EventListWriter eventListWriter,
       LastContactTime lastContactTime,
-      OutputFolder outputFolder) {
+      OutputFolder outputFolder,
+      StatisticsRecorder statisticsRecorder,
+      StatisticsWriter statisticsWriter) {
 
     this.population = population;
     this.diseaseProperties = diseaseProperties;
@@ -60,6 +66,8 @@ public class Outbreak {
     this.eventListWriter = eventListWriter;
     this.lastContactTime = lastContactTime;
     this.outputFolder = outputFolder.outputFolder();
+    this.statisticsRecorder = statisticsRecorder;
+    this.statisticsWriter = statisticsWriter;
   }
 
   public Map<Integer, CmptRecord> propagate() {
@@ -74,14 +82,24 @@ public class Outbreak {
         diseaseProperties.randomInfectionRate() / (double) properties.timeStepsPerDay();
 
     runContactData(timeLimit * properties.timeStepsPerDay(), randomInfectionRate);
+    printOutput();
+  }
 
+  private void printOutput() {
     try (Writer writer = new FileWriter(new File(outputFolder, INFECTION_MAP))) {
-      new InfectionMap(population.view()).outputMap(writer);
+      new InfectionMap(population.view(), statisticsRecorder).outputMap(writer);
       eventListWriter.output();
     } catch (IOException e) {
       String message = "An error occurred generating the infection map";
       LOGGER.error(message);
       throw new InfectionMapException(message, e);
+    }
+
+    try (Writer statsWriter = new FileWriter(new File(outputFolder, "stats.txt"));
+        Writer rValueWriter = new FileWriter(new File(outputFolder, "rValue.csv"))) {
+      statisticsWriter.output(statsWriter, rValueWriter);
+    } catch (IOException e) {
+      LOGGER.error("An error occurred while outputting the statistics", e);
     }
   }
 
