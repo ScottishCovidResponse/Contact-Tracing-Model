@@ -1,6 +1,7 @@
 package uk.co.ramp.event;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -16,30 +17,21 @@ import java.util.stream.Stream;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Import;
-import org.springframework.test.annotation.DirtiesContext;
-import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.util.ReflectionTestUtils;
-import uk.co.ramp.AppConfig;
 import uk.co.ramp.Population;
-import uk.co.ramp.TestConfig;
 import uk.co.ramp.TestUtils;
+import uk.co.ramp.distribution.Distribution;
 import uk.co.ramp.distribution.DistributionSampler;
 import uk.co.ramp.event.types.*;
 import uk.co.ramp.io.types.DiseaseProperties;
 import uk.co.ramp.io.types.StandardProperties;
 import uk.co.ramp.people.Case;
 import uk.co.ramp.policy.alert.AlertChecker;
-import uk.co.ramp.policy.alert.TracingPolicyContext;
 
-@RunWith(SpringRunner.class)
-@DirtiesContext
-@Import({TestUtils.class, AppConfig.class, TestConfig.class, TracingPolicyContext.class})
 public class VirusEventProcessorTest {
   private VirusEventProcessor eventProcessor;
   private DiseaseProperties diseaseProperties;
+  private StandardProperties properties;
   private Population population;
   private final AlertEvent alertEvent =
       ImmutableAlertEvent.builder()
@@ -51,17 +43,20 @@ public class VirusEventProcessorTest {
 
   private static final double DELTA = 1e-6;;
 
-  @Autowired private StandardProperties properties;
-  @Autowired DistributionSampler distributionSampler;
-
   @Before
   public void setUp() throws FileNotFoundException {
+    properties = mock(StandardProperties.class);
+    DistributionSampler distributionSampler = mock(DistributionSampler.class);
+    AlertChecker alertChecker = mock(AlertChecker.class);
     diseaseProperties = TestUtils.diseaseProperties();
     population = mock(Population.class);
 
-    AlertChecker alertChecker = mock(AlertChecker.class);
     when(alertChecker.checkForAlert(eq(0), eq(NONE), eq(SYMPTOMATIC), eq(1)))
         .thenReturn(Stream.of(alertEvent));
+    when(distributionSampler.getDistributionValue(any()))
+        .thenAnswer(i -> ((int) Math.round(((Distribution) i.getArgument(0)).mean())));
+
+    when(properties.timeStepsPerDay()).thenReturn(1);
 
     this.eventProcessor =
         new VirusEventProcessor(

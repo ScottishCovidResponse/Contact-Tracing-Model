@@ -50,7 +50,8 @@ public class DiseasePropertiesReaderTest {
           + "    \"mean\": 5,\n"
           + "    \"max\": 8\n"
           + "  },\n"
-          + "  \"testAccuracy\": 0.95,\n"
+          + "  \"testPositiveAccuracy\": 0.95,\n"
+          + "  \"testNegativeAccuracy\": 0.95,\n"
           + "  \"exposureThreshold\": 500,\n"
           + "  \"exposureProbability4UnitContact\": 0.01,\n"
           + "  \"exposureExponent\": 1.0,\n"
@@ -78,7 +79,8 @@ public class DiseasePropertiesReaderTest {
             .timeDeath(meanMax)
             .timeTestAdministered(meanMax)
             .timeTestResult(meanMax)
-            .testAccuracy(0.95)
+            .testPositiveAccuracy(0.95)
+            .testNegativeAccuracy(0.95)
             .exposureThreshold(500)
             .exposureProbability4UnitContact(0.01)
             .exposureExponent(1.0)

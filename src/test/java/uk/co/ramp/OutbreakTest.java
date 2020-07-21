@@ -7,13 +7,7 @@ import static org.mockito.Mockito.when;
 import static uk.co.ramp.people.VirusStatus.SUSCEPTIBLE;
 
 import java.io.FileNotFoundException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Random;
-import java.util.Set;
+import java.util.*;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Rule;
@@ -33,37 +27,24 @@ import uk.co.ramp.io.types.DiseaseProperties;
 import uk.co.ramp.io.types.StandardProperties;
 import uk.co.ramp.people.Case;
 import uk.co.ramp.people.Human;
-import uk.co.ramp.policy.alert.TracingPolicyContext;
-import uk.co.ramp.policy.isolation.IsolationPolicyContext;
 
 @SuppressWarnings("unchecked")
 @DirtiesContext
 @RunWith(SpringRunner.class)
-@Import({
-  TestConfig.class,
-  TestUtils.class,
-  AppConfig.class,
-  IsolationPolicyContext.class,
-  TracingPolicyContext.class
-})
+@Import({TestConfig.class, AppConfig.class})
 public class OutbreakTest {
 
   private final Random random = TestUtils.getRandom();
 
   @Rule public LogSpy logSpy = new LogSpy();
 
+  @Autowired Population population;
   @Autowired private StandardProperties standardProperties;
   @Autowired private InitialCaseReader initialCaseReader;
-
   @Autowired private Outbreak outbreak;
-
   @Autowired private CompletionEventListGroup eventListGroup;
 
-  @Autowired Population population;
-
   private DiseaseProperties diseaseProperties;
-
-  public OutbreakTest() throws FileNotFoundException {}
 
   @Before
   public void setUp() throws FileNotFoundException {

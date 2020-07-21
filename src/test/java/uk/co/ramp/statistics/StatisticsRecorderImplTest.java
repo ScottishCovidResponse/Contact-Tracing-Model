@@ -5,12 +5,14 @@ import static org.mockito.Mockito.when;
 
 import java.util.*;
 import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 import java.util.stream.Stream;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mockito;
 import uk.co.ramp.TestUtils;
 import uk.co.ramp.io.types.StandardProperties;
+import uk.co.ramp.people.AlertStatus;
 import uk.co.ramp.people.Case;
 import uk.co.ramp.statistics.types.ImmutableInfection;
 import uk.co.ramp.statistics.types.Infection;
@@ -25,7 +27,51 @@ public class StatisticsRecorderImplTest {
   public void setUp() {
     recorder =
         new StatisticsRecorderImpl(
-            properties, new HashMap<>(), new HashMap<>(), new HashMap<>(), new HashMap<>());
+            properties,
+            new HashMap<>(),
+            new HashMap<>(),
+            new HashMap<>(),
+            new HashMap<>(),
+            new EnumMap<>(AlertStatus.class),
+            new EnumMap<>(AlertStatus.class));
+  }
+
+  @Test
+  public void testIncorrectResults() {
+
+    // Avoid NPE
+    assertThat(recorder.getFalseNegatives()).isNotNull().isZero();
+    assertThat(recorder.getFalsePositives()).isNotNull().isZero();
+
+    int falsePos = random.nextInt(100);
+    int falseNeg = random.nextInt(100);
+
+    IntStream.range(0, falsePos)
+        .forEach(i -> recorder.recordIncorrectTestResult(AlertStatus.TESTED_POSITIVE));
+    IntStream.range(0, falseNeg)
+        .forEach(i -> recorder.recordIncorrectTestResult(AlertStatus.TESTED_NEGATIVE));
+
+    assertThat(recorder.getFalsePositives()).isEqualTo(falsePos);
+    assertThat(recorder.getFalseNegatives()).isEqualTo(falseNeg);
+  }
+
+  @Test
+  public void testCorrectResults() {
+
+    // Avoid NPE
+    assertThat(recorder.getFalseNegatives()).isNotNull().isZero();
+    assertThat(recorder.getFalsePositives()).isNotNull().isZero();
+
+    int truePos = random.nextInt(100);
+    int trueNeg = random.nextInt(100);
+
+    IntStream.range(0, truePos)
+        .forEach(i -> recorder.recordCorrectTestResult(AlertStatus.TESTED_POSITIVE));
+    IntStream.range(0, trueNeg)
+        .forEach(i -> recorder.recordCorrectTestResult(AlertStatus.TESTED_NEGATIVE));
+
+    assertThat(recorder.getTruePositives()).isEqualTo(truePos);
+    assertThat(recorder.getTrueNegatives()).isEqualTo(trueNeg);
   }
 
   @Test

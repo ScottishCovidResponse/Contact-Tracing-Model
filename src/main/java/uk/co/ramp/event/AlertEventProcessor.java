@@ -14,6 +14,7 @@ import uk.co.ramp.event.types.*;
 import uk.co.ramp.io.types.DiseaseProperties;
 import uk.co.ramp.io.types.StandardProperties;
 import uk.co.ramp.people.AlertStatus;
+import uk.co.ramp.statistics.StatisticsRecorder;
 import uk.co.ramp.utilities.ImmutableMeanMax;
 import uk.co.ramp.utilities.MeanMax;
 
@@ -24,16 +25,19 @@ public class AlertEventProcessor implements EventProcessor<AlertEvent> {
   private final DiseaseProperties diseaseProperties;
   private final DistributionSampler distributionSampler;
   private final StandardProperties properties;
+  private final StatisticsRecorder statisticsRecorder;
 
   public AlertEventProcessor(
       Population population,
       StandardProperties properties,
       DiseaseProperties diseaseProperties,
-      DistributionSampler distributionSampler) {
+      DistributionSampler distributionSampler,
+      StatisticsRecorder statisticsRecorder) {
     this.population = population;
     this.diseaseProperties = diseaseProperties;
     this.distributionSampler = distributionSampler;
     this.properties = properties;
+    this.statisticsRecorder = statisticsRecorder;
   }
 
   @Override
@@ -79,14 +83,35 @@ public class AlertEventProcessor implements EventProcessor<AlertEvent> {
 
     switch (event.nextStatus()) {
       case AWAITING_RESULT:
-        return population.isInfectious(event.id())
-            ? Optional.of(TESTED_POSITIVE)
-            : Optional.of(TESTED_NEGATIVE);
+        return determineTestResult(population.isInfectious(event.id()));
       case NONE:
         return Optional.of(NONE);
       default:
         LOGGER.error(event);
         throw new EventException("There is no case for the event" + event);
+    }
+  }
+
+  Optional<AlertStatus> determineTestResult(boolean isInfectious) {
+
+    double testEffectiveness = distributionSampler.uniformBetweenZeroAndOne();
+
+    if (isInfectious) {
+      if (testEffectiveness < diseaseProperties.testPositiveAccuracy()) {
+        statisticsRecorder.recordCorrectTestResult(TESTED_POSITIVE);
+        return Optional.of(TESTED_POSITIVE);
+      } else {
+        statisticsRecorder.recordIncorrectTestResult(TESTED_NEGATIVE);
+        return Optional.of(TESTED_NEGATIVE);
+      }
+    } else {
+      if (testEffectiveness < diseaseProperties.testNegativeAccuracy()) {
+        statisticsRecorder.recordCorrectTestResult(TESTED_NEGATIVE);
+        return Optional.of(TESTED_NEGATIVE);
+      } else {
+        statisticsRecorder.recordIncorrectTestResult(TESTED_POSITIVE);
+        return Optional.of(TESTED_POSITIVE);
+      }
     }
   }
 
