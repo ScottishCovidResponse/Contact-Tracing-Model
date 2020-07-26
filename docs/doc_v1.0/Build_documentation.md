@@ -19,13 +19,15 @@ Figure 1. The compartment model
 
 S – Susceptible – the default condition
 
-E<sub>1</sub> – Exposed, but not infectious
+E – Exposed, but not infectious
 
-E<sub>2</sub> – Exposed, infectious, but not detectable by a test
+Asym – Infected and asymptomatic, will test positive
 
-I<sub>a</sub> – Infected and asymptomatic, will test positive
+Pre – Infected and developing symptoms, will test positive
 
-I<sub>s</sub> – Infected and symptomatic, will test positive
+Sym – Infected and symptomatic, will test positive
+
+Sev – Infected and severely symptomatic, will test positive 
 
 R – Recovered
 
@@ -39,6 +41,14 @@ this document.
 The inputs are contained in the /inputs folder. They are in two formats,
 CSV and JSON.
 
+### InputLocations.json
+
+The first input file is the inputLocations.json file that allows all the other inputs to be configured. 
+This allows the user to have multiple configurations defined. File locations are relative to the input folder.
+
+![](inputLocations.png) 
+
+
 ### Contacts.csv
 
 The contact data is a CSV file contain network data that shows contacts
@@ -47,9 +57,8 @@ An example can be shown in Figure 2. The to and from fields are the ids
 of the nodes in contact. The weight field is a measure of the duration,
 intensity or proximity of the contact. This is dimensionless number and
 is used for determining the spread of the infection and is used for
-filtering the contacts should a node be alerted. NB. The time and nodes
-in the CSV file are indexed from 1, the code subtracts 1 so they are
-zero indexed.
+filtering the contacts should a node be alerted. The addition of a label 
+field is to enable filtering of contacts based on their label.
 
 ![](image2.png)
 
@@ -84,6 +93,15 @@ day. This value is likely to be much smaller than 0.05.
 
 Figure 3. The diseaseSettings.json file
 
+
+The exposureProbability4UnitContact (expUnitContact) and exposureExponent (exp) values are 
+used to determine the chance of infection for a given contact. 
+
+![](exposureBias.png)
+
+![](exposureProb.png)
+
+
 ### PopulationSettings.json
 
 An example of the population input can be seen in Figure 4. This file
@@ -107,6 +125,12 @@ Mundi.
 
 Figure 4. The population input
 
+### Initial Exposures
+
+The initial exposures file contains a list of IDs of the people who are in the
+exposed category at t=0. If this list is longer than the initial exposures, it 
+will be truncated. If it is too short, it will be filled randomly. 
+
 ### RunSettings.json
 
 The run settings file contains the main fields that a user may want to
@@ -121,19 +145,62 @@ go on in timesteps.
 Infected: the number of the population initially infected at t=0. Must
 be greater than 0.
 
-Seed: the seed for the random number generator. Will be modified by the
-command line argument if included. This ensure a reproducible output.
-
 Steady state: if there are still active infections when the contact data
 has been processed, the steady state flag enables the active cases to
 reach a resolution (recovered or dead) with no further random infections
 occurring.
 
-Contacts file: points to the CSV file being used in this run.
+(Optional) Seed: Can be specified on the command line or fixed.
 
 ![](image5.png)
 
 Figure 5. the run settings file
+
+
+## AgeData
+
+The age data file contains a list of id and age. This has been added 
+to allows the user to use age graduated contact files. Should the file 
+be longer than the population, additional input will be ignored. Should 
+it be shorter, the ages will be generated as per the population settings file. 
+
+![](ageData.png)
+
+## Isolation Policies
+
+The isolation policy can be split into 3 sections.
+
+### Virus Policy
+
+This policy determines the probability of a person in a given compartment 
+isolating, and for how long they will isolate. These can be modified and 
+varied using the distribution times. Also the time in isolation can vary 
+between ABSOLUTE or CONTACT_TIME. This means if a person becomes infected 
+they will either isolate for the isolation time from either the time of contact 
+or the time they are aware of being infected.
+![](virusPolicy.png)
+
+### Default Policy
+
+The default policy allows a global baseline to be set. For example, 
+in an older population 10% of the population may shield.
+
+![](defaultPolicy.png)
+
+### Alert Policy
+
+The alert policy defines the isolation policy for a person in any state. 
+These follow the same rules as the Virus Policy.
+
+![](alertPolicy.png)
+
+## Tracing Policies
+
+The tracing policy allows specification of alerts to be triggered when a person enters a 
+combined alert and virus status. The code will review their contacts for a number of specified days
+and trigger alerts to their contacts. 
+
+![](tracingPolicy.png)
 
 ## Virus and Alert Statuses
 
@@ -144,20 +211,23 @@ Following the schema described in Figure 1
 the status of the virus infections in the code is referred to by an
 enumeration called Virus Status, which has the options:
 
+  
   - SUSCEPTIBLE
 
   - EXPOSED
-
-  - EXPOSED\_2
-
-  - INFECTED
-
-  - INFECTED\_SYMP
-
+  
+  - ASYMPTOMATIC
+  
+  - PRESYMPTOMATIC
+  
+  - SYMPTOMATIC
+  
+  - SEVERELY_SYMPTOMATIC
+  
   - RECOVERED
-
+    
   - DEAD
-
+  
 Similarly, the Alert Status that a person is at is described by the
 enumeration:
 
@@ -205,10 +275,10 @@ should these resources not be loaded, so the code may exit here. A log
 message is printed describing the error and a Configuration Exception is
 thrown.
 
-It is worth noting that this is where the command line parameters are
-dealt with. At the point of writing, the only parameter is a job
-identifier that can be used to modify the random number seed in a batch
-job. This parameter is optional.
+There are three optional command line interfaces:
+- **seed:** allows a seed to be input. Defaults to a random seed.
+- **overrideInputFolderLocation:** allows a different input folder to be assigned. Defaults to /input.
+- **overrideOutputFolderLocation:** allows a different output folder to be assigned. Defaults to /output.
 
 The input files are described in Inputs.
 
@@ -228,8 +298,7 @@ run settings. The “Human” class contains 4 fields that are populated
 here:
 
 #### Age
-
-The age is determined from the census data and a uniform random number
+If the ages are not provided in the AgeData file, the ages are determined from the census data and a uniform random number
 generator.
 
 | Age Range | Proportion | Random \# Range  |
@@ -276,11 +345,17 @@ At present, health is randomly sampled from a uniform distribution. It
 may later have some relation to age. A health score of 1 is assumed to
 be a very healthy individual, a score of 0 is a very frail individual.
 
-#### Compliance
+#### Isolation Compliance
 
 At present, the compliance field is randomly sampled from a uniform
 distribution. A score of 0 is someone who will ignore any restrictions
 placed upon them totally, a score of 1 will obey totally.
+
+#### Reporting Compliance
+
+At present, the compliance field is randomly sampled from a uniform
+distribution. A score of 0 is someone who will not report an illness, 
+a score of 1 means they are guaranteed to report. 
 
 ### Contact Reader
 
@@ -294,9 +369,8 @@ simulation.
 
 ### Outbreak
 
-The outbreak class will be handled in much more detail later on in
-\<\<Section XYZ\>\>. This section will focus purely on the
-initialisation.
+The outbreak class will be handled in much more detail later on. 
+This section will focus purely on the initialisation.
 
 The Outbreak class is a Service Bean, so it is created as part of the
 App Config section, it is initialised with data in Contact Runner. It
@@ -324,9 +398,10 @@ section fills in the details on how this section works. Figure 10 shows
 the top level of how the propagation algorithm works and where it calls
 to. These will be broken down in turn in the following sections.
 
-Upon entering the method, a set of infected cases are created based on
-the input value from the run settings. These members of the population
-are randomly sampled and set to EXPOSED to begin the simulation.
+Upon entering the method, a set of infected cases are read from the initial 
+exposures file. If this file is shorter than the value specified in 
+RunSettings, they will be filled to the correct length. Likewise, if it is too 
+long, it is truncated to the correct length.
 
 Once the initial infections are allocated the runToCompletion method is
 called. This extracts some key variables from the input parameters,
@@ -381,97 +456,11 @@ Figure 11. Infection map example
 
 ### Run Contact Data
 
-Running the propagation of infection is the heart of the calculation.
-Figure 12 shows the flow of data.
 
-To begin with the update population method is called. This changes the
-state of any infection that is due to change on this day. This is
-explained further in 5.3. This is also where random infections are added
-to the mix. This is done by running a random number test against each
-susceptible case and setting their status to EXPOSED.
+TODO: Rewrite
 
-Following this, the contact data for this timestep is extracted along
-with the number of active cases (those not S, R or D), if this is zero
-and random infections are off, it will exit here. Otherwise, it will
-loop over the contact data.
 
-The contact data is evaluated using a series of conditionals. Firstly,
-the alert status and weight of the contact are reviewed to see if this
-is a significant contact. If both alert statuses are NONE and the weight
-of the contact is greater than exposureThreshold, it is a contact of
-interest. Before evaluating the contact further, the two cases are
-checked to see if their virus statuses are different, if they are the
-contact is evaluated.
 
-The two cases are evaluated to see who is in the more severe state,
-these are described by the rankings:
-
-| \-1 | DEAD           |
-| :-- | :------------- |
-| 0   | SUSCEPTIBLE    |
-| 1   | RECOVERED      |
-| 2   | EXPOSED        |
-| 3   | EXPOSED\_2     |
-| 4   | INFECTED       |
-| 5   | INFECTED\_SYMP |
-
-PersonA is the more severe case; the least severe case is personB. A
-dangerous mix is when personA is infectious (E2, I, IA) and personB is
-susceptible. If this is the case, the following test is conducted:
-
-![](eq6.gif)
-
-Where n is a random number.
-
-![](image12.png)
-
-Figure 12. The logic flow for reviewing contact data
-
-### Run to Steady State
-
-During the run to Steady-state routine, shown in Figure 13, updates the
-population statuses until the existing active cases are resolved, i.e.
-all active cases resolve in recovery or death. The exit condition is
-
-![](eq7.gif)
-
-![](image13.png)
-
-Figure 13. The run to completion algorithm
-
-### Update population
-
-The update population algorithm, shown in Figure 14, is run as part of
-Run Contact Data and Steady State. Each case has fields containing the
-next time their statuses change.
-
-![](image14.png)
-
-Figure 14. The update population algorithm
-
-#### Virus Status
-
-The virus status is updated first, both Exposed and Infected have a
-single option, which they progress to, the next status change is
-calculated using the mean and max times from the disease properties and
-the chosen random number distribution. Exposed<sub>2</sub> and
-Infected<sub>symp</sub> have two options, denoted by the red box. These
-are chosen by random number, n:
-
-![](eq8.gif)
-
-Likewise, the outcome of an Infected<sub>symp</sub> is determined by:
-
-![](eq9.gif)
-
-#### Alert Status
-
-The alert status only has one choice, the outcome of the test. In this
-method, the result of the test is determined by the step before, i.e.
-the recipient of the test needs to be infectious when tested, not when
-receiving the result. The red box here denotes the storing of a Boolean
-of ‘wasInfected’ at the time the test was taken. This is then used when
-the test result is in.
 
 ## Assumptions
 
@@ -498,3 +487,4 @@ the test result is in.
 ## Document version history
 
 Version 1 – drafted 27 May 2020
+Version 2 - updated 26 July 2020
