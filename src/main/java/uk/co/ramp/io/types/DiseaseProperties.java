@@ -29,7 +29,9 @@ public interface DiseaseProperties {
 
   MeanMax timeTestResult();
 
-  double testAccuracy();
+  double testPositiveAccuracy();
+
+  double testNegativeAccuracy();
 
   double randomInfectionRate();
 
@@ -44,7 +46,11 @@ public interface DiseaseProperties {
   @Check
   default void check() {
     Preconditions.checkState(
-        testAccuracy() >= 0 && testAccuracy() <= 1, "Test accuracy should be between 0 and 1");
+        testPositiveAccuracy() >= 0 && testPositiveAccuracy() <= 1,
+        "Test accuracy should be between 0 and 1");
+    Preconditions.checkState(
+        testNegativeAccuracy() >= 0 && testNegativeAccuracy() <= 1,
+        "Test accuracy should be between 0 and 1");
     Preconditions.checkState(
         randomInfectionRate() >= 0 && randomInfectionRate() <= 1,
         "Random infection rate should be between 0 and 1");

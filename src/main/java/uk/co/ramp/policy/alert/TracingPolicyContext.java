@@ -13,6 +13,7 @@ import uk.co.ramp.Population;
 import uk.co.ramp.distribution.DistributionSampler;
 import uk.co.ramp.event.CompletionEventListGroup;
 import uk.co.ramp.io.types.InputFiles;
+import uk.co.ramp.statistics.StatisticsRecorder;
 
 @SpringBootConfiguration
 public class TracingPolicyContext {
@@ -20,8 +21,11 @@ public class TracingPolicyContext {
 
   @Bean
   AlertContactTracer contactTracer(
-      CompletionEventListGroup eventList, Population population, TracingPolicy tracingPolicy) {
-    return new AlertContactTracer(tracingPolicy, eventList, population);
+      CompletionEventListGroup eventList,
+      Population population,
+      TracingPolicy tracingPolicy,
+      StatisticsRecorder statisticsRecorder) {
+    return new AlertContactTracer(tracingPolicy, eventList, population, statisticsRecorder);
   }
 
   @Bean

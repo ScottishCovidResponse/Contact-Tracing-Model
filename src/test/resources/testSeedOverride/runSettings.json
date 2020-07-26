@@ -2,7 +2,10 @@
   "populationSize": 10000,
   "timeLimit": 200,
   "initialExposures": 1000,
-  "seed": 3,
-  "steadyState": true
+  "steadyState": true,
+  "seed": 123,
+  "timeStepsPerDay": 1,
+  "seed": 123,
+  "timeStepSpread": [1]
 }
 

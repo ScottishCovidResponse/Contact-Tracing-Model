@@ -1,9 +1,6 @@
 package uk.co.ramp.event;
 
 import static org.hamcrest.CoreMatchers.containsString;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyDouble;
-import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static uk.co.ramp.people.VirusStatus.*;
@@ -16,7 +13,6 @@ import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.Mockito;
 import org.springframework.context.annotation.Import;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.junit4.SpringRunner;
@@ -98,95 +94,6 @@ public class ContactEventProcessorTest {
   }
 
   @Test
-  public void evaluateContactCompliant() {
-
-    int infector = 0;
-    int infectee = 1;
-    int time = 0;
-
-    IsolationPolicy isolationPolicy = Mockito.mock(IsolationPolicy.class);
-    when(isolationPolicy.isContactIsolated(any(), any(), anyDouble(), anyDouble(), anyInt()))
-        .thenReturn(true);
-
-    ReflectionTestUtils.setField(eventProcessor, "isolationPolicy", isolationPolicy);
-
-    Case mock0 = mock(Case.class);
-    when(mock0.virusStatus()).thenReturn(SYMPTOMATIC);
-    when(mock0.isInfectious()).thenReturn(true);
-    when(mock0.isolationCompliance()).thenReturn(-0.5);
-    when(mock0.id()).thenReturn(infector);
-
-    Case mock1 = mock(Case.class);
-    when(mock1.id()).thenReturn(infectee);
-    when(mock1.virusStatus()).thenReturn(SUSCEPTIBLE);
-
-    Map<Integer, Case> population = new HashMap<>();
-    population.put(0, mock0);
-    population.put(1, mock1);
-    ReflectionTestUtils.setField(eventProcessor, "population", new Population(population));
-
-    ContactEvent contactEvent =
-        ImmutableContactEvent.builder()
-            .from(infector)
-            .to(infectee)
-            .time(time)
-            .weight(5000)
-            .label("")
-            .build();
-
-    Optional<InfectionEvent> var = eventProcessor.evaluateContact(contactEvent, 0);
-
-    Assert.assertFalse(var.isPresent());
-  }
-
-  @Test
-  public void evaluateContactNonCompliant() {
-
-    int infector = 0;
-    int infectee = 1;
-    int time = 0;
-
-    IsolationPolicy isolationPolicy = Mockito.mock(IsolationPolicy.class);
-    when(isolationPolicy.isContactIsolated(any(), any(), anyDouble(), anyDouble(), anyInt()))
-        .thenReturn(true);
-
-    ReflectionTestUtils.setField(eventProcessor, "isolationPolicy", isolationPolicy);
-
-    Case mock0 = mock(Case.class);
-    when(mock0.virusStatus()).thenReturn(SYMPTOMATIC);
-    when(mock0.isInfectious()).thenReturn(true);
-    when(mock0.isolationCompliance()).thenReturn(0.5);
-    when(mock0.id()).thenReturn(infector);
-
-    Case mock1 = mock(Case.class);
-    when(mock1.id()).thenReturn(infectee);
-    when(mock1.virusStatus()).thenReturn(SUSCEPTIBLE);
-
-    Map<Integer, Case> population = new HashMap<>();
-    population.put(0, mock0);
-    population.put(1, mock1);
-    ReflectionTestUtils.setField(eventProcessor, "population", new Population(population));
-
-    ContactEvent contactEvent =
-        ImmutableContactEvent.builder()
-            .from(infector)
-            .to(infectee)
-            .time(time)
-            .weight(5000)
-            .label("")
-            .build();
-
-    Optional<InfectionEvent> var = eventProcessor.evaluateContact(contactEvent, 0);
-
-    Assert.assertTrue(var.isPresent());
-
-    InfectionEvent infectionEvent = var.get();
-    Assert.assertEquals(infectionEvent.time(), time + 1);
-    Assert.assertEquals(infectionEvent.id(), infectee);
-    Assert.assertEquals(infectionEvent.nextStatus(), EXPOSED);
-  }
-
-  @Test
   public void evaluateExposuresReturn() {
 
     int infector = 0;
@@ -207,17 +114,7 @@ public class ContactEventProcessorTest {
     population.put(1, mock1);
     ReflectionTestUtils.setField(eventProcessor, "population", new Population(population));
 
-    // outer empty return
-    ContactEvent contactEvent =
-        ImmutableContactEvent.builder()
-            .from(infector)
-            .to(infectee)
-            .time(time)
-            .weight(5000)
-            .label("")
-            .build();
-
-    Optional<InfectionEvent> var = eventProcessor.evaluateExposures(mock0, contactEvent, time);
+    Optional<InfectionEvent> var = eventProcessor.evaluateExposures(mock0, mock1, 5000, time);
 
     Assert.assertTrue(var.isPresent());
 
@@ -249,17 +146,7 @@ public class ContactEventProcessorTest {
     population.put(1, mock1);
     ReflectionTestUtils.setField(eventProcessor, "population", new Population(population));
 
-    // outer empty return
-    ContactEvent contactEvent =
-        ImmutableContactEvent.builder()
-            .from(infector)
-            .to(infectee)
-            .time(time)
-            .weight(5000)
-            .label("")
-            .build();
-
-    Optional<InfectionEvent> var = eventProcessor.evaluateExposures(mock0, contactEvent, time);
+    Optional<InfectionEvent> var = eventProcessor.evaluateExposures(mock0, mock1, 5000, time);
 
     System.out.println(logSpy.getOutput());
     Assert.assertFalse(var.isPresent());

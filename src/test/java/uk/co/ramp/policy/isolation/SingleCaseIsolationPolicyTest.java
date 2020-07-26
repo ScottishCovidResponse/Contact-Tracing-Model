@@ -16,14 +16,20 @@ import static uk.co.ramp.people.VirusStatus.*;
 import java.util.List;
 import org.junit.Before;
 import org.junit.Test;
+import org.mockito.Mockito;
+import uk.co.ramp.TestUtils;
 import uk.co.ramp.distribution.Distribution;
 import uk.co.ramp.distribution.DistributionSampler;
 import uk.co.ramp.distribution.ImmutableDistribution;
+import uk.co.ramp.io.types.StandardProperties;
 import uk.co.ramp.people.AlertStatus;
+import uk.co.ramp.statistics.StatisticsRecorder;
 import uk.co.ramp.utilities.MinMax;
 
 public class SingleCaseIsolationPolicyTest {
   private DistributionSampler distributionSampler;
+  private StandardProperties properties = TestUtils.standardProperties();
+  private StatisticsRecorder statisticsRecorder = Mockito.mock(StatisticsRecorder.class);
 
   private final Distribution flatZeroPercent =
       ImmutableDistribution.builder().mean(0).max(0).type(FLAT).build();
@@ -160,7 +166,9 @@ public class SingleCaseIsolationPolicyTest {
     when(this.distributionSampler.uniformInteger(anyInt()))
         .thenAnswer(invocation -> invocation.getArgument(0, int.class) / 2);
 
-    this.isolationPolicy = new SingleCaseIsolationPolicy(isolationProperties, distributionSampler);
+    this.isolationPolicy =
+        new SingleCaseIsolationPolicy(
+            isolationProperties, distributionSampler, properties, statisticsRecorder);
   }
 
   @Test
@@ -383,7 +391,9 @@ public class SingleCaseIsolationPolicyTest {
             .isolationProbabilityDistributionThreshold(thresholdLinearDistribution)
             .build();
 
-    var isolationPolicy = new SingleCaseIsolationPolicy(isolationProperties, distributionSampler);
+    var isolationPolicy =
+        new SingleCaseIsolationPolicy(
+            isolationProperties, distributionSampler, properties, statisticsRecorder);
 
     var proportionOfPopulationInfected = 0.25;
     assertThat(
@@ -417,7 +427,9 @@ public class SingleCaseIsolationPolicyTest {
             .isolationProbabilityDistributionThreshold(thresholdLinearDistribution)
             .build();
 
-    var isolationPolicy = new SingleCaseIsolationPolicy(isolationProperties, distributionSampler);
+    var isolationPolicy =
+        new SingleCaseIsolationPolicy(
+            isolationProperties, distributionSampler, properties, statisticsRecorder);
 
     var proportionOfPopulationInfected = 0.25;
     assertThat(
@@ -454,7 +466,9 @@ public class SingleCaseIsolationPolicyTest {
             .isolationProbabilityDistributionThreshold(thresholdLinearDistribution)
             .build();
 
-    var isolationPolicy = new SingleCaseIsolationPolicy(isolationProperties, distributionSampler);
+    var isolationPolicy =
+        new SingleCaseIsolationPolicy(
+            isolationProperties, distributionSampler, properties, statisticsRecorder);
 
     assertThat(
             isolationPolicy.isIndividualInIsolation(
@@ -520,7 +534,9 @@ public class SingleCaseIsolationPolicyTest {
             .isolationProbabilityDistributionThreshold(thresholdLinearDistribution)
             .build();
 
-    var isolationPolicy = new SingleCaseIsolationPolicy(isolationProperties, distributionSampler);
+    var isolationPolicy =
+        new SingleCaseIsolationPolicy(
+            isolationProperties, distributionSampler, properties, statisticsRecorder);
 
     assertThat(
             isolationPolicy.isIndividualInIsolation(
@@ -586,7 +602,9 @@ public class SingleCaseIsolationPolicyTest {
             .isolationProbabilityDistributionThreshold(thresholdLinearDistribution)
             .build();
 
-    var isolationPolicy = new SingleCaseIsolationPolicy(isolationProperties, distributionSampler);
+    var isolationPolicy =
+        new SingleCaseIsolationPolicy(
+            isolationProperties, distributionSampler, properties, statisticsRecorder);
 
     assertThat(
             isolationPolicy.isIndividualInIsolation(
@@ -652,7 +670,9 @@ public class SingleCaseIsolationPolicyTest {
             .isolationProbabilityDistributionThreshold(thresholdLinearDistribution)
             .build();
 
-    var isolationPolicy = new SingleCaseIsolationPolicy(isolationProperties, distributionSampler);
+    var isolationPolicy =
+        new SingleCaseIsolationPolicy(
+            isolationProperties, distributionSampler, properties, statisticsRecorder);
 
     assertThat(
             isolationPolicy.isIndividualInIsolation(
@@ -778,7 +798,9 @@ public class SingleCaseIsolationPolicyTest {
             .isolationProbabilityDistributionThreshold(thresholdLinearDistribution)
             .build();
 
-    var isolationPolicy = new SingleCaseIsolationPolicy(isolationProperties, distributionSampler);
+    var isolationPolicy =
+        new SingleCaseIsolationPolicy(
+            isolationProperties, distributionSampler, properties, statisticsRecorder);
 
     assertThat(
             isolationPolicy.isIndividualInIsolation(
@@ -887,7 +909,9 @@ public class SingleCaseIsolationPolicyTest {
             .isolationProbabilityDistributionThreshold(thresholdLinearDistribution)
             .build();
 
-    var isolationPolicy = new SingleCaseIsolationPolicy(isolationProperties, distributionSampler);
+    var isolationPolicy =
+        new SingleCaseIsolationPolicy(
+            isolationProperties, distributionSampler, properties, statisticsRecorder);
 
     assertThat(
             isolationPolicy.isIndividualInIsolation(
@@ -996,7 +1020,9 @@ public class SingleCaseIsolationPolicyTest {
             .isolationProbabilityDistributionThreshold(thresholdLinearDistribution)
             .build();
 
-    var isolationPolicy = new SingleCaseIsolationPolicy(isolationProperties, distributionSampler);
+    var isolationPolicy =
+        new SingleCaseIsolationPolicy(
+            isolationProperties, distributionSampler, properties, statisticsRecorder);
 
     assertThat(
             isolationPolicy.isIndividualInIsolation(
@@ -1094,7 +1120,9 @@ public class SingleCaseIsolationPolicyTest {
             .isolationProbabilityDistributionThreshold(thresholdLinearDistribution)
             .build();
 
-    var isolationPolicy = new SingleCaseIsolationPolicy(isolationProperties, distributionSampler);
+    var isolationPolicy =
+        new SingleCaseIsolationPolicy(
+            isolationProperties, distributionSampler, properties, statisticsRecorder);
     var proportionOfPopulationInfectious = 0.0;
     assertThat(
             isolationPolicy.isIndividualInIsolation(
@@ -1361,7 +1389,9 @@ public class SingleCaseIsolationPolicyTest {
             .isolationProbabilityDistributionThreshold(thresholdLinearDistribution)
             .build();
 
-    var isolationPolicy = new SingleCaseIsolationPolicy(isolationProperties, distributionSampler);
+    var isolationPolicy =
+        new SingleCaseIsolationPolicy(
+            isolationProperties, distributionSampler, properties, statisticsRecorder);
 
     assertThatIllegalStateException()
         .isThrownBy(
@@ -1409,7 +1439,9 @@ public class SingleCaseIsolationPolicyTest {
         .thenAnswer(
             returnsElementsOf(List.of(0.05, 0.15, 0.25, 0.35, 0.45, 0.55, 0.65, 0.75, 0.85, 0.95)));
 
-    var isolationPolicy = new SingleCaseIsolationPolicy(isolationProperties, distributionSampler);
+    var isolationPolicy =
+        new SingleCaseIsolationPolicy(
+            isolationProperties, distributionSampler, properties, statisticsRecorder);
 
     assertThat(
             isolationPolicy.isIndividualInIsolation(
@@ -1534,7 +1566,9 @@ public class SingleCaseIsolationPolicyTest {
             .isolationProbabilityDistributionThreshold(thresholdLinearDistribution)
             .build();
 
-    var isolationPolicy = new SingleCaseIsolationPolicy(isolationProperties, distributionSampler);
+    var isolationPolicy =
+        new SingleCaseIsolationPolicy(
+            isolationProperties, distributionSampler, properties, statisticsRecorder);
     var exposedTime = 0;
     var currentTime = 0;
     assertThat(
@@ -1548,7 +1582,9 @@ public class SingleCaseIsolationPolicyTest {
                 exposedTime))
         .isTrue();
 
-    isolationPolicy = new SingleCaseIsolationPolicy(isolationProperties, distributionSampler);
+    isolationPolicy =
+        new SingleCaseIsolationPolicy(
+            isolationProperties, distributionSampler, properties, statisticsRecorder);
     exposedTime = 0;
     currentTime = 1;
     assertThat(
@@ -1562,7 +1598,9 @@ public class SingleCaseIsolationPolicyTest {
                 exposedTime))
         .isTrue();
 
-    isolationPolicy = new SingleCaseIsolationPolicy(isolationProperties, distributionSampler);
+    isolationPolicy =
+        new SingleCaseIsolationPolicy(
+            isolationProperties, distributionSampler, properties, statisticsRecorder);
     exposedTime = 0;
     currentTime = 2;
     assertThat(
@@ -1598,7 +1636,9 @@ public class SingleCaseIsolationPolicyTest {
             .isolationProbabilityDistributionThreshold(thresholdLinearDistribution)
             .build();
 
-    var isolationPolicy = new SingleCaseIsolationPolicy(isolationProperties, distributionSampler);
+    var isolationPolicy =
+        new SingleCaseIsolationPolicy(
+            isolationProperties, distributionSampler, properties, statisticsRecorder);
 
     var exposedTime = 0;
     var currentTime = 0;
@@ -1613,7 +1653,9 @@ public class SingleCaseIsolationPolicyTest {
                 exposedTime))
         .isTrue();
 
-    isolationPolicy = new SingleCaseIsolationPolicy(isolationProperties, distributionSampler);
+    isolationPolicy =
+        new SingleCaseIsolationPolicy(
+            isolationProperties, distributionSampler, properties, statisticsRecorder);
     exposedTime = 0;
     currentTime = 1;
     assertThat(
@@ -1627,7 +1669,9 @@ public class SingleCaseIsolationPolicyTest {
                 exposedTime))
         .isTrue();
 
-    isolationPolicy = new SingleCaseIsolationPolicy(isolationProperties, distributionSampler);
+    isolationPolicy =
+        new SingleCaseIsolationPolicy(
+            isolationProperties, distributionSampler, properties, statisticsRecorder);
     exposedTime = 0;
     currentTime = 2;
     assertThat(

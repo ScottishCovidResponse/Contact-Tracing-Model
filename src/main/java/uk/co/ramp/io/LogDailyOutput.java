@@ -8,15 +8,22 @@ import org.apache.logging.log4j.Logger;
 import org.springframework.stereotype.Service;
 import uk.co.ramp.io.types.CmptRecord;
 import uk.co.ramp.io.types.ImmutableCmptRecord;
+import uk.co.ramp.io.types.StandardProperties;
 import uk.co.ramp.people.VirusStatus;
 
 @Service
 public class LogDailyOutput {
 
   private static final Logger LOGGER = LogManager.getLogger(LogDailyOutput.class);
+  private final int timeStepsPerDay;
   private int previousActiveCases = 0;
 
+  public LogDailyOutput(StandardProperties properties) {
+    this.timeStepsPerDay = properties.timeStepsPerDay();
+  }
+
   public CmptRecord log(int time, Map<VirusStatus, Integer> stats) {
+
     if (time == 0) {
       LOGGER.info(
           "|   Time  |    S    |    E    |    A    |    P    |   Sym   |   Sev   |    R    |    D    |   dAct  |");
@@ -26,7 +33,7 @@ public class LogDailyOutput {
 
     CmptRecord cmptRecord =
         ImmutableCmptRecord.builder()
-            .time(time)
+            .time(time / (double) timeStepsPerDay)
             .s(stats.get(SUSCEPTIBLE))
             .e(stats.get(EXPOSED))
             .a(stats.get(ASYMPTOMATIC))
@@ -39,7 +46,7 @@ public class LogDailyOutput {
 
     String s =
         String.format(
-            "| %7d | %7d | %7d | %7d | %7d | %7d | %7d | %7d | %7d | %7d |",
+            "| %7.02f | %7d | %7d | %7d | %7d | %7d | %7d | %7d | %7d | %7d |",
             cmptRecord.time(),
             cmptRecord.s(),
             cmptRecord.e(),

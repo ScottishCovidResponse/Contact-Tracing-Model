@@ -14,5 +14,7 @@ public interface Human {
 
   double isolationCompliance();
 
+  double reportingCompliance();
+
   double health();
 }

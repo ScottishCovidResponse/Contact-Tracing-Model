@@ -35,7 +35,6 @@ public class AppConfigTest {
     StandardProperties standardProperties = appConfig.standardProperties();
 
     Assert.assertNotNull(standardProperties);
-    //        Assert.assertFalse(standardProperties.contactsFile().isEmpty());
     Assert.assertNotNull(standardProperties.steadyState());
     Assert.assertTrue(standardProperties.initialExposures() > 0);
     Assert.assertTrue(standardProperties.populationSize() > 0);
@@ -91,7 +90,8 @@ public class AppConfigTest {
     Assert.assertTrue(diseaseProperties.timeTestAdministered().max() > 0);
     Assert.assertTrue(diseaseProperties.timeTestResult().max() > 0);
 
-    Assert.assertTrue(diseaseProperties.testAccuracy() > 0);
+    Assert.assertTrue(diseaseProperties.testPositiveAccuracy() > 0);
+    Assert.assertTrue(diseaseProperties.testNegativeAccuracy() > 0);
     Assert.assertTrue(diseaseProperties.exposureThreshold() > 0);
     Assert.assertTrue(
         diseaseProperties.exposureProbability4UnitContact() > 0.

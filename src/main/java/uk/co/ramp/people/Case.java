@@ -82,6 +82,10 @@ public class Case {
     return human.isolationCompliance();
   }
 
+  public double reportingCompliance() {
+    return human.reportingCompliance();
+  }
+
   public Gender gender() {
     return human.gender();
   }

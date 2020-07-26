@@ -1,9 +1,6 @@
 package uk.co.ramp.event;
 
-import static uk.co.ramp.people.AlertStatus.NONE;
-import static uk.co.ramp.people.AlertStatus.TESTED_NEGATIVE;
-import static uk.co.ramp.people.AlertStatus.TESTED_POSITIVE;
-import static uk.co.ramp.people.AlertStatus.getValidTransitions;
+import static uk.co.ramp.people.AlertStatus.*;
 
 import java.util.List;
 import java.util.Optional;
@@ -13,13 +10,11 @@ import uk.co.ramp.Population;
 import uk.co.ramp.distribution.Distribution;
 import uk.co.ramp.distribution.DistributionSampler;
 import uk.co.ramp.distribution.ImmutableDistribution;
-import uk.co.ramp.event.types.AlertEvent;
-import uk.co.ramp.event.types.EventProcessor;
-import uk.co.ramp.event.types.ImmutableAlertEvent;
-import uk.co.ramp.event.types.ImmutableProcessedEventResult;
-import uk.co.ramp.event.types.ProcessedEventResult;
+import uk.co.ramp.event.types.*;
 import uk.co.ramp.io.types.DiseaseProperties;
+import uk.co.ramp.io.types.StandardProperties;
 import uk.co.ramp.people.AlertStatus;
+import uk.co.ramp.statistics.StatisticsRecorder;
 import uk.co.ramp.utilities.ImmutableMeanMax;
 import uk.co.ramp.utilities.MeanMax;
 
@@ -29,14 +24,20 @@ public class AlertEventProcessor implements EventProcessor<AlertEvent> {
   private final Population population;
   private final DiseaseProperties diseaseProperties;
   private final DistributionSampler distributionSampler;
+  private final StandardProperties properties;
+  private final StatisticsRecorder statisticsRecorder;
 
   public AlertEventProcessor(
       Population population,
+      StandardProperties properties,
       DiseaseProperties diseaseProperties,
-      DistributionSampler distributionSampler) {
+      DistributionSampler distributionSampler,
+      StatisticsRecorder statisticsRecorder) {
     this.population = population;
     this.diseaseProperties = diseaseProperties;
     this.distributionSampler = distributionSampler;
+    this.properties = properties;
+    this.statisticsRecorder = statisticsRecorder;
   }
 
   @Override
@@ -82,14 +83,35 @@ public class AlertEventProcessor implements EventProcessor<AlertEvent> {
 
     switch (event.nextStatus()) {
       case AWAITING_RESULT:
-        return population.isInfectious(event.id())
-            ? Optional.of(TESTED_POSITIVE)
-            : Optional.of(TESTED_NEGATIVE);
+        return determineTestResult(population.isInfectious(event.id()));
       case NONE:
         return Optional.of(NONE);
       default:
         LOGGER.error(event);
         throw new EventException("There is no case for the event" + event);
+    }
+  }
+
+  Optional<AlertStatus> determineTestResult(boolean isInfectious) {
+
+    double testEffectiveness = distributionSampler.uniformBetweenZeroAndOne();
+
+    if (isInfectious) {
+      if (testEffectiveness < diseaseProperties.testPositiveAccuracy()) {
+        statisticsRecorder.recordCorrectTestResult(TESTED_POSITIVE);
+        return Optional.of(TESTED_POSITIVE);
+      } else {
+        statisticsRecorder.recordIncorrectTestResult(TESTED_NEGATIVE);
+        return Optional.of(TESTED_NEGATIVE);
+      }
+    } else {
+      if (testEffectiveness < diseaseProperties.testNegativeAccuracy()) {
+        statisticsRecorder.recordCorrectTestResult(TESTED_NEGATIVE);
+        return Optional.of(TESTED_NEGATIVE);
+      } else {
+        statisticsRecorder.recordIncorrectTestResult(TESTED_POSITIVE);
+        return Optional.of(TESTED_POSITIVE);
+      }
     }
   }
 
@@ -120,6 +142,6 @@ public class AlertEventProcessor implements EventProcessor<AlertEvent> {
             .mean(progressionData.mean())
             .max(progressionData.max())
             .build();
-    return distributionSampler.getDistributionValue(distribution);
+    return distributionSampler.getDistributionValue(distribution) * properties.timeStepsPerDay();
   }
 }

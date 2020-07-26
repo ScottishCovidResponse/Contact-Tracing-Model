@@ -9,12 +9,15 @@ import org.immutables.value.Value;
 import uk.co.ramp.distribution.Distribution;
 import uk.co.ramp.distribution.DistributionSampler;
 import uk.co.ramp.distribution.ImmutableDistribution;
+import uk.co.ramp.io.types.StandardProperties;
 import uk.co.ramp.people.AlertStatus;
 import uk.co.ramp.people.Case;
 import uk.co.ramp.people.VirusStatus;
+import uk.co.ramp.statistics.StatisticsRecorder;
 
 class SingleCaseIsolationPolicy {
   private final IsolationProperties isolationProperties;
+  private final StandardProperties properties;
   private final DistributionSampler distributionSampler;
   private final Distribution infinityDistribution =
       ImmutableDistribution.builder()
@@ -33,11 +36,17 @@ class SingleCaseIsolationPolicy {
   }
 
   private final Map<Integer, IsolationMapValue> currentlyInIsolationMap = new HashMap<>();
+  private final StatisticsRecorder statisticsRecorder;
 
   SingleCaseIsolationPolicy(
-      IsolationProperties isolationProperties, DistributionSampler distributionSampler) {
+      IsolationProperties isolationProperties,
+      DistributionSampler distributionSampler,
+      StandardProperties properties,
+      StatisticsRecorder statisticsRecorder) {
     this.isolationProperties = isolationProperties;
     this.distributionSampler = distributionSampler;
+    this.properties = properties;
+    this.statisticsRecorder = statisticsRecorder;
   }
 
   private IsolationProperty findRelevantIsolationProperty(
@@ -171,7 +180,8 @@ class SingleCaseIsolationPolicy {
             exposedTime);
     int requiredIsolationTime =
         distributionSampler.getDistributionValue(
-            matchingIsolationProperty.isolationTimeDistribution().orElse(infinityDistribution));
+                matchingIsolationProperty.isolationTimeDistribution().orElse(infinityDistribution))
+            * properties.timeStepsPerDay();
     double threshold =
         distributionSampler.getDistributionValue(
             isolationProperties.isolationProbabilityDistributionThreshold());
@@ -197,6 +207,10 @@ class SingleCaseIsolationPolicy {
                       val, matchingIsolationProperty, startOfIsolationTime, requiredIsolationTime)
                   : null);
     }
+
+    if (willIsolate && requiredIsolationTime > 0)
+      statisticsRecorder.recordDaysInIsolation(id, requiredIsolationTime);
+
     return willIsolate;
   }
 }

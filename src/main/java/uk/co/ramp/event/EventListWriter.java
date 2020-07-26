@@ -15,6 +15,7 @@ import org.apache.logging.log4j.Logger;
 import uk.co.ramp.event.types.ImmutableFormattedEvent;
 import uk.co.ramp.io.csv.CsvException;
 import uk.co.ramp.io.csv.CsvWriter;
+import uk.co.ramp.io.types.StandardProperties;
 
 public class EventListWriter {
   public static final String EVENTS_CSV = "events.csv";
@@ -23,14 +24,17 @@ public class EventListWriter {
   private final FormattedEventFactory formattedEventFactory;
   private final CompletionEventListGroup eventList;
   private final File outputFolder;
+  private final StandardProperties properties;
 
   EventListWriter(
       FormattedEventFactory formattedEventFactory,
       CompletionEventListGroup eventList,
+      StandardProperties properties,
       File outputFolder) {
     this.formattedEventFactory = formattedEventFactory;
     this.eventList = eventList;
     this.outputFolder = outputFolder;
+    this.properties = properties;
   }
 
   public void output() {
@@ -66,7 +70,11 @@ public class EventListWriter {
     List<ImmutableFormattedEvent> finalList =
         Stream.of(alertEvents, infectionEvents, virusEvents)
             .flatMap(s -> s)
-            .sorted(Comparator.comparingInt(ImmutableFormattedEvent::time))
+            .map(
+                e ->
+                    ImmutableFormattedEvent.copyOf(e)
+                        .withTime(e.time() / (double) properties.timeStepsPerDay()))
+            .sorted(Comparator.comparingDouble(ImmutableFormattedEvent::time))
             .collect(Collectors.toList());
 
     try (Writer writer = new FileWriter(new File(outputFolder, EVENTS_CSV))) {

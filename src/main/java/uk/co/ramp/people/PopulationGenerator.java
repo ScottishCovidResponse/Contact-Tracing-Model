@@ -63,6 +63,7 @@ public class PopulationGenerator {
               ? Gender.FEMALE
               : Gender.MALE;
       double isolationCompliance = dataGenerator.nextUniform(0, 1);
+      double reportingCompliance = dataGenerator.nextUniform(0, 1);
       double health = dataGenerator.nextUniform(0, 1);
 
       population.put(
@@ -72,6 +73,7 @@ public class PopulationGenerator {
                   .id(i)
                   .age(age)
                   .isolationCompliance(isolationCompliance)
+                  .reportingCompliance(reportingCompliance)
                   .gender(gender)
                   .health(health)
                   .build()));
