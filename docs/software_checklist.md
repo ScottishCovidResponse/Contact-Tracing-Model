@@ -6,15 +6,15 @@ This checklist is part of ongoing work on a model scoresheet for SCRC models. It
 
 ### Model / software name
 
-> Model / software name here
+> Contact-Tracing-Model
 
 ### Date
 
-> Date here
+> 29/07/2020
 
 ### Version identifier
 
-> Version identifier here
+> 1.0-SNAPSHOT
 
 ## Overall statement
 
@@ -22,7 +22,11 @@ Do we have sufficient confidence in the correctness of the software to trust the
 
 This is your overall judgement on the level of confidence based on all the aspects of the checklist. There is no formulaic way to arrive at this overall assessment based on the individual checklist answers but please explain how the measures in place combine to reach this level of confidence and make clear any caveats (eg applies for certain ways of using the software and not others).
 
-> Overall statement here
+> - [ ] Yes
+> - [x] Yes, with caveats
+> - [ ] No
+>
+> Documentation needs updating. The data pipeline is not yet being used.  There could be more high-level tests.  Everything else is looking pretty good.
 
 ## Checklist
 
@@ -37,10 +41,10 @@ Additionally, for each question please explain the situation and include any rel
 - Is there up-to-date documentation which explains precisely how to run the code to reproduce existing results? 
 
 > - [ ] Sufficiently addressed
-> - [ ] Some work remaining or caveats
+> - [X] Some work remaining or caveats
 > - [ ] Needs to be addressed
 > 
-> Response here
+> Input data and git hash are not yet recorded, but this will soon be addressed with data pipeline integration.  Results are reproducible.  Seeds can be specified up front or recorded. Library versions are listed in build.gradle.  Documentation for how to run the code is up to date.
 
 ### Are there appropriate tests?  (And are they automated?)
 
@@ -51,10 +55,10 @@ Additionally, for each question please explain the situation and include any rel
 - Is everything you need to run the tests (including documentation) in the repository (or the data pipeline where appropriate)?
 
 > - [ ] Sufficiently addressed
-> - [ ] Some work remaining or caveats
+> - [X] Some work remaining or caveats
 > - [ ] Needs to be addressed
 > 
-> Response here
+> There is ~90% unit test coverage, with tests running in CI, but no regression or top level testing yet.
 
 ### Are the scientific results of runs robust to different ways of running the code?
 
@@ -65,22 +69,22 @@ Additionally, for each question please explain the situation and include any rel
 
 (We don't require bitwise identical results here, but the broad conclusions after looking at the results of the test case should be the same.) 
 
-> - [ ] Sufficiently addressed
+> - [X] Sufficiently addressed
 > - [ ] Some work remaining or caveats
 > - [ ] Needs to be addressed
 > 
-> Response here
+> This is straight-forward with Java.
 
 ### Has any sort of automated code checking been applied?
 
 - For C++, this might just be the compiler output when run with "all warnings". It could also be more extensive static analysis. For other languages, it could be e.g. pylint, StaticLint.jl, etc.
 - If there are possible issues reported by such a tool, have they all been either fixed or understood to not be important?
 
-> - [ ] Sufficiently addressed
+> - [X] Sufficiently addressed
 > - [ ] Some work remaining or caveats
 > - [ ] Needs to be addressed
 > 
-> Response here
+> The code has been run against Sonarqube and any bugs, vulnerabilities and code smells are reviewed and addressed as part of the reviewing process.
 
 ### Is the code clean, generally understandable and readable and written according to good software engineering principles?
 
@@ -88,11 +92,11 @@ Additionally, for each question please explain the situation and include any rel
 - Commented where necessary?
 - Avoiding red flags such as very long functions, global variables, copy and pasted code, etc.?
 
-> - [ ] Sufficiently addressed
+> - [X] Sufficiently addressed
 > - [ ] Some work remaining or caveats
 > - [ ] Needs to be addressed
 > 
-> Response here
+> The code is generally well laid out and self-commenting.
 
 ### Is there sufficient documentation?
 
@@ -103,10 +107,10 @@ Additionally, for each question please explain the situation and include any rel
 - Is all the documentation up to date? 
 
 > - [ ] Sufficiently addressed
-> - [ ] Some work remaining or caveats
+> - [X] Some work remaining or caveats
 > - [ ] Needs to be addressed
 > 
-> Response here
+> There is user, developer and algorithm documentation.  (The developer and technical documentation are the same document.)  It is currently being updated.
 
 ### Is there suitable collaboration infrastructure?
 
@@ -115,19 +119,19 @@ Additionally, for each question please explain the situation and include any rel
 - Is an issue tracker used?
 - Are there contribution guidelines?
 
-> - [ ] Sufficiently addressed
+> - [X] Sufficiently addressed
 > - [ ] Some work remaining or caveats
 > - [ ] Needs to be addressed
 > 
-> Response here
+> GitHub for issue tracking, reviews, version control and CI, licence included.
 
 ### Are software dependencies listed and of appropriate quality?
 
-> - [ ] Sufficiently addressed
+> - [X] Sufficiently addressed
 > - [ ] Some work remaining or caveats
 > - [ ] Needs to be addressed
 > 
-> Response here
+> Libraries are listed in build.gradle and of appropriate quality.
 
 ### Is input and output data handled carefully?
 
@@ -136,6 +140,6 @@ Additionally, for each question please explain the situation and include any rel
 
 > - [ ] Sufficiently addressed
 > - [ ] Some work remaining or caveats
-> - [ ] Needs to be addressed
+> - [X] Needs to be addressed
 > 
-> Response here
+> The code is not yet using the data pipeline. It is appropriately parameterized.
