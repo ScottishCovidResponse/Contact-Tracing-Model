@@ -456,11 +456,65 @@ Figure 11. Infection map example
 
 ### Run Contact Data
 
+The runContactData method within Outbreak.java is where the main calculations in the code are triggered. 
+
+## Event Runner
+
+The events within the model are handled by a group of lists that contain specific events that can occur in the model. These are:
+
+1.	Alert Event
+2.	Contact Event
+3.	Infection Event
+4.	Virus Event
+
+Each of these events are processed in different ways and can trigger other events to occur at a future time. 
+
+![](RunContactData.png)
+
+### Contact Event
+
+Contact events are set in the contacts.csv file. They involve the interaction between two people at a given time. The duration/proximity of the event is measured using the weight parameter. 
+
+When a contact event takes place the two people are assessed based on their Virus Statuses, this allows the model to assess if the contact has the potential to spread the infection. One or both of the contacts may be in isolation, so the contact may not take place. The isolation policies are expanded upon below. 
+
+![](ContactEvent.png)
+
+### Alert Event
+
+TODO: Rewrite
+### Infection Event
+
+TODO: Rewrite
+### Virus Event
+
 
 TODO: Rewrite
 
+## Isolation Policy
+
+The isolation policy logic is stored in the policy.isolation package. A list of policies is input from the isolationPolicies.json file. These include policies for global, virus status, alert status and a default. The default policy will typically be to not isolate. Each policy has a priority value which allows the most relevant policy to be chosen. 
 
 
+### Global Policies
+Global policies are based on the proportion of the population infected. For example, a “stay at home” policy may be put into place if more than 10% of the population are infected, whereas a “stay alert” policy may be in place if between 5-10% of the population are infected. These values are as an example and can be configured in the input. 
+
+### 	Virus Status Policies
+An isolation policy can be defined based on the virus status of an individual. For example, symptomatic individuals may be required to stay at home for a defined period. The proportion required to isolate and duration of the isolation can be defined in the input. 
+
+
+### 	Alert Status Policies
+A policy can be defined for any of the alert statuses, much like with a virus status, the proportion required to isolate and duration of the isolation can be defined in the input. 
+
+
+### 	Determining Isolation Policy
+
+The isolation status of all individuals is stored in a map. These are used to determine if an individual has already been isolation, in which case they may not need a further isolation applied to them. 
+
+![](IsIsolating.png)
+
+The policies are grouped, sorted and selected by:
+
+![](FindPolicy.png)
 
 ## Assumptions
 
