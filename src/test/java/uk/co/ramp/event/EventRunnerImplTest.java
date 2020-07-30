@@ -142,10 +142,10 @@ public class EventRunnerImplTest {
 
     var processedEvents =
         List.of(
-            mockProcessedAlertEventValue1,
-            mockProcessedAlertEventValue2,
+            mockProcessedAlertEventValue4,
             mockProcessedAlertEventValue3,
-            mockProcessedAlertEventValue4);
+            mockProcessedAlertEventValue2,
+            mockProcessedAlertEventValue1);
     when(processedEventsGrouper.groupProcessedEventResults(eq(processedEvents)))
         .thenReturn(mockAggregatedProcessedEvent);
   }
