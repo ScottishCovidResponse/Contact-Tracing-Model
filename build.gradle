@@ -30,7 +30,7 @@ dependencies {
     implementation 'com.fasterxml.jackson.dataformat:jackson-dataformat-csv:2.11.0'
     implementation "org.immutables:value-annotations:2.8.8"
     implementation "org.immutables:gson:2.8.8"
-    implementation 'com.github.ScottishCovidResponse:data_pipeline_api:e32a0e4' // TODO replace e32a0e4 with data_pipeline_api release tag number once >= 0.7.0 is released
+    implementation 'com.github.ScottishCovidResponse:data_pipeline_api:master-SNAPSHOT' // TODO replace master-SNAPSHOT with data_pipeline_api release tag number once >= 0.7.0 is released
     compile group: 'com.fasterxml.jackson.datatype', name: 'jackson-datatype-guava', version: '2.11.1'
     compile group: 'com.fasterxml.jackson.datatype', name: 'jackson-datatype-jdk8', version: '2.11.1'
     testAnnotationProcessor "org.immutables:value:2.8.8"
