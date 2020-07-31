@@ -10,19 +10,9 @@ import uk.ramp.distribution.ImmutableDistribution;
 
 public class DiseasePropertiesReader {
   private final StandardApi dataPipelineApi;
-  private final long seed;
-  private final boolean isSeeded;
-
-  public DiseasePropertiesReader(StandardApi dataPipelineApi, long seed) {
-    this.dataPipelineApi = dataPipelineApi;
-    this.seed = seed;
-    this.isSeeded = true;
-  }
 
   public DiseasePropertiesReader(StandardApi dataPipelineApi) {
     this.dataPipelineApi = dataPipelineApi;
-    this.seed = 0;
-    this.isSeeded = false;
   }
 
   public DiseaseProperties read() {
@@ -95,11 +85,7 @@ public class DiseasePropertiesReader {
   }
 
   private Distribution readDistribution(String dataProduct, String component) {
-    Distribution dist = dataPipelineApi.readDistribution(dataProduct, component);
-    if (isSeeded) {
-      dist.underlyingDistribution().reseedRandomGenerator(seed);
-    }
-    return dist;
+    return dataPipelineApi.readDistribution(dataProduct, component);
   }
 
   private double readEstimate(String dataProduct, String component) {

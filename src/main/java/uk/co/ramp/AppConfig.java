@@ -141,22 +141,12 @@ public class AppConfig {
 
   @Bean
   public DiseaseProperties diseaseProperties(StandardApi dataPipelineApi) {
-    var seed = parsedSeed();
-    if (seed.isPresent()) {
-      return new DiseasePropertiesReader(dataPipelineApi, seed.getAsLong()).read();
-    } else {
-      return new DiseasePropertiesReader(dataPipelineApi).read();
-    }
+    return new DiseasePropertiesReader(dataPipelineApi).read();
   }
 
   @Bean
   public PopulationProperties populationProperties(StandardApi dataPipelineApi) {
-    var seed = parsedSeed();
-    if (seed.isPresent()) {
-      return new PopulationPropertiesReader(dataPipelineApi, seed.getAsLong()).read();
-    } else {
-      return new PopulationPropertiesReader(dataPipelineApi).read();
-    }
+    return new PopulationPropertiesReader(dataPipelineApi).read();
   }
 
   @Bean
