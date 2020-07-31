@@ -13,9 +13,10 @@ public class PopulationPropertiesReader {
   }
 
   public PopulationProperties read() {
-    double genderBalance = dataPipelineApi.readEstimate("CTM", "gender-balance").doubleValue();
+    double genderBalance =
+        dataPipelineApi.readEstimate("population_parameters", "gender-balance").doubleValue();
     Distribution populationDistribution =
-        dataPipelineApi.readDistribution("CTM", "population-distribution");
+        dataPipelineApi.readDistribution("population_parameters", "population-distribution");
 
     return ImmutablePopulationProperties.builder()
         .genderBalance(genderBalance)

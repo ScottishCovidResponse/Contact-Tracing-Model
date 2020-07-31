@@ -67,9 +67,11 @@ public class PopulationPropertiesReaderTest {
   @Before
   public void setUp() {
     this.dataPipelineApi = mock(StandardApi.class);
-    when(dataPipelineApi.readDistribution(eq("CTM"), eq("population-distribution")))
+    when(dataPipelineApi.readDistribution(
+            eq("population_parameters"), eq("population-distribution")))
         .thenReturn(distribution);
-    when(dataPipelineApi.readEstimate(eq("CTM"), eq("gender-balance"))).thenReturn(0.99);
+    when(dataPipelineApi.readEstimate(eq("population_parameters"), eq("gender-balance")))
+        .thenReturn(0.99);
   }
 
   @Test

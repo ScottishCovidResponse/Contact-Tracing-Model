@@ -49,6 +49,7 @@ scale = 5.0
 type = "point-estimate"
 value = 8.0
 
+
 [time-recovery-sev-distribution]
 type = "distribution"
 distribution = "exponential"
