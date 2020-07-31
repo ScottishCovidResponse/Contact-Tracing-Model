@@ -78,7 +78,7 @@ public class InitialCaseReaderTest {
         logSpy.getOutput(),
         containsString("An IOException was thrown while populating the initial cases."));
     Assert.assertThat(
-        logSpy.getOutput(), containsString("This file doesn't exist (No such file or directory)"));
+        logSpy.getOutput(), containsString("This file doesn't exist"));
     Assert.assertThat(
         logSpy.getOutput(),
         containsString("The set of initial cases is 0 long, when 10 was requested"));
