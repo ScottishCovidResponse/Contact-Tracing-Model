@@ -67,14 +67,14 @@ public class PopulationPropertiesReaderTest {
   @Before
   public void setUp() {
     this.dataPipelineApi = mock(StandardApi.class);
-    when(dataPipelineApi.readDistribution(eq("parameter"), eq("population-distribution")))
+    when(dataPipelineApi.readDistribution(eq("CTM"), eq("population-distribution")))
         .thenReturn(distribution);
-    when(dataPipelineApi.readEstimate(eq("parameter"), eq("gender-balance"))).thenReturn(0.99);
+    when(dataPipelineApi.readEstimate(eq("CTM"), eq("gender-balance"))).thenReturn(0.99);
   }
 
   @Test
   public void testRead() {
-    var reader = new PopulationPropertiesReader(dataPipelineApi, 123);
+    var reader = new PopulationPropertiesReader(dataPipelineApi);
     PopulationProperties populationProperties = reader.read();
 
     assertThat(populationProperties.genderBalance()).isCloseTo(0.99, offset(1e-6));
