@@ -3,12 +3,7 @@ package uk.co.ramp.event;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
-import uk.co.ramp.event.types.AlertEvent;
-import uk.co.ramp.event.types.ContactEvent;
-import uk.co.ramp.event.types.EventRunner;
-import uk.co.ramp.event.types.InfectionEvent;
-import uk.co.ramp.event.types.ProcessedEventResult;
-import uk.co.ramp.event.types.VirusEvent;
+import uk.co.ramp.event.types.*;
 
 public class EventRunnerImpl implements EventRunner {
   private final EventProcessorRunner<AlertEvent> alertEventRunner;
@@ -46,10 +41,10 @@ public class EventRunnerImpl implements EventRunner {
     // process existing events
     List<ProcessedEventResult> processedResults =
         Stream.of(
-                alertEventRunner.run(eventList.getNewAlertEvents(time)),
-                contactEventRunner.run(eventList.getNewContactEvents(time)),
+                virusEventRunner.run(eventList.getNewVirusEvents(time)),
                 infectionEventRunner.run(eventList.getNewInfectionEvents(time)),
-                virusEventRunner.run(eventList.getNewVirusEvents(time)))
+                contactEventRunner.run(eventList.getNewContactEvents(time)),
+                alertEventRunner.run(eventList.getNewAlertEvents(time)))
             .collect(Collectors.toList());
 
     ProcessedEventResult eventResults =
