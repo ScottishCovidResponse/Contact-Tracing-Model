@@ -65,7 +65,7 @@ public class PopulationGeneratorTest {
 
   @Test
   public void generate() {
-    int popSize = 10000;
+    int popSize = 20000;
     StandardProperties runSettings = mock(StandardProperties.class);
     when(runSettings.populationSize()).thenReturn(popSize);
     populationGenerator.setRunProperties(runSettings);

@@ -1,0 +1,47 @@
+data_directory: data/input
+access_log: access-{run_id}.yaml
+fail_on_hash_mismatch: True
+run_id: runId
+
+read:
+#  - where:
+#      data_product: human/mixing-matrix
+#      component: mixing-matrix
+#  - where:
+#      data_product: human/commutes
+#  - where:
+#      data_product: human/compartment-transition
+#  - where:
+#      data_product: human/population
+#      version: 0.1.0
+
+
+write:
+  - where:
+      {}
+    use:
+      source: contact_tracing_model
+
+  - where:
+      data_product: parameter
+      component: output-events
+    use:
+      filename: events.csv
+
+  - where:
+      data_product: parameter
+      component: output-infection-map
+    use:
+      filename: infectionMap.txt
+
+  - where:
+      data_product: parameter
+      component: output-r-value
+    use:
+      filename: rValue.csv
+
+  - where:
+      data_product: parameter
+      component: output-stats
+    use:
+      filename: stats.txt

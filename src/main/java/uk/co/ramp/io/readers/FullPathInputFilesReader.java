@@ -31,10 +31,8 @@ public class FullPathInputFilesReader {
         ImmutableInputFiles.builder()
             .contactData(getFilePath(baseInputFiles.contactData()))
             .ageData(getFilePath(baseInputFiles.ageData()))
-            .diseaseSettings(getFilePath(baseInputFiles.diseaseSettings()))
             .initialExposures(getFilePath(baseInputFiles.initialExposures()))
             .isolationPolicies(getFilePath(baseInputFiles.isolationPolicies()))
-            .populationSettings(getFilePath(baseInputFiles.populationSettings()))
             .runSettings(getFilePath(baseInputFiles.runSettings()))
             .tracingPolicies(getFilePath(baseInputFiles.tracingPolicies()))
             .build();

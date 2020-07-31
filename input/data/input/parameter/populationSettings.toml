@@ -1,0 +1,9 @@
+[gender-balance]
+type = "point-estimate"
+value = 0.99
+
+[population-distribution]
+type = "distribution"
+distribution = "categorical"
+bins = ["[0,14]", "[15,24]", "[25,54]", "[55,64]", "[65,90]"]
+weights = [0.1759, 0.1171, 0.4029, 0.1222, 0.1819]

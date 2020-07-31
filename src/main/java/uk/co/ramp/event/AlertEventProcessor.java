@@ -4,19 +4,20 @@ import static uk.co.ramp.people.AlertStatus.*;
 
 import java.util.List;
 import java.util.Optional;
+import org.apache.commons.math3.random.RandomGenerator;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import uk.co.ramp.Population;
-import uk.co.ramp.distribution.Distribution;
+import uk.co.ramp.distribution.BoundedDistribution;
 import uk.co.ramp.distribution.DistributionSampler;
-import uk.co.ramp.distribution.ImmutableDistribution;
+import uk.co.ramp.distribution.ImmutableBoundedDistribution;
 import uk.co.ramp.event.types.*;
 import uk.co.ramp.io.types.DiseaseProperties;
 import uk.co.ramp.io.types.StandardProperties;
 import uk.co.ramp.people.AlertStatus;
 import uk.co.ramp.statistics.StatisticsRecorder;
-import uk.co.ramp.utilities.ImmutableMeanMax;
-import uk.co.ramp.utilities.MeanMax;
+import uk.ramp.distribution.Distribution.DistributionType;
+import uk.ramp.distribution.ImmutableDistribution;
 
 public class AlertEventProcessor implements EventProcessor<AlertEvent> {
   private static final Logger LOGGER = LogManager.getLogger(AlertEventProcessor.class);
@@ -26,18 +27,21 @@ public class AlertEventProcessor implements EventProcessor<AlertEvent> {
   private final DistributionSampler distributionSampler;
   private final StandardProperties properties;
   private final StatisticsRecorder statisticsRecorder;
+  private final RandomGenerator rng;
 
   public AlertEventProcessor(
       Population population,
       StandardProperties properties,
       DiseaseProperties diseaseProperties,
       DistributionSampler distributionSampler,
-      StatisticsRecorder statisticsRecorder) {
+      StatisticsRecorder statisticsRecorder,
+      RandomGenerator rng) {
     this.population = population;
     this.diseaseProperties = diseaseProperties;
     this.distributionSampler = distributionSampler;
     this.properties = properties;
     this.statisticsRecorder = statisticsRecorder;
+    this.rng = rng;
   }
 
   @Override
@@ -117,12 +121,21 @@ public class AlertEventProcessor implements EventProcessor<AlertEvent> {
 
   int timeInStatus(AlertStatus newStatus) {
 
-    MeanMax progressionData;
+    BoundedDistribution progressionData;
     switch (newStatus) {
       case TESTED_POSITIVE:
       case TESTED_NEGATIVE:
       case ALERTED:
-        progressionData = ImmutableMeanMax.builder().mean(1).max(1).build();
+        progressionData =
+            ImmutableBoundedDistribution.builder()
+                .distribution(
+                    ImmutableDistribution.builder()
+                        .internalType(DistributionType.empirical)
+                        .empiricalSamples(List.of(1))
+                        .rng(rng)
+                        .build())
+                .max(1)
+                .build();
         break;
       case AWAITING_RESULT:
         progressionData = diseaseProperties.timeTestResult();
@@ -136,12 +149,6 @@ public class AlertEventProcessor implements EventProcessor<AlertEvent> {
         throw new IllegalStateException("Should not reach this state");
     }
 
-    Distribution distribution =
-        ImmutableDistribution.builder()
-            .type(diseaseProperties.progressionDistribution())
-            .mean(progressionData.mean())
-            .max(progressionData.max())
-            .build();
-    return distributionSampler.getDistributionValue(distribution) * properties.timeStepsPerDay();
+    return progressionData.getDistributionValue() * properties.timeStepsPerDay();
   }
 }

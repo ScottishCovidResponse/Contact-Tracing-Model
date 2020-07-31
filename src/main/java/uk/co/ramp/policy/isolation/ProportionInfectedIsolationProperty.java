@@ -1,13 +1,15 @@
 package uk.co.ramp.policy.isolation;
 
-import org.immutables.gson.Gson;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import org.immutables.value.Value;
-import uk.co.ramp.utilities.MinMax;
+import uk.co.ramp.utilities.ImmutableMinMax;
 
-@Gson.TypeAdapters
+@JsonSerialize
+@JsonDeserialize
 @Value.Immutable
 interface ProportionInfectedIsolationProperty {
-  MinMax proportionInfected();
+  ImmutableMinMax proportionInfected();
 
-  IsolationProperty isolationProperty();
+  ImmutableIsolationProperty isolationProperty();
 }

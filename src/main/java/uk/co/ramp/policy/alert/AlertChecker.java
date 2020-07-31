@@ -27,7 +27,7 @@ public class AlertChecker {
     this.distributionSampler = distributionSampler;
   }
 
-  private Optional<TracingPolicyItem> findPolicyItem(
+  private Optional<ImmutableTracingPolicyItem> findPolicyItem(
       VirusStatus virusStatusKey, AlertStatus alertStatusKey) {
     return tracingPolicy.policies().stream()
         .filter(p -> p.reporterVirusStatus() == virusStatusKey)
@@ -71,8 +71,10 @@ public class AlertChecker {
                         .id(id)
                         .time(
                             currentTime
-                                + distributionSampler.getDistributionValue(
-                                    tracingPolicyItem.get().timeDelayPerTraceLink()))
+                                + tracingPolicyItem
+                                    .get()
+                                    .timeDelayPerTraceLink()
+                                    .getDistributionValue())
                         .oldStatus(NONE)
                         .nextStatus(ALERTED)
                         .build());
@@ -82,9 +84,9 @@ public class AlertChecker {
 
   private boolean shouldPerformTracingForThisLink(TracingPolicyItem tracingPolicyItem) {
     var thresholdDistribution = tracingPolicy.probabilitySkippingTraceLinkThreshold();
-    var thresholdVal = distributionSampler.getDistributionValue(thresholdDistribution);
+    var thresholdVal = thresholdDistribution.getDistributionValue();
     var skipTracingDistribution = tracingPolicyItem.probabilitySkippingTraceLink();
-    var skipTracingVal = distributionSampler.getDistributionValue(skipTracingDistribution);
+    var skipTracingVal = skipTracingDistribution.getDistributionValue();
     return thresholdVal > skipTracingVal;
   }
 }

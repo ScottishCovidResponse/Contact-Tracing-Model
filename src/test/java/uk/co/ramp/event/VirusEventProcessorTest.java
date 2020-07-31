@@ -1,7 +1,6 @@
 package uk.co.ramp.event;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -20,7 +19,6 @@ import org.junit.Test;
 import org.springframework.test.util.ReflectionTestUtils;
 import uk.co.ramp.Population;
 import uk.co.ramp.TestUtils;
-import uk.co.ramp.distribution.Distribution;
 import uk.co.ramp.distribution.DistributionSampler;
 import uk.co.ramp.event.types.*;
 import uk.co.ramp.io.types.DiseaseProperties;
@@ -53,8 +51,8 @@ public class VirusEventProcessorTest {
 
     when(alertChecker.checkForAlert(eq(0), eq(NONE), eq(SYMPTOMATIC), eq(1)))
         .thenReturn(Stream.of(alertEvent));
-    when(distributionSampler.getDistributionValue(any()))
-        .thenAnswer(i -> ((int) Math.round(((Distribution) i.getArgument(0)).mean())));
+    //    when(distributionSampler.getDistributionValue(any()))
+    //        .thenAnswer(i -> ((int) Math.round(((BoundedDistribution) i.getArgument(0)).mean())));
 
     when(properties.timeStepsPerDay()).thenReturn(1);
 
@@ -123,7 +121,9 @@ public class VirusEventProcessorTest {
     VirusEvent evnt = processedEventResult.newVirusEvents().get(0);
 
     Assert.assertEquals(
-        event.time() + diseaseProperties.timeSymptomsOnset().mean() * properties.timeStepsPerDay(),
+        event.time()
+            + diseaseProperties.timeSymptomsOnset().getDistributionValue()
+                * properties.timeStepsPerDay(),
         evnt.time(),
         DELTA);
     Assert.assertEquals(0, evnt.id());
@@ -170,7 +170,8 @@ public class VirusEventProcessorTest {
     VirusEvent evnt = processedEventResult.newVirusEvents().get(0);
 
     Assert.assertEquals(
-        event.time() + diseaseProperties.timeLatent().mean() * properties.timeStepsPerDay(),
+        event.time()
+            + diseaseProperties.timeLatent().getDistributionValue() * properties.timeStepsPerDay(),
         evnt.time(),
         DELTA);
     Assert.assertEquals(0, evnt.id());

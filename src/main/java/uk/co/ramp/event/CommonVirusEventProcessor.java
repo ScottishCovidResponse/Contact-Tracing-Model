@@ -6,16 +6,14 @@ import java.util.List;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import uk.co.ramp.Population;
-import uk.co.ramp.distribution.Distribution;
+import uk.co.ramp.distribution.BoundedDistribution;
 import uk.co.ramp.distribution.DistributionSampler;
-import uk.co.ramp.distribution.ImmutableDistribution;
 import uk.co.ramp.event.types.CommonVirusEvent;
 import uk.co.ramp.event.types.Event;
 import uk.co.ramp.event.types.EventProcessor;
 import uk.co.ramp.io.types.DiseaseProperties;
 import uk.co.ramp.io.types.StandardProperties;
 import uk.co.ramp.people.VirusStatus;
-import uk.co.ramp.utilities.MeanMax;
 
 public abstract class CommonVirusEventProcessor<T extends Event> implements EventProcessor<T> {
   private static final Logger LOGGER = LogManager.getLogger(CommonVirusEventProcessor.class);
@@ -58,7 +56,7 @@ public abstract class CommonVirusEventProcessor<T extends Event> implements Even
 
   int timeInCompartment(VirusStatus currentStatus, VirusStatus newStatus) {
 
-    MeanMax progressionData;
+    BoundedDistribution progressionData;
     switch (currentStatus) {
       case EXPOSED:
         progressionData = diseaseProperties.timeLatent();
@@ -89,14 +87,7 @@ public abstract class CommonVirusEventProcessor<T extends Event> implements Even
         throw new EventException(message);
     }
 
-    Distribution distribution =
-        ImmutableDistribution.builder()
-            .type(diseaseProperties.progressionDistribution())
-            .mean(progressionData.mean())
-            .max(progressionData.max())
-            .build();
-
-    return distributionSampler.getDistributionValue(distribution) * properties.timeStepsPerDay();
+    return progressionData.getDistributionValue() * properties.timeStepsPerDay();
   }
 
   VirusStatus determineInfection(CommonVirusEvent e) {

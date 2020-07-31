@@ -1,13 +1,16 @@
 package uk.co.ramp.policy.alert;
 
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import java.util.List;
 import org.immutables.gson.Gson.TypeAdapters;
 import org.immutables.value.Value.Immutable;
-import uk.co.ramp.distribution.Distribution;
+import uk.co.ramp.distribution.BoundedDistribution;
 import uk.co.ramp.people.AlertStatus;
 import uk.co.ramp.people.VirusStatus;
 
-@TypeAdapters
+@JsonSerialize
+@JsonDeserialize
 @Immutable
 interface TracingPolicy {
   @TypeAdapters
@@ -19,18 +22,18 @@ interface TracingPolicy {
 
     int recentContactsLookBackTime();
 
-    Distribution timeDelayPerTraceLink();
+    BoundedDistribution timeDelayPerTraceLink();
 
-    Distribution probabilitySkippingTraceLink();
+    BoundedDistribution probabilitySkippingTraceLink();
   }
 
   String description();
 
-  List<TracingPolicyItem> policies();
+  List<ImmutableTracingPolicyItem> policies();
 
   int noOfTracingLevels();
 
-  Distribution probabilitySkippingTraceLinkThreshold();
+  BoundedDistribution probabilitySkippingTraceLinkThreshold();
 
   // TODO add Precondition checks to ensure each (reporterAlertStatus and reporterVirusStatus)
   // pairs are unique across all policy items.

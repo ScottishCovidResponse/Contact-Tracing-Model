@@ -1,5 +1,6 @@
 package uk.co.ramp.event;
 
+import org.apache.commons.math3.random.RandomDataGenerator;
 import org.springframework.boot.SpringBootConfiguration;
 import org.springframework.context.annotation.Bean;
 import uk.co.ramp.Population;
@@ -47,10 +48,16 @@ public class EventContext {
       InitialCaseReader initialCaseReader,
       AlertChecker alertChecker,
       CompletionEventListGroup eventList,
-      StatisticsRecorder statisticsRecorder) {
+      StatisticsRecorder statisticsRecorder,
+      RandomDataGenerator rng) {
     AlertEventProcessor alertEventProcessor =
         new AlertEventProcessor(
-            population, properties, diseaseProperties, distributionSampler, statisticsRecorder);
+            population,
+            properties,
+            diseaseProperties,
+            distributionSampler,
+            statisticsRecorder,
+            rng.getRandomGenerator());
     VirusEventProcessor virusEventProcessor =
         new VirusEventProcessor(
             population, properties, diseaseProperties, distributionSampler, alertChecker);

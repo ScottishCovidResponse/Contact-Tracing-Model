@@ -13,8 +13,6 @@ public class InputFilesReaderTest {
   private static final String mockInputLocations =
       "{\n"
           + "  \"runSettings\": \"runSettings.json\",\n"
-          + "  \"populationSettings\": \"populationSettings.json\",\n"
-          + "  \"diseaseSettings\": \"diseaseSettings.json\",\n"
           + "  \"contactData\": \"contactData.csv\",\n"
           + "  \"ageData\": \"ageData.csv\",\n"
           + "  \"initialExposures\": \"initialExposures.csv\",\n"
@@ -31,11 +29,9 @@ public class InputFilesReaderTest {
 
     var expectedInputLocation =
         ImmutableInputFiles.builder()
-            .diseaseSettings("diseaseSettings.json")
             .contactData("contactData.csv")
             .ageData("ageData.csv")
             .initialExposures("initialExposures.csv")
-            .populationSettings("populationSettings.json")
             .runSettings("runSettings.json")
             .tracingPolicies("tracingPolicies.json")
             .isolationPolicies("isolationPolicies.json")

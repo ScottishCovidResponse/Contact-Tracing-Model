@@ -1,0 +1,116 @@
+-
+  data_product: CTM
+  component: test-positive-accuracy
+  filename: parameter/diseaseSettings.toml
+-
+  data_product: CTM
+  component: test-negative-accuracy
+  filename: parameter/diseaseSettings.toml
+-
+  data_product: CTM
+  component: exposure-threshold
+  filename: parameter/diseaseSettings.toml
+-
+  data_product: CTM
+  component: exposure-probability-4-unit-contact
+  filename: parameter/diseaseSettings.toml
+-
+  data_product: CTM
+  component: exposure-exponent
+  filename: parameter/diseaseSettings.toml
+-
+  data_product: CTM
+  component: random-infection-rate
+  filename: parameter/diseaseSettings.toml
+-
+  data_product: CTM
+  component: time-latent-distribution
+  filename: parameter/diseaseSettings.toml
+-
+  data_product: CTM
+  component: time-latent-max
+  filename: parameter/diseaseSettings.toml
+-
+  data_product: CTM
+  component: time-recovery-asymp-distribution
+  filename: parameter/diseaseSettings.toml
+-
+  data_product: CTM
+  component: time-recovery-asymp-max
+  filename: parameter/diseaseSettings.toml
+-
+  data_product: CTM
+  component: time-recovery-symp-distribution
+  filename: parameter/diseaseSettings.toml
+-
+  data_product: CTM
+  component: time-recovery-symp-max
+  filename: parameter/diseaseSettings.toml
+-
+  data_product: CTM
+  component: time-recovery-sev-distribution
+  filename: parameter/diseaseSettings.toml
+-
+  data_product: CTM
+  component: time-recovery-sev-max
+  filename: parameter/diseaseSettings.toml
+-
+  data_product: CTM
+  component: time-symptoms-onset-distribution
+  filename: parameter/diseaseSettings.toml
+-
+  data_product: CTM
+  component: time-symptoms-onset-max
+  filename: parameter/diseaseSettings.toml
+-
+  data_product: CTM
+  component: time-decline-distribution
+  filename: parameter/diseaseSettings.toml
+-
+  data_product: CTM
+  component: time-decline-max
+  filename: parameter/diseaseSettings.toml
+-
+  data_product: CTM
+  component: time-death-distribution
+  filename: parameter/diseaseSettings.toml
+-
+  data_product: CTM
+  component: time-death-max
+  filename: parameter/diseaseSettings.toml
+-
+  data_product: CTM
+  component: time-test-administered-distribution
+  filename: parameter/diseaseSettings.toml
+-
+  data_product: CTM
+  component: time-test-administered-max
+  filename: parameter/diseaseSettings.toml
+-
+  data_product: CTM
+  component: time-test-result-distribution
+  filename: parameter/diseaseSettings.toml
+-
+  data_product: CTM
+  component: time-test-result-max
+  filename: parameter/diseaseSettings.toml
+-
+  data_product: CTM
+  component: gender-balance
+  filename: parameter/populationSettings.toml
+-
+  data_product: CTM
+  component: population-distribution
+  filename: parameter/populationSettings.toml
+#-
+#  data_product: CTM
+#  component: example-table
+#  filename: object/example4.h5
+#-
+#  data_product: CTM
+#  component: example-array
+#  filename: object/example5.h5
+#-
+#  data_product: CTM
+#  component: grid1km/10year/females
+#  filename: object/example5.h5

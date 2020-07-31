@@ -22,8 +22,6 @@ public class InputFilesReader {
     InputFiles properties =
         ImmutableInputFiles.builder()
             .runSettings("runSettings.json")
-            .diseaseSettings("diseaseSettings.json")
-            .populationSettings("populationSettings.json")
             .contactData("contactData.csv")
             .ageData("ageData.csv")
             .initialExposures("initialExposures.csv")

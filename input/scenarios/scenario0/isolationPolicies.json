@@ -5,15 +5,20 @@
   "defaultPolicy": {
     "id": "Default Policy",
     "isolationProbabilityDistribution": {
-      "type": "FLAT",
-      "mean": 0,
+      "distribution": {
+        "distribution": "empirical",
+        "empiricalSamples": [0]
+      },
       "max": 0
     },
     "priority": 0
   },
   "isolationProbabilityDistributionThreshold": {
-    "type": "LINEAR",
-    "mean": 50,
+    "distribution": {
+      "distribution": "categorical",
+      "bins": ["[0,100]"],
+      "weights": [1.0]
+    },
     "max": 100
   }
 }

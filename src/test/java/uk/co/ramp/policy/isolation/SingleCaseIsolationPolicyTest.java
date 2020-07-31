@@ -3,24 +3,19 @@ package uk.co.ramp.policy.isolation;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatIllegalStateException;
 import static org.mockito.AdditionalAnswers.returnsElementsOf;
-import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
-import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
-import static uk.co.ramp.distribution.ProgressionDistribution.FLAT;
-import static uk.co.ramp.distribution.ProgressionDistribution.LINEAR;
 import static uk.co.ramp.people.AlertStatus.*;
 import static uk.co.ramp.people.VirusStatus.*;
 
 import java.util.List;
+import org.apache.commons.math3.random.RandomGenerator;
 import org.junit.Before;
 import org.junit.Test;
-import org.mockito.Mockito;
 import uk.co.ramp.TestUtils;
-import uk.co.ramp.distribution.Distribution;
+import uk.co.ramp.distribution.BoundedDistribution;
 import uk.co.ramp.distribution.DistributionSampler;
-import uk.co.ramp.distribution.ImmutableDistribution;
 import uk.co.ramp.io.types.StandardProperties;
 import uk.co.ramp.people.AlertStatus;
 import uk.co.ramp.statistics.StatisticsRecorder;
@@ -29,37 +24,35 @@ import uk.co.ramp.utilities.MinMax;
 public class SingleCaseIsolationPolicyTest {
   private DistributionSampler distributionSampler;
   private StandardProperties properties = TestUtils.standardProperties();
-  private StatisticsRecorder statisticsRecorder = Mockito.mock(StatisticsRecorder.class);
+  private StatisticsRecorder statisticsRecorder = mock(StatisticsRecorder.class);
 
-  private final Distribution flatZeroPercent =
-      ImmutableDistribution.builder().mean(0).max(0).type(FLAT).build();
+  private final BoundedDistribution flatZeroPercent = mock(BoundedDistribution.class);
 
-  private final Distribution flatHundredPercent =
-      ImmutableDistribution.builder().mean(100).max(100).type(FLAT).build();
+  private final BoundedDistribution flatHundredPercent = mock(BoundedDistribution.class);
 
-  private final Distribution flatOneDay =
-      ImmutableDistribution.builder().mean(1).max(1).type(FLAT).build();
+  private final BoundedDistribution flatOneDay = mock(BoundedDistribution.class);
 
-  private final IsolationProperty defaultZeroIsolationProperty =
+  private final ImmutableIsolationProperty defaultZeroIsolationProperty =
       ImmutableIsolationProperty.builder()
           .id("zeroIsolationPolicy")
           .isolationProbabilityDistribution(flatZeroPercent)
           .priority(-1)
           .build();
 
-  private final VirusStatusIsolationProperty infectedSymptomaticHundredPercentIsolationProperty =
-      ImmutableVirusStatusIsolationProperty.builder()
-          .virusStatus(SYMPTOMATIC)
-          .isolationProperty(
-              ImmutableIsolationProperty.builder()
-                  .id("virusPolicyName1")
-                  .priority(1)
-                  .isolationProbabilityDistribution(flatHundredPercent)
-                  .isolationTimeDistribution(flatOneDay)
-                  .build())
-          .build();
+  private final ImmutableVirusStatusIsolationProperty
+      infectedSymptomaticHundredPercentIsolationProperty =
+          ImmutableVirusStatusIsolationProperty.builder()
+              .virusStatus(SYMPTOMATIC)
+              .isolationProperty(
+                  ImmutableIsolationProperty.builder()
+                      .id("virusPolicyName1")
+                      .priority(1)
+                      .isolationProbabilityDistribution(flatHundredPercent)
+                      .isolationTimeDistribution(flatOneDay)
+                      .build())
+              .build();
 
-  private final VirusStatusIsolationProperty recoveredZeroPercentIsolationProperty =
+  private final ImmutableVirusStatusIsolationProperty recoveredZeroPercentIsolationProperty =
       ImmutableVirusStatusIsolationProperty.builder()
           .virusStatus(RECOVERED)
           .isolationProperty(
@@ -71,7 +64,7 @@ public class SingleCaseIsolationPolicyTest {
                   .build())
           .build();
 
-  private final VirusStatusIsolationProperty deadZeroPercentIsolationProperty =
+  private final ImmutableVirusStatusIsolationProperty deadZeroPercentIsolationProperty =
       ImmutableVirusStatusIsolationProperty.builder()
           .virusStatus(DEAD)
           .isolationProperty(
@@ -83,19 +76,20 @@ public class SingleCaseIsolationPolicyTest {
                   .build())
           .build();
 
-  private final AlertStatusIsolationProperty testedPositiveHundredPercentIsolationProperty =
-      ImmutableAlertStatusIsolationProperty.builder()
-          .alertStatus(TESTED_POSITIVE)
-          .isolationProperty(
-              ImmutableIsolationProperty.builder()
-                  .id("alertedPolicyName1")
-                  .priority(0)
-                  .isolationProbabilityDistribution(flatHundredPercent)
-                  .isolationTimeDistribution(flatOneDay)
-                  .build())
-          .build();
+  private final ImmutableAlertStatusIsolationProperty
+      testedPositiveHundredPercentIsolationProperty =
+          ImmutableAlertStatusIsolationProperty.builder()
+              .alertStatus(TESTED_POSITIVE)
+              .isolationProperty(
+                  ImmutableIsolationProperty.builder()
+                      .id("alertedPolicyName1")
+                      .priority(0)
+                      .isolationProbabilityDistribution(flatHundredPercent)
+                      .isolationTimeDistribution(flatOneDay)
+                      .build())
+              .build();
 
-  private final AlertStatusIsolationProperty alertedHundredPercentIsolationProperty =
+  private final ImmutableAlertStatusIsolationProperty alertedHundredPercentIsolationProperty =
       ImmutableAlertStatusIsolationProperty.builder()
           .alertStatus(AlertStatus.ALERTED)
           .isolationProperty(
@@ -107,7 +101,7 @@ public class SingleCaseIsolationPolicyTest {
                   .build())
           .build();
 
-  private final ProportionInfectedIsolationProperty
+  private final ImmutableProportionInfectedIsolationProperty
       twentyPercentInfectedHundredPercentIsolationProperty =
           ImmutableProportionInfectedIsolationProperty.builder()
               .proportionInfected(MinMax.of(20, 100))
@@ -119,7 +113,7 @@ public class SingleCaseIsolationPolicyTest {
                       .build())
               .build();
 
-  private final ProportionInfectedIsolationProperty
+  private final ImmutableProportionInfectedIsolationProperty
       twentyPercentInfectedZeroPercentIsolationProperty =
           ImmutableProportionInfectedIsolationProperty.builder()
               .proportionInfected(MinMax.of(20, 100))
@@ -131,11 +125,10 @@ public class SingleCaseIsolationPolicyTest {
                       .build())
               .build();
 
-  private final Distribution flatThreeDays =
-      ImmutableDistribution.builder().mean(3).max(3).type(FLAT).build();
+  private final BoundedDistribution flatThreeDays = mock(BoundedDistribution.class);
 
-  private final Distribution thresholdLinearDistribution =
-      ImmutableDistribution.builder().mean(50).max(100).type(LINEAR).build();
+  private final BoundedDistribution thresholdLinearBoundedDistribution =
+      mock(BoundedDistribution.class);
 
   private final int currentTime = 0;
   private final int exposedTime = 0;
@@ -144,9 +137,22 @@ public class SingleCaseIsolationPolicyTest {
   private final double proportionOfPopulationInfected = 0.0;
 
   private SingleCaseIsolationPolicy isolationPolicy;
+  private RandomGenerator rng;
 
   @Before
   public void setUp() {
+    when(flatZeroPercent.getDistributionValue()).thenReturn(0);
+    when(flatZeroPercent.max()).thenReturn(0D);
+    when(flatHundredPercent.getDistributionValue()).thenReturn(100);
+    when(flatHundredPercent.max()).thenReturn(100D);
+    when(flatOneDay.getDistributionValue()).thenReturn(1);
+    when(flatOneDay.max()).thenReturn(1D);
+    when(flatThreeDays.getDistributionValue()).thenReturn(3);
+    when(flatThreeDays.max()).thenReturn(3D);
+    when(thresholdLinearBoundedDistribution.getDistributionValue())
+        .thenAnswer(returnsElementsOf(List.of(5, 15, 25, 35, 45, 55, 65, 75, 85, 95)));
+    when(thresholdLinearBoundedDistribution.max()).thenReturn(100D);
+
     IsolationProperties isolationProperties =
         ImmutableIsolationProperties.builder()
             .defaultPolicy(defaultZeroIsolationProperty)
@@ -156,19 +162,25 @@ public class SingleCaseIsolationPolicyTest {
             .addAlertStatusPolicies(testedPositiveHundredPercentIsolationProperty)
             .addAlertStatusPolicies(alertedHundredPercentIsolationProperty)
             .addGlobalIsolationPolicies(twentyPercentInfectedHundredPercentIsolationProperty)
-            .isolationProbabilityDistributionThreshold(thresholdLinearDistribution)
+            .isolationProbabilityDistributionThreshold(thresholdLinearBoundedDistribution)
             .build();
 
     this.distributionSampler = mock(DistributionSampler.class);
-    when(this.distributionSampler.getDistributionValue(any(Distribution.class)))
-        .thenAnswer(invocation -> (int) invocation.getArgument(0, Distribution.class).mean());
+    //    when(this.distributionSampler.getDistributionValue(any(BoundedDistribution.class)))
+    //        .thenAnswer(invocation -> (int) invocation.getArgument(0,
+    // BoundedDistribution.class).mean());
+    when(distributionSampler.uniformBetweenZeroAndOne())
+        .thenAnswer(
+            returnsElementsOf(List.of(0.05, 0.15, 0.25, 0.35, 0.45, 0.55, 0.65, 0.75, 0.85, 0.95)));
+
     when(this.distributionSampler.uniformBetweenZeroAndOne()).thenReturn(0.5);
     when(this.distributionSampler.uniformInteger(anyInt()))
         .thenAnswer(invocation -> invocation.getArgument(0, int.class) / 2);
-
+    rng = mock(RandomGenerator.class);
+    when(rng.nextDouble()).thenReturn(0.5D);
     this.isolationPolicy =
         new SingleCaseIsolationPolicy(
-            isolationProperties, distributionSampler, properties, statisticsRecorder);
+            isolationProperties, distributionSampler, properties, statisticsRecorder, rng);
   }
 
   @Test
@@ -388,12 +400,12 @@ public class SingleCaseIsolationPolicyTest {
                     .build())
             .addGlobalIsolationPolicies(twentyPercentInfectedZeroPercentIsolationProperty)
             .defaultPolicy(defaultZeroIsolationProperty)
-            .isolationProbabilityDistributionThreshold(thresholdLinearDistribution)
+            .isolationProbabilityDistributionThreshold(thresholdLinearBoundedDistribution)
             .build();
 
     var isolationPolicy =
         new SingleCaseIsolationPolicy(
-            isolationProperties, distributionSampler, properties, statisticsRecorder);
+            isolationProperties, distributionSampler, properties, statisticsRecorder, rng);
 
     var proportionOfPopulationInfected = 0.25;
     assertThat(
@@ -424,12 +436,12 @@ public class SingleCaseIsolationPolicyTest {
                             .build())
                     .build())
             .defaultPolicy(defaultZeroIsolationProperty)
-            .isolationProbabilityDistributionThreshold(thresholdLinearDistribution)
+            .isolationProbabilityDistributionThreshold(thresholdLinearBoundedDistribution)
             .build();
 
     var isolationPolicy =
         new SingleCaseIsolationPolicy(
-            isolationProperties, distributionSampler, properties, statisticsRecorder);
+            isolationProperties, distributionSampler, properties, statisticsRecorder, rng);
 
     var proportionOfPopulationInfected = 0.25;
     assertThat(
@@ -446,7 +458,7 @@ public class SingleCaseIsolationPolicyTest {
 
   @Test
   public void testShouldIsolate_Symptomatic_NotTested_StaysIsolated() {
-    VirusStatusIsolationProperty virusStatusIsolationProperty =
+    ImmutableVirusStatusIsolationProperty virusStatusIsolationProperty =
         ImmutableVirusStatusIsolationProperty.builder()
             .virusStatus(SYMPTOMATIC)
             .isolationProperty(
@@ -463,12 +475,12 @@ public class SingleCaseIsolationPolicyTest {
             .addVirusStatusPolicies(virusStatusIsolationProperty)
             .addGlobalIsolationPolicies(twentyPercentInfectedZeroPercentIsolationProperty)
             .defaultPolicy(defaultZeroIsolationProperty)
-            .isolationProbabilityDistributionThreshold(thresholdLinearDistribution)
+            .isolationProbabilityDistributionThreshold(thresholdLinearBoundedDistribution)
             .build();
 
     var isolationPolicy =
         new SingleCaseIsolationPolicy(
-            isolationProperties, distributionSampler, properties, statisticsRecorder);
+            isolationProperties, distributionSampler, properties, statisticsRecorder, rng);
 
     assertThat(
             isolationPolicy.isIndividualInIsolation(
@@ -514,7 +526,7 @@ public class SingleCaseIsolationPolicyTest {
 
   @Test
   public void testShouldIsolate_Symptomatic_TestedPositive_StaysIsolated() {
-    VirusStatusIsolationProperty virusStatusIsolationProperty =
+    ImmutableVirusStatusIsolationProperty virusStatusIsolationProperty =
         ImmutableVirusStatusIsolationProperty.builder()
             .virusStatus(SYMPTOMATIC)
             .isolationProperty(
@@ -531,12 +543,12 @@ public class SingleCaseIsolationPolicyTest {
             .addVirusStatusPolicies(virusStatusIsolationProperty)
             .addGlobalIsolationPolicies(twentyPercentInfectedZeroPercentIsolationProperty)
             .defaultPolicy(defaultZeroIsolationProperty)
-            .isolationProbabilityDistributionThreshold(thresholdLinearDistribution)
+            .isolationProbabilityDistributionThreshold(thresholdLinearBoundedDistribution)
             .build();
 
     var isolationPolicy =
         new SingleCaseIsolationPolicy(
-            isolationProperties, distributionSampler, properties, statisticsRecorder);
+            isolationProperties, distributionSampler, properties, statisticsRecorder, rng);
 
     assertThat(
             isolationPolicy.isIndividualInIsolation(
@@ -582,7 +594,7 @@ public class SingleCaseIsolationPolicyTest {
 
   @Test
   public void testShouldIsolate_Symptomatic_TestedNegative_StopsIsolating() {
-    VirusStatusIsolationProperty virusStatusIsolationProperty =
+    ImmutableVirusStatusIsolationProperty virusStatusIsolationProperty =
         ImmutableVirusStatusIsolationProperty.builder()
             .virusStatus(SYMPTOMATIC)
             .isolationProperty(
@@ -599,12 +611,12 @@ public class SingleCaseIsolationPolicyTest {
             .addVirusStatusPolicies(virusStatusIsolationProperty)
             .addGlobalIsolationPolicies(twentyPercentInfectedZeroPercentIsolationProperty)
             .defaultPolicy(defaultZeroIsolationProperty)
-            .isolationProbabilityDistributionThreshold(thresholdLinearDistribution)
+            .isolationProbabilityDistributionThreshold(thresholdLinearBoundedDistribution)
             .build();
 
     var isolationPolicy =
         new SingleCaseIsolationPolicy(
-            isolationProperties, distributionSampler, properties, statisticsRecorder);
+            isolationProperties, distributionSampler, properties, statisticsRecorder, rng);
 
     assertThat(
             isolationPolicy.isIndividualInIsolation(
@@ -650,7 +662,7 @@ public class SingleCaseIsolationPolicyTest {
 
   @Test
   public void testShouldIsolate_InfectedAgain_SecondIsolation() {
-    VirusStatusIsolationProperty virusStatusIsolationProperty =
+    ImmutableVirusStatusIsolationProperty virusStatusIsolationProperty =
         ImmutableVirusStatusIsolationProperty.builder()
             .virusStatus(SYMPTOMATIC)
             .isolationProperty(
@@ -667,12 +679,12 @@ public class SingleCaseIsolationPolicyTest {
             .addVirusStatusPolicies(virusStatusIsolationProperty)
             .addGlobalIsolationPolicies(twentyPercentInfectedZeroPercentIsolationProperty)
             .defaultPolicy(defaultZeroIsolationProperty)
-            .isolationProbabilityDistributionThreshold(thresholdLinearDistribution)
+            .isolationProbabilityDistributionThreshold(thresholdLinearBoundedDistribution)
             .build();
 
     var isolationPolicy =
         new SingleCaseIsolationPolicy(
-            isolationProperties, distributionSampler, properties, statisticsRecorder);
+            isolationProperties, distributionSampler, properties, statisticsRecorder, rng);
 
     assertThat(
             isolationPolicy.isIndividualInIsolation(
@@ -778,7 +790,7 @@ public class SingleCaseIsolationPolicyTest {
 
   @Test
   public void testShouldIsolate_InfectedAgain_WithinExpiry_SecondIsolation() {
-    VirusStatusIsolationProperty virusStatusIsolationProperty =
+    ImmutableVirusStatusIsolationProperty virusStatusIsolationProperty =
         ImmutableVirusStatusIsolationProperty.builder()
             .virusStatus(SYMPTOMATIC)
             .isolationProperty(
@@ -795,12 +807,12 @@ public class SingleCaseIsolationPolicyTest {
             .addVirusStatusPolicies(virusStatusIsolationProperty)
             .addGlobalIsolationPolicies(twentyPercentInfectedZeroPercentIsolationProperty)
             .defaultPolicy(defaultZeroIsolationProperty)
-            .isolationProbabilityDistributionThreshold(thresholdLinearDistribution)
+            .isolationProbabilityDistributionThreshold(thresholdLinearBoundedDistribution)
             .build();
 
     var isolationPolicy =
         new SingleCaseIsolationPolicy(
-            isolationProperties, distributionSampler, properties, statisticsRecorder);
+            isolationProperties, distributionSampler, properties, statisticsRecorder, rng);
 
     assertThat(
             isolationPolicy.isIndividualInIsolation(
@@ -876,7 +888,7 @@ public class SingleCaseIsolationPolicyTest {
 
   @Test
   public void testShouldIsolate_AlertTestNegativeThenInfected_SecondIsolation() {
-    VirusStatusIsolationProperty virusStatusIsolationProperty =
+    ImmutableVirusStatusIsolationProperty virusStatusIsolationProperty =
         ImmutableVirusStatusIsolationProperty.builder()
             .virusStatus(SYMPTOMATIC)
             .isolationProperty(
@@ -888,7 +900,7 @@ public class SingleCaseIsolationPolicyTest {
                     .build())
             .build();
 
-    AlertStatusIsolationProperty alertStatusIsolationProperty =
+    ImmutableAlertStatusIsolationProperty alertStatusIsolationProperty =
         ImmutableAlertStatusIsolationProperty.builder()
             .alertStatus(AlertStatus.ALERTED)
             .isolationProperty(
@@ -906,12 +918,12 @@ public class SingleCaseIsolationPolicyTest {
             .addAlertStatusPolicies(alertStatusIsolationProperty)
             .addGlobalIsolationPolicies(twentyPercentInfectedZeroPercentIsolationProperty)
             .defaultPolicy(defaultZeroIsolationProperty)
-            .isolationProbabilityDistributionThreshold(thresholdLinearDistribution)
+            .isolationProbabilityDistributionThreshold(thresholdLinearBoundedDistribution)
             .build();
 
     var isolationPolicy =
         new SingleCaseIsolationPolicy(
-            isolationProperties, distributionSampler, properties, statisticsRecorder);
+            isolationProperties, distributionSampler, properties, statisticsRecorder, rng);
 
     assertThat(
             isolationPolicy.isIndividualInIsolation(
@@ -987,7 +999,7 @@ public class SingleCaseIsolationPolicyTest {
 
   @Test
   public void testShouldIsolate_AlertTestNegativeThenInfected_SecondIsolation_Short_Cycle() {
-    VirusStatusIsolationProperty virusStatusIsolationProperty =
+    ImmutableVirusStatusIsolationProperty virusStatusIsolationProperty =
         ImmutableVirusStatusIsolationProperty.builder()
             .virusStatus(SYMPTOMATIC)
             .isolationProperty(
@@ -999,7 +1011,7 @@ public class SingleCaseIsolationPolicyTest {
                     .build())
             .build();
 
-    AlertStatusIsolationProperty alertStatusIsolationProperty =
+    ImmutableAlertStatusIsolationProperty alertStatusIsolationProperty =
         ImmutableAlertStatusIsolationProperty.builder()
             .alertStatus(AlertStatus.ALERTED)
             .isolationProperty(
@@ -1017,12 +1029,12 @@ public class SingleCaseIsolationPolicyTest {
             .addAlertStatusPolicies(alertStatusIsolationProperty)
             .addGlobalIsolationPolicies(twentyPercentInfectedZeroPercentIsolationProperty)
             .defaultPolicy(defaultZeroIsolationProperty)
-            .isolationProbabilityDistributionThreshold(thresholdLinearDistribution)
+            .isolationProbabilityDistributionThreshold(thresholdLinearBoundedDistribution)
             .build();
 
     var isolationPolicy =
         new SingleCaseIsolationPolicy(
-            isolationProperties, distributionSampler, properties, statisticsRecorder);
+            isolationProperties, distributionSampler, properties, statisticsRecorder, rng);
 
     assertThat(
             isolationPolicy.isIndividualInIsolation(
@@ -1117,12 +1129,12 @@ public class SingleCaseIsolationPolicyTest {
                             .build())
                     .build())
             .defaultPolicy(defaultZeroIsolationProperty)
-            .isolationProbabilityDistributionThreshold(thresholdLinearDistribution)
+            .isolationProbabilityDistributionThreshold(thresholdLinearBoundedDistribution)
             .build();
 
     var isolationPolicy =
         new SingleCaseIsolationPolicy(
-            isolationProperties, distributionSampler, properties, statisticsRecorder);
+            isolationProperties, distributionSampler, properties, statisticsRecorder, rng);
     var proportionOfPopulationInfectious = 0.0;
     assertThat(
             isolationPolicy.isIndividualInIsolation(
@@ -1356,7 +1368,7 @@ public class SingleCaseIsolationPolicyTest {
 
   @Test
   public void testShouldIsolate_ThrowsException_NonDeterministicPolicyOutcome() {
-    AlertStatusIsolationProperty alertStatusProperty =
+    ImmutableAlertStatusIsolationProperty alertStatusProperty =
         ImmutableAlertStatusIsolationProperty.builder()
             .alertStatus(AlertStatus.ALERTED)
             .isolationProperty(
@@ -1368,7 +1380,7 @@ public class SingleCaseIsolationPolicyTest {
                     .build())
             .build();
 
-    VirusStatusIsolationProperty virusStatusProperty =
+    ImmutableVirusStatusIsolationProperty virusStatusProperty =
         ImmutableVirusStatusIsolationProperty.builder()
             .virusStatus(SYMPTOMATIC)
             .isolationProperty(
@@ -1386,12 +1398,12 @@ public class SingleCaseIsolationPolicyTest {
             .addAlertStatusPolicies(alertStatusProperty)
             .addGlobalIsolationPolicies(twentyPercentInfectedHundredPercentIsolationProperty)
             .defaultPolicy(defaultZeroIsolationProperty)
-            .isolationProbabilityDistributionThreshold(thresholdLinearDistribution)
+            .isolationProbabilityDistributionThreshold(thresholdLinearBoundedDistribution)
             .build();
 
     var isolationPolicy =
         new SingleCaseIsolationPolicy(
-            isolationProperties, distributionSampler, properties, statisticsRecorder);
+            isolationProperties, distributionSampler, properties, statisticsRecorder, rng);
 
     assertThatIllegalStateException()
         .isThrownBy(
@@ -1409,39 +1421,34 @@ public class SingleCaseIsolationPolicyTest {
 
   @Test
   public void testShouldIsolate_70PercentChance() {
-    var seventyFlatDistribution =
-        ImmutableDistribution.builder().mean(70).max(70).type(FLAT).build();
+    var seventyFlatDistribution = mock(BoundedDistribution.class);
+    when(seventyFlatDistribution.getDistributionValue()).thenReturn(75);
+    when(seventyFlatDistribution.max()).thenReturn(75D);
 
-    ProportionInfectedIsolationProperty twentyPercentInfectedSeventyPercentIsolationProperty =
-        ImmutableProportionInfectedIsolationProperty.builder()
-            .proportionInfected(MinMax.of(20, 100))
-            .isolationProperty(
-                ImmutableIsolationProperty.builder()
-                    .id("globalPolicyName1")
-                    .priority(1)
-                    .isolationProbabilityDistribution(seventyFlatDistribution)
-                    .build())
-            .build();
+    ImmutableProportionInfectedIsolationProperty
+        twentyPercentInfectedSeventyPercentIsolationProperty =
+            ImmutableProportionInfectedIsolationProperty.builder()
+                .proportionInfected(MinMax.of(20, 100))
+                .isolationProperty(
+                    ImmutableIsolationProperty.builder()
+                        .id("globalPolicyName1")
+                        .priority(1)
+                        .isolationProbabilityDistribution(seventyFlatDistribution)
+                        .build())
+                .build();
 
     IsolationProperties isolationProperties =
         ImmutableIsolationProperties.builder()
             .defaultPolicy(defaultZeroIsolationProperty)
             .addGlobalIsolationPolicies(twentyPercentInfectedSeventyPercentIsolationProperty)
-            .isolationProbabilityDistributionThreshold(thresholdLinearDistribution)
+            .isolationProbabilityDistributionThreshold(thresholdLinearBoundedDistribution)
             .build();
 
     var proportionOfPopulationInfectious = 0.2;
 
-    when(this.distributionSampler.getDistributionValue(eq(thresholdLinearDistribution)))
-        .thenAnswer(returnsElementsOf(List.of(5, 15, 25, 35, 45, 55, 65, 75, 85, 95)));
-    when(this.distributionSampler.getDistributionValue(eq(seventyFlatDistribution))).thenReturn(75);
-    when(this.distributionSampler.uniformBetweenZeroAndOne())
-        .thenAnswer(
-            returnsElementsOf(List.of(0.05, 0.15, 0.25, 0.35, 0.45, 0.55, 0.65, 0.75, 0.85, 0.95)));
-
     var isolationPolicy =
         new SingleCaseIsolationPolicy(
-            isolationProperties, distributionSampler, properties, statisticsRecorder);
+            isolationProperties, distributionSampler, properties, statisticsRecorder, rng);
 
     assertThat(
             isolationPolicy.isIndividualInIsolation(
@@ -1563,12 +1570,12 @@ public class SingleCaseIsolationPolicyTest {
                             .startOfIsolationTime(IsolationStartTimeType.CONTACT_TIME)
                             .build())
                     .build())
-            .isolationProbabilityDistributionThreshold(thresholdLinearDistribution)
+            .isolationProbabilityDistributionThreshold(thresholdLinearBoundedDistribution)
             .build();
 
     var isolationPolicy =
         new SingleCaseIsolationPolicy(
-            isolationProperties, distributionSampler, properties, statisticsRecorder);
+            isolationProperties, distributionSampler, properties, statisticsRecorder, rng);
     var exposedTime = 0;
     var currentTime = 0;
     assertThat(
@@ -1584,7 +1591,7 @@ public class SingleCaseIsolationPolicyTest {
 
     isolationPolicy =
         new SingleCaseIsolationPolicy(
-            isolationProperties, distributionSampler, properties, statisticsRecorder);
+            isolationProperties, distributionSampler, properties, statisticsRecorder, rng);
     exposedTime = 0;
     currentTime = 1;
     assertThat(
@@ -1600,7 +1607,7 @@ public class SingleCaseIsolationPolicyTest {
 
     isolationPolicy =
         new SingleCaseIsolationPolicy(
-            isolationProperties, distributionSampler, properties, statisticsRecorder);
+            isolationProperties, distributionSampler, properties, statisticsRecorder, rng);
     exposedTime = 0;
     currentTime = 2;
     assertThat(
@@ -1633,12 +1640,12 @@ public class SingleCaseIsolationPolicyTest {
                             .startOfIsolationTime(IsolationStartTimeType.ABSOLUTE)
                             .build())
                     .build())
-            .isolationProbabilityDistributionThreshold(thresholdLinearDistribution)
+            .isolationProbabilityDistributionThreshold(thresholdLinearBoundedDistribution)
             .build();
 
     var isolationPolicy =
         new SingleCaseIsolationPolicy(
-            isolationProperties, distributionSampler, properties, statisticsRecorder);
+            isolationProperties, distributionSampler, properties, statisticsRecorder, rng);
 
     var exposedTime = 0;
     var currentTime = 0;
@@ -1655,7 +1662,7 @@ public class SingleCaseIsolationPolicyTest {
 
     isolationPolicy =
         new SingleCaseIsolationPolicy(
-            isolationProperties, distributionSampler, properties, statisticsRecorder);
+            isolationProperties, distributionSampler, properties, statisticsRecorder, rng);
     exposedTime = 0;
     currentTime = 1;
     assertThat(
@@ -1671,7 +1678,7 @@ public class SingleCaseIsolationPolicyTest {
 
     isolationPolicy =
         new SingleCaseIsolationPolicy(
-            isolationProperties, distributionSampler, properties, statisticsRecorder);
+            isolationProperties, distributionSampler, properties, statisticsRecorder, rng);
     exposedTime = 0;
     currentTime = 2;
     assertThat(

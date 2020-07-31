@@ -4,30 +4,29 @@ import com.google.common.base.Preconditions;
 import org.immutables.gson.Gson.TypeAdapters;
 import org.immutables.value.Value.Check;
 import org.immutables.value.Value.Immutable;
-import uk.co.ramp.distribution.ProgressionDistribution;
-import uk.co.ramp.utilities.MeanMax;
+import uk.co.ramp.distribution.BoundedDistribution;
 
 @TypeAdapters
 @Immutable
 public interface DiseaseProperties {
 
-  MeanMax timeLatent();
+  BoundedDistribution timeLatent();
 
-  MeanMax timeRecoveryAsymp();
+  BoundedDistribution timeRecoveryAsymp();
 
-  MeanMax timeRecoverySymp();
+  BoundedDistribution timeRecoverySymp();
 
-  MeanMax timeRecoverySev();
+  BoundedDistribution timeRecoverySev();
 
-  MeanMax timeSymptomsOnset();
+  BoundedDistribution timeSymptomsOnset();
 
-  MeanMax timeDecline();
+  BoundedDistribution timeDecline();
 
-  MeanMax timeDeath();
+  BoundedDistribution timeDeath();
 
-  MeanMax timeTestAdministered();
+  BoundedDistribution timeTestAdministered();
 
-  MeanMax timeTestResult();
+  BoundedDistribution timeTestResult();
 
   double testPositiveAccuracy();
 
@@ -40,8 +39,6 @@ public interface DiseaseProperties {
   double exposureProbability4UnitContact();
 
   double exposureExponent();
-
-  ProgressionDistribution progressionDistribution();
 
   @Check
   default void check() {

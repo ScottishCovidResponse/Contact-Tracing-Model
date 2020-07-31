@@ -1,13 +1,15 @@
 package uk.co.ramp.policy.isolation;
 
-import org.immutables.gson.Gson;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import org.immutables.value.Value;
 import uk.co.ramp.people.AlertStatus;
 
-@Gson.TypeAdapters
+@JsonSerialize
+@JsonDeserialize
 @Value.Immutable
 interface AlertStatusIsolationProperty {
   AlertStatus alertStatus();
 
-  IsolationProperty isolationProperty();
+  ImmutableIsolationProperty isolationProperty();
 }

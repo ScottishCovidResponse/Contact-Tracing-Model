@@ -29,10 +29,8 @@ public class FullPathInputFilesReaderTest {
       ImmutableInputFiles.builder()
           .contactData("contactData.csv")
           .ageData("ageData.csv")
-          .diseaseSettings("diseaseSettings.json")
           .initialExposures("initialExposures.csv")
           .isolationPolicies("isolationPolicies.json")
-          .populationSettings("populationSettings.json")
           .runSettings("runSettings.json")
           .tracingPolicies("tracingPolicies.json")
           .build();
@@ -59,10 +57,8 @@ public class FullPathInputFilesReaderTest {
         ImmutableInputFiles.builder()
             .contactData("defaultInputFolder/contactData.csv")
             .ageData("defaultInputFolder/ageData.csv")
-            .diseaseSettings("defaultInputFolder/diseaseSettings.json")
             .initialExposures("defaultInputFolder/initialExposures.csv")
             .isolationPolicies("overrideFolder1/isolationPolicies.json")
-            .populationSettings("defaultInputFolder/populationSettings.json")
             .runSettings("defaultInputFolder/runSettings.json")
             .tracingPolicies("overrideFolder1/tracingPolicies.json")
             .build();

@@ -11,9 +11,8 @@ import uk.co.ramp.TestUtils;
 public class AgeRetrieverTest {
   @Test
   public void findAge() throws FileNotFoundException {
-    var ageRetriever =
-        new AgeRetriever(TestUtils.populationProperties(), TestUtils.dataGenerator(), Map.of());
-    int n = 10000;
+    var ageRetriever = new AgeRetriever(TestUtils.populationProperties(), Map.of());
+    int n = 20000;
     List<Integer> ages = new ArrayList<>();
     for (int i = 0; i < n; i++) {
       ages.add(ageRetriever.findAge(i));

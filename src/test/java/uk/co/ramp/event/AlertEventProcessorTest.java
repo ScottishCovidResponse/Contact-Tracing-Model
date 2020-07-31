@@ -1,12 +1,12 @@
 package uk.co.ramp.event;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
 import static uk.co.ramp.people.AlertStatus.*;
 import static uk.co.ramp.people.VirusStatus.SUSCEPTIBLE;
 
+import org.apache.commons.math3.random.RandomGenerator;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Rule;
@@ -32,6 +32,7 @@ public class AlertEventProcessorTest {
   private DistributionSampler distributionSampler;
   private AlertEventProcessor eventProcessor;
   private StatisticsRecorder statisticsRecorder;
+  private RandomGenerator rng;
 
   private static final double DELTA = 1e-6;;
 
@@ -43,16 +44,22 @@ public class AlertEventProcessorTest {
     population = mock(Population.class);
     distributionSampler = mock(DistributionSampler.class);
     statisticsRecorder = mock(StatisticsRecorderImpl.class);
-    when(distributionSampler.getDistributionValue(any())).thenReturn(1);
     when(statisticsRecorder.getFalsePositives()).thenReturn(0);
     when(statisticsRecorder.getFalseNegatives()).thenReturn(0);
+    rng = mock(RandomGenerator.class);
+    when(rng.nextDouble()).thenReturn(0.5D);
   }
 
   @Test
   public void timeInStatus() {
     eventProcessor =
         new AlertEventProcessor(
-            population, properties, diseaseProperties, distributionSampler, statisticsRecorder);
+            population,
+            properties,
+            diseaseProperties,
+            distributionSampler,
+            statisticsRecorder,
+            rng);
 
     int time = eventProcessor.timeInStatus(NONE);
     Assert.assertEquals(0, time);
@@ -62,13 +69,16 @@ public class AlertEventProcessorTest {
 
     time = eventProcessor.timeInStatus(REQUESTED_TEST);
     Assert.assertEquals(
-        diseaseProperties.timeTestAdministered().mean() * properties.timeStepsPerDay(),
+        diseaseProperties.timeTestAdministered().getDistributionValue()
+            * properties.timeStepsPerDay(),
         time,
         DELTA);
 
     time = eventProcessor.timeInStatus(AWAITING_RESULT);
     Assert.assertEquals(
-        diseaseProperties.timeTestResult().mean() * properties.timeStepsPerDay(), time, DELTA);
+        diseaseProperties.timeTestResult().getDistributionValue() * properties.timeStepsPerDay(),
+        time,
+        DELTA);
 
     time = eventProcessor.timeInStatus(TESTED_NEGATIVE);
     Assert.assertEquals(properties.timeStepsPerDay(), time);
@@ -85,7 +95,12 @@ public class AlertEventProcessorTest {
 
     eventProcessor =
         new AlertEventProcessor(
-            population, properties, diseaseProperties, distributionSampler, statisticsRecorder);
+            population,
+            properties,
+            diseaseProperties,
+            distributionSampler,
+            statisticsRecorder,
+            rng);
 
     AlertEvent event =
         ImmutableAlertEvent.builder().time(0).id(0).oldStatus(NONE).nextStatus(ALERTED).build();
@@ -104,7 +119,10 @@ public class AlertEventProcessorTest {
     Assert.assertEquals(0, eventResult.newCompletedVirusEvents().size());
     AlertEvent evnt = eventResult.newAlertEvents().get(0);
 
-    Assert.assertEquals(properties.timeStepsPerDay(), evnt.time());
+    Assert.assertEquals(
+        diseaseProperties.timeTestAdministered().getDistributionValue()
+            * properties.timeStepsPerDay(),
+        evnt.time());
     Assert.assertEquals(0, evnt.id());
     Assert.assertEquals(ALERTED, evnt.oldStatus());
     Assert.assertEquals(REQUESTED_TEST, evnt.nextStatus());
@@ -118,7 +136,12 @@ public class AlertEventProcessorTest {
     when(population.getAlertStatus(eq(0))).thenReturn(REQUESTED_TEST);
     eventProcessor =
         new AlertEventProcessor(
-            population, properties, diseaseProperties, distributionSampler, statisticsRecorder);
+            population,
+            properties,
+            diseaseProperties,
+            distributionSampler,
+            statisticsRecorder,
+            rng);
 
     var processedEvents = eventProcessor.processEvent(event);
     assertThat(processedEvents.newCompletedAlertEvents()).isEmpty();
@@ -139,7 +162,12 @@ public class AlertEventProcessorTest {
 
     eventProcessor =
         new AlertEventProcessor(
-            population, properties, diseaseProperties, distributionSampler, statisticsRecorder);
+            population,
+            properties,
+            diseaseProperties,
+            distributionSampler,
+            statisticsRecorder,
+            rng);
 
     when(distributionSampler.uniformBetweenZeroAndOne()).thenReturn(0.99d);
     assertThat(eventProcessor.determineTestResult(true)).hasValue(TESTED_NEGATIVE);

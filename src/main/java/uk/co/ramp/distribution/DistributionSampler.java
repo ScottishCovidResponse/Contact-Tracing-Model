@@ -18,38 +18,6 @@ public class DistributionSampler {
     return rng.nextInt(0, max);
   }
 
-  public int getDistributionValue(Distribution distribution) {
-    ProgressionDistribution distributionType = distribution.type();
-    double mean = distribution.mean();
-    double max = distribution.max();
-
-    int value = (int) Math.round(mean);
-    double sample;
-    switch (distributionType) {
-      case GAUSSIAN:
-        sample = rng.nextGaussian(mean, mean / 2d);
-        break;
-      case LINEAR:
-        sample = rng.nextUniform(mean - (max - mean), max);
-        break;
-      case EXPONENTIAL:
-        sample = rng.nextExponential(mean);
-        break;
-      case FLAT:
-      default:
-        return value;
-    }
-
-    value = (int) Math.round(sample);
-
-    // recursing to avoid artificial peaks at 1 and max
-    if (value < 1 || value > max) {
-      value = getDistributionValue(distribution);
-    }
-
-    return value;
-  }
-
   public int resampleDays(int[] outcomes, double[] timeSpread) {
     return new EnumeratedIntegerDistribution(rng.getRandomGenerator(), outcomes, timeSpread)
         .sample();
