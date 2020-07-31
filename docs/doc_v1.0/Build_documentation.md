@@ -473,48 +473,78 @@ Each of these events are processed in different ways and can trigger other event
 
 ### Contact Event
 
-Contact events are set in the contacts.csv file. They involve the interaction between two people at a given time. The duration/proximity of the event is measured using the weight parameter. 
+Contact events are set in the contacts.csv file. They involve the interaction between two people at a given time. 
+The duration/proximity of the event is measured using the weight parameter. 
 
-When a contact event takes place the two people are assessed based on their Virus Statuses, this allows the model to assess if the contact has the potential to spread the infection. One or both of the contacts may be in isolation, so the contact may not take place. The isolation policies are expanded upon below. 
+When a contact event takes place the two people are assessed based on their Virus Statuses, this allows the model to 
+assess if the contact has the potential to spread the infection. One or both of the contacts may be in isolation, 
+so the contact may not take place. The isolation policies are expanded upon below. 
 
 ![](ContactEvent.png)
 
 ### Alert Event
 
-TODO: Rewrite
+The alert event processor is used to cycle through the states of disease alert that a member of the population can be in at any one point. 
+
+![](image6.png)
+
+The person has their status set to a corresponding status and the next status is calculated for a time in the future. 
+The result of the test is determined by whether the individual is currently infectious and a dice roll against the accuracy 
+of the test. The number of false positives and negatives is recorded as an output statistic. 
+
+![](AlertEvent.png)
+
 ### Infection Event
 
 TODO: Rewrite
 ### Virus Event
 
-
-TODO: Rewrite
+A virus event is the progression of the virus through in compartments. The initial infection is not included as this is 
+an Infection Event. The processing of the event is very similar to the previous sections, with the exception of checking 
+for alerts based on the virus status of the individual. This process creates alert events for people who have been in 
+contact with the individual. The individual has a reportingCompliance field that may reduce the chance of an individual
+reporting symptoms. The alert checker and tracing policies are covered below.  
 
 ## Isolation Policy
 
-The isolation policy logic is stored in the policy.isolation package. A list of policies is input from the isolationPolicies.json file. These include policies for global, virus status, alert status and a default. The default policy will typically be to not isolate. Each policy has a priority value which allows the most relevant policy to be chosen. 
+The isolation policy logic is stored in the policy.isolation package. A list of policies is input from the 
+isolationPolicies.json file. These include policies for global, virus status, alert status and a default. 
+The default policy will typically be to not isolate. Each policy has a priority value which allows the most relevant policy to be chosen. 
 
 
 ### Global Policies
-Global policies are based on the proportion of the population infected. For example, a “stay at home” policy may be put into place if more than 10% of the population are infected, whereas a “stay alert” policy may be in place if between 5-10% of the population are infected. These values are as an example and can be configured in the input. 
+Global policies are based on the proportion of the population infected. For example, a “stay at home” policy may be put 
+into place if more than 10% of the population are infected, whereas a “stay alert” policy may be in place if 
+between 5-10% of the population are infected. These values are as an example and can be configured in the input. 
 
 ### 	Virus Status Policies
-An isolation policy can be defined based on the virus status of an individual. For example, symptomatic individuals may be required to stay at home for a defined period. The proportion required to isolate and duration of the isolation can be defined in the input. 
+An isolation policy can be defined based on the virus status of an individual. For example, symptomatic individuals 
+may be required to stay at home for a defined period. The proportion required to isolate and duration of the isolation can be defined in the input. 
 
 
 ### 	Alert Status Policies
-A policy can be defined for any of the alert statuses, much like with a virus status, the proportion required to isolate and duration of the isolation can be defined in the input. 
+A policy can be defined for any of the alert statuses, much like with a virus status, the proportion required to isolate 
+and duration of the isolation can be defined in the input. 
 
 
 ### 	Determining Isolation Policy
 
-The isolation status of all individuals is stored in a map. These are used to determine if an individual has already been isolation, in which case they may not need a further isolation applied to them. 
+The isolation status of all individuals is stored in a map. These are used to determine if an individual has already 
+been isolation, in which case they may not need a further isolation applied to them. 
 
 ![](IsIsolating.png)
 
 The policies are grouped, sorted and selected by:
 
 ![](FindPolicy.png)
+
+## Tracing Policy
+
+A tracing policy is triggered when an individual reports themselves as having symptoms. The policy input has been 
+covered above. A combination of Virus and Alert statuses are used to trigger contact tracing. It is possible to look 
+back through the contacts over a number of days and inform individuals that they should isolate. 
+
+![](CheckForAlert.png)
 
 ## Assumptions
 
