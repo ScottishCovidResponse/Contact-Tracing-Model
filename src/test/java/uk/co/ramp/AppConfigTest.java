@@ -12,7 +12,6 @@ import java.util.Random;
 import org.apache.commons.math3.random.RandomDataGenerator;
 import org.junit.Assert;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Rule;
 import org.junit.Test;
 import org.mockito.Mockito;
@@ -92,6 +91,7 @@ public class AppConfigTest {
     Assert.assertTrue(diseaseProperties.timeTestResult().max() > 0);
 
     Assert.assertTrue(diseaseProperties.testPositiveAccuracy() > 0);
+    Assert.assertTrue(diseaseProperties.testNegativeAccuracy() > 0);
     Assert.assertTrue(diseaseProperties.exposureThreshold() > 0);
     Assert.assertTrue(
         diseaseProperties.exposureProbability4UnitContact() > 0.
@@ -161,9 +161,7 @@ public class AppConfigTest {
         containsString("Additional Seed information not provided, using internal random seed."));
   }
 
-  // TODO: can't see why this is failing... it works in debug for me.
   @Test
-  @Ignore
   public void randomDataGeneratorWithArgs() throws ConfigurationException {
 
     Random random = TestUtils.getRandom();

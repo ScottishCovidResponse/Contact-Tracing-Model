@@ -27,7 +27,6 @@ import uk.co.ramp.io.types.DiseaseProperties;
 import uk.co.ramp.io.types.StandardProperties;
 import uk.co.ramp.people.Case;
 import uk.co.ramp.people.Human;
-import uk.co.ramp.statistics.StatisticsWriter;
 
 @SuppressWarnings("unchecked")
 @DirtiesContext
@@ -50,8 +49,6 @@ public class OutbreakTest {
   @Before
   public void setUp() throws FileNotFoundException {
     this.diseaseProperties = TestUtils.diseaseProperties();
-    StatisticsWriter statisticsWriter = mock(StatisticsWriter.class);
-    ReflectionTestUtils.setField(outbreak, "statisticsWriter", statisticsWriter);
   }
 
   @Test
@@ -137,7 +134,7 @@ public class OutbreakTest {
             .filter(status -> status == SUSCEPTIBLE)
             .count();
 
-    Map<Double, CmptRecord> records = outbreak.propagate();
+    Map<Integer, CmptRecord> records = outbreak.propagate();
 
     long susceptiblePost =
         population.values().stream()

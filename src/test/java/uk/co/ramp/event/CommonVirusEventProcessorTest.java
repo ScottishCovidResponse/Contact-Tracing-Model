@@ -1,6 +1,7 @@
 package uk.co.ramp.event;
 
 import static org.hamcrest.CoreMatchers.containsString;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static uk.co.ramp.people.VirusStatus.*;
@@ -11,14 +12,12 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
-import org.junit.runner.RunWith;
 import org.mockito.Mockito;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Import;
-import org.springframework.test.annotation.DirtiesContext;
-import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.util.ReflectionTestUtils;
-import uk.co.ramp.*;
+import uk.co.ramp.LogSpy;
+import uk.co.ramp.Population;
+import uk.co.ramp.TestUtils;
+import uk.co.ramp.distribution.Distribution;
 import uk.co.ramp.distribution.DistributionSampler;
 import uk.co.ramp.distribution.ProgressionDistribution;
 import uk.co.ramp.event.types.CommonVirusEvent;
@@ -30,25 +29,26 @@ import uk.co.ramp.io.types.StandardProperties;
 import uk.co.ramp.people.Case;
 import uk.co.ramp.people.Human;
 import uk.co.ramp.people.VirusStatus;
-import uk.co.ramp.policy.alert.TracingPolicyContext;
 import uk.co.ramp.utilities.ImmutableMeanMax;
 
-@RunWith(SpringRunner.class)
-@DirtiesContext
-@Import({TestUtils.class, AppConfig.class, TestConfig.class, TracingPolicyContext.class})
 public class CommonVirusEventProcessorTest {
   @Rule public LogSpy logSpy = new LogSpy();
 
   private CommonVirusEventProcessor<Event> eventProcessor;
 
   private DiseaseProperties diseaseProperties;
-  @Autowired private StandardProperties properties;
-
-  @Autowired public DistributionSampler distributionSampler;
+  public DistributionSampler distributionSampler;
+  private StandardProperties properties;
 
   @Before
   public void setUp() throws Exception {
     diseaseProperties = TestUtils.diseaseProperties();
+    distributionSampler = mock(DistributionSampler.class);
+    when(distributionSampler.uniformBetweenZeroAndOne()).thenReturn(0.5d);
+    when(distributionSampler.getDistributionValue(any()))
+        .thenAnswer(i -> ((int) Math.round(((Distribution) i.getArgument(0)).mean())));
+    properties = mock(StandardProperties.class);
+    when(properties.timeStepsPerDay()).thenReturn(1);
     Human human = mock(Human.class);
     when(human.health()).thenReturn(-1d);
     Case aCase = new Case(human);
@@ -126,30 +126,40 @@ public class CommonVirusEventProcessorTest {
 
     ReflectionTestUtils.setField(eventProcessor, "diseaseProperties", diseaseProperties);
 
+    final double delta = 1e-6;
+
     Assert.assertEquals(
-        diseaseProperties.timeLatent().mean(),
-        eventProcessor.timeInCompartment(EXPOSED, ASYMPTOMATIC));
+        diseaseProperties.timeLatent().mean() * properties.timeStepsPerDay(),
+        eventProcessor.timeInCompartment(EXPOSED, ASYMPTOMATIC),
+        delta);
     Assert.assertEquals(
-        diseaseProperties.timeRecoveryAsymp().mean(),
-        eventProcessor.timeInCompartment(ASYMPTOMATIC, RECOVERED));
+        diseaseProperties.timeRecoveryAsymp().mean() * properties.timeStepsPerDay(),
+        eventProcessor.timeInCompartment(ASYMPTOMATIC, RECOVERED),
+        delta);
     Assert.assertEquals(
-        diseaseProperties.timeLatent().mean(),
-        eventProcessor.timeInCompartment(EXPOSED, PRESYMPTOMATIC));
+        diseaseProperties.timeLatent().mean() * properties.timeStepsPerDay(),
+        eventProcessor.timeInCompartment(EXPOSED, PRESYMPTOMATIC),
+        delta);
     Assert.assertEquals(
-        diseaseProperties.timeSymptomsOnset().mean(),
-        eventProcessor.timeInCompartment(PRESYMPTOMATIC, SYMPTOMATIC));
+        diseaseProperties.timeSymptomsOnset().mean() * properties.timeStepsPerDay(),
+        eventProcessor.timeInCompartment(PRESYMPTOMATIC, SYMPTOMATIC),
+        delta);
     Assert.assertEquals(
-        diseaseProperties.timeRecoverySymp().mean(),
-        eventProcessor.timeInCompartment(SYMPTOMATIC, RECOVERED));
+        diseaseProperties.timeRecoverySymp().mean() * properties.timeStepsPerDay(),
+        eventProcessor.timeInCompartment(SYMPTOMATIC, RECOVERED),
+        delta);
     Assert.assertEquals(
-        diseaseProperties.timeDecline().mean(),
-        eventProcessor.timeInCompartment(SYMPTOMATIC, SEVERELY_SYMPTOMATIC));
+        diseaseProperties.timeDecline().mean() * properties.timeStepsPerDay(),
+        eventProcessor.timeInCompartment(SYMPTOMATIC, SEVERELY_SYMPTOMATIC),
+        delta);
     Assert.assertEquals(
-        diseaseProperties.timeRecoverySev().mean(),
-        eventProcessor.timeInCompartment(SEVERELY_SYMPTOMATIC, RECOVERED));
+        diseaseProperties.timeRecoverySev().mean() * properties.timeStepsPerDay(),
+        eventProcessor.timeInCompartment(SEVERELY_SYMPTOMATIC, RECOVERED),
+        delta);
     Assert.assertEquals(
-        diseaseProperties.timeDeath().mean(),
-        eventProcessor.timeInCompartment(SEVERELY_SYMPTOMATIC, DEAD));
+        diseaseProperties.timeDeath().mean() * properties.timeStepsPerDay(),
+        eventProcessor.timeInCompartment(SEVERELY_SYMPTOMATIC, DEAD),
+        delta);
   }
 
   @Test
