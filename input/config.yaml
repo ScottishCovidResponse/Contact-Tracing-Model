@@ -1,6 +1,4 @@
-run_metadata:
-  data_directory: data/input
-
+data_directory: data/input
 access_log: access-{run_id}.yaml
 fail_on_hash_mismatch: True
 run_id: runId
