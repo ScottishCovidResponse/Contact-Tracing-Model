@@ -183,14 +183,14 @@ or the time they are aware of being infected.
 ### Default Policy
 
 The default policy allows a global baseline to be set. For example, 
-in an older population 10% of the population may shield.
+10% of the population may be shielding by default.
 
 ![](defaultPolicy.png)
 
 ### Alert Policy
 
 The alert policy defines the isolation policy for a person in any state. 
-These follow the same rules as the Virus Policy.
+These follow the same rules as the Virus Policy. The alert policy is related to the status of the individual. 
 
 ![](alertPolicy.png)
 
@@ -496,7 +496,15 @@ of the test. The number of false positives and negatives is recorded as an outpu
 
 ### Infection Event
 
-TODO: Rewrite
+An infection event is triggered in three ways:
+
+1. The id has been chosen as a seed infection.
+2. The id has been randomly chosen to be a seed.
+3. The id has been in contact with an infectious individual and has subsequently contracted the infection. 
+
+Once a SUSCEPTIBLE individual is exposed to the infection, an infection event is triggered which in turn creates a virus event. 
+The infection event occurs one time step after the contact. 
+
 ### Virus Event
 
 A virus event is the progression of the virus through in compartments. The initial infection is not included as this is 
@@ -571,4 +579,4 @@ back through the contacts over a number of days and inform individuals that they
 ## Document version history
 
 Version 1 – drafted 27 May 2020
-Version 2 - updated 26 July 2020
+Version 2 - updated 12 August 2020
