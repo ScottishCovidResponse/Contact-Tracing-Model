@@ -13,7 +13,8 @@ This model using a
 SE<sub>1</sub>E<sub>2</sub>I<sub>a</sub>I<sub>s</sub>RD model with the
 following transitions allowed:
 
-![](image1.png)
+<img src="image1.png" alt="Compartment diagram" width="800">
+
 
 Figure 1. The compartment model
 
@@ -46,7 +47,7 @@ CSV and JSON.
 The first input file is the inputLocations.json file that allows all the other inputs to be configured. 
 This allows the user to have multiple configurations defined. File locations are relative to the input folder.
 
-![](inputLocations.png) 
+<img src="inputLocations.png" alt="input Locations" width="600">
 
 
 ### Contacts.csv
@@ -60,7 +61,8 @@ is used for determining the spread of the infection and is used for
 filtering the contacts should a node be alerted. The addition of a label 
 field is to enable filtering of contacts based on their label.
 
-![](image2.png)
+<img src="image2.png" alt="Contacts File" width="500">
+
 
 Figure 2. Contacts.csv example
 
@@ -89,7 +91,8 @@ from outside the network interacting. This is the probability per
 person, per timestep. So, 0.05 is 5 people in a population of 100 per
 day. This value is likely to be much smaller than 0.05.
 
-![](image3.png)
+<img src="image3.png" alt="Contacts File" width="400">
+
 
 Figure 3. The diseaseSettings.json file
 
@@ -97,10 +100,8 @@ Figure 3. The diseaseSettings.json file
 The exposureProbability4UnitContact (expUnitContact) and exposureExponent (exp) values are 
 used to determine the chance of infection for a given contact. 
 
-![](exposureBias.png)
-
-![](exposureProb.png)
-
+<img src="exposureBias.png" alt="exposureBias" width="400">
+<img src="exposureProb.png" alt="exposureProb" width="400">
 
 ### PopulationSettings.json
 
@@ -121,7 +122,7 @@ Gender balance: this is the ratio of men:women, so there are 99 men for
 every 100 women in this example. This data has been taken from Index
 Mundi.
 
-![](image4.png)
+<img src="image4.png" alt="exposureProb" width="300">
 
 Figure 4. The population input
 
@@ -152,7 +153,8 @@ occurring.
 
 (Optional) Seed: Can be specified on the command line or fixed.
 
-![](image5.png)
+<img src="image5.png" alt="Run Settings Example" width="300">
+
 
 Figure 5. the run settings file
 
@@ -164,7 +166,8 @@ to allows the user to use age graduated contact files. Should the file
 be longer than the population, additional input will be ignored. Should 
 it be shorter, the ages will be generated as per the population settings file. 
 
-![](ageData.png)
+<img src="ageData.png" alt="age Data Example" width="100">
+
 
 ## Isolation Policies
 
@@ -178,21 +181,23 @@ varied using the distribution times. Also the time in isolation can vary
 between ABSOLUTE or CONTACT_TIME. This means if a person becomes infected 
 they will either isolate for the isolation time from either the time of contact 
 or the time they are aware of being infected.
-![](virusPolicy.png)
+
+<img src="virusPolicy.png" alt="virus Policy Example" width="400">
 
 ### Default Policy
 
 The default policy allows a global baseline to be set. For example, 
 10% of the population may be shielding by default.
 
-![](defaultPolicy.png)
+
+<img src="defaultPolicy.png" alt="default Policy Example" width="500">
 
 ### Alert Policy
 
 The alert policy defines the isolation policy for a person in any state. 
 These follow the same rules as the Virus Policy. The alert policy is related to the status of the individual. 
 
-![](alertPolicy.png)
+<img src="alertPolicy.png" alt="alert Policy Example" width="500">
 
 ## Tracing Policies
 
@@ -201,12 +206,16 @@ combined alert and virus status. The code will review their contacts for a numbe
 and trigger alerts to their contacts. 
 
 ![](tracingPolicy.png)
+<img src="tracingPolicy.png" alt="tracing Policy Example" width="600">
+
 
 ## Virus and Alert Statuses
 
 Following the schema described in Figure 1
 
-![](image1.png)
+<img src="image1.png" alt="Compartments" width="500">
+
+
 
 the status of the virus infections in the code is referred to by an
 enumeration called Virus Status, which has the options:
