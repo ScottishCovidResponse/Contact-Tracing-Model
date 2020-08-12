@@ -45,6 +45,7 @@ public class ContactReader {
 
   /**
    * Takes the contact events and samples them into multiple timesteps
+   *
    * @param contactEvents the read in data
    * @return the resampled data
    */

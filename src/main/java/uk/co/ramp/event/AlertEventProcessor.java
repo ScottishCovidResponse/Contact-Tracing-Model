@@ -83,7 +83,7 @@ public class AlertEventProcessor implements EventProcessor<AlertEvent> {
 
     switch (event.nextStatus()) {
       case AWAITING_RESULT:
-        return determineTestResult(population.isInfectious(event.id()));
+        return determineTestResult(event.id());
       case NONE:
         return Optional.of(NONE);
       default:
@@ -92,11 +92,11 @@ public class AlertEventProcessor implements EventProcessor<AlertEvent> {
     }
   }
 
-  Optional<AlertStatus> determineTestResult(boolean isInfectious) {
+  Optional<AlertStatus> determineTestResult(int id) {
 
     double testEffectiveness = distributionSampler.uniformBetweenZeroAndOne();
 
-    if (isInfectious) {
+    if (population.isInfectious(id)) {
       if (testEffectiveness < diseaseProperties.testPositiveAccuracy()) {
         statisticsRecorder.recordCorrectTestResult(TESTED_POSITIVE);
         return Optional.of(TESTED_POSITIVE);
@@ -140,8 +140,8 @@ public class AlertEventProcessor implements EventProcessor<AlertEvent> {
     Distribution distribution =
         ImmutableDistribution.builder()
             .type(diseaseProperties.progressionDistribution())
-            .mean(progressionData.mean()* properties.timeStepsPerDay())
-            .max(progressionData.max()* properties.timeStepsPerDay())
+            .mean(progressionData.mean() * properties.timeStepsPerDay())
+            .max(progressionData.max() * properties.timeStepsPerDay())
             .build();
     return distributionSampler.getDistributionValue(distribution);
   }
