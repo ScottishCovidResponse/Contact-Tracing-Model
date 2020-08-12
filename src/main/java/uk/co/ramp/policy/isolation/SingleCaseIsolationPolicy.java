@@ -178,6 +178,8 @@ class SingleCaseIsolationPolicy {
                 .orElse(IsolationStartTimeType.ABSOLUTE),
             currentTime,
             exposedTime);
+
+    // Scales the isolation time from days to time steps
     int requiredIsolationTime =
         distributionSampler.getDistributionValue(
                 matchingIsolationProperty.isolationTimeDistribution().orElse(infinityDistribution))

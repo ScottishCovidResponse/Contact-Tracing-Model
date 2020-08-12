@@ -78,9 +78,12 @@ public class Outbreak {
   void runToCompletion() {
     // the latest time to run to
     int timeLimit = properties.timeLimit();
+
+    // Scales the random rate from days to time steps
     double randomInfectionRate =
         diseaseProperties.randomInfectionRate() / (double) properties.timeStepsPerDay();
 
+    // Scales the time limit from days to time steps
     runContactData(timeLimit * properties.timeStepsPerDay(), randomInfectionRate);
     printOutput();
   }

@@ -27,7 +27,7 @@ public class StatisticsWriter {
   }
 
   void outputGeneralStats(Writer statsWriter) throws IOException {
-
+    // scales the time back into days, from timesteps
     double timeIsolated =
         statisticsRecorder.getPersonDaysIsolation().values().stream()
                 .mapToInt(Integer::intValue)

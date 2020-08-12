@@ -136,6 +136,7 @@ public class AlertEventProcessor implements EventProcessor<AlertEvent> {
         throw new IllegalStateException("Should not reach this state");
     }
 
+    // Calculates the time in time steps
     Distribution distribution =
         ImmutableDistribution.builder()
             .type(diseaseProperties.progressionDistribution())

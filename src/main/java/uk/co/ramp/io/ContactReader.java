@@ -43,6 +43,11 @@ public class ContactReader {
         .collect(Collectors.toUnmodifiableList());
   }
 
+  /**
+   * Takes the contact events and samples them into multiple timesteps
+   * @param contactEvents the read in data
+   * @return the resampled data
+   */
   List<ImmutableContactEvent> resampleContacts(List<ImmutableContactEvent> contactEvents) {
     int steps = properties.timeStepsPerDay();
 

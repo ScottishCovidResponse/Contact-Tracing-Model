@@ -31,6 +31,7 @@ public class LogDailyOutput {
     int activeCases = activeCases(stats);
     int dActive = activeCases - previousActiveCases;
 
+    // outputs record in days
     CmptRecord cmptRecord =
         ImmutableCmptRecord.builder()
             .time(time / (double) timeStepsPerDay)

@@ -66,7 +66,7 @@ public class EventListWriter {
             .map(formattedEventFactory::create);
 
     // Skipping contact events for now to retain current implementation functionality
-
+    // Scales time from timestep to day
     List<ImmutableFormattedEvent> finalList =
         Stream.of(alertEvents, infectionEvents, virusEvents)
             .flatMap(s -> s)

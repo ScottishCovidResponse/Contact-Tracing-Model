@@ -89,6 +89,7 @@ public abstract class CommonVirusEventProcessor<T extends Event> implements Even
         throw new EventException(message);
     }
 
+    // Calculates the time in time steps
     Distribution distribution =
         ImmutableDistribution.builder()
             .type(diseaseProperties.progressionDistribution())
@@ -96,7 +97,7 @@ public abstract class CommonVirusEventProcessor<T extends Event> implements Even
             .max(progressionData.max()* properties.timeStepsPerDay())
             .build();
 
-    return distributionSampler.getDistributionValue(distribution) * properties.timeStepsPerDay();
+    return distributionSampler.getDistributionValue(distribution);
   }
 
   VirusStatus determineInfection(CommonVirusEvent e) {
