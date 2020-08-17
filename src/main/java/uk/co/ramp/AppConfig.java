@@ -1,13 +1,5 @@
 package uk.co.ramp;
 
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileReader;
-import java.io.IOException;
-import java.io.Reader;
-import java.nio.file.Files;
-import java.nio.file.Paths;
-import java.util.Optional;
 import org.apache.commons.math3.random.RandomDataGenerator;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -16,20 +8,15 @@ import org.springframework.boot.SpringBootConfiguration;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import uk.co.ramp.distribution.DistributionSampler;
-import uk.co.ramp.io.readers.AgeDataReader;
-import uk.co.ramp.io.readers.DirectoryList;
-import uk.co.ramp.io.readers.DiseasePropertiesReader;
-import uk.co.ramp.io.readers.FullPathInputFilesReader;
-import uk.co.ramp.io.readers.InputFilesReader;
-import uk.co.ramp.io.readers.PopulationPropertiesReader;
-import uk.co.ramp.io.readers.StandardPropertiesReader;
-import uk.co.ramp.io.types.DiseaseProperties;
-import uk.co.ramp.io.types.ImmutableOutputFolder;
-import uk.co.ramp.io.types.InputFiles;
-import uk.co.ramp.io.types.OutputFolder;
-import uk.co.ramp.io.types.PopulationProperties;
-import uk.co.ramp.io.types.StandardProperties;
+import uk.co.ramp.io.InfectionRates;
+import uk.co.ramp.io.readers.*;
+import uk.co.ramp.io.types.*;
 import uk.co.ramp.people.AgeRetriever;
+
+import java.io.*;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.util.Optional;
 
 @SpringBootConfiguration
 @ComponentScan
@@ -137,6 +124,18 @@ public class AppConfig {
     }
   }
 
+  @Bean
+  public InfectionRates infectionRates(){
+    try (Reader reader = getReader(inputFiles().infectionRates())) {
+      return new InfectionRateReader().read(reader);
+    } catch (IOException e) {
+      String message = "An error occurred while parsing the infection rates at " + inputFiles().infectionRates();
+      LOGGER.error(message);
+      throw new ConfigurationException(message, e);
+    }
+  }
+
+
   private void useSeed(RandomDataGenerator rdg, int seed) {
     rdg.reSeed(seed);
     LOGGER.info("Additional Seed information provided, the seed will be {}", seed);
@@ -187,4 +186,7 @@ public class AppConfig {
   Reader getReader(String input) throws FileNotFoundException {
     return new FileReader(new File(input));
   }
+
+
+
 }
