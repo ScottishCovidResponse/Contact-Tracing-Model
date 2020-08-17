@@ -161,9 +161,7 @@ public class AppConfigTest {
         containsString("Additional Seed information not provided, using internal random seed."));
   }
 
-  // TODO: can't see why this is failing... it works in debug for me.
   @Test
-  @Ignore
   public void randomDataGeneratorWithArgs() throws ConfigurationException {
 
     Random random = TestUtils.getRandom();

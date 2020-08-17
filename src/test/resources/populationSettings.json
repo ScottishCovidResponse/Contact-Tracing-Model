@@ -28,9 +28,9 @@
       "max": 100
     }
   },
-  "genderBalance": 0.99,
+  "genderBalance": 1,
   "testCapacity" : 0.01,
-  "appUptake" : 0.5
+  "appUptake" : 0.7
 }
 
 
