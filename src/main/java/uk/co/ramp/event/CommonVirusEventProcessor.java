@@ -59,7 +59,6 @@ public abstract class CommonVirusEventProcessor<T extends Event> implements Even
   int timeInCompartment(VirusStatus currentStatus, VirusStatus newStatus) {
 
     MeanMax progressionData;
-    // TODO check when not exhausted
     switch (currentStatus) {
       case EXPOSED:
         progressionData = diseaseProperties.timeLatent();
@@ -96,6 +95,7 @@ public abstract class CommonVirusEventProcessor<T extends Event> implements Even
             .mean(progressionData.mean())
             .max(progressionData.max())
             .build();
+
     return distributionSampler.getDistributionValue(distribution) * properties.timeStepsPerDay();
   }
 

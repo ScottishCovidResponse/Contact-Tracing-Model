@@ -16,12 +16,14 @@ import uk.co.ramp.TestUtils;
 import uk.co.ramp.io.types.StandardProperties;
 import uk.co.ramp.people.Case;
 import uk.co.ramp.statistics.types.ImmutableInfection;
+import uk.co.ramp.statistics.types.ImmutableRValueOutput;
 import uk.co.ramp.statistics.types.Infection;
 
 public class StatisticsWriterTest {
 
   private StatisticsWriter statisticsWriter;
   private final Random random = TestUtils.getRandom();
+  private List<ImmutableRValueOutput> rollingAverage = new ArrayList<>();
 
   @Before
   public void setup() {
@@ -58,6 +60,18 @@ public class StatisticsWriterTest {
     Map<Integer, Integer> map3 = createMap(10);
 
     when(statisticsRecorder.getContactsTraced()).thenReturn(map3);
+
+    for (int i = 0; i < 5; i++)
+      rollingAverage.add(
+          ImmutableRValueOutput.builder()
+              .r(random.nextDouble())
+              .sevenDayAverageR(random.nextDouble())
+              .newInfections(random.nextInt(5))
+              .newInfectors(random.nextInt(5))
+              .time(i)
+              .build());
+
+    when(statisticsRecorder.getRollingAverage(7)).thenReturn(rollingAverage);
   }
 
   private Map<Integer, Integer> createMap(int keyMax) {
@@ -69,8 +83,23 @@ public class StatisticsWriterTest {
   }
 
   @Test
-  public void outputR() {
-    // TODO:
+  public void outputR() throws IOException {
+
+    Writer writer = new StringWriter();
+    statisticsWriter.outputR(writer);
+    List<String> output = List.of(writer.toString().split("\n"));
+    assertThat(output.get(0))
+        .contains("\"time\",\"newInfectors\",\"newInfections\",\"r\",\"sevenDayAverageR\"");
+
+    for (int i = 1; i < output.size(); i++) {
+      var outputLine = output.get(i);
+      var data = rollingAverage.get(i - 1);
+      assertThat(outputLine)
+          .contains(String.valueOf(data.r()))
+          .contains(String.valueOf(data.sevenDayAverageR()))
+          .contains(String.valueOf(data.newInfections()))
+          .contains(String.valueOf(data.newInfectors()));
+    }
   }
 
   @Test
@@ -82,5 +111,9 @@ public class StatisticsWriterTest {
     assertThat(writer.toString()).contains("Person Days in Isolation ,");
     assertThat(writer.toString()).contains("People infected ,");
     assertThat(writer.toString()).contains("Contacts Traced ,");
+    assertThat(writer.toString()).contains("Correct Positive Tests ,");
+    assertThat(writer.toString()).contains("Correct Negative Tests ,");
+    assertThat(writer.toString()).contains("False Positive Tests ,");
+    assertThat(writer.toString()).contains("False Negative Tests ,");
   }
 }
