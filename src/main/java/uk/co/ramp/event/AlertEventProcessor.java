@@ -103,6 +103,7 @@ public class AlertEventProcessor implements EventProcessor<AlertEvent> {
 
     if (isInfectious) {
       if (testEffectiveness < diseaseProperties.testPositiveAccuracy()) {
+        statisticsRecorder.recordCorrectTestResult(TESTED_POSITIVE);
         return Optional.of(TESTED_POSITIVE);
       } else {
         statisticsRecorder.recordIncorrectTestResult(TESTED_NEGATIVE);
@@ -110,6 +111,7 @@ public class AlertEventProcessor implements EventProcessor<AlertEvent> {
       }
     } else {
       if (testEffectiveness < diseaseProperties.testNegativeAccuracy()) {
+        statisticsRecorder.recordCorrectTestResult(TESTED_NEGATIVE);
         return Optional.of(TESTED_NEGATIVE);
       } else {
         statisticsRecorder.recordIncorrectTestResult(TESTED_POSITIVE);

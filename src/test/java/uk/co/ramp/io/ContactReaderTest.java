@@ -4,17 +4,15 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import java.io.IOException;
 import java.io.StringReader;
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.List;
-import java.util.Map;
-import java.util.Random;
+import java.util.*;
 import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import org.assertj.core.data.Offset;
+import org.junit.Before;
 import org.junit.Test;
 import uk.co.ramp.TestUtils;
+import uk.co.ramp.distribution.DistributionSampler;
 import uk.co.ramp.event.types.ContactEvent;
 import uk.co.ramp.event.types.ImmutableContactEvent;
 import uk.co.ramp.io.types.ImmutableStandardProperties;
@@ -47,11 +45,20 @@ public class ContactReaderTest {
   private final ContactEvent record2 =
       ImmutableContactEvent.builder().time(0).from(7).to(8).weight(8.2).label("label").build();
 
+  private DistributionSampler distributionSampler;
+
+  @Before
+  public void setup() {
+
+    distributionSampler = new DistributionSampler(TestUtils.dataGenerator());
+  }
+
   @Test
   public void testRead() throws IOException {
     StringReader stringReader = new StringReader(csv);
+
     List<ContactEvent> dailyContactRecords =
-        new ContactReader(defaultProperties, TestUtils.dataGenerator()).readEvents(stringReader);
+        new ContactReader(defaultProperties, distributionSampler).readEvents(stringReader);
 
     assertThat(dailyContactRecords).containsExactly(record1, record2);
   }
@@ -68,7 +75,7 @@ public class ContactReaderTest {
 
     StringReader stringReader = new StringReader(csv);
     List<ContactEvent> dailyContactRecords =
-        new ContactReader(properties, TestUtils.dataGenerator()).readEvents(stringReader);
+        new ContactReader(properties, distributionSampler).readEvents(stringReader);
 
     assertThat(dailyContactRecords).size().isEqualTo(2);
 
@@ -91,7 +98,7 @@ public class ContactReaderTest {
     StringReader stringReader = new StringReader(csvOverPersonLimit);
 
     List<ContactEvent> dailyContactRecords =
-        new ContactReader(defaultProperties, TestUtils.dataGenerator()).readEvents(stringReader);
+        new ContactReader(defaultProperties, distributionSampler).readEvents(stringReader);
 
     assertThat(dailyContactRecords).isEmpty();
   }
@@ -118,7 +125,7 @@ public class ContactReaderTest {
             .map(ContactEvent::time)
             .collect(Collectors.groupingBy(Function.identity(), Collectors.counting()));
 
-    ContactReader reader = new ContactReader(properties, TestUtils.dataGenerator());
+    ContactReader reader = new ContactReader(properties, distributionSampler);
 
     List<ImmutableContactEvent> output = reader.resampleContacts(contactEvents);
     var outMaxTime =
@@ -155,7 +162,7 @@ public class ContactReaderTest {
             .build();
     ;
 
-    ContactReader reader = new ContactReader(properties, TestUtils.dataGenerator());
+    ContactReader reader = new ContactReader(properties, distributionSampler);
 
     List<ImmutableContactEvent> output = reader.resampleContacts(contactEvents);
 

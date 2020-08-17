@@ -1,6 +1,8 @@
 package uk.co.ramp.statistics;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
 import uk.co.ramp.io.types.StandardProperties;
 import uk.co.ramp.people.AlertStatus;
 import uk.co.ramp.people.Case;
@@ -10,18 +12,34 @@ import uk.co.ramp.statistics.types.Infection;
 
 public class StatisticsRecorderImpl implements StatisticsRecorder {
 
-  private final Map<Integer, Integer> personDaysIsolation = new HashMap<>();
-  private final Map<Integer, Integer> peopleInfected = new HashMap<>();
-  private final Map<Integer, Integer> contactsTraced = new HashMap<>();
+
+  private final Map<Integer, Integer> personDaysIsolation;
+  private final Map<Integer, Integer> peopleInfected;
+  private final Map<Integer, Integer> contactsTraced;
+  private final Map<Integer, List<Infection>> r0Progression;
+  private final Map<AlertStatus, Integer> incorrectTests;
+  private final Map<AlertStatus, Integer> correctTests;
   private final Map<Integer, Integer> testsConducted = new HashMap<>();
   private final Map<Integer, List<Integer>> delayedTests = new HashMap<>();
-  private final Map<Integer, List<Infection>> r0Progression = new HashMap<>();
-  private final Map<AlertStatus, Integer> incorrectTests = new EnumMap<>(AlertStatus.class);
 
   private final StandardProperties properties;
 
-  public StatisticsRecorderImpl(StandardProperties properties) {
+  public StatisticsRecorderImpl(
+      StandardProperties properties,
+      Map<Integer, Integer> personDaysIsolation,
+      Map<Integer, Integer> peopleInfected,
+      Map<Integer, Integer> contactsTraced,
+      Map<Integer, List<Infection>> r0Progression,
+      Map<AlertStatus, Integer> incorrectTests,
+      Map<AlertStatus, Integer> correctTests) {
     this.properties = properties;
+
+    this.personDaysIsolation = personDaysIsolation;
+    this.peopleInfected = peopleInfected;
+    this.contactsTraced = contactsTraced;
+    this.r0Progression = r0Progression;
+    this.incorrectTests = incorrectTests;
+    this.correctTests = correctTests;
   }
 
   public Map<Integer, Integer> getContactsTraced() {
@@ -57,12 +75,22 @@ public class StatisticsRecorderImpl implements StatisticsRecorder {
 
   @Override
   public int getFalseNegatives() {
-    return incorrectTests.get(AlertStatus.TESTED_NEGATIVE);
+    return incorrectTests.getOrDefault(AlertStatus.TESTED_NEGATIVE, 0);
   }
 
   @Override
   public int getFalsePositives() {
-    return incorrectTests.get(AlertStatus.TESTED_POSITIVE);
+    return incorrectTests.getOrDefault(AlertStatus.TESTED_POSITIVE, 0);
+  }
+
+  @Override
+  public int getTruePositives() {
+    return correctTests.getOrDefault(AlertStatus.TESTED_POSITIVE, 0);
+  }
+
+  @Override
+  public int getTrueNegatives() {
+    return correctTests.getOrDefault(AlertStatus.TESTED_NEGATIVE, 0);
   }
 
   public void recordDaysInIsolation(int personId, int duration) {
@@ -96,6 +124,10 @@ public class StatisticsRecorderImpl implements StatisticsRecorder {
   @Override
   public void recordTestDelayed(int time, int id) {
     delayedTests.computeIfAbsent(time, k -> new ArrayList<>()).add(id);
+
+  @Override  
+  public void recordCorrectTestResult(AlertStatus alertStatus) {
+    correctTests.compute(alertStatus, (k, v) -> (v == null) ? 1 : ++v);
   }
 
   public List<ImmutableRValueOutput> getRollingAverage(int period) {

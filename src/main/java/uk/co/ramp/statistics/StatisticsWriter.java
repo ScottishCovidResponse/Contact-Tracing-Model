@@ -45,6 +45,8 @@ public class StatisticsWriter {
     statsWriter.write("Person Days in Isolation , " + timeIsolated);
     statsWriter.write("\nPeople infected , " + totalInfected);
     statsWriter.write("\nContacts Traced , " + contactsTraced);
+    statsWriter.write("\nCorrect Positive Tests , " + statisticsRecorder.getTruePositives());
+    statsWriter.write("\nCorrect Negative Tests , " + statisticsRecorder.getTrueNegatives());
     statsWriter.write("\nFalse Positive Tests , " + statisticsRecorder.getFalsePositives());
     statsWriter.write("\nFalse Negative Tests , " + statisticsRecorder.getFalseNegatives());
     statsWriter.write("\nDelayed Tests , " + delayedTests);

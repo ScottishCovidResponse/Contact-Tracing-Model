@@ -1,6 +1,8 @@
 package uk.co.ramp.io;
 
 import static org.hamcrest.CoreMatchers.containsString;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 import static uk.co.ramp.people.VirusStatus.*;
 
 import java.util.*;
@@ -10,6 +12,7 @@ import org.junit.Rule;
 import org.junit.Test;
 import uk.co.ramp.LogSpy;
 import uk.co.ramp.TestUtils;
+import uk.co.ramp.io.types.StandardProperties;
 import uk.co.ramp.people.VirusStatus;
 
 public class LogDailyOutputTest {
@@ -20,7 +23,9 @@ public class LogDailyOutputTest {
 
   @Before
   public void setup() {
-    logger = new LogDailyOutput();
+    StandardProperties properties = mock(StandardProperties.class);
+    when(properties.timeStepsPerDay()).thenReturn(1);
+    logger = new LogDailyOutput(properties);
   }
 
   @Test
@@ -41,7 +46,7 @@ public class LogDailyOutputTest {
             .filter(e -> active.contains(e.getKey()))
             .mapToInt(Map.Entry::getValue)
             .sum();
-    logger.log(time, map, 1);
+    logger.log(time, map);
 
     String log = logSpy.getOutput();
 
@@ -81,7 +86,7 @@ public class LogDailyOutputTest {
       map.put(v, random.nextInt(100));
     }
     //        int previousActiveCases = 0;
-    logger.log(time, map, 1);
+    logger.log(time, map);
     //        logger.log(time, map, previousActiveCases);
     Assert.assertThat(
         logSpy.getOutput(),

@@ -8,22 +8,14 @@ import java.util.List;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.springframework.context.annotation.Import;
-import org.springframework.test.annotation.DirtiesContext;
-import org.springframework.test.context.junit4.SpringRunner;
 import uk.co.ramp.*;
 import uk.co.ramp.event.types.*;
 
-@RunWith(SpringRunner.class)
-@DirtiesContext
-@Import({TestUtils.class, AppConfig.class, TestConfig.class})
 public class EventProcessorRunnerTest {
   private interface MockEventProcessor extends EventProcessor<Event> {}
 
   @Rule public LogSpy logSpy = new LogSpy();
 
-  private EventProcessorRunner<Event> eventProcessorRunner;
   private EventProcessor<Event> eventProcessor;
   private ProcessedEventsGrouper processedEventsGrouper;
 
@@ -32,7 +24,7 @@ public class EventProcessorRunnerTest {
   private ProcessedEventResult mockProcessedEventResult3;
 
   @Before
-  public void setUp() throws Exception {
+  public void setUp() {
     this.eventProcessor = mock(MockEventProcessor.class);
     this.processedEventsGrouper = mock(ProcessedEventsGrouper.class);
     this.mockEvent1 = mock(Event.class);
@@ -50,7 +42,8 @@ public class EventProcessorRunnerTest {
 
   @Test
   public void run() {
-    eventProcessorRunner = new EventProcessorRunner<>(eventProcessor, processedEventsGrouper);
+    EventProcessorRunner<Event> eventProcessorRunner =
+        new EventProcessorRunner<>(eventProcessor, processedEventsGrouper);
     assertThat(eventProcessorRunner.run(List.of(mockEvent1, mockEvent2)))
         .isEqualTo(mockProcessedEventResult3);
   }

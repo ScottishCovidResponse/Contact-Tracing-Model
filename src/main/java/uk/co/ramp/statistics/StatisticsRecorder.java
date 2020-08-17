@@ -22,6 +22,8 @@ public interface StatisticsRecorder {
 
   void recordTestDelayed(int time, int id);
 
+  void recordCorrectTestResult(AlertStatus alertStatus);
+
   List<ImmutableRValueOutput> getRollingAverage(int period);
 
   Map<Integer, Integer> getContactsTraced();
@@ -41,4 +43,8 @@ public interface StatisticsRecorder {
   int getFalsePositives();
 
   int getFalseNegatives();
+
+  int getTruePositives();
+
+  int getTrueNegatives();
 }

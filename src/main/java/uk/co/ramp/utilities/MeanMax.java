@@ -12,9 +12,9 @@ import org.immutables.value.Value.Immutable;
 @JsonDeserialize
 @Immutable
 public interface MeanMax {
-  int mean();
+  double mean();
 
-  int max();
+  double max();
 
   @Check
   default void check() {

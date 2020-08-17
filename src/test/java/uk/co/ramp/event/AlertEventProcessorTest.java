@@ -7,17 +7,13 @@ import static org.mockito.Mockito.*;
 import static uk.co.ramp.people.AlertStatus.*;
 import static uk.co.ramp.people.VirusStatus.SUSCEPTIBLE;
 
-import java.util.Optional;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Import;
-import org.springframework.test.annotation.DirtiesContext;
-import org.springframework.test.context.junit4.SpringRunner;
-import uk.co.ramp.*;
+import uk.co.ramp.LogSpy;
+import uk.co.ramp.Population;
+import uk.co.ramp.TestUtils;
 import uk.co.ramp.distribution.DistributionSampler;
 import uk.co.ramp.event.types.AlertEvent;
 import uk.co.ramp.event.types.ImmutableAlertEvent;
@@ -28,22 +24,23 @@ import uk.co.ramp.io.types.StandardProperties;
 import uk.co.ramp.statistics.StatisticsRecorder;
 import uk.co.ramp.statistics.StatisticsRecorderImpl;
 
-@RunWith(SpringRunner.class)
-@DirtiesContext
-@Import({TestUtils.class, AppConfig.class, TestConfig.class})
 public class AlertEventProcessorTest {
   @Rule public LogSpy logSpy = new LogSpy();
 
   private DiseaseProperties diseaseProperties;
   private Population population;
-  @Autowired private StandardProperties properties;
+  private StandardProperties properties;
   private DistributionSampler distributionSampler;
   private AlertEventProcessor eventProcessor;
   private StatisticsRecorder statisticsRecorder;
   private PopulationProperties populationProperties;
 
+  private static final double DELTA = 1e-6;;
+
   @Before
   public void setUp() throws Exception {
+    properties = mock(StandardProperties.class);
+    when(properties.timeStepsPerDay()).thenReturn(1);
     diseaseProperties = TestUtils.diseaseProperties();
     population = mock(Population.class);
     distributionSampler = mock(DistributionSampler.class);
@@ -74,16 +71,21 @@ public class AlertEventProcessorTest {
     Assert.assertEquals(1, time);
 
     time = eventProcessor.timeInStatus(REQUESTED_TEST, alertEvent);
-    Assert.assertEquals(diseaseProperties.timeTestAdministered().mean(), time);
+    Assert.assertEquals(
+        diseaseProperties.timeTestAdministered().mean() * properties.timeStepsPerDay(),
+        time,
+        DELTA);
 
     time = eventProcessor.timeInStatus(AWAITING_RESULT, alertEvent);
-    Assert.assertEquals(diseaseProperties.timeTestResult().mean(), time);
+    Assert.assertEquals(
+        diseaseProperties.timeTestResult().mean() * properties.timeStepsPerDay(), time, DELTA);
 
     time = eventProcessor.timeInStatus(TESTED_NEGATIVE, alertEvent);
     Assert.assertEquals(1, time);
 
     time = eventProcessor.timeInStatus(TESTED_POSITIVE, alertEvent);
     Assert.assertEquals(1, time);
+
   }
 
   @Test
@@ -118,7 +120,7 @@ public class AlertEventProcessorTest {
     Assert.assertEquals(0, eventResult.newCompletedVirusEvents().size());
     AlertEvent evnt = eventResult.newAlertEvents().get(0);
 
-    Assert.assertEquals(1, evnt.time());
+    Assert.assertEquals(properties.timeStepsPerDay(), evnt.time());
     Assert.assertEquals(0, evnt.id());
     Assert.assertEquals(ALERTED, evnt.oldStatus());
     Assert.assertEquals(REQUESTED_TEST, evnt.nextStatus());
@@ -166,23 +168,15 @@ public class AlertEventProcessorTest {
             populationProperties);
 
     when(distributionSampler.uniformBetweenZeroAndOne()).thenReturn(0.99d);
-    assertThat(eventProcessor.determineTestResult(true))
-        .isNotEmpty()
-        .isEqualTo(Optional.of(TESTED_NEGATIVE));
+    assertThat(eventProcessor.determineTestResult(true)).hasValue(TESTED_NEGATIVE);
 
     when(distributionSampler.uniformBetweenZeroAndOne()).thenReturn(0.90d);
-    assertThat(eventProcessor.determineTestResult(true))
-        .isNotEmpty()
-        .isEqualTo(Optional.of(TESTED_POSITIVE));
+    assertThat(eventProcessor.determineTestResult(true)).hasValue(TESTED_POSITIVE);
 
     when(distributionSampler.uniformBetweenZeroAndOne()).thenReturn(0.90d);
-    assertThat(eventProcessor.determineTestResult(false))
-        .isNotEmpty()
-        .isEqualTo(Optional.of(TESTED_NEGATIVE));
+    assertThat(eventProcessor.determineTestResult(false)).hasValue(TESTED_NEGATIVE);
 
     when(distributionSampler.uniformBetweenZeroAndOne()).thenReturn(0.99d);
-    assertThat(eventProcessor.determineTestResult(false))
-        .isNotEmpty()
-        .isEqualTo(Optional.of(TESTED_POSITIVE));
+    assertThat(eventProcessor.determineTestResult(false)).hasValue(TESTED_POSITIVE);
   }
 }
