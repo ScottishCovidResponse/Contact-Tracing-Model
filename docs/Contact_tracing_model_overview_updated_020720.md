@@ -8,8 +8,8 @@ Sibylle Mohr
 
 **Modelling lead**: Sibylle Mohr (University of Glasgow, EPIC)
 
-**RSE core team**: Sam Brett (AWE), Vino Mano (Man Group), John
-Nonweiler (UKAEA), Edward Townsend (AWE)
+**RSE core team**: Sam Brett, Vino Mano (Man Group), John
+Nonweiler (UKAEA), Edward Townsend
 
 **Epidemiologist**: Louise Matthews (University of Glasgow, EPIC)
 

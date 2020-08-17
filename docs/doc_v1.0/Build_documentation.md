@@ -13,7 +13,8 @@ This model using a
 SE<sub>1</sub>E<sub>2</sub>I<sub>a</sub>I<sub>s</sub>RD model with the
 following transitions allowed:
 
-![](image1.png)
+<img src="image1.png" alt="Compartment diagram" width="800">
+
 
 Figure 1. The compartment model
 
@@ -46,7 +47,7 @@ CSV and JSON.
 The first input file is the inputLocations.json file that allows all the other inputs to be configured. 
 This allows the user to have multiple configurations defined. File locations are relative to the input folder.
 
-![](inputLocations.png) 
+<img src="inputLocations.png" alt="input Locations" width="600">
 
 
 ### Contacts.csv
@@ -60,7 +61,8 @@ is used for determining the spread of the infection and is used for
 filtering the contacts should a node be alerted. The addition of a label 
 field is to enable filtering of contacts based on their label.
 
-![](image2.png)
+<img src="image2.png" alt="Contacts File" width="500">
+
 
 Figure 2. Contacts.csv example
 
@@ -89,7 +91,8 @@ from outside the network interacting. This is the probability per
 person, per timestep. So, 0.05 is 5 people in a population of 100 per
 day. This value is likely to be much smaller than 0.05.
 
-![](image3.png)
+<img src="image3.png" alt="Contacts File" width="400">
+
 
 Figure 3. The diseaseSettings.json file
 
@@ -97,10 +100,8 @@ Figure 3. The diseaseSettings.json file
 The exposureProbability4UnitContact (expUnitContact) and exposureExponent (exp) values are 
 used to determine the chance of infection for a given contact. 
 
-![](exposureBias.png)
-
-![](exposureProb.png)
-
+<img src="exposureBias.png" alt="exposureBias" width="400">
+<img src="exposureProb.png" alt="exposureProb" width="400">
 
 ### PopulationSettings.json
 
@@ -121,7 +122,7 @@ Gender balance: this is the ratio of men:women, so there are 99 men for
 every 100 women in this example. This data has been taken from Index
 Mundi.
 
-![](image4.png)
+<img src="image4.png" alt="exposureProb" width="300">
 
 Figure 4. The population input
 
@@ -152,7 +153,8 @@ occurring.
 
 (Optional) Seed: Can be specified on the command line or fixed.
 
-![](image5.png)
+<img src="image5.png" alt="Run Settings Example" width="300">
+
 
 Figure 5. the run settings file
 
@@ -164,7 +166,8 @@ to allows the user to use age graduated contact files. Should the file
 be longer than the population, additional input will be ignored. Should 
 it be shorter, the ages will be generated as per the population settings file. 
 
-![](ageData.png)
+<img src="ageData.png" alt="age Data Example" width="100">
+
 
 ## Isolation Policies
 
@@ -178,21 +181,23 @@ varied using the distribution times. Also the time in isolation can vary
 between ABSOLUTE or CONTACT_TIME. This means if a person becomes infected 
 they will either isolate for the isolation time from either the time of contact 
 or the time they are aware of being infected.
-![](virusPolicy.png)
+
+<img src="virusPolicy.png" alt="virus Policy Example" width="400">
 
 ### Default Policy
 
 The default policy allows a global baseline to be set. For example, 
-in an older population 10% of the population may shield.
+10% of the population may be shielding by default.
 
-![](defaultPolicy.png)
+
+<img src="defaultPolicy.png" alt="default Policy Example" width="500">
 
 ### Alert Policy
 
 The alert policy defines the isolation policy for a person in any state. 
-These follow the same rules as the Virus Policy.
+These follow the same rules as the Virus Policy. The alert policy is related to the status of the individual. 
 
-![](alertPolicy.png)
+<img src="alertPolicy.png" alt="alert Policy Example" width="500">
 
 ## Tracing Policies
 
@@ -201,12 +206,16 @@ combined alert and virus status. The code will review their contacts for a numbe
 and trigger alerts to their contacts. 
 
 ![](tracingPolicy.png)
+<img src="tracingPolicy.png" alt="tracing Policy Example" width="600">
+
 
 ## Virus and Alert Statuses
 
 Following the schema described in Figure 1
 
-![](image1.png)
+<img src="image1.png" alt="Compartments" width="500">
+
+
 
 the status of the virus infections in the code is referred to by an
 enumeration called Virus Status, which has the options:
@@ -456,11 +465,103 @@ Figure 11. Infection map example
 
 ### Run Contact Data
 
+The runContactData method within Outbreak.java is where the main calculations in the code are triggered. 
 
-TODO: Rewrite
+## Event Runner
+
+The events within the model are handled by a group of lists that contain specific events that can occur in the model. These are:
+
+1.	Alert Event
+2.	Contact Event
+3.	Infection Event
+4.	Virus Event
+
+Each of these events are processed in different ways and can trigger other events to occur at a future time. 
+
+![](RunContactData.png)
+
+### Contact Event
+
+Contact events are set in the contacts.csv file. They involve the interaction between two people at a given time. 
+The duration/proximity of the event is measured using the weight parameter. 
+
+When a contact event takes place the two people are assessed based on their Virus Statuses, this allows the model to 
+assess if the contact has the potential to spread the infection. One or both of the contacts may be in isolation, 
+so the contact may not take place. The isolation policies are expanded upon below. 
+
+![](ContactEvent.png)
+
+### Alert Event
+
+The alert event processor is used to cycle through the states of disease alert that a member of the population can be in at any one point. 
+
+![](image6.png)
+
+The person has their status set to a corresponding status and the next status is calculated for a time in the future. 
+The result of the test is determined by whether the individual is currently infectious and a dice roll against the accuracy 
+of the test. The number of false positives and negatives is recorded as an output statistic. 
+
+![](AlertEvent.png)
+
+### Infection Event
+
+An infection event is triggered in three ways:
+
+1. The id has been chosen as a seed infection.
+2. The id has been randomly chosen to be a seed.
+3. The id has been in contact with an infectious individual and has subsequently contracted the infection. 
+
+Once a SUSCEPTIBLE individual is exposed to the infection, an infection event is triggered which in turn creates a virus event. 
+The infection event occurs one time step after the contact. 
+
+### Virus Event
+
+A virus event is the progression of the virus through in compartments. The initial infection is not included as this is 
+an Infection Event. The processing of the event is very similar to the previous sections, with the exception of checking 
+for alerts based on the virus status of the individual. This process creates alert events for people who have been in 
+contact with the individual. The individual has a reportingCompliance field that may reduce the chance of an individual
+reporting symptoms. The alert checker and tracing policies are covered below.  
+
+## Isolation Policy
+
+The isolation policy logic is stored in the policy.isolation package. A list of policies is input from the 
+isolationPolicies.json file. These include policies for global, virus status, alert status and a default. 
+The default policy will typically be to not isolate. Each policy has a priority value which allows the most relevant policy to be chosen. 
 
 
+### Global Policies
+Global policies are based on the proportion of the population infected. For example, a “stay at home” policy may be put 
+into place if more than 10% of the population are infected, whereas a “stay alert” policy may be in place if 
+between 5-10% of the population are infected. These values are as an example and can be configured in the input. 
 
+### 	Virus Status Policies
+An isolation policy can be defined based on the virus status of an individual. For example, symptomatic individuals 
+may be required to stay at home for a defined period. The proportion required to isolate and duration of the isolation can be defined in the input. 
+
+
+### 	Alert Status Policies
+A policy can be defined for any of the alert statuses, much like with a virus status, the proportion required to isolate 
+and duration of the isolation can be defined in the input. 
+
+
+### 	Determining Isolation Policy
+
+The isolation status of all individuals is stored in a map. These are used to determine if an individual has already 
+been isolation, in which case they may not need a further isolation applied to them. 
+
+![](IsIsolating.png)
+
+The policies are grouped, sorted and selected by:
+
+![](FindPolicy.png)
+
+## Tracing Policy
+
+A tracing policy is triggered when an individual reports themselves as having symptoms. The policy input has been 
+covered above. A combination of Virus and Alert statuses are used to trigger contact tracing. It is possible to look 
+back through the contacts over a number of days and inform individuals that they should isolate. 
+
+![](CheckForAlert.png)
 
 ## Assumptions
 
@@ -487,4 +588,4 @@ TODO: Rewrite
 ## Document version history
 
 Version 1 – drafted 27 May 2020
-Version 2 - updated 26 July 2020
+Version 2 - updated 12 August 2020
