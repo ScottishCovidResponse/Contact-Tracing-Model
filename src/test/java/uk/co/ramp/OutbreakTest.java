@@ -24,6 +24,7 @@ import uk.co.ramp.event.types.ImmutableContactEvent;
 import uk.co.ramp.io.InitialCaseReader;
 import uk.co.ramp.io.types.CmptRecord;
 import uk.co.ramp.io.types.DiseaseProperties;
+import uk.co.ramp.io.types.PopulationProperties;
 import uk.co.ramp.io.types.StandardProperties;
 import uk.co.ramp.people.Case;
 import uk.co.ramp.people.Human;
@@ -43,12 +44,16 @@ public class OutbreakTest {
   @Autowired private InitialCaseReader initialCaseReader;
   @Autowired private Outbreak outbreak;
   @Autowired private CompletionEventListGroup eventListGroup;
+  @Autowired private PopulationProperties populationProperties;
 
   private DiseaseProperties diseaseProperties;
 
   @Before
   public void setUp() throws FileNotFoundException {
     this.diseaseProperties = TestUtils.diseaseProperties();
+    populationProperties = mock(PopulationProperties.class);
+    when(populationProperties.testCapacity()).thenReturn(1d);
+    when(populationProperties.appUptake()).thenReturn(1d);
   }
 
   @Test
@@ -154,7 +159,7 @@ public class OutbreakTest {
 
   @Test
   @DirtiesContext
-  public void runToCompletionAllContact() throws FileNotFoundException {
+  public void runToCompletionAllContact() {
     int popSize = 100;
     int infections = 1 + popSize / 10;
 

@@ -171,6 +171,6 @@ public class AlertEventProcessor implements EventProcessor<AlertEvent> {
         return testTime - timeNow;
       }
     }
-    return properties.timeLimit() - timeNow;
+    return properties.timeLimit()*properties.timeStepsPerDay() - timeNow;
   }
 }
