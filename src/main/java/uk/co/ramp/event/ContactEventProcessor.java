@@ -1,23 +1,20 @@
 package uk.co.ramp.event;
 
-import static uk.co.ramp.people.VirusStatus.EXPOSED;
-import static uk.co.ramp.people.VirusStatus.SUSCEPTIBLE;
-
-import java.util.Optional;
 import org.apache.commons.math3.util.FastMath;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import uk.co.ramp.Population;
 import uk.co.ramp.distribution.DistributionSampler;
-import uk.co.ramp.event.types.ContactEvent;
-import uk.co.ramp.event.types.EventProcessor;
-import uk.co.ramp.event.types.ImmutableInfectionEvent;
-import uk.co.ramp.event.types.ImmutableProcessedEventResult;
-import uk.co.ramp.event.types.InfectionEvent;
-import uk.co.ramp.event.types.ProcessedEventResult;
+import uk.co.ramp.event.types.*;
+import uk.co.ramp.io.InfectionRates;
 import uk.co.ramp.io.types.DiseaseProperties;
 import uk.co.ramp.people.Case;
 import uk.co.ramp.policy.isolation.IsolationPolicy;
+
+import java.util.Optional;
+
+import static uk.co.ramp.people.VirusStatus.EXPOSED;
+import static uk.co.ramp.people.VirusStatus.SUSCEPTIBLE;
 
 public class ContactEventProcessor implements EventProcessor<ContactEvent> {
   private static final Logger LOGGER = LogManager.getLogger(ContactEventProcessor.class);
@@ -26,16 +23,19 @@ public class ContactEventProcessor implements EventProcessor<ContactEvent> {
   private final DiseaseProperties diseaseProperties;
   private final DistributionSampler distributionSampler;
   private final IsolationPolicy isolationPolicy;
+  private final InfectionRates infectionRates;
 
   public ContactEventProcessor(
-      Population population,
-      DiseaseProperties diseaseProperties,
-      DistributionSampler distributionSampler,
-      IsolationPolicy isolationPolicy) {
+          Population population,
+          DiseaseProperties diseaseProperties,
+          DistributionSampler distributionSampler,
+          IsolationPolicy isolationPolicy,
+          InfectionRates infectionRates) {
     this.population = population;
     this.diseaseProperties = diseaseProperties;
     this.distributionSampler = distributionSampler;
     this.isolationPolicy = isolationPolicy;
+    this.infectionRates = infectionRates;
   }
 
   @Override
@@ -105,7 +105,7 @@ public class ContactEventProcessor implements EventProcessor<ContactEvent> {
    * probability to the contact weight, respectively.
    *
    * <p>For an intuitive parameter specification in {@link DiseaseProperties}, instead of specifying
-   * bias in [-infty, infty], probability U == P(exposure=1|C=1) = {@link
+   * bias in [-infty, infty], probability U == P(exposure=1|C=1) = {
    * exposureProbability4UnitContact#DiseaseProperties}, whose support is (0, 1), should be
    * provided. Then it is automatically converted into exp(bias) = U/(1-U) based on Sigmoid(bias) =
    * U.
@@ -121,10 +121,10 @@ public class ContactEventProcessor implements EventProcessor<ContactEvent> {
     boolean dangerMix = personA.isInfectious() && personB.virusStatus() == SUSCEPTIBLE;
 
     double expBias =
-        diseaseProperties.exposureProbability4UnitContact()
-            / (1.0 - diseaseProperties.exposureProbability4UnitContact());
+            diseaseProperties.exposureProbability4UnitContact()
+                    / (1.0 - diseaseProperties.exposureProbability4UnitContact());
     double exposureProb =
-        1. / (1. + 1. / (expBias * FastMath.pow(weight, diseaseProperties.exposureExponent())));
+            infectionRates.getInfectionRate(personA.virusStatus()) / (1. + 1. / (expBias * FastMath.pow(weight, diseaseProperties.exposureExponent())));
 
     if (dangerMix && distributionSampler.uniformBetweenZeroAndOne() < exposureProb) {
       LOGGER.debug("       DANGER MIX");
