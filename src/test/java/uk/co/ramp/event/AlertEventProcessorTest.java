@@ -23,6 +23,7 @@ import uk.co.ramp.event.types.AlertEvent;
 import uk.co.ramp.event.types.ImmutableAlertEvent;
 import uk.co.ramp.event.types.ProcessedEventResult;
 import uk.co.ramp.io.types.DiseaseProperties;
+import uk.co.ramp.io.types.PopulationProperties;
 import uk.co.ramp.io.types.StandardProperties;
 import uk.co.ramp.statistics.StatisticsRecorder;
 import uk.co.ramp.statistics.StatisticsRecorderImpl;
@@ -39,6 +40,7 @@ public class AlertEventProcessorTest {
   private DistributionSampler distributionSampler;
   private AlertEventProcessor eventProcessor;
   private StatisticsRecorder statisticsRecorder;
+  private PopulationProperties populationProperties;
 
   @Before
   public void setUp() throws Exception {
@@ -46,6 +48,7 @@ public class AlertEventProcessorTest {
     population = mock(Population.class);
     distributionSampler = mock(DistributionSampler.class);
     statisticsRecorder = mock(StatisticsRecorderImpl.class);
+    populationProperties = mock(PopulationProperties.class);
     when(distributionSampler.getDistributionValue(any())).thenReturn(1);
     when(statisticsRecorder.getFalsePositives()).thenReturn(0);
     when(statisticsRecorder.getFalseNegatives()).thenReturn(0);
@@ -55,24 +58,31 @@ public class AlertEventProcessorTest {
   public void timeInStatus() {
     eventProcessor =
         new AlertEventProcessor(
-            population, properties, diseaseProperties, distributionSampler, statisticsRecorder);
+            population,
+            properties,
+            diseaseProperties,
+            distributionSampler,
+            statisticsRecorder,
+            populationProperties);
 
-    int time = eventProcessor.timeInStatus(NONE);
+    AlertEvent alertEvent = mock(AlertEvent.class);
+
+    int time = eventProcessor.timeInStatus(NONE, alertEvent);
     Assert.assertEquals(0, time);
 
-    time = eventProcessor.timeInStatus(ALERTED);
+    time = eventProcessor.timeInStatus(ALERTED, alertEvent);
     Assert.assertEquals(1, time);
 
-    time = eventProcessor.timeInStatus(REQUESTED_TEST);
+    time = eventProcessor.timeInStatus(REQUESTED_TEST, alertEvent);
     Assert.assertEquals(diseaseProperties.timeTestAdministered().mean(), time);
 
-    time = eventProcessor.timeInStatus(AWAITING_RESULT);
+    time = eventProcessor.timeInStatus(AWAITING_RESULT, alertEvent);
     Assert.assertEquals(diseaseProperties.timeTestResult().mean(), time);
 
-    time = eventProcessor.timeInStatus(TESTED_NEGATIVE);
+    time = eventProcessor.timeInStatus(TESTED_NEGATIVE, alertEvent);
     Assert.assertEquals(1, time);
 
-    time = eventProcessor.timeInStatus(TESTED_POSITIVE);
+    time = eventProcessor.timeInStatus(TESTED_POSITIVE, alertEvent);
     Assert.assertEquals(1, time);
   }
 
@@ -84,7 +94,12 @@ public class AlertEventProcessorTest {
 
     eventProcessor =
         new AlertEventProcessor(
-            population, properties, diseaseProperties, distributionSampler, statisticsRecorder);
+            population,
+            properties,
+            diseaseProperties,
+            distributionSampler,
+            statisticsRecorder,
+            populationProperties);
 
     AlertEvent event =
         ImmutableAlertEvent.builder().time(0).id(0).oldStatus(NONE).nextStatus(ALERTED).build();
@@ -117,7 +132,12 @@ public class AlertEventProcessorTest {
     when(population.getAlertStatus(eq(0))).thenReturn(REQUESTED_TEST);
     eventProcessor =
         new AlertEventProcessor(
-            population, properties, diseaseProperties, distributionSampler, statisticsRecorder);
+            population,
+            properties,
+            diseaseProperties,
+            distributionSampler,
+            statisticsRecorder,
+            populationProperties);
 
     var processedEvents = eventProcessor.processEvent(event);
     assertThat(processedEvents.newCompletedAlertEvents()).isEmpty();
@@ -138,7 +158,12 @@ public class AlertEventProcessorTest {
 
     eventProcessor =
         new AlertEventProcessor(
-            population, properties, diseaseProperties, distributionSampler, statisticsRecorder);
+            population,
+            properties,
+            diseaseProperties,
+            distributionSampler,
+            statisticsRecorder,
+            populationProperties);
 
     when(distributionSampler.uniformBetweenZeroAndOne()).thenReturn(0.99d);
     assertThat(eventProcessor.determineTestResult(true))

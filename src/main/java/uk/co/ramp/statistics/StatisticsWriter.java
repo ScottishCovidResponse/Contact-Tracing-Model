@@ -2,6 +2,7 @@ package uk.co.ramp.statistics;
 
 import java.io.IOException;
 import java.io.Writer;
+import java.util.Collection;
 import uk.co.ramp.io.csv.CsvWriter;
 import uk.co.ramp.io.types.StandardProperties;
 import uk.co.ramp.statistics.types.ImmutableRValueOutput;
@@ -38,10 +39,14 @@ public class StatisticsWriter {
     int contactsTraced =
         statisticsRecorder.getContactsTraced().values().stream().mapToInt(Integer::intValue).sum();
 
+    int delayedTests =
+        statisticsRecorder.getDelayedTests().values().stream().mapToInt(Collection::size).sum();
+
     statsWriter.write("Person Days in Isolation , " + timeIsolated);
     statsWriter.write("\nPeople infected , " + totalInfected);
     statsWriter.write("\nContacts Traced , " + contactsTraced);
     statsWriter.write("\nFalse Positive Tests , " + statisticsRecorder.getFalsePositives());
     statsWriter.write("\nFalse Negative Tests , " + statisticsRecorder.getFalseNegatives());
+    statsWriter.write("\nDelayed Tests , " + delayedTests);
   }
 }

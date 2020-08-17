@@ -13,6 +13,8 @@ public class StatisticsRecorderImpl implements StatisticsRecorder {
   private final Map<Integer, Integer> personDaysIsolation = new HashMap<>();
   private final Map<Integer, Integer> peopleInfected = new HashMap<>();
   private final Map<Integer, Integer> contactsTraced = new HashMap<>();
+  private final Map<Integer, Integer> testsConducted = new HashMap<>();
+  private final Map<Integer, List<Integer>> delayedTests = new HashMap<>();
   private final Map<Integer, List<Infection>> r0Progression = new HashMap<>();
   private final Map<AlertStatus, Integer> incorrectTests = new EnumMap<>(AlertStatus.class);
 
@@ -36,6 +38,21 @@ public class StatisticsRecorderImpl implements StatisticsRecorder {
 
   public Map<Integer, List<Infection>> getR0Progression() {
     return r0Progression;
+  }
+
+  @Override
+  public Map<Integer, Integer> getTestsConducted() {
+    return testsConducted;
+  }
+
+  @Override
+  public Map<Integer, List<Integer>> getDelayedTests() {
+    return delayedTests;
+  }
+
+  @Override
+  public int getTestsConducted(int time) {
+    return testsConducted.getOrDefault(time, 0);
   }
 
   @Override
@@ -69,6 +86,16 @@ public class StatisticsRecorderImpl implements StatisticsRecorder {
   @Override
   public void recordIncorrectTestResult(AlertStatus alertStatus) {
     incorrectTests.compute(alertStatus, (k, v) -> (v == null) ? 1 : ++v);
+  }
+
+  @Override
+  public void recordTestConducted(int time) {
+    testsConducted.compute(time, (k, v) -> (v == null) ? 1 : ++v);
+  }
+
+  @Override
+  public void recordTestDelayed(int time, int id) {
+    delayedTests.computeIfAbsent(time, k -> new ArrayList<>()).add(id);
   }
 
   public List<ImmutableRValueOutput> getRollingAverage(int period) {
