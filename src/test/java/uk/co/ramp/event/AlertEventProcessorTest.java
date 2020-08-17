@@ -33,7 +33,7 @@ public class AlertEventProcessorTest {
   private AlertEventProcessor eventProcessor;
   private StatisticsRecorder statisticsRecorder;
 
-  private static final double DELTA = 1e-6;;
+  private static final double DELTA = 1e-6;
 
   @Before
   public void setUp() throws Exception {
@@ -142,15 +142,17 @@ public class AlertEventProcessorTest {
             population, properties, diseaseProperties, distributionSampler, statisticsRecorder);
 
     when(distributionSampler.uniformBetweenZeroAndOne()).thenReturn(0.99d);
-    assertThat(eventProcessor.determineTestResult(true)).hasValue(TESTED_NEGATIVE);
+    when(population.isInfectious(0)).thenReturn(true);
+    assertThat(eventProcessor.determineTestResult(0)).hasValue(TESTED_NEGATIVE);
 
     when(distributionSampler.uniformBetweenZeroAndOne()).thenReturn(0.90d);
-    assertThat(eventProcessor.determineTestResult(true)).hasValue(TESTED_POSITIVE);
+    assertThat(eventProcessor.determineTestResult(0)).hasValue(TESTED_POSITIVE);
 
     when(distributionSampler.uniformBetweenZeroAndOne()).thenReturn(0.90d);
-    assertThat(eventProcessor.determineTestResult(false)).hasValue(TESTED_NEGATIVE);
+    when(population.isInfectious(0)).thenReturn(false);
+    assertThat(eventProcessor.determineTestResult(0)).hasValue(TESTED_NEGATIVE);
 
     when(distributionSampler.uniformBetweenZeroAndOne()).thenReturn(0.99d);
-    assertThat(eventProcessor.determineTestResult(false)).hasValue(TESTED_POSITIVE);
+    assertThat(eventProcessor.determineTestResult(0)).hasValue(TESTED_POSITIVE);
   }
 }
