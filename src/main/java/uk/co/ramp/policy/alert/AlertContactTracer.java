@@ -1,17 +1,16 @@
 package uk.co.ramp.policy.alert;
 
-import uk.co.ramp.Population;
-import uk.co.ramp.event.CompletionEventListGroup;
-import uk.co.ramp.statistics.StatisticsRecorder;
+import static uk.co.ramp.people.AlertStatus.NONE;
+import static uk.co.ramp.people.VirusStatus.DEAD;
 
 import java.util.Collection;
 import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
-
-import static uk.co.ramp.people.AlertStatus.NONE;
-import static uk.co.ramp.people.VirusStatus.DEAD;
+import uk.co.ramp.Population;
+import uk.co.ramp.event.CompletionEventListGroup;
+import uk.co.ramp.statistics.StatisticsRecorder;
 
 public class AlertContactTracer {
   private final TracingPolicy tracingPolicy;
@@ -52,9 +51,9 @@ public class AlertContactTracer {
     statisticsRecorder.recordContactsTraced(currentTime, currentLevelContactsTrace.size());
 
     return Stream.of(currentLevelContactsTrace, nextLevelContactsTrace)
-            .flatMap(Collection::stream)
-            .filter(id -> id != personId)
-            .filter(id -> population.hasApp(personId))
+        .flatMap(Collection::stream)
+        .filter(id -> id != personId)
+        .filter(id -> population.hasApp(personId))
         .collect(Collectors.toSet());
   }
 

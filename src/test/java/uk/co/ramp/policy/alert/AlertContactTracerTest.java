@@ -61,18 +61,17 @@ public class AlertContactTracerTest {
     assertThat(contactTracer.traceRecentContacts(0, 2, 1)).containsExactlyInAnyOrder(2, 3);
   }
 
-
   @Test
   public void testPrimaryLevelTraceNoApp() {
     when(tracingPolicy.noOfTracingLevels()).thenReturn(1);
     when(eventList.getCompletedContactEventsInPeriod(eq(0), eq(2), eq(1)))
-            .thenReturn(List.of(event1, event2, event3));
+        .thenReturn(List.of(event1, event2, event3));
     when(population.getAlertStatus(anyInt())).thenReturn(AlertStatus.NONE);
     when(population.getVirusStatus(anyInt())).thenReturn(VirusStatus.EXPOSED);
     when(population.hasApp(anyInt())).thenReturn(false);
 
     var contactTracer =
-            new AlertContactTracer(tracingPolicy, eventList, population, statisticsRecorder);
+        new AlertContactTracer(tracingPolicy, eventList, population, statisticsRecorder);
 
     assertThat(contactTracer.traceRecentContacts(0, 2, 1)).isEmpty();
   }

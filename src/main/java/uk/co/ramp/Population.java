@@ -41,7 +41,7 @@ public class Population {
     return population.get(id).virusStatus();
   }
 
-  public boolean hasApp(int id){
+  public boolean hasApp(int id) {
     return population.get(id).hasApp();
   }
 
