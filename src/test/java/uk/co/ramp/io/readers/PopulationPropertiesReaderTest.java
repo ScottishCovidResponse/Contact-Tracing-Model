@@ -41,7 +41,9 @@ public class PopulationPropertiesReaderTest {
           + "      'max': 90 "
           + "    } "
           + "  }, "
-          + "  'genderBalance': 0.99 "
+          + "  'genderBalance': 0.99 ,"
+          + "  'testCapacity' : 0.01,"
+          + "  'appUptake' : 0.7"
           + "}";
 
   @Test
