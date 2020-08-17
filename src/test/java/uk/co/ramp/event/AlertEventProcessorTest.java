@@ -85,7 +85,6 @@ public class AlertEventProcessorTest {
 
     time = eventProcessor.timeInStatus(TESTED_POSITIVE, alertEvent);
     Assert.assertEquals(1, time);
-
   }
 
   @Test

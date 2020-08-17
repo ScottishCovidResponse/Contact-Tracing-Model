@@ -1,6 +1,7 @@
 package uk.co.ramp.statistics;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import uk.co.ramp.io.types.StandardProperties;
@@ -11,7 +12,6 @@ import uk.co.ramp.statistics.types.ImmutableRValueOutput;
 import uk.co.ramp.statistics.types.Infection;
 
 public class StatisticsRecorderImpl implements StatisticsRecorder {
-
 
   private final Map<Integer, Integer> personDaysIsolation;
   private final Map<Integer, Integer> peopleInfected;
@@ -124,8 +124,9 @@ public class StatisticsRecorderImpl implements StatisticsRecorder {
   @Override
   public void recordTestDelayed(int time, int id) {
     delayedTests.computeIfAbsent(time, k -> new ArrayList<>()).add(id);
+  }
 
-  @Override  
+  @Override
   public void recordCorrectTestResult(AlertStatus alertStatus) {
     correctTests.compute(alertStatus, (k, v) -> (v == null) ? 1 : ++v);
   }
