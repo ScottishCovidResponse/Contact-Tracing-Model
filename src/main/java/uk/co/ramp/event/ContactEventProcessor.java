@@ -1,5 +1,9 @@
 package uk.co.ramp.event;
 
+import static uk.co.ramp.people.VirusStatus.EXPOSED;
+import static uk.co.ramp.people.VirusStatus.SUSCEPTIBLE;
+
+import java.util.Optional;
 import org.apache.commons.math3.util.FastMath;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -11,11 +15,6 @@ import uk.co.ramp.io.types.DiseaseProperties;
 import uk.co.ramp.people.Case;
 import uk.co.ramp.policy.isolation.IsolationPolicy;
 
-import java.util.Optional;
-
-import static uk.co.ramp.people.VirusStatus.EXPOSED;
-import static uk.co.ramp.people.VirusStatus.SUSCEPTIBLE;
-
 public class ContactEventProcessor implements EventProcessor<ContactEvent> {
   private static final Logger LOGGER = LogManager.getLogger(ContactEventProcessor.class);
 
@@ -26,11 +25,11 @@ public class ContactEventProcessor implements EventProcessor<ContactEvent> {
   private final InfectionRates infectionRates;
 
   public ContactEventProcessor(
-          Population population,
-          DiseaseProperties diseaseProperties,
-          DistributionSampler distributionSampler,
-          IsolationPolicy isolationPolicy,
-          InfectionRates infectionRates) {
+      Population population,
+      DiseaseProperties diseaseProperties,
+      DistributionSampler distributionSampler,
+      IsolationPolicy isolationPolicy,
+      InfectionRates infectionRates) {
     this.population = population;
     this.diseaseProperties = diseaseProperties;
     this.distributionSampler = distributionSampler;
@@ -121,10 +120,11 @@ public class ContactEventProcessor implements EventProcessor<ContactEvent> {
     boolean dangerMix = personA.isInfectious() && personB.virusStatus() == SUSCEPTIBLE;
 
     double expBias =
-            diseaseProperties.exposureProbability4UnitContact()
-                    / (1.0 - diseaseProperties.exposureProbability4UnitContact());
+        diseaseProperties.exposureProbability4UnitContact()
+            / (1.0 - diseaseProperties.exposureProbability4UnitContact());
     double exposureProb =
-            infectionRates.getInfectionRate(personA.virusStatus()) / (1. + 1. / (expBias * FastMath.pow(weight, diseaseProperties.exposureExponent())));
+        infectionRates.getInfectionRate(personA.virusStatus())
+            / (1. + 1. / (expBias * FastMath.pow(weight, diseaseProperties.exposureExponent())));
 
     if (dangerMix && distributionSampler.uniformBetweenZeroAndOne() < exposureProb) {
       LOGGER.debug("       DANGER MIX");

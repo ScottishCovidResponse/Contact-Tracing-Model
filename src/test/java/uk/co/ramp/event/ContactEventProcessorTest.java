@@ -1,5 +1,14 @@
 package uk.co.ramp.event;
 
+import static org.hamcrest.CoreMatchers.containsString;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
+import static uk.co.ramp.people.VirusStatus.*;
+
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Optional;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Rule;
@@ -21,15 +30,6 @@ import uk.co.ramp.people.Case;
 import uk.co.ramp.people.Human;
 import uk.co.ramp.policy.alert.TracingPolicyContext;
 import uk.co.ramp.policy.isolation.IsolationPolicy;
-
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Optional;
-
-import static org.hamcrest.CoreMatchers.containsString;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
-import static uk.co.ramp.people.VirusStatus.*;
 
 @RunWith(SpringRunner.class)
 @DirtiesContext
@@ -53,10 +53,15 @@ public class ContactEventProcessorTest {
     DistributionSampler distributionSampler = mock(DistributionSampler.class);
     IsolationPolicy isolationPolicy = mock(IsolationPolicy.class);
     InfectionRates infectionRates = mock(InfectionRates.class);
+    when(infectionRates.getInfectionRate(any())).thenReturn(1d);
 
     eventProcessor =
         new ContactEventProcessor(
-            new Population(population), diseaseProperties, distributionSampler, isolationPolicy, infectionRates);
+            new Population(population),
+            diseaseProperties,
+            distributionSampler,
+            isolationPolicy,
+            infectionRates);
   }
 
   @Test

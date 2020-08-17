@@ -40,16 +40,16 @@ public class EventContext {
 
   @Bean
   public EventRunner eventRunner(
-          Population population,
-          StandardProperties properties,
-          DiseaseProperties diseaseProperties,
-          DistributionSampler distributionSampler,
-          IsolationPolicy isolationPolicy,
-          InitialCaseReader initialCaseReader,
-          AlertChecker alertChecker,
-          CompletionEventListGroup eventList,
-          StatisticsRecorder statisticsRecorder,
-          InfectionRates infectionRates) {
+      Population population,
+      StandardProperties properties,
+      DiseaseProperties diseaseProperties,
+      DistributionSampler distributionSampler,
+      IsolationPolicy isolationPolicy,
+      InitialCaseReader initialCaseReader,
+      AlertChecker alertChecker,
+      CompletionEventListGroup eventList,
+      StatisticsRecorder statisticsRecorder,
+      InfectionRates infectionRates) {
     AlertEventProcessor alertEventProcessor =
         new AlertEventProcessor(
             population, properties, diseaseProperties, distributionSampler, statisticsRecorder);

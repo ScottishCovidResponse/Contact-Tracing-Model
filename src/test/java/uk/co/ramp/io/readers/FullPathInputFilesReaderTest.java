@@ -22,7 +22,8 @@ public class FullPathInputFilesReaderTest {
           + "  \"ageData\": \"ageData.csv\",\n"
           + "  \"initialExposures\": \"initialExposures.csv\",\n"
           + "  \"tracingPolicies\": \"tracingPolicies.json\",\n"
-          + "  \"isolationPolicies\": \"isolationPolicies.json\"\n"
+          + "  \"isolationPolicies\": \"isolationPolicies.json\",\n"
+          + "  \"infectionRates\": \"infectionRates.json\"\n"
           + "}";
 
   private final InputFiles baseInputFiles =
@@ -35,6 +36,7 @@ public class FullPathInputFilesReaderTest {
           .populationSettings("populationSettings.json")
           .runSettings("runSettings.json")
           .tracingPolicies("tracingPolicies.json")
+          .infectionRates("infectionRates.json")
           .build();
 
   private final String overrideInputFolderLocation = "overrideFolder1";
@@ -65,6 +67,7 @@ public class FullPathInputFilesReaderTest {
             .populationSettings("defaultInputFolder/populationSettings.json")
             .runSettings("defaultInputFolder/runSettings.json")
             .tracingPolicies("overrideFolder1/tracingPolicies.json")
+            .infectionRates("defaultInputFolder/infectionRates.json")
             .build();
 
     assertThat(reader.read(underLyingBaseInputFilesReader)).isEqualTo(expectedInputFiles);

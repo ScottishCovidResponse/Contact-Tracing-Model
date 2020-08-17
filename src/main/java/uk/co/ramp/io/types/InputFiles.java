@@ -42,6 +42,6 @@ public interface InputFiles {
     Preconditions.checkState(
         !isolationPolicies().isBlank(), "Isolation policies location should not be blank");
     Preconditions.checkState(
-            !infectionRates().isBlank(), "Infection rates location should not be blank");
+        !infectionRates().isBlank(), "Infection rates location should not be blank");
   }
 }

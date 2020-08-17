@@ -1,5 +1,9 @@
 package uk.co.ramp;
 
+import java.io.*;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.util.Optional;
 import org.apache.commons.math3.random.RandomDataGenerator;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -12,11 +16,6 @@ import uk.co.ramp.io.InfectionRates;
 import uk.co.ramp.io.readers.*;
 import uk.co.ramp.io.types.*;
 import uk.co.ramp.people.AgeRetriever;
-
-import java.io.*;
-import java.nio.file.Files;
-import java.nio.file.Paths;
-import java.util.Optional;
 
 @SpringBootConfiguration
 @ComponentScan
@@ -125,16 +124,16 @@ public class AppConfig {
   }
 
   @Bean
-  public InfectionRates infectionRates(){
+  public InfectionRates infectionRates() {
     try (Reader reader = getReader(inputFiles().infectionRates())) {
       return new InfectionRateReader().read(reader);
     } catch (IOException e) {
-      String message = "An error occurred while parsing the infection rates at " + inputFiles().infectionRates();
+      String message =
+          "An error occurred while parsing the infection rates at " + inputFiles().infectionRates();
       LOGGER.error(message);
       throw new ConfigurationException(message, e);
     }
   }
-
 
   private void useSeed(RandomDataGenerator rdg, int seed) {
     rdg.reSeed(seed);
@@ -186,7 +185,4 @@ public class AppConfig {
   Reader getReader(String input) throws FileNotFoundException {
     return new FileReader(new File(input));
   }
-
-
-
 }
