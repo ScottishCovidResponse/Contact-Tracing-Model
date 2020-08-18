@@ -5,6 +5,7 @@ import org.springframework.context.annotation.Bean;
 import uk.co.ramp.Population;
 import uk.co.ramp.distribution.DistributionSampler;
 import uk.co.ramp.event.types.*;
+import uk.co.ramp.io.InfectionRates;
 import uk.co.ramp.io.InitialCaseReader;
 import uk.co.ramp.io.types.DiseaseProperties;
 import uk.co.ramp.io.types.OutputFolder;
@@ -47,7 +48,8 @@ public class EventContext {
       InitialCaseReader initialCaseReader,
       AlertChecker alertChecker,
       CompletionEventListGroup eventList,
-      StatisticsRecorder statisticsRecorder) {
+      StatisticsRecorder statisticsRecorder,
+      InfectionRates infectionRates) {
     AlertEventProcessor alertEventProcessor =
         new AlertEventProcessor(
             population, properties, diseaseProperties, distributionSampler, statisticsRecorder);
@@ -59,7 +61,7 @@ public class EventContext {
             population, properties, diseaseProperties, distributionSampler, statisticsRecorder);
     ContactEventProcessor contactEventProcessor =
         new ContactEventProcessor(
-            population, diseaseProperties, distributionSampler, isolationPolicy);
+            population, diseaseProperties, distributionSampler, isolationPolicy, infectionRates);
 
     ProcessedEventsGrouper processedEventsGrouper = new ProcessedEventsGrouper();
 

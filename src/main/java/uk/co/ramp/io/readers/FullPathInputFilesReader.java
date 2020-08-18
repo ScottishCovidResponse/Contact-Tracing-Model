@@ -37,6 +37,7 @@ public class FullPathInputFilesReader {
             .populationSettings(getFilePath(baseInputFiles.populationSettings()))
             .runSettings(getFilePath(baseInputFiles.runSettings()))
             .tracingPolicies(getFilePath(baseInputFiles.tracingPolicies()))
+            .infectionRates(getFilePath(baseInputFiles.infectionRates()))
             .build();
 
     LOGGER.info("Loaded input files from locations: {}", inputFiles);
