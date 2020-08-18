@@ -22,6 +22,8 @@ public interface StandardProperties {
 
   OptionalInt seed();
 
+  OptionalInt dayOffset();
+
   boolean steadyState();
 
   @Check
