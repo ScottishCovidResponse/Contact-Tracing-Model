@@ -35,9 +35,7 @@ public class AlertEventProcessorTest {
   private StatisticsRecorder statisticsRecorder;
   private PopulationProperties populationProperties;
 
-  private static final double DELTA = 1e-6;;
-
-  private static final double DELTA = 1e-6;;
+  private static final double DELTA = 1e-6;
 
   @Before
   public void setUp() throws Exception {
@@ -69,7 +67,6 @@ public class AlertEventProcessorTest {
     int time = eventProcessor.timeInStatusAndTestQueue(NONE, alertEvent);
     Assert.assertEquals(0, time);
 
-
     time = eventProcessor.timeInStatusAndTestQueue(ALERTED, alertEvent);
     Assert.assertEquals(1, time);
 
@@ -89,7 +86,6 @@ public class AlertEventProcessorTest {
 
     time = eventProcessor.timeInStatusAndTestQueue(TESTED_POSITIVE, alertEvent);
     Assert.assertEquals(1, time);
-
   }
 
   @Test
