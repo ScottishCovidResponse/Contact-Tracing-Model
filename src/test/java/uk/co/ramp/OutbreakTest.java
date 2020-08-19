@@ -109,7 +109,7 @@ public class OutbreakTest {
     int popSize = 100;
     double[] array = {1};
 
-    ReflectionTestUtils.setField(standardProperties, "timeLimit", 100);
+    ReflectionTestUtils.setField(standardProperties, "timeLimitDays", 100);
     ReflectionTestUtils.setField(standardProperties, "initialExposures", 10);
     ReflectionTestUtils.setField(standardProperties, "populationSize", popSize);
     ReflectionTestUtils.setField(standardProperties, "timeStepsPerDay", 1);
@@ -149,7 +149,7 @@ public class OutbreakTest {
 
     assertThat(population.size()).isGreaterThan(0);
 
-    Assert.assertEquals(records.size(), standardProperties.timeLimit() + 1);
+    Assert.assertEquals(records.size(), standardProperties.timeLimitDays() + 1);
     Assert.assertTrue(susceptiblePost < susceptible);
     Assert.assertThat(
         logSpy.getOutput(),
@@ -175,7 +175,7 @@ public class OutbreakTest {
     Set<Integer> cases = generateTestCases(infections, popSize);
     ReflectionTestUtils.setField(this.initialCaseReader, "cases", cases);
 
-    ReflectionTestUtils.setField(standardProperties, "timeLimit", 100);
+    ReflectionTestUtils.setField(standardProperties, "timeLimitDays", 100);
     ReflectionTestUtils.setField(standardProperties, "initialExposures", infections);
     ReflectionTestUtils.setField(standardProperties, "populationSize", popSize);
     ReflectionTestUtils.setField(standardProperties, "steadyState", false);

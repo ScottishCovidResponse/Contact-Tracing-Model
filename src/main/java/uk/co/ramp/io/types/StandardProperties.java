@@ -12,7 +12,7 @@ import org.immutables.value.Value.Immutable;
 public interface StandardProperties {
   int populationSize();
 
-  int timeLimit();
+  int timeLimitDays();
 
   int timeStepsPerDay();
 
@@ -29,7 +29,7 @@ public interface StandardProperties {
   @Check
   default void check() {
     Preconditions.checkState(populationSize() > 0, "Population size should be greater than 0");
-    Preconditions.checkState(timeLimit() >= 0, "Time limit should not be negative");
+    Preconditions.checkState(timeLimitDays() >= 0, "Time limit should not be negative");
     Preconditions.checkState(initialExposures() >= 0, "Initial exposures should not be negative");
     Preconditions.checkState(
         timeStepsPerDay() > 0, "There should be at least one time step per day");

@@ -39,7 +39,7 @@ public class ContactReader {
     return contactEvents.stream()
         .filter(event -> event.from() < properties.populationSize())
         .filter(event -> event.to() < properties.populationSize())
-        .filter(event -> event.time() <= properties.timeLimit() * properties.timeStepsPerDay())
+        .filter(event -> event.time() <= properties.timeLimitDays() * properties.timeStepsPerDay())
         .collect(Collectors.toUnmodifiableList());
   }
 

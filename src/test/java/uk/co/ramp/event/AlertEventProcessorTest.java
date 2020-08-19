@@ -64,26 +64,26 @@ public class AlertEventProcessorTest {
 
     AlertEvent alertEvent = mock(AlertEvent.class);
 
-    int time = eventProcessor.timeInStatus(NONE, alertEvent);
+    int time = eventProcessor.timeInStatusAndTestQueue(NONE, alertEvent);
     Assert.assertEquals(0, time);
 
-    time = eventProcessor.timeInStatus(ALERTED, alertEvent);
+    time = eventProcessor.timeInStatusAndTestQueue(ALERTED, alertEvent);
     Assert.assertEquals(1, time);
 
-    time = eventProcessor.timeInStatus(REQUESTED_TEST, alertEvent);
+    time = eventProcessor.timeInStatusAndTestQueue(REQUESTED_TEST, alertEvent);
     Assert.assertEquals(
         diseaseProperties.timeTestAdministered().mean() * properties.timeStepsPerDay(),
         time,
         DELTA);
 
-    time = eventProcessor.timeInStatus(AWAITING_RESULT, alertEvent);
+    time = eventProcessor.timeInStatusAndTestQueue(AWAITING_RESULT, alertEvent);
     Assert.assertEquals(
         diseaseProperties.timeTestResult().mean() * properties.timeStepsPerDay(), time, DELTA);
 
-    time = eventProcessor.timeInStatus(TESTED_NEGATIVE, alertEvent);
+    time = eventProcessor.timeInStatusAndTestQueue(TESTED_NEGATIVE, alertEvent);
     Assert.assertEquals(1, time);
 
-    time = eventProcessor.timeInStatus(TESTED_POSITIVE, alertEvent);
+    time = eventProcessor.timeInStatusAndTestQueue(TESTED_POSITIVE, alertEvent);
     Assert.assertEquals(1, time);
   }
 

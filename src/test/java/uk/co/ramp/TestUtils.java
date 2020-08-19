@@ -52,7 +52,7 @@ public class TestUtils {
         .populationSize(1000)
         .seed(123)
         .steadyState(true)
-        .timeLimit(100)
+        .timeLimitDays(100)
         .timeStepsPerDay(1)
         .timeStepSpread(1)
         .build();

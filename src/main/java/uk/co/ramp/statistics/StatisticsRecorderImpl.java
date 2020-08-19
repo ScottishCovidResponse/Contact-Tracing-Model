@@ -135,7 +135,7 @@ public class StatisticsRecorderImpl implements StatisticsRecorder {
     MovingAverage movingAverage = new MovingAverage(period);
     Map<Integer, List<Infection>> inf = getR0Progression();
     List<ImmutableRValueOutput> rValueOutputs = new ArrayList<>();
-    for (int i = 0; i < properties.timeLimit(); i++) {
+    for (int i = 0; i < properties.timeLimitDays(); i++) {
       List<Infection> orDefault = inf.get(i);
       if (orDefault != null) {
         int seeded = orDefault.stream().mapToInt(Infection::infections).sum();

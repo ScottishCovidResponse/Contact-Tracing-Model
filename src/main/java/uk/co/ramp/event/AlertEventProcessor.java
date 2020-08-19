@@ -61,7 +61,7 @@ public class AlertEventProcessor implements EventProcessor<AlertEvent> {
     }
 
     if (nextStatus.get() != event.nextStatus()) {
-      int deltaTime = timeInStatus(nextStatus.get(), event);
+      int deltaTime = timeInStatusAndTestQueue(nextStatus.get(), event);
 
       AlertEvent subsequentEvent =
           ImmutableAlertEvent.builder()
@@ -87,7 +87,6 @@ public class AlertEventProcessor implements EventProcessor<AlertEvent> {
 
     switch (event.nextStatus()) {
       case AWAITING_RESULT:
-        //        statisticsRecorder.recordTestConducted(event.time());
         return determineTestResult(population.isInfectious(event.id()));
       case NONE:
         return Optional.of(NONE);
@@ -120,7 +119,7 @@ public class AlertEventProcessor implements EventProcessor<AlertEvent> {
     }
   }
 
-  int timeInStatus(AlertStatus newStatus, AlertEvent event) {
+  int timeInStatusAndTestQueue(AlertStatus newStatus, AlertEvent event) {
     int time = event.time();
     MeanMax progressionData;
     switch (newStatus) {
@@ -165,12 +164,14 @@ public class AlertEventProcessor implements EventProcessor<AlertEvent> {
 
   private int findNextTest(int timeNow, int capacity) {
 
-    for (int testTime = timeNow; testTime < properties.timeLimit(); testTime++) {
+    for (int testTime = timeNow;
+        testTime < properties.timeLimitDays() * properties.timeStepsPerDay();
+        testTime++) {
       if (statisticsRecorder.getTestsConducted(testTime) < capacity) {
         statisticsRecorder.recordTestConducted(testTime);
         return testTime - timeNow;
       }
     }
-    return properties.timeLimit() * properties.timeStepsPerDay() - timeNow;
+    return properties.timeLimitDays() * properties.timeStepsPerDay() - timeNow;
   }
 }

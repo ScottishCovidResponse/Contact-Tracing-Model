@@ -85,7 +85,7 @@ public class PopulationGeneratorTest {
             / (double) popSize;
 
     double hasApp =
-        population.values().stream().map(Case::hasApp).filter(a -> a.equals(true)).count()
+        population.values().stream().filter(Case::hasApp).count()
             / (double) popSize;
 
     System.out.println(hasApp);
