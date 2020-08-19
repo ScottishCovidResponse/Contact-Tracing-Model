@@ -1,6 +1,7 @@
 package uk.co.ramp.statistics;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import uk.co.ramp.io.types.StandardProperties;
@@ -18,6 +19,8 @@ public class StatisticsRecorderImpl implements StatisticsRecorder {
   private final Map<Integer, List<Infection>> r0Progression;
   private final Map<AlertStatus, Integer> incorrectTests;
   private final Map<AlertStatus, Integer> correctTests;
+  private final Map<Integer, Integer> testsConducted = new HashMap<>();
+  private final Map<Integer, List<Integer>> delayedTests = new HashMap<>();
 
   private final StandardProperties properties;
 
@@ -53,6 +56,21 @@ public class StatisticsRecorderImpl implements StatisticsRecorder {
 
   public Map<Integer, List<Infection>> getR0Progression() {
     return r0Progression;
+  }
+
+  @Override
+  public Map<Integer, Integer> getTestsConducted() {
+    return testsConducted;
+  }
+
+  @Override
+  public Map<Integer, List<Integer>> getDelayedTests() {
+    return delayedTests;
+  }
+
+  @Override
+  public int getTestsConducted(int time) {
+    return testsConducted.getOrDefault(time, 0);
   }
 
   @Override
@@ -99,6 +117,16 @@ public class StatisticsRecorderImpl implements StatisticsRecorder {
   }
 
   @Override
+  public void recordTestConducted(int time) {
+    testsConducted.compute(time, (k, v) -> (v == null) ? 1 : ++v);
+  }
+
+  @Override
+  public void recordTestDelayed(int time, int id) {
+    delayedTests.computeIfAbsent(time, k -> new ArrayList<>()).add(id);
+  }
+
+  @Override
   public void recordCorrectTestResult(AlertStatus alertStatus) {
     correctTests.compute(alertStatus, (k, v) -> (v == null) ? 1 : ++v);
   }
@@ -107,7 +135,7 @@ public class StatisticsRecorderImpl implements StatisticsRecorder {
     MovingAverage movingAverage = new MovingAverage(period);
     Map<Integer, List<Infection>> inf = getR0Progression();
     List<ImmutableRValueOutput> rValueOutputs = new ArrayList<>();
-    for (int i = 0; i < properties.timeLimit(); i++) {
+    for (int i = 0; i < properties.timeLimitDays(); i++) {
       List<Infection> orDefault = inf.get(i);
       if (orDefault != null) {
         int seeded = orDefault.stream().mapToInt(Infection::infections).sum();
