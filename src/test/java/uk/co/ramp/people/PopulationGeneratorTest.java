@@ -14,7 +14,6 @@ import uk.co.ramp.io.types.StandardProperties;
 
 public class PopulationGeneratorTest {
 
-  private static final double DELTA = 1e-6;
   private PopulationGenerator populationGenerator;
   private final Random random = TestUtils.getRandom();
 
@@ -85,11 +84,16 @@ public class PopulationGeneratorTest {
         population.values().stream().map(Case::gender).filter(a -> a.equals(Gender.FEMALE)).count()
             / (double) popSize;
 
+    double hasApp = population.values().stream().filter(Case::hasApp).count() / (double) popSize;
+
+    System.out.println(hasApp);
+
     Assert.assertEquals(0.5, compliance, 0.01);
     Assert.assertEquals(0.5, health, 0.01);
     Assert.assertEquals(50, age, 0.5);
     Assert.assertEquals(0.5, men, 0.01);
     Assert.assertEquals(0.5, women, 0.01);
+    Assert.assertEquals(0.7, hasApp, 0.01);
   }
 
   private void createPeople(Map<Integer, Case> var, int start, int end, VirusStatus v) {

@@ -31,7 +31,7 @@ public class ContactReaderTest {
   private final StandardProperties defaultProperties =
       ImmutableStandardProperties.builder()
           .populationSize(10000)
-          .timeLimit(100)
+          .timeLimitDays(100)
           .initialExposures(1000)
           .seed(0)
           .steadyState(true)
