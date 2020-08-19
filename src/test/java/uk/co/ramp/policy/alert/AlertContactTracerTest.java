@@ -71,7 +71,7 @@ public class AlertContactTracerTest {
   private void setupMock() {
     when(tracingPolicy.noOfTracingLevels()).thenReturn(1);
     when(eventList.getCompletedContactEventsInPeriod(eq(0), eq(2), eq(1)))
-            .thenReturn(List.of(event1, event2, event3));
+        .thenReturn(List.of(event1, event2, event3));
     when(population.getAlertStatus(anyInt())).thenReturn(AlertStatus.NONE);
     when(population.getVirusStatus(anyInt())).thenReturn(VirusStatus.EXPOSED);
   }

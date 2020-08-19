@@ -84,9 +84,7 @@ public class PopulationGeneratorTest {
         population.values().stream().map(Case::gender).filter(a -> a.equals(Gender.FEMALE)).count()
             / (double) popSize;
 
-    double hasApp =
-        population.values().stream().filter(Case::hasApp).count()
-            / (double) popSize;
+    double hasApp = population.values().stream().filter(Case::hasApp).count() / (double) popSize;
 
     System.out.println(hasApp);
 
