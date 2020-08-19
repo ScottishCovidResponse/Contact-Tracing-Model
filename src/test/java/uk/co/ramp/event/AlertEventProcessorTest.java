@@ -37,6 +37,8 @@ public class AlertEventProcessorTest {
 
   private static final double DELTA = 1e-6;;
 
+  private static final double DELTA = 1e-6;;
+
   @Before
   public void setUp() throws Exception {
     properties = mock(StandardProperties.class);
@@ -67,10 +69,12 @@ public class AlertEventProcessorTest {
     int time = eventProcessor.timeInStatusAndTestQueue(NONE, alertEvent);
     Assert.assertEquals(0, time);
 
+
     time = eventProcessor.timeInStatusAndTestQueue(ALERTED, alertEvent);
     Assert.assertEquals(1, time);
 
     time = eventProcessor.timeInStatusAndTestQueue(REQUESTED_TEST, alertEvent);
+
     Assert.assertEquals(
         diseaseProperties.timeTestAdministered().mean() * properties.timeStepsPerDay(),
         time,
@@ -85,6 +89,7 @@ public class AlertEventProcessorTest {
 
     time = eventProcessor.timeInStatusAndTestQueue(TESTED_POSITIVE, alertEvent);
     Assert.assertEquals(1, time);
+
   }
 
   @Test
