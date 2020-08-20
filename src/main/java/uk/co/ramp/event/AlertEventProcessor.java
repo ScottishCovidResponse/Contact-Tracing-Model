@@ -12,6 +12,7 @@ import uk.co.ramp.distribution.DistributionSampler;
 import uk.co.ramp.distribution.ImmutableDistribution;
 import uk.co.ramp.event.types.*;
 import uk.co.ramp.io.types.DiseaseProperties;
+import uk.co.ramp.io.types.PopulationProperties;
 import uk.co.ramp.io.types.StandardProperties;
 import uk.co.ramp.people.AlertStatus;
 import uk.co.ramp.statistics.StatisticsRecorder;
@@ -26,18 +27,21 @@ public class AlertEventProcessor implements EventProcessor<AlertEvent> {
   private final DistributionSampler distributionSampler;
   private final StandardProperties properties;
   private final StatisticsRecorder statisticsRecorder;
+  private final PopulationProperties populationProperties;
 
   public AlertEventProcessor(
       Population population,
       StandardProperties properties,
       DiseaseProperties diseaseProperties,
       DistributionSampler distributionSampler,
-      StatisticsRecorder statisticsRecorder) {
+      StatisticsRecorder statisticsRecorder,
+      PopulationProperties populationProperties) {
     this.population = population;
     this.diseaseProperties = diseaseProperties;
     this.distributionSampler = distributionSampler;
     this.properties = properties;
     this.statisticsRecorder = statisticsRecorder;
+    this.populationProperties = populationProperties;
   }
 
   @Override
@@ -57,7 +61,7 @@ public class AlertEventProcessor implements EventProcessor<AlertEvent> {
     }
 
     if (nextStatus.get() != event.nextStatus()) {
-      int deltaTime = timeInStatus(nextStatus.get());
+      int deltaTime = timeInStatusAndTestQueue(nextStatus.get(), event);
 
       AlertEvent subsequentEvent =
           ImmutableAlertEvent.builder()
@@ -115,12 +119,25 @@ public class AlertEventProcessor implements EventProcessor<AlertEvent> {
     }
   }
 
-  int timeInStatus(AlertStatus newStatus) {
-
+  int timeInStatusAndTestQueue(AlertStatus newStatus, AlertEvent event) {
+    int time = event.time();
     MeanMax progressionData;
     switch (newStatus) {
       case TESTED_POSITIVE:
       case TESTED_NEGATIVE:
+        int conducted = statisticsRecorder.getTestsConducted(time);
+        int capacity =
+            (int) Math.ceil(properties.populationSize() * populationProperties.testCapacity());
+        boolean testsAvailable = conducted < capacity;
+        if (testsAvailable) {
+          statisticsRecorder.recordTestConducted(time);
+          progressionData = ImmutableMeanMax.builder().mean(1).max(1).build();
+        } else {
+          int testTime = findNextTest(time, capacity);
+          statisticsRecorder.recordTestDelayed(time, event.id());
+          progressionData = ImmutableMeanMax.builder().mean(testTime).max(testTime).build();
+        }
+        break;
       case ALERTED:
         progressionData = ImmutableMeanMax.builder().mean(1).max(1).build();
         break;
@@ -143,5 +160,18 @@ public class AlertEventProcessor implements EventProcessor<AlertEvent> {
             .max(progressionData.max())
             .build();
     return distributionSampler.getDistributionValue(distribution) * properties.timeStepsPerDay();
+  }
+
+  private int findNextTest(int timeNow, int capacity) {
+
+    for (int testTime = timeNow;
+        testTime < properties.timeLimitDays() * properties.timeStepsPerDay();
+        testTime++) {
+      if (statisticsRecorder.getTestsConducted(testTime) < capacity) {
+        statisticsRecorder.recordTestConducted(testTime);
+        return testTime - timeNow;
+      }
+    }
+    return properties.timeLimitDays() * properties.timeStepsPerDay() - timeNow;
   }
 }
