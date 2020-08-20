@@ -9,6 +9,7 @@ import java.util.*;
 import java.util.stream.Collectors;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import uk.co.ramp.io.types.StandardProperties;
 import uk.co.ramp.people.Case;
 import uk.co.ramp.statistics.StatisticsRecorder;
 
@@ -17,10 +18,15 @@ public class InfectionMap {
   private static final Logger LOGGER = LogManager.getLogger(InfectionMap.class);
   private final Map<Integer, Case> population;
   private final StatisticsRecorder statisticsRecorder;
+  private final StandardProperties properties;
 
-  public InfectionMap(Map<Integer, Case> population, StatisticsRecorder statisticsRecorder) {
+  public InfectionMap(
+      Map<Integer, Case> population,
+      StatisticsRecorder statisticsRecorder,
+      StandardProperties properties) {
     this.population = population;
     this.statisticsRecorder = statisticsRecorder;
+    this.properties = properties;
   }
 
   public void outputMap(Writer writer) {
@@ -108,6 +114,7 @@ public class InfectionMap {
   }
 
   public String getSource(Case c) {
-    return Strings.padEnd(c.id() + "(" + c.exposedTime() + ")", 12, ' ');
+    return Strings.padEnd(
+        c.id() + "(" + c.exposedTime() / properties.timeStepsPerDay() + ")", 12, ' ');
   }
 }
