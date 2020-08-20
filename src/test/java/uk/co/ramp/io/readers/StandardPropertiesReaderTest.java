@@ -12,7 +12,7 @@ public class StandardPropertiesReaderTest {
   private static final String mockStandardProperties =
       "{"
           + "  'populationSize': 10000,"
-          + "  'timeLimit': 100,"
+          + "  'timeLimitDays': 100,"
           + "  'initialExposures': 1000,"
           + "  'seed': 0,"
           + "  'steadyState': true,"
@@ -35,7 +35,7 @@ public class StandardPropertiesReaderTest {
     assertThat(standardProperties.initialExposures()).isEqualTo(1000);
     assertThat(standardProperties.populationSize()).isEqualTo(10000);
     assertThat(standardProperties.seed()).hasValue(0);
-    assertThat(standardProperties.timeLimit()).isEqualTo(100);
+    assertThat(standardProperties.timeLimitDays()).isEqualTo(100);
     assertThat(standardProperties.steadyState()).isTrue();
     assertThat(standardProperties.timeStepsPerDay()).isEqualTo(4);
     assertThat(standardProperties.timeStepSpread()).containsExactly(0.25, 0.25, 0.25, 0.25);

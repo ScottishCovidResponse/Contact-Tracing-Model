@@ -39,12 +39,13 @@ public class ContactReader {
     return contactEvents.stream()
         .filter(event -> event.from() < properties.populationSize())
         .filter(event -> event.to() < properties.populationSize())
-        .filter(event -> event.time() <= properties.timeLimit() * properties.timeStepsPerDay())
+        .filter(event -> event.time() <= properties.timeLimitDays() * properties.timeStepsPerDay())
         .collect(Collectors.toUnmodifiableList());
   }
 
   List<ImmutableContactEvent> resampleContacts(List<ImmutableContactEvent> contactEvents) {
     int steps = properties.timeStepsPerDay();
+    int offset = properties.dayOffset().orElse(0);
 
     Set<Integer> timeSteps =
         contactEvents.stream().map(ImmutableContactEvent::time).collect(Collectors.toSet());
@@ -54,7 +55,7 @@ public class ContactReader {
       List<ImmutableContactEvent> timeEvents =
           contactEvents.stream().filter(event -> event.time() == step).collect(Collectors.toList());
 
-      int start = step * steps;
+      int start = (step - offset) * steps;
       int end = start + steps - 1;
       int[] outcomes = IntStream.rangeClosed(start, end).toArray();
 

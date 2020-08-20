@@ -18,6 +18,10 @@ public interface StatisticsRecorder {
 
   void recordIncorrectTestResult(AlertStatus alertStatus);
 
+  void recordTestConducted(int time);
+
+  void recordTestDelayed(int time, int id);
+
   void recordCorrectTestResult(AlertStatus alertStatus);
 
   List<ImmutableRValueOutput> getRollingAverage(int period);
@@ -29,6 +33,12 @@ public interface StatisticsRecorder {
   Map<Integer, Integer> getPersonDaysIsolation();
 
   Map<Integer, List<Infection>> getR0Progression();
+
+  Map<Integer, Integer> getTestsConducted();
+
+  Map<Integer, List<Integer>> getDelayedTests();
+
+  int getTestsConducted(int time);
 
   int getFalsePositives();
 

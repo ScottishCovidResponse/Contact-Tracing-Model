@@ -65,6 +65,7 @@ public class PopulationGenerator {
       double isolationCompliance = dataGenerator.nextUniform(0, 1);
       double reportingCompliance = dataGenerator.nextUniform(0, 1);
       double health = dataGenerator.nextUniform(0, 1);
+      boolean hasApp = dataGenerator.nextUniform(0, 1) < properties.appUptake();
 
       population.put(
           i,
@@ -76,6 +77,7 @@ public class PopulationGenerator {
                   .reportingCompliance(reportingCompliance)
                   .gender(gender)
                   .health(health)
+                  .hasApp(hasApp)
                   .build()));
     }
 

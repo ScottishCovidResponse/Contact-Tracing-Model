@@ -18,6 +18,7 @@ import org.junit.Test;
 import org.mockito.Mockito;
 import uk.co.ramp.LogSpy;
 import uk.co.ramp.TestUtils;
+import uk.co.ramp.io.types.StandardProperties;
 import uk.co.ramp.people.Case;
 import uk.co.ramp.people.VirusStatus;
 import uk.co.ramp.statistics.StatisticsRecorder;
@@ -64,8 +65,9 @@ public class InfectionMapTest {
         population.put(i, thisCase);
       }
     }
-
-    infectionMap = new InfectionMap(population, Mockito.mock(StatisticsRecorder.class));
+    StandardProperties properties = Mockito.mock(StandardProperties.class);
+    when(properties.timeStepsPerDay()).thenReturn(1);
+    infectionMap = new InfectionMap(population, Mockito.mock(StatisticsRecorder.class), properties);
   }
 
   @Test
