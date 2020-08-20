@@ -23,6 +23,7 @@ public class PopulationGeneratorTest {
 
   private PopulationGenerator populationGenerator;
   private final Random random = TestUtils.getRandom();
+  private static final double DELTA = 1e-6;
 
   @Before
   public void setup() throws IOException {
