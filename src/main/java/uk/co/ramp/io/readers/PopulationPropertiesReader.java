@@ -40,6 +40,8 @@ public class PopulationPropertiesReader {
             .putAgeDependence(3, 0.8)
             .putAgeDependence(4, 0.4)
             .genderBalance(0.99)
+            .appUptake(0.7)
+            .testCapacity(0.01)
             .build();
 
     Gson gson = new GsonBuilder().setPrettyPrinting().create();

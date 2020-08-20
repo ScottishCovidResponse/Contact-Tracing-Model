@@ -21,7 +21,6 @@ import uk.co.ramp.utilities.MinMax;
 
 public class PopulationGeneratorTest {
 
-  private static final double DELTA = 1e-6;
   private PopulationGenerator populationGenerator;
   private final Random random = TestUtils.getRandom();
 
@@ -93,11 +92,16 @@ public class PopulationGeneratorTest {
             / (double) popSize;
     double healthModifier = populationGenerator.getHealthModifier(50);
 
+    double hasApp = population.values().stream().filter(Case::hasApp).count() / (double) popSize;
+
+    System.out.println(hasApp);
+
     Assert.assertEquals(0.5, compliance, 0.01);
     Assert.assertEquals(0.5 * healthModifier, health, 0.01);
     Assert.assertEquals(50, age, 0.5);
     Assert.assertEquals(0.5, men, 0.01);
     Assert.assertEquals(0.5, women, 0.01);
+    Assert.assertEquals(0.7, hasApp, 0.01);
   }
 
   @Test

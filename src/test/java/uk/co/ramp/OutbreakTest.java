@@ -24,6 +24,7 @@ import uk.co.ramp.event.types.ImmutableContactEvent;
 import uk.co.ramp.io.InitialCaseReader;
 import uk.co.ramp.io.types.CmptRecord;
 import uk.co.ramp.io.types.DiseaseProperties;
+import uk.co.ramp.io.types.PopulationProperties;
 import uk.co.ramp.io.types.StandardProperties;
 import uk.co.ramp.people.Case;
 import uk.co.ramp.people.Human;
@@ -43,12 +44,16 @@ public class OutbreakTest {
   @Autowired private InitialCaseReader initialCaseReader;
   @Autowired private Outbreak outbreak;
   @Autowired private CompletionEventListGroup eventListGroup;
+  @Autowired private PopulationProperties populationProperties;
 
   private DiseaseProperties diseaseProperties;
 
   @Before
   public void setUp() throws FileNotFoundException {
     this.diseaseProperties = TestUtils.diseaseProperties();
+    populationProperties = mock(PopulationProperties.class);
+    when(populationProperties.testCapacity()).thenReturn(1d);
+    when(populationProperties.appUptake()).thenReturn(1d);
   }
 
   @Test
@@ -104,7 +109,7 @@ public class OutbreakTest {
     int popSize = 100;
     double[] array = {1};
 
-    ReflectionTestUtils.setField(standardProperties, "timeLimit", 100);
+    ReflectionTestUtils.setField(standardProperties, "timeLimitDays", 100);
     ReflectionTestUtils.setField(standardProperties, "initialExposures", 10);
     ReflectionTestUtils.setField(standardProperties, "populationSize", popSize);
     ReflectionTestUtils.setField(standardProperties, "timeStepsPerDay", 1);
@@ -144,7 +149,7 @@ public class OutbreakTest {
 
     assertThat(population.size()).isGreaterThan(0);
 
-    Assert.assertEquals(records.size(), standardProperties.timeLimit() + 1);
+    Assert.assertEquals(records.size(), standardProperties.timeLimitDays() + 1);
     Assert.assertTrue(susceptiblePost < susceptible);
     Assert.assertThat(
         logSpy.getOutput(),
@@ -154,7 +159,7 @@ public class OutbreakTest {
 
   @Test
   @DirtiesContext
-  public void runToCompletionAllContact() throws FileNotFoundException {
+  public void runToCompletionAllContact() {
     int popSize = 100;
     int infections = 1 + popSize / 10;
 
@@ -170,7 +175,7 @@ public class OutbreakTest {
     Set<Integer> cases = generateTestCases(infections, popSize);
     ReflectionTestUtils.setField(this.initialCaseReader, "cases", cases);
 
-    ReflectionTestUtils.setField(standardProperties, "timeLimit", 100);
+    ReflectionTestUtils.setField(standardProperties, "timeLimitDays", 100);
     ReflectionTestUtils.setField(standardProperties, "initialExposures", infections);
     ReflectionTestUtils.setField(standardProperties, "populationSize", popSize);
     ReflectionTestUtils.setField(standardProperties, "steadyState", false);

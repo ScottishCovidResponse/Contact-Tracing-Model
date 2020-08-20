@@ -18,6 +18,10 @@ public interface PopulationProperties {
   double genderBalance();
 
   Map<Integer, Double> ageDependence();
+  
+  double appUptake();
+
+  double testCapacity();
 
   @Check
   default void check() {
@@ -30,5 +34,9 @@ public interface PopulationProperties {
         "Bins should be consistent");
     Preconditions.checkState(
         genderBalance() >= 0 && genderBalance() <= 1, "Gender balance should be between 0 and 1");
+    Preconditions.checkState(
+        testCapacity() > 0d && testCapacity() <= 1, "testCapacity should be between 0 and 1");
+    Preconditions.checkState(
+        appUptake() > 0d && appUptake() <= 1d, "appUptake should be between 0 and 1");
   }
 }
