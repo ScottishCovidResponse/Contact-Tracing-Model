@@ -1,16 +1,23 @@
 package uk.co.ramp.people;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static uk.co.ramp.people.VirusStatus.*;
 
+import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.util.*;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Random;
+import org.assertj.core.data.Offset;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import uk.co.ramp.TestUtils;
+import uk.co.ramp.io.types.PopulationProperties;
 import uk.co.ramp.io.types.StandardProperties;
+import uk.co.ramp.utilities.MinMax;
 
 public class PopulationGeneratorTest {
 
@@ -84,12 +91,55 @@ public class PopulationGeneratorTest {
     double women =
         population.values().stream().map(Case::gender).filter(a -> a.equals(Gender.FEMALE)).count()
             / (double) popSize;
+    double healthModifier = populationGenerator.getHealthModifier(50);
 
     Assert.assertEquals(0.5, compliance, 0.01);
-    Assert.assertEquals(0.5, health, 0.01);
+    Assert.assertEquals(0.5 * healthModifier, health, 0.01);
     Assert.assertEquals(50, age, 0.5);
     Assert.assertEquals(0.5, men, 0.01);
     Assert.assertEquals(0.5, women, 0.01);
+  }
+
+  @Test
+  public void getHealthModifier() throws FileNotFoundException {
+    PopulationProperties populationProperties = TestUtils.populationProperties();
+
+    double max =
+        populationProperties.populationAges().values().stream()
+            .mapToDouble(MinMax::max)
+            .max()
+            .orElse(100);
+    double min =
+        populationProperties.populationAges().values().stream()
+            .mapToDouble(MinMax::min)
+            .min()
+            .orElse(0);
+
+    Map<Integer, Double> expected = new HashMap<>();
+    expected.put(0, 0.9d);
+    expected.put(10, 0.9d);
+    expected.put(20, 0.8d);
+    expected.put(30, 0.8d);
+    expected.put(40, 0.6d);
+    expected.put(50, 0.6d);
+    expected.put(60, 0.4d);
+    expected.put(70, 0.4d);
+    expected.put(80, 0.2d);
+    expected.put(90, 0.2d);
+
+    int low = (int) (min / 10d) - 2;
+    int high = (int) (max / 10d) + 2;
+
+    for (int i = low; i < high; i++) {
+      int age = i * 10;
+      double modifier = populationGenerator.getHealthModifier(age);
+
+      if (age >= max || age < min) {
+        assertThat(modifier).isCloseTo(1d, Offset.offset(DELTA));
+      } else {
+        assertThat(modifier).isCloseTo(expected.get(age), Offset.offset(DELTA));
+      }
+    }
   }
 
   private void createPeople(Map<Integer, Case> var, int start, int end, VirusStatus v) {

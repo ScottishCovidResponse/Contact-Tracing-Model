@@ -17,6 +17,8 @@ public interface PopulationProperties {
 
   double genderBalance();
 
+  Map<Integer, Double> ageDependence();
+
   @Check
   default void check() {
     final double eps = 1e-6;
