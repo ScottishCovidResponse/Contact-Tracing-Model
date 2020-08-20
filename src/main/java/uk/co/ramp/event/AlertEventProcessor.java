@@ -139,9 +139,9 @@ public class AlertEventProcessor implements EventProcessor<AlertEvent> {
     Distribution distribution =
         ImmutableDistribution.builder()
             .type(diseaseProperties.progressionDistribution())
-            .mean(progressionData.mean())
-            .max(progressionData.max())
+            .mean(progressionData.mean() * properties.timeStepsPerDay())
+            .max(progressionData.max() * properties.timeStepsPerDay())
             .build();
-    return distributionSampler.getDistributionValue(distribution) * properties.timeStepsPerDay();
+    return distributionSampler.getDistributionValue(distribution);
   }
 }
