@@ -193,7 +193,7 @@ The default policy allows a global baseline to be set. For example,
 
 ### Alert Policy
 
-The alert policy defines the isolation policy for a person in any state. 
+The alert policy defines the isolation policy for a person in any alert state. 
 These follow the same rules as the Virus Policy. The alert policy is related to the status of the individual. 
 
 <img src="alertPolicy.png" alt="alert Policy Example" width="500">
