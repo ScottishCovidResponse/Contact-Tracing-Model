@@ -15,9 +15,7 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import uk.co.ramp.TestUtils;
-import uk.co.ramp.io.types.PopulationProperties;
 import uk.co.ramp.io.types.StandardProperties;
-import uk.co.ramp.utilities.MinMax;
 
 public class PopulationGeneratorTest {
 
@@ -71,8 +69,8 @@ public class PopulationGeneratorTest {
   }
 
   @Test
-  public void generate() {
-    int popSize = 10000;
+  public void generate() throws FileNotFoundException {
+    int popSize = 100000;
     StandardProperties runSettings = mock(StandardProperties.class);
     when(runSettings.populationSize()).thenReturn(popSize);
     populationGenerator.setRunProperties(runSettings);
@@ -91,11 +89,12 @@ public class PopulationGeneratorTest {
     double women =
         population.values().stream().map(Case::gender).filter(a -> a.equals(Gender.FEMALE)).count()
             / (double) popSize;
-    double healthModifier = populationGenerator.getHealthModifier(50);
-
+    double healthModifier =
+        TestUtils.populationProperties().ageDependence().values().stream()
+            .mapToDouble(Double::doubleValue)
+            .average()
+            .orElse(0);
     double hasApp = population.values().stream().filter(Case::hasApp).count() / (double) popSize;
-
-    System.out.println(hasApp);
 
     Assert.assertEquals(0.5, compliance, 0.01);
     Assert.assertEquals(0.5 * healthModifier, health, 0.01);
@@ -106,24 +105,15 @@ public class PopulationGeneratorTest {
   }
 
   @Test
-  public void getHealthModifier() throws FileNotFoundException {
-    PopulationProperties populationProperties = TestUtils.populationProperties();
-
-    double max =
-        populationProperties.populationAges().values().stream()
-            .mapToDouble(MinMax::max)
-            .max()
-            .orElse(100);
-    double min =
-        populationProperties.populationAges().values().stream()
-            .mapToDouble(MinMax::min)
-            .min()
-            .orElse(0);
+  public void getHealthModifier() {
 
     Map<Integer, Double> expected = new HashMap<>();
+    expected.put(-10, 1d);
     expected.put(0, 0.9d);
     expected.put(10, 0.9d);
+    expected.put(19, 0.9d);
     expected.put(20, 0.8d);
+    expected.put(21, 0.8d);
     expected.put(30, 0.8d);
     expected.put(40, 0.6d);
     expected.put(50, 0.6d);
@@ -131,19 +121,12 @@ public class PopulationGeneratorTest {
     expected.put(70, 0.4d);
     expected.put(80, 0.2d);
     expected.put(90, 0.2d);
+    expected.put(110, 1d);
+    expected.put(120, 1d);
 
-    int low = (int) (min / 10d) - 2;
-    int high = (int) (max / 10d) + 2;
-
-    for (int i = low; i < high; i++) {
-      int age = i * 10;
+    for (int age : expected.keySet()) {
       double modifier = populationGenerator.getHealthModifier(age);
-
-      if (age >= max || age < min) {
-        assertThat(modifier).isCloseTo(1d, Offset.offset(DELTA));
-      } else {
-        assertThat(modifier).isCloseTo(expected.get(age), Offset.offset(DELTA));
-      }
+      assertThat(modifier).isCloseTo(expected.get(age), Offset.offset(DELTA));
     }
   }
 

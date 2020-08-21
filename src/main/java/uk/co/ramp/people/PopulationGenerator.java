@@ -91,7 +91,7 @@ public class PopulationGenerator {
 
     int index =
         properties.populationAges().entrySet().stream()
-            .filter(entry -> entry.getValue().min() <= age && entry.getValue().max() > age)
+            .filter(entry -> entry.getValue().min() <= age && entry.getValue().max() >= age)
             .map(Map.Entry::getKey)
             .findAny()
             .orElse(-1);
