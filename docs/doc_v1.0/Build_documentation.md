@@ -464,7 +464,7 @@ Figure 11. Infection map example
 
 ### Run Contact Data
 
-The runContactData method within Outbreak.java is where the main calculations in the code are triggered. 
+The runContactData method within Outbreak.java is where the main calculations are triggered. 
 
 ## Event Runner
 
