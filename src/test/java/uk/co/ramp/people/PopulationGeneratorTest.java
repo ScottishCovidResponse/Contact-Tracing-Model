@@ -1,11 +1,16 @@
 package uk.co.ramp.people;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static uk.co.ramp.people.VirusStatus.*;
 
+import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.util.*;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Random;
+import org.assertj.core.data.Offset;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -16,6 +21,7 @@ public class PopulationGeneratorTest {
 
   private PopulationGenerator populationGenerator;
   private final Random random = TestUtils.getRandom();
+  private static final double DELTA = 1e-6;
 
   @Before
   public void setup() throws IOException {
@@ -63,8 +69,8 @@ public class PopulationGeneratorTest {
   }
 
   @Test
-  public void generate() {
-    int popSize = 10000;
+  public void generate() throws FileNotFoundException {
+    int popSize = 100000;
     StandardProperties runSettings = mock(StandardProperties.class);
     when(runSettings.populationSize()).thenReturn(popSize);
     populationGenerator.setRunProperties(runSettings);
@@ -83,17 +89,45 @@ public class PopulationGeneratorTest {
     double women =
         population.values().stream().map(Case::gender).filter(a -> a.equals(Gender.FEMALE)).count()
             / (double) popSize;
-
+    double healthModifier =
+        TestUtils.populationProperties().ageDependence().values().stream()
+            .mapToDouble(Double::doubleValue)
+            .average()
+            .orElse(0);
     double hasApp = population.values().stream().filter(Case::hasApp).count() / (double) popSize;
 
-    System.out.println(hasApp);
-
     Assert.assertEquals(0.5, compliance, 0.01);
-    Assert.assertEquals(0.5, health, 0.01);
+    Assert.assertEquals(0.5 * healthModifier, health, 0.01);
     Assert.assertEquals(50, age, 0.5);
     Assert.assertEquals(0.5, men, 0.01);
     Assert.assertEquals(0.5, women, 0.01);
     Assert.assertEquals(0.7, hasApp, 0.01);
+  }
+
+  @Test
+  public void getHealthModifier() {
+
+    Map<Integer, Double> expected = new HashMap<>();
+    expected.put(-10, 1d);
+    expected.put(0, 0.9d);
+    expected.put(10, 0.9d);
+    expected.put(19, 0.9d);
+    expected.put(20, 0.8d);
+    expected.put(21, 0.8d);
+    expected.put(30, 0.8d);
+    expected.put(40, 0.6d);
+    expected.put(50, 0.6d);
+    expected.put(60, 0.4d);
+    expected.put(70, 0.4d);
+    expected.put(80, 0.2d);
+    expected.put(90, 0.2d);
+    expected.put(110, 1d);
+    expected.put(120, 1d);
+
+    for (int age : expected.keySet()) {
+      double modifier = populationGenerator.getHealthModifier(age);
+      assertThat(modifier).isCloseTo(expected.get(age), Offset.offset(DELTA));
+    }
   }
 
   private void createPeople(Map<Integer, Case> var, int start, int end, VirusStatus v) {

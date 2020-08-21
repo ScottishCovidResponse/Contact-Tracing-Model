@@ -17,6 +17,8 @@ public interface PopulationProperties {
 
   double genderBalance();
 
+  Map<Integer, Double> ageDependence();
+
   double appUptake();
 
   double testCapacity();
