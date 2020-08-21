@@ -77,7 +77,7 @@ public class Outbreak {
 
   void runToCompletion() {
     // the latest time to run to
-    int timeLimit = properties.timeLimit();
+    int timeLimit = properties.timeLimitDays();
     double randomInfectionRate =
         diseaseProperties.randomInfectionRate() / (double) properties.timeStepsPerDay();
 
@@ -87,7 +87,7 @@ public class Outbreak {
 
   private void printOutput() {
     try (Writer writer = new FileWriter(new File(outputFolder, INFECTION_MAP))) {
-      new InfectionMap(population.view(), statisticsRecorder).outputMap(writer);
+      new InfectionMap(population.view(), statisticsRecorder, properties).outputMap(writer);
       eventListWriter.output();
     } catch (IOException e) {
       String message = "An error occurred generating the infection map";

@@ -158,69 +158,56 @@ No contact tracing.
 
 • **Scenario 1a**
 
-Alerting is based on reporting by *symptomatic* individuals. Contacts of
-reportee from last *14 days* alerted and ask to isolate for 14 days from
+Alerting is based on reporting by **symptomatic** individuals. Contacts of
+reportee from last **14 days** alerted and ask to isolate for 14 days from
 time of alert.
 
 • **Scenario 1b**
 
-Alerting is based on reporting by *symptomatic* individuals. Contacts of
-reportee from last *14 days* alerted and asked to isolate for 14 days
-from *time of contact*.
+Alerting is based on reporting by **symptomatic** individuals. Contacts of
+reportee from last **14 days** alerted and asked to isolate for 14 days
+from **time of contact**.
 
 • **Scenario 1c**
 
-Alerting is based on reporting by *symptomatic* individuals. Contacts of
+Alerting is based on reporting by **symptomatic** individuals. Contacts of
 reportee from last X days alerted and asked to isolate for Y days from
-time of contact. Vary X and Y in range *0 to 14* and investigate
+time of contact. Vary X and Y in range **0 to 14** and investigate
 trade-off between R and number of person days in isolation.
 
 • **Scenario 1d**
 
-Alerting is based on reporting by *symptomatic* individuals. Identify
-and alert secondary contacts of reportee from last *14 days* and ask
-them to isolate for 14 days from \*time of contact.
+Alerting is based on reporting by **symptomatic** individuals. Identify
+and alert secondary contacts of reportee from last **14 days** and ask
+them to isolate for 14 days from **time of contact**.
 
 • **Scenario 1e**
 
-Alerting is based on reporting by *symptomatic* individuals. Identify
-and alert secondary contacts of reportee from last *X days* and ask them
-to isolate for *Y days* from *time of contact*. Vary X and Y in range *0
-to 14* and investigate trade-off between R and number of person days in
-isolation.
+Alerting is based on reporting by **symptomatic** individuals. Identify
+and alert secondary contacts of reportee from last **X days** and ask them
+to isolate for **Y days** from **time of contact**. Vary X and Y in range **0 to 14** and investigate trade-off between R and number of person days in isolation.
 
 • **Scenario 2a**
 
-Alerting is based on reporting by *symptomatic* individuals. Choose X
-and Y from Scenario 1c. Contacts of reportee *most likely to be
-infected* are alerted and asked to isolate for Y days from *time of
-alert/time of contact*.
+Alerting is based on reporting by **symptomatic** individuals. Choose X
+and Y from Scenario 1c. Contacts of reportee **most likely to be infected** are alerted and asked to isolate for Y days from **time of alert/time of contact**.
 
 For identification of contacts most likely to be infected, we plan to
-use a function of *time of contact, weight of contact, and number of
-days* the reportee has been symptomatic. In the first instance we could
-use a fixed delay between symptoms and reporting and let the function
+use a function of **time of contact, weight of contact, and number of days** the reportee has been symptomatic. In the first instance we could use a fixed delay between symptoms and reporting and let the function
 depend on time of contact alone.
 
 • **Scenario 2b**
 
-Alerting is based on reporting by *symptomatic* individuals. Choose X
-and Y from Scenario 1c. Identify contacts *most likely to be infected*
-as in 2a. Isolate all contacts until they are *tested*. *Release
-negative contacts* and *isolate positive contacts* for Y days from time
-of alert.
+Alerting is based on reporting by **symptomatic** individuals. Choose X
+and Y from Scenario 1c. Identify contacts **most likely to be infected**
+as in 2a. Isolate all contacts until they are **tested**. **Release negative contacts** and **isolate positive contacts** for Y days from time of alert.
 
 • **Scenario 3**
 
-Alerting is based on reporting by *symptomatic* individuals. Choose X
-and Y from Scenario 1c. Identify contacts *most likely to be infected*
-as in 2a. Isolate all contacts until they are *tested*. *Release
-negative contacts* and *isolate positive contacts* for Y days from time
-of alert. Now include *secondary contacts*, by repeating process for
-contacts of test positive individuals.
+Alerting is based on reporting by **symptomatic** individuals. Choose X
+and Y from Scenario 1c. Identify contacts **most likely to be infected**
+as in 2a. Isolate all contacts until they are **tested**. **Release negative contacts** and **isolate positive contacts** for Y days from time of alert. Now include **secondary contacts**, by repeating process for contacts of test positive individuals.
 
 • **Scenario 4**
 
-As scenario 2b, but alerting is based on a *positive test on symptomatic
-individuals*. Include delay between reporting symptoms and test result.
-This aims to test how much delays reduce the impact of contact tracing.
+As scenario 2b, but alerting is based on a **positive test** on **symptomatic individuals**. Include delay between reporting symptoms and test result. This aims to test how much delays reduce the impact of contact tracing.

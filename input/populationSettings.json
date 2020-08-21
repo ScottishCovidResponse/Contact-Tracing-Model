@@ -6,6 +6,13 @@
     "3": 0.1222,
     "4": 0.1819
   },
+  "ageDependence": {
+    "0": 0.9,
+    "1": 0.8,
+    "2": 0.6,
+    "3": 0.4,
+    "4": 0.2
+  },
   "populationAges": {
     "0": {
       "min": 0,
@@ -28,5 +35,8 @@
       "max": 90
     }
   },
-  "genderBalance": 0.99
+  "genderBalance": 0.99,
+  "testCapacity" : 0.01,
+  "appUptake" : 0.5
+
 }

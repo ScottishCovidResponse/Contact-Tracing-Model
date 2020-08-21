@@ -34,7 +34,14 @@ public class PopulationPropertiesReader {
             .putPopulationAges(2, ImmutableMinMax.of(25, 54))
             .putPopulationAges(3, ImmutableMinMax.of(55, 64))
             .putPopulationAges(4, ImmutableMinMax.of(65, 90))
+            .putAgeDependence(0, 0.9)
+            .putAgeDependence(1, 0.6)
+            .putAgeDependence(2, 0.2)
+            .putAgeDependence(3, 0.8)
+            .putAgeDependence(4, 0.4)
             .genderBalance(0.99)
+            .appUptake(0.7)
+            .testCapacity(0.01)
             .build();
 
     Gson gson = new GsonBuilder().setPrettyPrinting().create();

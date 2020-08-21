@@ -39,7 +39,7 @@ public class AppConfigTest {
     Assert.assertTrue(standardProperties.initialExposures() > 0);
     Assert.assertTrue(standardProperties.populationSize() > 0);
     Assert.assertTrue(standardProperties.seed().isEmpty());
-    Assert.assertTrue(standardProperties.timeLimit() > 0);
+    Assert.assertTrue(standardProperties.timeLimitDays() > 0);
     Assert.assertTrue(standardProperties.populationSize() > standardProperties.initialExposures());
   }
 

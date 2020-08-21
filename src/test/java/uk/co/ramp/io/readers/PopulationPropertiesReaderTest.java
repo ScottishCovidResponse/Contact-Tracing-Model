@@ -19,6 +19,13 @@ public class PopulationPropertiesReaderTest {
           + "    '3': 0.1222, "
           + "    '4': 0.1819 "
           + "  }, "
+          + "  'ageDependence': { "
+          + "    '0': 0.9, "
+          + "    '1': 0.6, "
+          + "    '2': 0.2, "
+          + "    '3': 0.8, "
+          + "    '4': 0.4 "
+          + "  }, "
           + "  populationAges: { "
           + "    '0': { "
           + "      'min': 0, "
@@ -41,7 +48,9 @@ public class PopulationPropertiesReaderTest {
           + "      'max': 90 "
           + "    } "
           + "  }, "
-          + "  'genderBalance': 0.99 "
+          + "  'genderBalance': 0.99 ,"
+          + "  'testCapacity' : 0.01,"
+          + "  'appUptake' : 0.7"
           + "}";
 
   @Test
