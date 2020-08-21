@@ -44,8 +44,7 @@ CSV and JSON.
 
 ### InputLocations.json
 
-The first input file is the inputLocations.json file that allows all the other inputs to be configured. 
-This allows the user to have multiple configurations defined. File locations are relative to the input folder.
+The _InputLocations.json_ file allows the user to specify the location of all other inputs files relative to the _/input_ folder. This allows the user to organise multiple simulation configurations.
 
 <img src="inputLocations.png" alt="input Locations" width="600">
 
