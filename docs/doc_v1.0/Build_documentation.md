@@ -49,14 +49,12 @@ The _InputLocations.json_ file allows the user to specify the location of all ot
 
 ### Contacts.csv
 
-The contact data is a CSV file contain network data that shows contacts
-between nodes in the network. The columns are time, from, to and weight.
-An example can be shown in Figure 2. The to and from fields are the ids
-of the nodes in contact. The weight field is a measure of the duration,
-intensity or proximity of the contact. This is dimensionless number and
-is used for determining the spread of the infection and is used for
-filtering the contacts should a node be alerted. The addition of a label 
-field is to enable filtering of contacts based on their label.
+The contact data is a CSV file containing the temporal network of contacts between individuals in a population.
+The columns are time, from, to and weight. An example can be shown in Figure 2. The to and from fields are the ids
+of the nodes in contact. The weight field is a measure of the duration, intensity or proximity of the contact. 
+This is dimensionless number and is used as threshold for determining the spread of infection, allowing to filter 
+the individual contacts regarding whether they should be alerted or not. The addition of a label field is to enable 
+filtering of contacts based on their label.
 
 <img src="image2.png" alt="Contacts File" width="500">
 
@@ -139,8 +137,12 @@ smaller than the number of people in the contact network.
 Time Limit Days: this is an absolute limit for how long the simulation will
 go on in timesteps.
 
-Infected: the number of the population initially infected at t=0. Must
+initial Exposures: the number of the population initially infected at t=0. Must
 be greater than 0.
+
+timeStepsPerDay: allows to set the timestep (per day) for disease progression e.g. half days ('2') or quarter days ('4').
+
+timeStepSpread: set probability for spreading the disease in each chosen timestep, e.g. for half days [0.4,0.6] or quarter days [0.2, 0.2, 0.4, 0.2].
 
 (Optional) Seed: Can be specified on the command line or fixed.
 
@@ -154,9 +156,9 @@ If the contacts start on day 0, but day 10 is desired a value of -10 is required
 Figure 5. the run settings file
 
 
-## AgeData
+## Population Data
 
-The age data file contains a list of id and age. This has been added 
+The population data file contains a list of id and age. This has been added 
 to allows the user to use age graduated contact files. Should the file 
 be longer than the population, additional input will be ignored. Should 
 it be shorter, the ages will be generated as per the population settings file. 
@@ -298,7 +300,7 @@ step. These are output to a csv file.
 The population is parameterised from the population properties file and
 the run settings. These contain census data on the age and gender
 breakdown of the population. The size of the population is read from the
-run settings. The “Human” class contains 4 fields that are populated
+run settings. The “Human” class contains 5 fields that are populated
 here:
 
 #### Age
@@ -373,7 +375,6 @@ simulation.
 
 ### Outbreak
 
-The outbreak class will be handled in much more detail later on. 
 This section will focus purely on the initialisation.
 
 The Outbreak class is a Service Bean, so it is created as part of the
@@ -402,10 +403,9 @@ section fills in the details on how this section works. Figure 10 shows
 the top level of how the propagation algorithm works and where it calls
 to. These will be broken down in turn in the following sections.
 
-Upon entering the method, a set of infected cases are read from the initial 
-exposures file. If this file is shorter than the value specified in 
-RunSettings, they will be filled to the correct length. Likewise, if it is too 
-long, it is truncated to the correct length.
+Upon entering the method, a set of initial infections (index cases) are read from the initial exposures 
+file ('initialExposures.csv'). If this file is shorter than the value of initially infecteds specified 
+in RunSettings.json, they will be filled to the required length by randomly infecting individuals in the population.
 
 Once the initial infections are allocated the runToCompletion method is
 called. This extracts some key variables from the input parameters,
@@ -415,9 +415,6 @@ timeLimit : the maximum duration of the simulation. This will exit the
 code even if active cases are present. It has the highest precedent.
 This is to stop any codes hanging should an error occur that is not
 foreseen.
-
-steadyState: this allows the code to run until there are no active cases
-(everyone is S, R or D), but will exit if timeLimit is reached.
 
 maxContact: this take the contact data and finds the last time point at
 which we have a record.
@@ -492,7 +489,7 @@ The alert event processor is used to cycle through the states of disease alert t
 
 ![](image6.png)
 
-The person has their status set to a corresponding status and the next status is calculated for a time in the future. 
+The person has their alert status set to accordingly and the next status is calculated for a time in the future. 
 The result of a test is determined by whether the individual is currently infectious and a dice roll against the accuracy of a test. The number of false positives and negatives is recorded as an output statistic. 
 
 ![](AlertEvent.png)
@@ -501,25 +498,27 @@ The result of a test is determined by whether the individual is currently infect
 
 An infection event can be triggered in three ways:
 
-1. The id has been chosen as a seed infection.
-2. The id has been randomly chosen to be a seed.
-3. The id has been in contact with an infectious individual and has subsequently contracted the infection. 
+1. The individual (id) has been chosen as a seed infection.
+2. The individual (id) has been randomly chosen to be a seed.
+3. The individual (id) has been in contact with an infectious individual and has subsequently contracted the infection. 
 
 Once a SUSCEPTIBLE individual is exposed to the infection, an infection event is triggered which in turn creates a virus event. 
 The infection event occurs one time step after the contact. 
 
 ### Virus Event
 
-A virus event is the progression of the virus through intscompartments. The initial infection is not included as this is 
+A virus event is the progression of the virus through its compartments. The initial infection is not included as this is 
 an infection event. The processing of the event is very similar to the previous sections, with the exception of checking 
 for alerts based on the virus status of an individual. This process creates alert events for people who have been in 
-contact with an infectious individual. An individual has a reportingCompliance field that may reduce the chance of reporting symptoms. The alert checker and tracing policies are covered below.  
+contact with an infectious individual. An individual has a reportingCompliance field that may reduce the chance of 
+reporting symptoms. The alert checker and tracing policies are covered below.  
 
 ## Isolation Policy
 
 The isolation policy logic is stored in the policy.isolation package. A list of policies is input from the 
 isolationPolicies.json file. These include policies for global, virus status, alert status and a default. 
-The default policy will typically be to not isolate. Each policy has a priority value which allows the most relevant policy to be chosen. 
+The default policy will typically be to not isolate. Each policy has a priority value which allows the most 
+relevant policy to be chosen. 
 
 
 ### Global Policies
@@ -529,7 +528,8 @@ between 5-10% of the population are infected. These values are as an example and
 
 ### 	Virus Status Policies
 An isolation policy can be defined based on the virus status of an individual. For example, symptomatic individuals 
-may be required to stay at home for a defined period. The proportion required to isolate and duration of the isolation can be defined in the input. 
+may be required to stay at home for a defined period. The proportion required to isolate and duration of the isolation 
+can be defined in the input. 
 
 
 ### 	Alert Status Policies
@@ -539,7 +539,7 @@ and duration of the isolation can be defined in the input.
 
 ### 	Determining Isolation Policy
 
-The isolation status of all individuals is stored in a map. These are used to determine if an individual has already 
+The isolation status of all individuals is cached. These are used to determine if an individual has already 
 been isolation, in which case they may not need a further isolation applied to them. 
 
 ![](IsIsolating.png)
