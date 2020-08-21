@@ -170,7 +170,7 @@ it be shorter, the ages will be generated as per the population settings file.
 
 ## Isolation Policies
 
-The isolation policy can be split into 3 sections.
+An isolation policy can be split into 3 sections.
 
 ### Virus Policy
 
