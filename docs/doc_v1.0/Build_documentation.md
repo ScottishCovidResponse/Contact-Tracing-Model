@@ -503,7 +503,7 @@ The result of a test is determined by whether the individual is currently infect
 
 ### Infection Event
 
-An infection event is triggered in three ways:
+An infection event can be triggered in three ways:
 
 1. The id has been chosen as a seed infection.
 2. The id has been randomly chosen to be a seed.
