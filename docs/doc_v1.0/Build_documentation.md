@@ -497,8 +497,7 @@ The alert event processor is used to cycle through the states of disease alert t
 ![](image6.png)
 
 The person has their status set to a corresponding status and the next status is calculated for a time in the future. 
-The result of the test is determined by whether the individual is currently infectious and a dice roll against the accuracy 
-of the test. The number of false positives and negatives is recorded as an output statistic. 
+The result of a test is determined by whether the individual is currently infectious and a dice roll against the accuracy of a test. The number of false positives and negatives is recorded as an output statistic. 
 
 ![](AlertEvent.png)
 
