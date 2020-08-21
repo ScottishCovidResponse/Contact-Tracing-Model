@@ -470,10 +470,10 @@ The runContactData method within Outbreak.java is where the main calculations ar
 
 The events within the model are handled by a group of lists that contain specific events that can occur in the model. These are:
 
-1.	Alert Event
-2.	Contact Event
-3.	Infection Event
-4.	Virus Event
+1.	Virus Event
+2.	Infection Event
+3.	Contact Event
+4.	Alert Event
 
 Each of these events are processed in different ways and can trigger other events to occur at a future time. 
 
