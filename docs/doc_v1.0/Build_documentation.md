@@ -514,11 +514,10 @@ The infection event occurs one time step after the contact.
 
 ### Virus Event
 
-A virus event is the progression of the virus through in compartments. The initial infection is not included as this is 
-an Infection Event. The processing of the event is very similar to the previous sections, with the exception of checking 
-for alerts based on the virus status of the individual. This process creates alert events for people who have been in 
-contact with the individual. The individual has a reportingCompliance field that may reduce the chance of an individual
-reporting symptoms. The alert checker and tracing policies are covered below.  
+A virus event is the progression of the virus through intscompartments. The initial infection is not included as this is 
+an infection event. The processing of the event is very similar to the previous sections, with the exception of checking 
+for alerts based on the virus status of an individual. This process creates alert events for people who have been in 
+contact with an infectious individual. An individual has a reportingCompliance field that may reduce the chance of reporting symptoms. The alert checker and tracing policies are covered below.  
 
 ## Isolation Policy
 
