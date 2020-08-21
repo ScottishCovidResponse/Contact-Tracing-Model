@@ -127,9 +127,8 @@ Figure 4. The population input
 
 ### Initial Exposures
 
-The initial exposures file contains a list of IDs of the people who are in the
-exposed category at t=0. If this list is longer than the initial exposures, it 
-will be truncated. If it is too short, it will be filled randomly. 
+The initial exposures file contains a list of IDs of the individuals who are
+initially exposed at the start of the simulation, i.e. at the first time step. If this list is longer than the initial exposures, it will be truncated. If it is too short, it will be filled randomly. 
 
 ### RunSettings.json
 
