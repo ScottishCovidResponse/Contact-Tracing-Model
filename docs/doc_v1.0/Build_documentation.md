@@ -9,9 +9,7 @@ This document is to describe structure, design and assumptions made in
 the creation of the Contact Tracing model through the SCRC/RAMP
 collaboration.
 
-This model using a
-SE<sub>1</sub>E<sub>2</sub>I<sub>a</sub>I<sub>s</sub>RD model with the
-following transitions allowed:
+This model uses a S-E-Asym-Pre-Sym-Sev-R-D model that allows the following transitions:
 
 <img src="image1.png" alt="Compartment diagram" width="800">
 
@@ -138,18 +136,17 @@ change.
 Population size: the number of nodes in a network. This can be larger or
 smaller than the number of people in the contact network.
 
-Time Limit: this is an absolute limit for how long the simulation will
+Time Limit Days: this is an absolute limit for how long the simulation will
 go on in timesteps.
 
 Infected: the number of the population initially infected at t=0. Must
 be greater than 0.
 
-Steady state: if there are still active infections when the contact data
-has been processed, the steady state flag enables the active cases to
-reach a resolution (recovered or dead) with no further random infections
-occurring.
-
 (Optional) Seed: Can be specified on the command line or fixed.
+
+(Optional) dayOffset: If the contacts need to be shifted this optional integer can be used. 
+If the contacts start on day 1, but day 0 is desired a value of 1 is required. 
+If the contacts start on day 0, but day 10 is desired a value of -10 is required. 
 
 <img src="image5.png" alt="Run Settings Example" width="300">
 

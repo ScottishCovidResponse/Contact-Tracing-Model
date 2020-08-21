@@ -178,7 +178,6 @@ public class OutbreakTest {
     ReflectionTestUtils.setField(standardProperties, "timeLimitDays", 100);
     ReflectionTestUtils.setField(standardProperties, "initialExposures", infections);
     ReflectionTestUtils.setField(standardProperties, "populationSize", popSize);
-    ReflectionTestUtils.setField(standardProperties, "steadyState", false);
 
     List<ContactEvent> contacts = createContactRecords(500, population);
     eventListGroup.addNewContactEvents(contacts);

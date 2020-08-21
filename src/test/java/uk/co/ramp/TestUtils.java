@@ -51,7 +51,6 @@ public class TestUtils {
         .initialExposures(10)
         .populationSize(1000)
         .seed(123)
-        .steadyState(true)
         .timeLimitDays(100)
         .timeStepsPerDay(1)
         .timeStepSpread(1)

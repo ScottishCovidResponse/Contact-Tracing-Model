@@ -27,7 +27,6 @@ public class StandardPropertiesReader {
             .timeStepsPerDay(4)
             .timeStepSpread(0.25, 0.25, 0.25, 0.25)
             .seed(0)
-            .steadyState(true)
             .build();
 
     Gson gson = new GsonBuilder().setPrettyPrinting().create();

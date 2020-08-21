@@ -24,8 +24,6 @@ public interface StandardProperties {
 
   OptionalInt dayOffset();
 
-  boolean steadyState();
-
   @Check
   default void check() {
     Preconditions.checkState(populationSize() > 0, "Population size should be greater than 0");

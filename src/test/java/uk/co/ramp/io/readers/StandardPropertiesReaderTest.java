@@ -15,7 +15,6 @@ public class StandardPropertiesReaderTest {
           + "  'timeLimitDays': 100,"
           + "  'initialExposures': 1000,"
           + "  'seed': 0,"
-          + "  'steadyState': true,"
           + "  'timeStepsPerDay': 4,"
           + "  'timeStepSpread': [0.25,0.25,0.25,0.25]"
           + "}";
@@ -36,7 +35,6 @@ public class StandardPropertiesReaderTest {
     assertThat(standardProperties.populationSize()).isEqualTo(10000);
     assertThat(standardProperties.seed()).hasValue(0);
     assertThat(standardProperties.timeLimitDays()).isEqualTo(100);
-    assertThat(standardProperties.steadyState()).isTrue();
     assertThat(standardProperties.timeStepsPerDay()).isEqualTo(4);
     assertThat(standardProperties.timeStepSpread()).containsExactly(0.25, 0.25, 0.25, 0.25);
   }
