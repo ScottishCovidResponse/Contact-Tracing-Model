@@ -19,6 +19,7 @@ import uk.co.ramp.event.types.AlertEvent;
 import uk.co.ramp.event.types.ImmutableAlertEvent;
 import uk.co.ramp.event.types.ProcessedEventResult;
 import uk.co.ramp.io.types.DiseaseProperties;
+import uk.co.ramp.io.types.PopulationProperties;
 import uk.co.ramp.io.types.StandardProperties;
 import uk.co.ramp.statistics.StatisticsRecorder;
 import uk.co.ramp.statistics.StatisticsRecorderImpl;
@@ -32,20 +33,25 @@ public class AlertEventProcessorTest {
   private DistributionSampler distributionSampler;
   private AlertEventProcessor eventProcessor;
   private StatisticsRecorder statisticsRecorder;
+  private PopulationProperties populationProperties;
   private RandomGenerator rng;
 
-  private static final double DELTA = 1e-6;;
+  private static final double DELTA = 1e-6;
 
   @Before
   public void setUp() throws Exception {
     properties = mock(StandardProperties.class);
     when(properties.timeStepsPerDay()).thenReturn(1);
+    when(properties.timeLimitDays()).thenReturn(27);
+    when(properties.populationSize()).thenReturn(10000);
     diseaseProperties = TestUtils.diseaseProperties();
     population = mock(Population.class);
     distributionSampler = mock(DistributionSampler.class);
     statisticsRecorder = mock(StatisticsRecorderImpl.class);
     when(statisticsRecorder.getFalsePositives()).thenReturn(0);
     when(statisticsRecorder.getFalseNegatives()).thenReturn(0);
+    populationProperties = mock(PopulationProperties.class);
+    when(populationProperties.testCapacity()).thenReturn(0.01);
     rng = mock(RandomGenerator.class);
     when(rng.nextDouble()).thenReturn(0.5D);
   }
@@ -59,32 +65,36 @@ public class AlertEventProcessorTest {
             diseaseProperties,
             distributionSampler,
             statisticsRecorder,
+            populationProperties,
             rng);
 
-    int time = eventProcessor.timeInStatus(NONE);
+    AlertEvent alertEvent = mock(AlertEvent.class);
+
+    int time = eventProcessor.timeInStatusAndTestQueue(NONE, alertEvent);
     Assert.assertEquals(0, time);
 
-    time = eventProcessor.timeInStatus(ALERTED);
-    Assert.assertEquals(properties.timeStepsPerDay(), time);
+    time = eventProcessor.timeInStatusAndTestQueue(ALERTED, alertEvent);
+    Assert.assertEquals(1, time);
 
-    time = eventProcessor.timeInStatus(REQUESTED_TEST);
+    time = eventProcessor.timeInStatusAndTestQueue(REQUESTED_TEST, alertEvent);
+
     Assert.assertEquals(
         diseaseProperties.timeTestAdministered().getDistributionValue()
             * properties.timeStepsPerDay(),
         time,
         DELTA);
 
-    time = eventProcessor.timeInStatus(AWAITING_RESULT);
+    time = eventProcessor.timeInStatusAndTestQueue(AWAITING_RESULT, alertEvent);
     Assert.assertEquals(
         diseaseProperties.timeTestResult().getDistributionValue() * properties.timeStepsPerDay(),
         time,
         DELTA);
 
-    time = eventProcessor.timeInStatus(TESTED_NEGATIVE);
-    Assert.assertEquals(properties.timeStepsPerDay(), time);
+    time = eventProcessor.timeInStatusAndTestQueue(TESTED_NEGATIVE, alertEvent);
+    Assert.assertEquals(1, time);
 
-    time = eventProcessor.timeInStatus(TESTED_POSITIVE);
-    Assert.assertEquals(properties.timeStepsPerDay(), time);
+    time = eventProcessor.timeInStatusAndTestQueue(TESTED_POSITIVE, alertEvent);
+    Assert.assertEquals(1, time);
   }
 
   @Test
@@ -100,6 +110,7 @@ public class AlertEventProcessorTest {
             diseaseProperties,
             distributionSampler,
             statisticsRecorder,
+            populationProperties,
             rng);
 
     AlertEvent event =
@@ -141,6 +152,7 @@ public class AlertEventProcessorTest {
             diseaseProperties,
             distributionSampler,
             statisticsRecorder,
+            populationProperties,
             rng);
 
     var processedEvents = eventProcessor.processEvent(event);
@@ -167,6 +179,7 @@ public class AlertEventProcessorTest {
             diseaseProperties,
             distributionSampler,
             statisticsRecorder,
+            populationProperties,
             rng);
 
     when(distributionSampler.uniformBetweenZeroAndOne()).thenReturn(0.99d);

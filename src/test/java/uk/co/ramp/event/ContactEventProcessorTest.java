@@ -1,6 +1,7 @@
 package uk.co.ramp.event;
 
 import static org.hamcrest.CoreMatchers.containsString;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static uk.co.ramp.people.VirusStatus.*;
@@ -19,7 +20,11 @@ import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.util.ReflectionTestUtils;
 import uk.co.ramp.*;
 import uk.co.ramp.distribution.DistributionSampler;
-import uk.co.ramp.event.types.*;
+import uk.co.ramp.event.types.ContactEvent;
+import uk.co.ramp.event.types.ImmutableContactEvent;
+import uk.co.ramp.event.types.InfectionEvent;
+import uk.co.ramp.event.types.ProcessedEventResult;
+import uk.co.ramp.io.InfectionRates;
 import uk.co.ramp.io.types.DiseaseProperties;
 import uk.co.ramp.people.Case;
 import uk.co.ramp.people.Human;
@@ -46,10 +51,16 @@ public class ContactEventProcessorTest {
 
     DistributionSampler distributionSampler = mock(DistributionSampler.class);
     IsolationPolicy isolationPolicy = mock(IsolationPolicy.class);
+    InfectionRates infectionRates = mock(InfectionRates.class);
+    when(infectionRates.getInfectionRate(any())).thenReturn(1d);
 
     eventProcessor =
         new ContactEventProcessor(
-            new Population(population), diseaseProperties, distributionSampler, isolationPolicy);
+            new Population(population),
+            diseaseProperties,
+            distributionSampler,
+            isolationPolicy,
+            infectionRates);
   }
 
   @Test

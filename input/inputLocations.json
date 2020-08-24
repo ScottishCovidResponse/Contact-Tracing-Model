@@ -4,5 +4,6 @@
   "ageData": "ids_Paul.csv",
   "initialExposures": "initialExposures.csv",
   "tracingPolicies": "tracingPolicies.json",
-  "isolationPolicies": "isolationPolicies.json"
+  "isolationPolicies": "isolationPolicies.json",
+  "infectionRates": "infectionRates.json"
 }

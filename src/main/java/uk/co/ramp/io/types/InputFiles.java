@@ -21,6 +21,8 @@ public interface InputFiles {
 
   String isolationPolicies();
 
+  String infectionRates();
+
   @Check
   default void check() {
     Preconditions.checkState(!runSettings().isBlank(), "Run settings location should not be blank");
@@ -31,5 +33,7 @@ public interface InputFiles {
         !tracingPolicies().isBlank(), "Tracing policies location should not be blank");
     Preconditions.checkState(
         !isolationPolicies().isBlank(), "Isolation policies location should not be blank");
+    Preconditions.checkState(
+        !infectionRates().isBlank(), "Infection rates location should not be blank");
   }
 }

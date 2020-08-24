@@ -27,6 +27,7 @@ public class InputFilesReader {
             .initialExposures("initialExposures.csv")
             .tracingPolicies("tracingPolicies.json")
             .isolationPolicies("isolationPolicies.json")
+            .infectionRates("infectionRates.json")
             .build();
 
     Gson gson = new GsonBuilder().setPrettyPrinting().create();

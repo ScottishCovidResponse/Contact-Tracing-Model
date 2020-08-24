@@ -76,6 +76,10 @@ public class Case {
     return human.id();
   }
 
+  public boolean hasApp() {
+    return human.hasApp();
+  }
+
   // derived values
 
   public double isolationCompliance() {

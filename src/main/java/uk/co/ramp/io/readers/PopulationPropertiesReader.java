@@ -17,10 +17,16 @@ public class PopulationPropertiesReader {
         dataPipelineApi.readEstimate("population_parameters", "gender-balance").doubleValue();
     Distribution populationDistribution =
         dataPipelineApi.readDistribution("population_parameters", "population-distribution");
+    double appUptake =
+        dataPipelineApi.readEstimate("population_parameters", "app-uptake").doubleValue();
+    double testCapacity =
+        dataPipelineApi.readEstimate("population_parameters", "test-capacity").doubleValue();
 
     return ImmutablePopulationProperties.builder()
         .genderBalance(genderBalance)
         .distribution(populationDistribution)
+        .appUptake(appUptake)
+        .testCapacity(testCapacity)
         .build();
   }
 }

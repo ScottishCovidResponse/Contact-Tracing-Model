@@ -58,13 +58,17 @@ public class PopulationGenerator {
 
       int age = ageRetriever.findAge(i);
 
+      double healthModifier = getHealthModifier(age);
+
       Gender gender =
           dataGenerator.nextUniform(0, 1) > properties.genderBalance() / 2d
               ? Gender.FEMALE
               : Gender.MALE;
       double isolationCompliance = dataGenerator.nextUniform(0, 1);
       double reportingCompliance = dataGenerator.nextUniform(0, 1);
-      double health = dataGenerator.nextUniform(0, 1);
+      double health = healthModifier * dataGenerator.nextUniform(0, 1);
+
+      boolean hasApp = dataGenerator.nextUniform(0, 1) < properties.appUptake();
 
       population.put(
           i,
@@ -76,9 +80,23 @@ public class PopulationGenerator {
                   .reportingCompliance(reportingCompliance)
                   .gender(gender)
                   .health(health)
+                  .hasApp(hasApp)
                   .build()));
     }
 
     return population;
+  }
+
+  public double getHealthModifier(int age) {
+    return 1d;
+    // TODO: Re-implement ageDependence
+    //    int index =
+    //        properties.populationAges().entrySet().stream()
+    //            .filter(entry -> entry.getValue().min() <= age && entry.getValue().max() >= age)
+    //            .map(Map.Entry::getKey)
+    //            .findAny()
+    //            .orElse(-1);
+    //
+    //    return properties.ageDependence().getOrDefault(index, 1d);
   }
 }

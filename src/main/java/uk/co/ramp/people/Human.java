@@ -17,4 +17,6 @@ public interface Human {
   double reportingCompliance();
 
   double health();
+
+  boolean hasApp();
 }

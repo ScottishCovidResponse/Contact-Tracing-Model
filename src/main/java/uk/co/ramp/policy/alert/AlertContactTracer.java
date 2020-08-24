@@ -62,6 +62,7 @@ public class AlertContactTracer {
         .flatMapToInt(e -> IntStream.of(e.from(), e.to()))
         .distinct()
         .filter(id -> id != personId)
+        .filter(id -> population.hasApp(personId))
         .filter(id -> population.getAlertStatus(id) == NONE)
         .filter(id -> population.getVirusStatus(id) != DEAD)
         .boxed()

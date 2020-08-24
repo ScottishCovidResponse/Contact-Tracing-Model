@@ -4,7 +4,7 @@
   extension: toml
   filename: population_parameters/0.1.0/populationSettings.toml
   namespace: CTM
-  verified_hash: 02e67af55c9163148a877806a74a43d66b34e219
+  verified_hash: f1fe9ed812954a2a56ad362d5739a7aa5d00713d
   version: 0.1.0
 - accessibility: 0
   component: population-distribution
@@ -12,7 +12,23 @@
   extension: toml
   filename: population_parameters/0.1.0/populationSettings.toml
   namespace: CTM
-  verified_hash: 02e67af55c9163148a877806a74a43d66b34e219
+  verified_hash: f1fe9ed812954a2a56ad362d5739a7aa5d00713d
+  version: 0.1.0
+- accessibility: 0
+  component: app-uptake
+  data_product: population_parameters
+  extension: toml
+  filename: population_parameters/0.1.0/populationSettings.toml
+  namespace: CTM
+  verified_hash: f1fe9ed812954a2a56ad362d5739a7aa5d00713d
+  version: 0.1.0
+- accessibility: 0
+  component: test-capacity
+  data_product: population_parameters
+  extension: toml
+  filename: population_parameters/0.1.0/populationSettings.toml
+  namespace: CTM
+  verified_hash: f1fe9ed812954a2a56ad362d5739a7aa5d00713d
   version: 0.1.0
 - accessibility: 0
   component: exposure-exponent

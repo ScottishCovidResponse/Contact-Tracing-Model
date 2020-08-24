@@ -205,6 +205,14 @@ class SingleCaseIsolationPolicy {
         (threshold < requiredIsolationFactor)
             && (overrideComplianceAndForcePolicy || isCompliant)
             && (!timedPolicy || isInIsolationPeriod);
+    boolean wasIsolating = currentlyInIsolationMap.get(id) != null;
+
+    // record days spent in isolation when individual comes out of isolation
+    if (wasIsolating && !willIsolate) {
+      int duration = currentTime - currentlyInIsolationMap.get(id).startTime();
+      statisticsRecorder.recordDaysInIsolation(id, duration);
+    }
+
     if (timedPolicy || isDefaultPolicy) {
       currentlyInIsolationMap.compute(
           id,
@@ -214,9 +222,6 @@ class SingleCaseIsolationPolicy {
                       val, matchingIsolationProperty, startOfIsolationTime, requiredIsolationTime)
                   : null);
     }
-
-    if (willIsolate && requiredIsolationTime > 0)
-      statisticsRecorder.recordDaysInIsolation(id, requiredIsolationTime);
 
     return willIsolate;
   }

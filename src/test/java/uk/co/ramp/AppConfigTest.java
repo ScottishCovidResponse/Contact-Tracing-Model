@@ -164,6 +164,8 @@ public class AppConfigTest {
     when(stdApi.readEstimate(anyString(), eq("gender-balance"))).thenReturn(0.99);
     when(stdApi.readDistribution(anyString(), eq("population-distribution")))
         .thenReturn(populationDistribution);
+    when(stdApi.readEstimate(anyString(), eq("app-uptake"))).thenReturn(0.01);
+    when(stdApi.readEstimate(anyString(), eq("test-capacity"))).thenReturn(0.7);
 
     appConfig = new AppConfig(null, null, null);
   }
@@ -177,7 +179,7 @@ public class AppConfigTest {
     Assert.assertTrue(standardProperties.initialExposures() > 0);
     Assert.assertTrue(standardProperties.populationSize() > 0);
     Assert.assertTrue(standardProperties.seed().isEmpty());
-    Assert.assertTrue(standardProperties.timeLimit() > 0);
+    Assert.assertTrue(standardProperties.timeLimitDays() > 0);
     Assert.assertTrue(standardProperties.populationSize() > standardProperties.initialExposures());
   }
 

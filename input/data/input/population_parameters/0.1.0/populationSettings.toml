@@ -2,6 +2,14 @@
 type = "point-estimate"
 value = 0.99
 
+[app-uptake]
+type = "point-estimate"
+value = 0.7
+
+[test-capacity]
+type = "point-estimate"
+value = 0.01
+
 [population-distribution]
 type = "distribution"
 distribution = "categorical"

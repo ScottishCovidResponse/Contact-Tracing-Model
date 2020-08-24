@@ -72,6 +72,10 @@ public class PopulationPropertiesReaderTest {
         .thenReturn(distribution);
     when(dataPipelineApi.readEstimate(eq("population_parameters"), eq("gender-balance")))
         .thenReturn(0.99);
+    when(dataPipelineApi.readEstimate(eq("population_parameters"), eq("app-uptake")))
+        .thenReturn(0.7);
+    when(dataPipelineApi.readEstimate(eq("population_parameters"), eq("test-capacity")))
+        .thenReturn(0.01);
   }
 
   @Test
@@ -80,6 +84,8 @@ public class PopulationPropertiesReaderTest {
     PopulationProperties populationProperties = reader.read();
 
     assertThat(populationProperties.genderBalance()).isCloseTo(0.99, offset(1e-6));
+    assertThat(populationProperties.appUptake()).isCloseTo(0.7, offset(1e-6));
+    assertThat(populationProperties.testCapacity()).isCloseTo(0.01, offset(1e-6));
 
     assertThat(populationProperties.distribution()).isEqualTo(distribution);
   }
