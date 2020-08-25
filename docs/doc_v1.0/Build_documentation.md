@@ -1,9 +1,9 @@
 Build Documention
 ================
-Author: Sam Brett
+Author: Sam Brett & Ed Townsend
 
 
-## Intro
+## Introduction
 
 This document is to describe structure, design and assumptions made in
 the creation of the Contact Tracing model through the SCRC/RAMP
@@ -37,29 +37,45 @@ this document.
 
 ## Inputs
 
-The inputs are contained in the /inputs folder. They are in two formats,
-CSV and JSON.
+The inputs are contained in the _/inputs_ folder, located in the root directory of the Contact Tracing Model. All input files come in one of two formats: CSV and JSON.
 
 ### InputLocations.json
 
-The _InputLocations.json_ file allows the user to specify the location of all other inputs files relative to the _/input_ folder. This allows the user to organise multiple simulation configurations.
+The _InputLocations.json_ file allows the user to specify the location of all inputs files relative to the _/input_ folder. This allows the user to organise multiple simulation configurations without overwriting existing configurations within the _/input_ folder.
 
 <img src="inputLocations.png" alt="input Locations" width="600">
 
+**Figure 1** - _InputLocation.json_ example.
+
+An example of the expected input files is illustrated above in Figure 1. If a file is omitted from _InputLocations.json_ then the Contact Tracing Model will default to the corresponding file in the _/input_ folder. 
+
+Should the Contact Tracing Model fail to acquire a specified file, an error will be thrown.
 
 ### Contacts.csv
 
-The contact data is a CSV file containing the temporal network of contacts between individuals in a population.
-The columns are time, from, to and weight. An example can be shown in Figure 2. The to and from fields are the ids
-of the nodes in contact. The weight field is a measure of the duration, intensity or proximity of the contact. 
-This is dimensionless number and is used as threshold for determining the spread of infection, allowing to filter 
-the individual contacts regarding whether they should be alerted or not. The addition of a label field is to enable 
-filtering of contacts based on their label.
+The contact data is stored within the _Contacts.csv_ file. The contact data file contains the data of a temporal network of contacts between individuals in a population.
+The columns are:
+  * _time_
+    * The time that the contact occurs.
+  * _from_
+    * The first individual's ID.
+    * Sometimes referred to as a node in the contact network.
+  * _to_
+    * The second individual's ID.
+    * * Sometimes referred to as a node in the contact network.
+  * _weight_
+    * The weighting associated with the interaction. 
+    * The likelihood of an infectious individual infecting the other is proportional to the weighting factor.
+    * More details regarding the use of the weighting factor can be found [here](#diseasesettingsjson).
+  * _label_
+    * The location of where the interaction occurs.
+    * The label is not currently used in the current version of the Contact Tracing Model.
+
+An example of the contents of a _Contacts.csv_ file can be found in Figure 2.
 
 <img src="image2.png" alt="Contacts File" width="500">
 
-
-Figure 2. Contacts.csv example
+**Figure 2** _Contacts.csv_ example
 
 ### DiseaseSettings.json
 
