@@ -189,7 +189,7 @@ The _dayOffset_ field offsets the contact data by the specified number of days. 
 
 ## Age Data
 
-The _Age Data_ file assigns an age to an individuals' ID. The _Age Data_ takes precedence over the age data within the _Population Settings_ file. Figure 6 shows an example _Age Data_ file.
+The _Age Data_ file assigns an age to an individual via their ID. The _Age Data_ takes precedence over the age data within the _Population Settings_ file. Figure 6 shows an example _Age Data_ file.
 
 <img src="ageData.png" alt="age Data Example" width="100">
 
