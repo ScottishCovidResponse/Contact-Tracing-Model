@@ -4,3 +4,5 @@
 # These are explicitly windows files and should use crlf
 *.bat           text eol=crlf
 
+# The data pipeline api checks file hashes, so it is important that line endings are not modified
+*.toml -text

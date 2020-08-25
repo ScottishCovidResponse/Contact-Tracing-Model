@@ -1,20 +1,22 @@
 package uk.co.ramp.policy.isolation;
 
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.google.common.base.Preconditions;
 import java.util.Optional;
-import org.immutables.gson.Gson.TypeAdapters;
 import org.immutables.value.Value.Check;
 import org.immutables.value.Value.Immutable;
-import uk.co.ramp.distribution.Distribution;
+import uk.co.ramp.distribution.BoundedDistribution;
 
 @Immutable
-@TypeAdapters
+@JsonSerialize
+@JsonDeserialize
 interface IsolationProperty {
   String id();
 
-  Distribution isolationProbabilityDistribution();
+  BoundedDistribution isolationProbabilityDistribution();
 
-  Optional<Distribution> isolationTimeDistribution();
+  Optional<BoundedDistribution> isolationTimeDistribution();
 
   Optional<Boolean> overrideComplianceAndForcePolicy();
 

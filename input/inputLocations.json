@@ -1,7 +1,5 @@
 {
   "runSettings": "runSettings.json",
-  "populationSettings": "populationSettings.json",
-  "diseaseSettings": "diseaseSettings.json",
   "contactData": "homogeneous_contacts.csv",
   "ageData": "ids_Paul.csv",
   "initialExposures": "initialExposures.csv",

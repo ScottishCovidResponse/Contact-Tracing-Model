@@ -6,13 +6,17 @@
       "isolationProperty": {
         "id": "Symptomatic Policy",
         "isolationProbabilityDistribution": {
-          "type": "FLAT",
-          "mean": 100,
+          "distribution": {
+            "distribution": "empirical",
+            "empiricalSamples": [100]
+          },
           "max": 100
         },
         "isolationTimeDistribution": {
-          "type": "FLAT",
-          "mean": 12,
+          "distribution": {
+            "distribution": "empirical",
+            "empiricalSamples": [12]
+          },
           "max": 12
         },
         "startOfIsolationTime": "ABSOLUTE",
@@ -24,13 +28,17 @@
       "isolationProperty": {
         "id": "Severely Symptomatic Policy",
         "isolationProbabilityDistribution": {
-          "type": "FLAT",
-          "mean": 100,
+          "distribution": {
+            "distribution": "empirical",
+            "empiricalSamples": [100]
+          },
           "max": 100
         },
         "isolationTimeDistribution": {
-          "type": "FLAT",
-          "mean": 12,
+          "distribution": {
+            "distribution": "empirical",
+            "empiricalSamples": [12]
+          },
           "max": 12
         },
         "startOfIsolationTime": "ABSOLUTE",
@@ -44,13 +52,17 @@
       "isolationProperty": {
         "id": "Alerted Policy",
         "isolationProbabilityDistribution": {
-          "type": "FLAT",
-          "mean": 100,
+          "distribution": {
+            "distribution": "empirical",
+            "empiricalSamples": [100]
+          },
           "max": 100
         },
         "isolationTimeDistribution": {
-          "type": "FLAT",
-          "mean": 12,
+          "distribution": {
+            "distribution": "empirical",
+            "empiricalSamples": [12]
+          },
           "max": 12
         },
         "startOfIsolationTime": "ABSOLUTE",
@@ -62,13 +74,17 @@
       "isolationProperty": {
         "id": "Requested Test Policy",
         "isolationProbabilityDistribution": {
-          "type": "FLAT",
-          "mean": 100,
+          "distribution": {
+            "distribution": "empirical",
+            "empiricalSamples": [100]
+          },
           "max": 100
         },
         "isolationTimeDistribution": {
-          "type": "FLAT",
-          "mean": 12,
+          "distribution": {
+            "distribution": "empirical",
+            "empiricalSamples": [12]
+          },
           "max": 12
         },
         "startOfIsolationTime": "ABSOLUTE",
@@ -80,13 +96,17 @@
       "isolationProperty": {
         "id": "Awaiting Result Policy",
         "isolationProbabilityDistribution": {
-          "type": "FLAT",
-          "mean": 100,
+          "distribution": {
+            "distribution": "empirical",
+            "empiricalSamples": [100]
+          },
           "max": 100
         },
         "isolationTimeDistribution": {
-          "type": "FLAT",
-          "mean": 12,
+          "distribution": {
+            "distribution": "empirical",
+            "empiricalSamples": [12]
+          },
           "max": 12
         },
         "startOfIsolationTime": "ABSOLUTE",
@@ -98,13 +118,17 @@
       "isolationProperty": {
         "id": "Tested Positive Policy",
         "isolationProbabilityDistribution": {
-          "type": "FLAT",
-          "mean": 100,
+          "distribution": {
+            "distribution": "empirical",
+            "empiricalSamples": [100]
+          },
           "max": 100
         },
         "isolationTimeDistribution": {
-          "type": "FLAT",
-          "mean": 12,
+          "distribution": {
+            "distribution": "empirical",
+            "empiricalSamples": [12]
+          },
           "max": 12
         },
         "startOfIsolationTime": "ABSOLUTE",
@@ -115,15 +139,20 @@
   "defaultPolicy": {
     "id": "Default Policy",
     "isolationProbabilityDistribution": {
-      "type": "FLAT",
-      "mean": 0,
+      "distribution": {
+        "distribution": "empirical",
+        "empiricalSamples": [0]
+      },
       "max": 0
     },
     "priority": 0
   },
   "isolationProbabilityDistributionThreshold": {
-    "type": "LINEAR",
-    "mean": 50,
+    "distribution": {
+      "distribution": "categorical",
+      "bins": ["[0,100]"],
+      "weights": [1.0]
+    },
     "max": 100
   }
 }

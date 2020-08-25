@@ -88,14 +88,15 @@ public class PopulationGenerator {
   }
 
   public double getHealthModifier(int age) {
-
-    int index =
-        properties.populationAges().entrySet().stream()
-            .filter(entry -> entry.getValue().min() <= age && entry.getValue().max() >= age)
-            .map(Map.Entry::getKey)
-            .findAny()
-            .orElse(-1);
-
-    return properties.ageDependence().getOrDefault(index, 1d);
+    return 1d;
+    // TODO: Re-implement ageDependence
+    //    int index =
+    //        properties.populationAges().entrySet().stream()
+    //            .filter(entry -> entry.getValue().min() <= age && entry.getValue().max() >= age)
+    //            .map(Map.Entry::getKey)
+    //            .findAny()
+    //            .orElse(-1);
+    //
+    //    return properties.ageDependence().getOrDefault(index, 1d);
   }
 }

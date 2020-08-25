@@ -3,6 +3,7 @@ package uk.co.ramp;
 import static org.hamcrest.CoreMatchers.containsString;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import java.io.File;
@@ -12,7 +13,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import org.junit.*;
-import org.mockito.Mockito;
 import org.springframework.context.ApplicationContext;
 import uk.co.ramp.event.CompletionEventListGroup;
 import uk.co.ramp.event.types.ContactEvent;
@@ -24,6 +24,7 @@ import uk.co.ramp.io.types.InputFiles;
 import uk.co.ramp.io.types.StandardProperties;
 import uk.co.ramp.people.Case;
 import uk.co.ramp.people.PopulationGenerator;
+import uk.ramp.api.StandardApi;
 
 public class ContactRunnerTest {
 
@@ -33,9 +34,11 @@ public class ContactRunnerTest {
 
   @Before
   public void setUp() {
-    applicationContext = Mockito.mock(ApplicationContext.class);
+    applicationContext = mock(ApplicationContext.class);
     runner = new ContactRunner();
     runner.setApplicationContext(applicationContext);
+    StandardApi dataPipelineApi = mock(StandardApi.class);
+    runner.setDataPipelineApi(dataPipelineApi);
   }
 
   @After
@@ -48,13 +51,13 @@ public class ContactRunnerTest {
   public void run() throws IOException {
 
     // Stub classes
-    PopulationGenerator populationGenerator = Mockito.mock(PopulationGenerator.class);
-    StandardProperties runProperties = Mockito.mock(StandardProperties.class);
-    Outbreak outbreak = Mockito.mock(Outbreak.class);
-    ContactReader reader = Mockito.mock(ContactReader.class);
-    CompartmentWriter compartmentWriter = Mockito.mock(CompartmentWriter.class);
-    InputFiles inputFiles = Mockito.mock(InputFiles.class);
-    CompletionEventListGroup eventList = Mockito.mock(CompletionEventListGroup.class);
+    PopulationGenerator populationGenerator = mock(PopulationGenerator.class);
+    StandardProperties runProperties = mock(StandardProperties.class);
+    Outbreak outbreak = mock(Outbreak.class);
+    ContactReader reader = mock(ContactReader.class);
+    CompartmentWriter compartmentWriter = mock(CompartmentWriter.class);
+    InputFiles inputFiles = mock(InputFiles.class);
+    CompletionEventListGroup eventList = mock(CompletionEventListGroup.class);
 
     // provide junk file for reader
     File temp = File.createTempFile("test", "file");
@@ -96,7 +99,7 @@ public class ContactRunnerTest {
     File temp = File.createTempFile("test", "file");
     List<CmptRecord> var = new ArrayList<>();
 
-    CompartmentWriter compartmentWriter = Mockito.mock(CompartmentWriter.class);
+    CompartmentWriter compartmentWriter = mock(CompartmentWriter.class);
     doThrow(new IOException()).when(compartmentWriter).write(any(), any());
     when(applicationContext.getBean(CompartmentWriter.class)).thenReturn(compartmentWriter);
     try {

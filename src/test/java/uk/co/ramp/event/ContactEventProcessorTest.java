@@ -28,12 +28,11 @@ import uk.co.ramp.io.InfectionRates;
 import uk.co.ramp.io.types.DiseaseProperties;
 import uk.co.ramp.people.Case;
 import uk.co.ramp.people.Human;
-import uk.co.ramp.policy.alert.TracingPolicyContext;
 import uk.co.ramp.policy.isolation.IsolationPolicy;
 
 @RunWith(SpringRunner.class)
 @DirtiesContext
-@Import({TestUtils.class, AppConfig.class, TestConfig.class, TracingPolicyContext.class})
+@Import({TestUtils.class})
 public class ContactEventProcessorTest {
   @Rule public LogSpy logSpy = new LogSpy();
 

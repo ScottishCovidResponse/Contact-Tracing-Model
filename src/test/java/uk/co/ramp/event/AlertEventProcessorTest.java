@@ -1,12 +1,12 @@
 package uk.co.ramp.event;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
 import static uk.co.ramp.people.AlertStatus.*;
 import static uk.co.ramp.people.VirusStatus.SUSCEPTIBLE;
 
+import org.apache.commons.math3.random.RandomGenerator;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Rule;
@@ -34,6 +34,7 @@ public class AlertEventProcessorTest {
   private AlertEventProcessor eventProcessor;
   private StatisticsRecorder statisticsRecorder;
   private PopulationProperties populationProperties;
+  private RandomGenerator rng;
 
   private static final double DELTA = 1e-6;
 
@@ -41,14 +42,18 @@ public class AlertEventProcessorTest {
   public void setUp() throws Exception {
     properties = mock(StandardProperties.class);
     when(properties.timeStepsPerDay()).thenReturn(1);
+    when(properties.timeLimitDays()).thenReturn(27);
+    when(properties.populationSize()).thenReturn(10000);
     diseaseProperties = TestUtils.diseaseProperties();
     population = mock(Population.class);
     distributionSampler = mock(DistributionSampler.class);
     statisticsRecorder = mock(StatisticsRecorderImpl.class);
-    populationProperties = mock(PopulationProperties.class);
-    when(distributionSampler.getDistributionValue(any())).thenReturn(1);
     when(statisticsRecorder.getFalsePositives()).thenReturn(0);
     when(statisticsRecorder.getFalseNegatives()).thenReturn(0);
+    populationProperties = mock(PopulationProperties.class);
+    when(populationProperties.testCapacity()).thenReturn(0.01);
+    rng = mock(RandomGenerator.class);
+    when(rng.nextDouble()).thenReturn(0.5D);
   }
 
   @Test
@@ -60,7 +65,8 @@ public class AlertEventProcessorTest {
             diseaseProperties,
             distributionSampler,
             statisticsRecorder,
-            populationProperties);
+            populationProperties,
+            rng);
 
     AlertEvent alertEvent = mock(AlertEvent.class);
 
@@ -73,13 +79,16 @@ public class AlertEventProcessorTest {
     time = eventProcessor.timeInStatusAndTestQueue(REQUESTED_TEST, alertEvent);
 
     Assert.assertEquals(
-        diseaseProperties.timeTestAdministered().mean() * properties.timeStepsPerDay(),
+        diseaseProperties.timeTestAdministered().getDistributionValue()
+            * properties.timeStepsPerDay(),
         time,
         DELTA);
 
     time = eventProcessor.timeInStatusAndTestQueue(AWAITING_RESULT, alertEvent);
     Assert.assertEquals(
-        diseaseProperties.timeTestResult().mean() * properties.timeStepsPerDay(), time, DELTA);
+        diseaseProperties.timeTestResult().getDistributionValue() * properties.timeStepsPerDay(),
+        time,
+        DELTA);
 
     time = eventProcessor.timeInStatusAndTestQueue(TESTED_NEGATIVE, alertEvent);
     Assert.assertEquals(1, time);
@@ -101,7 +110,8 @@ public class AlertEventProcessorTest {
             diseaseProperties,
             distributionSampler,
             statisticsRecorder,
-            populationProperties);
+            populationProperties,
+            rng);
 
     AlertEvent event =
         ImmutableAlertEvent.builder().time(0).id(0).oldStatus(NONE).nextStatus(ALERTED).build();
@@ -120,7 +130,10 @@ public class AlertEventProcessorTest {
     Assert.assertEquals(0, eventResult.newCompletedVirusEvents().size());
     AlertEvent evnt = eventResult.newAlertEvents().get(0);
 
-    Assert.assertEquals(properties.timeStepsPerDay(), evnt.time());
+    Assert.assertEquals(
+        diseaseProperties.timeTestAdministered().getDistributionValue()
+            * properties.timeStepsPerDay(),
+        evnt.time());
     Assert.assertEquals(0, evnt.id());
     Assert.assertEquals(ALERTED, evnt.oldStatus());
     Assert.assertEquals(REQUESTED_TEST, evnt.nextStatus());
@@ -139,7 +152,8 @@ public class AlertEventProcessorTest {
             diseaseProperties,
             distributionSampler,
             statisticsRecorder,
-            populationProperties);
+            populationProperties,
+            rng);
 
     var processedEvents = eventProcessor.processEvent(event);
     assertThat(processedEvents.newCompletedAlertEvents()).isEmpty();
@@ -165,7 +179,8 @@ public class AlertEventProcessorTest {
             diseaseProperties,
             distributionSampler,
             statisticsRecorder,
-            populationProperties);
+            populationProperties,
+            rng);
 
     when(distributionSampler.uniformBetweenZeroAndOne()).thenReturn(0.99d);
     assertThat(eventProcessor.determineTestResult(true)).hasValue(TESTED_NEGATIVE);

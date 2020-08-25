@@ -4,20 +4,17 @@ import static uk.co.ramp.people.AlertStatus.*;
 
 import java.util.List;
 import java.util.Optional;
+import org.apache.commons.math3.random.RandomGenerator;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import uk.co.ramp.Population;
-import uk.co.ramp.distribution.Distribution;
 import uk.co.ramp.distribution.DistributionSampler;
-import uk.co.ramp.distribution.ImmutableDistribution;
 import uk.co.ramp.event.types.*;
 import uk.co.ramp.io.types.DiseaseProperties;
 import uk.co.ramp.io.types.PopulationProperties;
 import uk.co.ramp.io.types.StandardProperties;
 import uk.co.ramp.people.AlertStatus;
 import uk.co.ramp.statistics.StatisticsRecorder;
-import uk.co.ramp.utilities.ImmutableMeanMax;
-import uk.co.ramp.utilities.MeanMax;
 
 public class AlertEventProcessor implements EventProcessor<AlertEvent> {
   private static final Logger LOGGER = LogManager.getLogger(AlertEventProcessor.class);
@@ -28,6 +25,7 @@ public class AlertEventProcessor implements EventProcessor<AlertEvent> {
   private final StandardProperties properties;
   private final StatisticsRecorder statisticsRecorder;
   private final PopulationProperties populationProperties;
+  private final RandomGenerator rng;
 
   public AlertEventProcessor(
       Population population,
@@ -35,13 +33,15 @@ public class AlertEventProcessor implements EventProcessor<AlertEvent> {
       DiseaseProperties diseaseProperties,
       DistributionSampler distributionSampler,
       StatisticsRecorder statisticsRecorder,
-      PopulationProperties populationProperties) {
+      PopulationProperties populationProperties,
+      RandomGenerator rng) {
     this.population = population;
     this.diseaseProperties = diseaseProperties;
     this.distributionSampler = distributionSampler;
     this.properties = properties;
     this.statisticsRecorder = statisticsRecorder;
     this.populationProperties = populationProperties;
+    this.rng = rng;
   }
 
   @Override
@@ -121,7 +121,7 @@ public class AlertEventProcessor implements EventProcessor<AlertEvent> {
 
   int timeInStatusAndTestQueue(AlertStatus newStatus, AlertEvent event) {
     int time = event.time();
-    MeanMax progressionData;
+    int timeStepsInStatus = 0;
     switch (newStatus) {
       case TESTED_POSITIVE:
       case TESTED_NEGATIVE:
@@ -131,35 +131,33 @@ public class AlertEventProcessor implements EventProcessor<AlertEvent> {
         boolean testsAvailable = conducted < capacity;
         if (testsAvailable) {
           statisticsRecorder.recordTestConducted(time);
-          progressionData = ImmutableMeanMax.builder().mean(1).max(1).build();
+          timeStepsInStatus = properties.timeStepsPerDay();
         } else {
           int testTime = findNextTest(time, capacity);
           statisticsRecorder.recordTestDelayed(time, event.id());
-          progressionData = ImmutableMeanMax.builder().mean(testTime).max(testTime).build();
+          timeStepsInStatus = testTime;
         }
         break;
       case ALERTED:
-        progressionData = ImmutableMeanMax.builder().mean(1).max(1).build();
+        timeStepsInStatus = properties.timeStepsPerDay();
         break;
       case AWAITING_RESULT:
-        progressionData = diseaseProperties.timeTestResult();
+        timeStepsInStatus =
+            diseaseProperties.timeTestResult().getDistributionValue()
+                * properties.timeStepsPerDay();
         break;
       case REQUESTED_TEST:
-        progressionData = diseaseProperties.timeTestAdministered();
+        timeStepsInStatus =
+            diseaseProperties.timeTestAdministered().getDistributionValue()
+                * properties.timeStepsPerDay();
         break;
       case NONE:
-        return 0;
+        break;
       default:
         throw new IllegalStateException("Should not reach this state");
     }
 
-    Distribution distribution =
-        ImmutableDistribution.builder()
-            .type(diseaseProperties.progressionDistribution())
-            .mean(progressionData.mean() * properties.timeStepsPerDay())
-            .max(progressionData.max() * properties.timeStepsPerDay())
-            .build();
-    return distributionSampler.getDistributionValue(distribution);
+    return timeStepsInStatus;
   }
 
   private int findNextTest(int timeNow, int capacity) {

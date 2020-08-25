@@ -3,8 +3,11 @@
   "policies": [],
   "noOfTracingLevels": 0,
   "probabilitySkippingTraceLinkThreshold": {
-    "mean": 50,
-    "max": 100,
-    "type": "LINEAR"
+    "distribution": {
+      "distribution": "categorical",
+      "bins": ["[0,100]"],
+      "weights": [1.0]
+    },
+    "max": 100
   }
 }

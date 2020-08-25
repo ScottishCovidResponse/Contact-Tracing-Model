@@ -6,14 +6,18 @@
       "reporterVirusStatus": "SYMPTOMATIC",
       "recentContactsLookBackTime": 11,
       "timeDelayPerTraceLink": {
-        "mean": 1,
-        "max": 1,
-        "type": "FLAT"
+        "distribution": {
+          "distribution": "empirical",
+          "empiricalSamples": [1]
+        },
+        "max": 1
       },
       "probabilitySkippingTraceLink": {
-        "mean": 10,
-        "max": 10,
-        "type": "FLAT"
+        "distribution": {
+          "distribution": "empirical",
+          "empiricalSamples": [10]
+        },
+        "max": 10
       }
     },
     {
@@ -21,21 +25,28 @@
       "reporterVirusStatus": "SEVERELY_SYMPTOMATIC",
       "recentContactsLookBackTime": 11,
       "timeDelayPerTraceLink": {
-        "mean": 1,
-        "max": 1,
-        "type": "FLAT"
+        "distribution": {
+          "distribution": "empirical",
+          "empiricalSamples": [1]
+        },
+        "max": 1
       },
       "probabilitySkippingTraceLink": {
-        "mean": 10,
-        "max": 10,
-        "type": "FLAT"
+        "distribution": {
+          "distribution": "empirical",
+          "empiricalSamples": [10]
+        },
+        "max": 10
       }
     }
   ],
   "noOfTracingLevels": 2,
   "probabilitySkippingTraceLinkThreshold": {
-    "mean": 50,
-    "max": 100,
-    "type": "LINEAR"
+    "distribution": {
+      "distribution": "categorical",
+      "bins": ["[0,100]"],
+      "weights": [1.0]
+    },
+    "max": 100
   }
 }
