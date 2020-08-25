@@ -4,8 +4,8 @@ Author: Sam Brett & Ed Townsend
 
 ## Introduction
 
-This document is to describe structure, design and assumptions made in
-the creation of the Contact Tracing model through the SCRC/RAMP
+This document is to describe the structure, design and assumptions made in
+the creation of the Contact Tracing Model through the SCRC/RAMP
 collaboration.
 
 This model uses a S-E-Asym-Pre-Sym-Sev-R-D model that allows the following transitions:
@@ -39,9 +39,9 @@ The inputs are contained in the _/inputs_ folder, located in the root directory 
 
 ### Input Locations
 
-The _Input Locations_ file allows the user to specify the location of all inputs files relative to the _/input_ folder. This allows the user to organise multiple simulation configurations without overwriting existing configurations within the _/input_ folder.
+The _Input Locations_ file allows the user to specify the location of all input files relative to the _/input_ folder, which is located in the root of the Contract Tracing Model directory. This allows the user to organise multiple simulation configurations without overwriting existing configurations within the _/input_ folder.
 
-The input locations file's name must be set to _inputLocations.json_.
+The name of the _Input Locations_ file must be set to _inputLocations.json_.
 
 <img src="inputLocations.png" alt="input Locations" width="600">
 
@@ -51,12 +51,12 @@ An example of the expected input files is illustrated above in Figure 1. If a fi
 
 Should the Contact Tracing Model fail to acquire a specified file, an error will be thrown.
 
-The input location
+The directory of the input files defaults to the _/input_ folder, but may be overridden via the command line. See XXXX for more details.
 
 ### Contact Data
 
-The _Contact Data_ is stored within the a csv file that contains the data of a temporal network of contacts between individuals in a population.
-The columns are:
+The _Contact Data_ is stored within a CSV file that contains the data of a temporal network of contacts between individuals in a population.
+The columns in the _Contact Data_ file are:
   * _time_
     * The time that the contact occurs.
   * _from_
@@ -68,12 +68,12 @@ The columns are:
   * _weight_
     * The weighting associated with the interaction. 
     * The likelihood of an infectious individual infecting the other is proportional to the weighting factor.
-    * More details regarding the use of the weighting factor can be found [here](#diseasesettingsjson).
+    * More details regarding the use of the weighting factor can be found [here](#diseasesettings).
   * _label_
     * The location of where the interaction occurs.
     * The label is not currently used in the current version of the Contact Tracing Model.
 
-An example of the contents of a _Contacts.csv_ file can be found in Figure 2.
+An example of the contents of a _Contacts Data_ file can be found in Figure 2.
 
 <img src="image2.png" alt="Contacts File" width="500">
 
@@ -82,18 +82,18 @@ An example of the contents of a _Contacts.csv_ file can be found in Figure 2.
 ### Disease Settings
 
 The _Disease Settings_ file contains the parameters that define the behaviour of the disease. Within this file, the user can change the following quantities:
-  * The parameters to the distribution used to sample the duration an individual will spend in a given virus compartment.
+  * The parameters of the distributions used to sample the duration an individual spends in a given virus compartment.
   * The likelihood of a test producing a false negative or false positive result.
   * The distribution used to sample the duration a test takes to be administered.
-  * The distribution used to sample the duration a test results takes to be delivered.
+  * The distribution used to sample the duration a test result takes to be delivered.
   * The parameters to determine the probability of being exposed through an interaction.
   * Proportion of population randomly infected per day.
   
  <img src="diseaseSettings.png" alt="Contacts File" width="400">
 
-**Figure 3.** Example disease settings file
+**Figure 3.** Example _Disease Settings_ file
   
-Figure 3 shows the contents of an example _diseaseSettings.json_ file. For entry defining the duration an individual spends in a virus compartment and the testing durations, there is a corresponding _mean_ and _max_ field. These correspond to the mean and maximum values that parameterise the chosen distibution, specified by the _progressionDistribution_ field.
+Figure 3 shows the contents of an example _Disease Settings_ file. For each entry defining the duration an individual spends in a virus compartment and the testing durations, there is a corresponding _mean_ and _max_ field. These correspond to the mean and maximum values that parameterise the chosen distibution, specified by the _progressionDistribution_ field.
 
 The _progressionDistribution_ field accepts the follow distributions:
 * GAUSSIAN
@@ -102,24 +102,23 @@ The _progressionDistribution_ field accepts the follow distributions:
 * LINEAR
   * A uniform distribution.
 * FLAT
-  * A constant value give by the mean.
+  * A constant value given by the mean.
 
-**NOTE:** Currently, the Contact Tracing Model only allows one distribution type to be specified at a time. For example, it is not possible to sample from a GAUSSIAN and EXPONENTIAL distribution for _timeTestAdministered_ and _timeRecoveryAsymp_, respectively, in the same simulation.
+**NOTE:** Currently, the Contact Tracing Model only allows one distribution type to be specified at a time. For example, it is not possible to sample _timeTestAdministered_ from a GAUSSIAN and _timeRecoveryAsymp_ from an EXPONENTIAL distribution in the same simulation.
 
-The _testPositiveAccuracy_ and _testNegativeAccuracy_ fields represent the probability of a test result being a false positive or false negative. For example, if a test result is negative and a _testNegativeAccuracy_ value of 0.95, then there is a 5% chance the result will be a false negative. These quantities are sample against a uniform (or LINEAR) distribution and not the distribution specified by the _progressionDistribution_ field.
+The _testPositiveAccuracy_ and _testNegativeAccuracy_ fields represent the probability of a test result being a false positive or false negative. For example, if a test result is negative and the _testNegativeAccuracy_ value is 0.95, then there is a 5% chance this result will be a false negative. These quantities are sampled from a uniform (or LINEAR) distribution and not the distribution specified by the _progressionDistribution_ field.
 
 The _exposureThreshold_ field is a minimum exposure value that is used to determine
 if a contact is close enough to spread the infection. This works as a
 high pass filter value with the weight field.
 
 The _randomInfectionRate_ field allows a proportion of the population to be
-randomly exposed from outside the network per day. This is to simulate people
-from outside the network interacting. This is the probability per
-person, per timestep. So, 0.05 is 5 people in a population of 100 per
-day. This value is likely to be much smaller than 0.05.
+randomly exposed from outside the contact network per day. This is to simulate people
+from outside the network interacting with the population. This is the probability an individual will randomly get infected per timestep. For example, a _randomInfectionRate_ of  0.05 will result in 5 people in a population of 100, per
+timestep, to get infected.
 
 The _exposureProbability4UnitContact_ (expUnitContact) and _exposureExponent_ (exp) values are 
-used to determine the chance of infection for a given contact, along with the weighting value in the _Contacts.csv_ file. The mathematical implementation of the aforementioned quantites can be found in the images below.
+used to determine the chance of infection for a given contact, along with the weighting value in the _Contact Data_ file. The mathematical implementation of the aforementioned quantites can be found in the images below.
 
 <img src="exposureBias.png" alt="exposureBias" width="400">
 <img src="exposureProb.png" alt="exposureProb" width="400">
