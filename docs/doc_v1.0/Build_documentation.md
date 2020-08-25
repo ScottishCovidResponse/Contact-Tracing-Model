@@ -39,15 +39,15 @@ this document.
 
 The inputs are contained in the _/inputs_ folder, located in the root directory of the Contact Tracing Model. All input files come in one of two formats: CSV and JSON.
 
-### InputLocations.json
+### inputLocations.json
 
-The _InputLocations.json_ file allows the user to specify the location of all inputs files relative to the _/input_ folder. This allows the user to organise multiple simulation configurations without overwriting existing configurations within the _/input_ folder.
+The _inputLocations.json_ file allows the user to specify the location of all inputs files relative to the _/input_ folder. This allows the user to organise multiple simulation configurations without overwriting existing configurations within the _/input_ folder.
 
 <img src="inputLocations.png" alt="input Locations" width="600">
 
-**Figure 1** - _InputLocation.json_ example.
+**Figure 1** - _inputLocations.json_ example.
 
-An example of the expected input files is illustrated above in Figure 1. If a file is omitted from _InputLocations.json_ then the Contact Tracing Model will default to the corresponding file in the _/input_ folder. 
+An example of the expected input files is illustrated above in Figure 1. If a file is omitted from _inputLocations.json_ then the Contact Tracing Model will default to the corresponding file in the _/input_ folder. 
 
 Should the Contact Tracing Model fail to acquire a specified file, an error will be thrown.
 
@@ -62,7 +62,7 @@ The columns are:
     * Sometimes referred to as a node in the contact network.
   * _to_
     * The second individual's ID.
-    * * Sometimes referred to as a node in the contact network.
+    * Sometimes referred to as a node in the contact network.
   * _weight_
     * The weighting associated with the interaction. 
     * The likelihood of an infectious individual infecting the other is proportional to the weighting factor.
@@ -79,37 +79,45 @@ An example of the contents of a _Contacts.csv_ file can be found in Figure 2.
 
 ### DiseaseSettings.json
 
-Figure 3 shows the contents of the disease properties file. It shows the
-mean and max times between compartments of the disease. These are used
-to vary the propagation between nodes. These values are used with the
-random number generator to produce distributions based on the
-progression distribution field. The values for this can be GAUSSIAN,
-LINEAR, EXPONENTIAL or FLAT. NB LINEAR uses a uniform distribution and
-FLAT returns the mean.
+The _diseaseSettings.json_ file contains the parameters that define the behaviour of the disease. Within this file, the user can change the following quantities:
+  * The parameters to the distribution used to sample the duration an individual will spend in a given virus compartment.
+  * The likelihood of a test producing a false negative or false positive result.
+  * The distribution used to sample the duration a test takes to be administered.
+  * The distribution used to sample the duration a test results takes to be delivered.
+  * The parameters to determine the probability of being exposed through an interaction.
+  * Proportion of population randomly infected per day.
+  
+ <img src="image3.png" alt="Contacts File" width="400">
 
-Exposure threshold is a minimum exposure value that is used to determine
-if the contact is close enough to spread the infection. This works as a
+**Figure 3.** Example _diseaseSettings.json_ file
+  
+Figure 3 shows the contents of an example _diseaseSettings.json_ file. For entry defining the duration an individual spends in a virus compartment and the testing durations, there is a correspond _mean_ and _max_ field. These correspond to the mean and maximum values that parameterise the chosen distibution, specified by the _progressionDistribution_ field.
+
+The _progressionDistribution_ field accepts the follow distributions:
+* GAUSSIAN
+  * **NOTE:** the standard deviation is set to half of the mean value. This will be changed in a future version of the Contact Tracing Model.
+* EXPONENTIAL
+* LINEAR
+  * A uniform distribution.
+* FLAT
+  * A constant value give by the mean.
+
+**NOTE:** Currently, the Contact Tracing Model only allows one distribution type to be specified at a time. For example, it is not possible to sample from a GAUSSIAN and EXPONENTIAL distribution for _timeTestAdministered_ and _timeRecoveryAsymp_, respectively, in the same simulation.
+
+The _testPositiveAccuracy_ and _testNegativeAccuracy_ fields represent the probability of a test result being a false positive or false negative. For example, if a test result is negative and a _testNegativeAccuracy_ value of 0.95, then there is a 5% chance the result will be a false negative.
+
+The _exposureThreshold_ field is a minimum exposure value that is used to determine
+if a contact is close enough to spread the infection. This works as a
 high pass filter value with the weight field.
 
-Exposure tuning is used to scale the weight factor when an exposure
-occurs. So, if two people interact with the possibility of infection
-spreading the chance of the spread occurring can be modified by dividing
-the contact weight by the tuning value.
-
-Random Exposure: this allows a proportion of the population to be
-randomly exposed from outside the network. This is to simulate people
+The _randomInfectionRate_ field allows a proportion of the population to be
+randomly exposed from outside the network per day. This is to simulate people
 from outside the network interacting. This is the probability per
 person, per timestep. So, 0.05 is 5 people in a population of 100 per
 day. This value is likely to be much smaller than 0.05.
 
-<img src="image3.png" alt="Contacts File" width="400">
-
-
-Figure 3. The diseaseSettings.json file
-
-
-The exposureProbability4UnitContact (expUnitContact) and exposureExponent (exp) values are 
-used to determine the chance of infection for a given contact. 
+The _exposureProbability4UnitContact_ (expUnitContact) and _exposureExponent_ (exp) values are 
+used to determine the chance of infection for a given contact, along with the weighting value in the _Contacts.csv_ file.
 
 <img src="exposureBias.png" alt="exposureBias" width="400">
 <img src="exposureProb.png" alt="exposureProb" width="400">
