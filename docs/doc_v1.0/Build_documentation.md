@@ -87,7 +87,7 @@ The _diseaseSettings.json_ file contains the parameters that define the behaviou
   * The parameters to determine the probability of being exposed through an interaction.
   * Proportion of population randomly infected per day.
   
- <img src="image3.png" alt="Contacts File" width="400">
+ <img src="diseaseSettings.png" alt="Contacts File" width="400">
 
 **Figure 3.** Example _diseaseSettings.json_ file
   
