@@ -11,12 +11,7 @@ import org.springframework.context.annotation.Bean;
 import uk.co.ramp.distribution.BoundedDistribution;
 import uk.co.ramp.distribution.ImmutableBoundedDistribution;
 import uk.co.ramp.io.readers.AgeDataReader;
-import uk.co.ramp.io.types.DiseaseProperties;
-import uk.co.ramp.io.types.ImmutableDiseaseProperties;
-import uk.co.ramp.io.types.ImmutablePopulationProperties;
-import uk.co.ramp.io.types.ImmutableStandardProperties;
-import uk.co.ramp.io.types.PopulationProperties;
-import uk.co.ramp.io.types.StandardProperties;
+import uk.co.ramp.io.types.*;
 import uk.co.ramp.people.AgeRetriever;
 import uk.ramp.distribution.Distribution;
 import uk.ramp.distribution.Distribution.DistributionType;
@@ -150,5 +145,35 @@ public class TestUtils {
     Reader reader = new FileReader(file);
     var agesData = new AgeDataReader().read(reader);
     return new AgeRetriever(populationProperties(), agesData);
+  }
+
+  public static AgeDependentHealthList ageDependentHealth() {
+    return ImmutableAgeDependentHealthList.builder()
+        .addAgeDependentList(
+            ImmutableAgeDependentHealth.builder()
+                .range(uk.co.ramp.utilities.ImmutableMinMax.of(0, 19))
+                .modifier(1.d)
+                .build())
+        .addAgeDependentList(
+            ImmutableAgeDependentHealth.builder()
+                .range(uk.co.ramp.utilities.ImmutableMinMax.of(20, 39))
+                .modifier(0.9)
+                .build())
+        .addAgeDependentList(
+            ImmutableAgeDependentHealth.builder()
+                .range(uk.co.ramp.utilities.ImmutableMinMax.of(40, 59))
+                .modifier(0.8)
+                .build())
+        .addAgeDependentList(
+            ImmutableAgeDependentHealth.builder()
+                .range(uk.co.ramp.utilities.ImmutableMinMax.of(60, 79))
+                .modifier(0.6)
+                .build())
+        .addAgeDependentList(
+            ImmutableAgeDependentHealth.builder()
+                .range(uk.co.ramp.utilities.ImmutableMinMax.of(80, 100))
+                .modifier(0.4)
+                .build())
+        .build();
   }
 }

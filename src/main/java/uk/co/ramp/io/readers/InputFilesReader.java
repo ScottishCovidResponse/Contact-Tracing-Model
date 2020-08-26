@@ -28,6 +28,7 @@ public class InputFilesReader {
             .tracingPolicies("tracingPolicies.json")
             .isolationPolicies("isolationPolicies.json")
             .infectionRates("infectionRates.json")
+            .ageDependentHealth("ageDependentHealth.json")
             .build();
 
     Gson gson = new GsonBuilder().setPrettyPrinting().create();

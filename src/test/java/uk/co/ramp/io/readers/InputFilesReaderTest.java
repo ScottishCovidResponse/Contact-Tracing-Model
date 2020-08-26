@@ -18,7 +18,8 @@ public class InputFilesReaderTest {
           + "  \"initialExposures\": \"initialExposures.csv\",\n"
           + "  \"tracingPolicies\": \"tracingPolicies.json\",\n"
           + "  \"isolationPolicies\": \"isolationPolicies.json\",\n"
-          + "  \"infectionRates\": \"infectionRates.json\"\n"
+          + "  \"infectionRates\": \"infectionRates.json\",\n"
+          + "  \"ageDependentHealth\": \"ageDependentHealth.json\"\n"
           + "}";
 
   @Test
@@ -37,6 +38,7 @@ public class InputFilesReaderTest {
             .tracingPolicies("tracingPolicies.json")
             .isolationPolicies("isolationPolicies.json")
             .infectionRates("infectionRates.json")
+            .ageDependentHealth("ageDependentHealth.json")
             .build();
     assertThat(actualInputLocations).isEqualTo(expectedInputLocation);
   }

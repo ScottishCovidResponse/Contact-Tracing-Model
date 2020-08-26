@@ -8,8 +8,10 @@ import java.util.stream.Stream;
 import org.apache.commons.math3.random.RandomDataGenerator;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import uk.co.ramp.io.types.AgeDependentHealthList;
 import uk.co.ramp.io.types.PopulationProperties;
 import uk.co.ramp.io.types.StandardProperties;
+import uk.co.ramp.utilities.MinMax;
 
 @Service
 public class PopulationGenerator {
@@ -18,6 +20,19 @@ public class PopulationGenerator {
   private PopulationProperties properties;
   private RandomDataGenerator dataGenerator;
   private AgeRetriever ageRetriever;
+  private Map<MinMax, Double> ageMap;
+
+  public static Map<VirusStatus, Integer> getCmptCounts(Map<Integer, Case> population) {
+
+    Map<VirusStatus, Integer> pop =
+        population.values().stream()
+            .map(Case::virusStatus)
+            .collect(Collectors.groupingBy(Function.identity(), Collectors.summingInt(e -> 1)));
+
+    Stream.of(VirusStatus.values()).forEach(vs -> pop.putIfAbsent(vs, 0));
+
+    return pop;
+  }
 
   @Autowired
   public void setRunProperties(StandardProperties runProperties) {
@@ -39,16 +54,14 @@ public class PopulationGenerator {
     this.ageRetriever = ageRetriever;
   }
 
-  public static Map<VirusStatus, Integer> getCmptCounts(Map<Integer, Case> population) {
-
-    Map<VirusStatus, Integer> pop =
-        population.values().stream()
-            .map(Case::virusStatus)
-            .collect(Collectors.groupingBy(Function.identity(), Collectors.summingInt(e -> 1)));
-
-    Stream.of(VirusStatus.values()).forEach(vs -> pop.putIfAbsent(vs, 0));
-
-    return pop;
+  @Autowired
+  public void setAgeDependentHealthList(AgeDependentHealthList ageDependentHealthList) {
+    ageMap =
+        ageDependentHealthList.ageDependentList().stream()
+            .collect(
+                Collectors.toMap(
+                    AgeDependentHealthList.AgeDependentHealth::range,
+                    AgeDependentHealthList.AgeDependentHealth::modifier));
   }
 
   public Map<Integer, Case> generate() {
@@ -88,15 +101,11 @@ public class PopulationGenerator {
   }
 
   public double getHealthModifier(int age) {
-    return 1d;
-    // TODO: Re-implement ageDependence
-    //    int index =
-    //        properties.populationAges().entrySet().stream()
-    //            .filter(entry -> entry.getValue().min() <= age && entry.getValue().max() >= age)
-    //            .map(Map.Entry::getKey)
-    //            .findAny()
-    //            .orElse(-1);
-    //
-    //    return properties.ageDependence().getOrDefault(index, 1d);
+
+    return ageMap.entrySet().stream()
+        .filter(entry -> entry.getKey().min() <= age && entry.getKey().max() >= age)
+        .map(Map.Entry::getValue)
+        .findAny()
+        .orElse(1d);
   }
 }
