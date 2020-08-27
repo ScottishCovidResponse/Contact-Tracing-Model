@@ -13,12 +13,14 @@ Author: Sam Brett & Ed Townsend
       - [Initial Exposures](#initial-exposures)
       - [Run Settings](#run-settings)
       - [Age Data](#age-data)
-      - [Isolation Policies](#isolation-policies)
-      - [Tracing Policies](#tracing-policies)
     - [Data Pipeline Input Files](#data-pipeline-input-files)
+      - [Configuration File](#configuration-file)
       - [Disease Settings](#disease-settings)
       - [Population Settings](#population-settings)
-  - [Isolation Policies](#main-isolation-policies)
+      - [Isolation Policies](#isolation-policies)
+      - [Tracing Policies](#tracing-policies)
+  - [Isolation Policy File](#main-isolation-policies)
+  - [Tracing Policy Files](#main-tracing-polciies
 
 
 ## Introduction
@@ -52,14 +54,16 @@ D – Dead
 The progression through these transitions will be discussed throughout
 this document.
 
+
 ## Input Files
 
-The Contact Tracing Model's input files can be split into two categories: those created locally ([Local Input Files](#local-input-files)), and those created via the Data Pipeline API ([Data Pipeline Input Files](#data-pipeline-input-files)). This section describes the parameters and data stored in each input file.
+The Contact Tracing Model's input files can be split into two categories: those that contain data locally ([Local Input Files](#local-input-files)), and those that get data via the Data Pipeline API ([Data Pipeline Input Files](#data-pipeline-input-files)). This section describes the parameters and data stored in each input file.
 
 
 ### Local Input Files
 
-The _Local Input Files_ are files that are created/stored/edited locally, as opposed to those generated through the [Data Pipeline API](#data-pipeline-input-files). The _Local Input Files_ are contained in the _/inputs_ folder, located in the root directory of the Contact Tracing Model. All _Local Input Files_ come in one of two formats: CSV, JSON.
+The _Local Input Files_ are files that are store their data locally, as opposed to being retrieved through the [Data Pipeline API](#data-pipeline-input-files). The _Local Input Files_ are contained in the _/inputs_ folder, located in the root directory of the Contact Tracing Model. All _Local Input Files_ come in one of two formats: CSV, JSON.
+
 
 #### Input Locations
 
@@ -69,13 +73,14 @@ The name of the _Input Locations_ file must be set to _inputLocations.json_.
 
 <img src="inputLocations.png" alt="input Locations" width="600">
 
-**Figure 1.** Example _inputLocations.json_ file.
+**Figure 2.** Example _inputLocations.json_ file.
 
-An example of the expected input files is illustrated above in Figure 1. If a file is omitted from _inputLocations.json_ then the Contact Tracing Model will default to the corresponding file in the _/input_ folder. 
+An example of the expected input files is illustrated above in Figure 2. If a file is omitted from _inputLocations.json_ then the Contact Tracing Model will default to the corresponding file in the _/input_ folder. 
 
 Should the Contact Tracing Model fail to acquire a specified file, an error will be thrown.
 
 The directory of the input files defaults to the _/input_ folder, but may be overridden via the command line. See XXXX for more details.
+
 
 #### Contact Data
 
@@ -97,11 +102,11 @@ The columns in the _Contact Data_ file are:
     * The location of where the interaction occurs.
     * The label is not currently used in the current version of the Contact Tracing Model.
 
-An example of the contents of a _Contacts Data_ file can be found in Figure 2.
+An example of the contents of a _Contacts Data_ file can be found in Figure 3.
 
 <img src="image2.png" alt="Contacts File" width="500">
 
-**Figure 2.** Example contact data file.
+**Figure 3.** Example contact data file.
 
 
 
@@ -114,21 +119,21 @@ The _Infection Rates_ file allows the user to provide a weighting factor to indi
 **Figure 4.** Example _Infection Rates_ file.
 
 
-
 #### Initial Exposures
 
 At the beginning of a simulation there needs to be a number of infected individuals to start the spread of the disease. The IDs of individuals who are initially infected are specified in an _Initial Exposures_ file. This file is a CSV with one column of IDs of the individuals to be infected. 
 
 Should the number of individuals specified in the _Initial Exposures_ file differ from the value specified in the [_Run Settings_](#runsettings) file, then the data will be truncated if too long, or randomly allocated if too short.  
 
+
 #### Run Settings
 
 The _Run Settings_ file contains the main fields that a user may want to
-change. An example of a _Run Settings_ file can be found below in Figure 6.
+change. An example of a _Run Settings_ file can be found below in Figure 5.
 
 <img src="runSettings.png" alt="Run Settings Example" width="300">
 
-**Figure 6.** Example _Run Settings_ file.
+**Figure 5.** Example _Run Settings_ file.
 
 The _populationSize_ field defines the total number of individuals in a population. This value can be smaller or larger than the number of people in the contact network.
 
@@ -150,19 +155,56 @@ The _seed_ field can be specified via the command line or in the _Run Settings_ 
 
 The _dayOffset_ field offsets the contact data by the specified number of days. This allows flexibility when using contact data from different sources who may employ differing convections of labelling the first day. For example, the Contact Tracing Model considers the first day to occur between timesteps [0, 1), however some contact data may start from the first day being indexed by 1. To avoid missing contact data, the _dayOffset_ field aligns the Contact Tracing Model to the _Contact Data_ file.
 
+
 #### Age Data
 
-The _Age Data_ file assigns an age to an individual via their ID. The _Age Data_ takes precedence over the age data within the _Population Settings_ file. Figure 7 shows an example _Age Data_ file.
+The _Age Data_ file assigns an age to an individual via their ID. The _Age Data_ takes precedence over the age data within the _Population Settings_ file. Figure 6 shows an example _Age Data_ file.
 
 <img src="ageData.png" alt="Age Data Example" width="100">
 
-**Figure 7.** Example _Age Data_ file.
-
-#### Isolation Policies
-
-#### Tracing Policies
+**Figure 6.** Example _Age Data_ file.
 
 ### Data Pipeline Input Files
+
+Input files that interact via the Data Pipeline API are stored in either a _.TOML_, ._YAML_ or _.JSON_ file format. All files listed within this section interface with the Data Pipeline API to retrieve the desired data. All data files that interact withth the Data Pipeline API contain the common field _type_ that designates the data type for a specific parameter.
+
+The _type_ field has two values that the Contact Tracing Model accepts:
+  - _"point-estimate"_
+    - A constant value.
+  - _"distribution"_
+  
+If the value of _type_ is set to _"point-estimate"_, the relevant contextual field is _value_, the constant value.
+  
+If the value of _type_ is set to _"distribution"_, the relevant contextual fields are:
+  - _distribution_
+    - Available values:
+      - "gamma"
+        - _shape_
+        - _scale_
+      - "exponential"
+        - _scale_
+      - "uniform"
+      - "empirical"
+        - _empiricalSamples_
+      - "categorical"
+        - _bins_
+        - _weights_
+        
+For more information, see the Java Data Pipeline API (**#REF**).
+
+#### Configuration File
+  
+The _Configuration File_ is parsed by the Data Pipeline API to initialise the locations and names of input files to read, and output files to write. Figure 7 shows an example of a _Configuration File_.
+
+<img src="config.png" alt="Config File Example" width="400">
+
+**Figure 7.** Example _Configuration File_
+
+Similar to the [_Input Locations_](#input-locations) file, the _Configuration File_ allows the user to specify the directory where the _.TOML_ files are that interact with the Data Pipeline API via the _data_directory_ field.
+
+The _read_ field contains the various subdirectories, of _data_directory_, in which the _.TOML_ files reside.
+
+The _write_ filed specifies the location of the output files.
 
 #### Population Settings
 
@@ -172,25 +214,23 @@ The _Population Settings_ file contains details that define the population for a
   * The proportion of the population that can be tested per day.
   * The proportion of the population that use the contact tracing app.
   
-An example of the a _Population Settings_ file can be found below in Figure 5.
+An example of the a _Population Settings_ file can be found below in Figure 8.
 
 <img src="populationSettings.png" alt="populationSettings Example" width="300">
 
-**Figure 5.** Example population settings file.
+**Figure 8.** Example population settings file.
 
-The _populationDistribution_ field contains the fraction of the population whose age falls within a given age bin (seen in the _populationAges_ field). The sum of fractions should equal to 1. A warning/error will be raised if the values do not sum to 1.
-
-The _populationAges_ field define the upper and lower (inclusive) bounds of the age bin. If an individual has not been assigned an age (see [here](#agedata)), the age bins, together with the fractions in _populationDistribution_ field, will be used to assigne an age to the individual by sampling from a uniform distribution.
+The _population-distribution_ field contains the distribution data of the population's ages.
 
 **NOTE:** The population distribution must have 5 bins, otherwise an error will be thrown.
 
-The _genderBalance_ field is the ratio of men:women, so there are 99 men for
+The _gender-balance_ field is the ratio of men:women, so there are 99 men for
 every 100 women in this example. This data has been taken from Index
 Mundi.
 
-The _testCapacity_ field is the proportion of the population that can be tested per day. Should the testing capacity be exceeded, an individual waiting to be tested will be tested on the next available testing day.
+The _test-capacity_ field is the proportion of the population that can be tested per day. Should the testing capacity be exceeded, an individual waiting to be tested will be tested on the next available testing day.
 
-The _appUptake_ field defines the proportion of the population that is actively using the contact tracing app. 
+The _app-uptake_ field defines the proportion of the population that is actively using the contact tracing app. 
 
 #### Disease Settings
 
@@ -204,37 +244,37 @@ The _Disease Settings_ file contains the parameters that define the behaviour of
   
  <img src="diseaseSettings.png" alt="Contacts File" width="400">
 
-**Figure 3.** Example _Disease Settings_ file
+**Figure 9.** Example _Disease Settings_ file
   
-Figure 3 shows the contents of an example _Disease Settings_ file. For each entry defining the duration an individual spends in a virus compartment and the testing durations, there is a corresponding _mean_ and _max_ field. These correspond to the mean and maximum values that parameterise the chosen distibution, specified by the _progressionDistribution_ field.
+Figure 9 shows the contents of an example _Disease Settings_ file.
 
-The _progressionDistribution_ field accepts the follow distributions:
-* GAUSSIAN
-  * **NOTE:** the standard deviation is set to half of the mean value. This will be changed in a future version of the Contact Tracing Model.
-* EXPONENTIAL
-* LINEAR
-  * A uniform distribution.
-* FLAT
-  * A constant value given by the mean.
+The fields not mentioned below describe the distribution of the time taken for an individual to progress to the next virus compartment, or for virus tests to be administered and the results delivered. 
 
-**NOTE:** Currently, the Contact Tracing Model only allows one distribution type to be specified at a time. For example, it is not possible to sample _timeTestAdministered_ from a GAUSSIAN and _timeRecoveryAsymp_ from an EXPONENTIAL distribution in the same simulation.
+The _test-positive-accuracy_ and _test-negative-accuracy_ fields represent the probability of a test result being a false positive or false negative. For example, if a test result is negative and the _test-negative-accuracy_ value is 0.95, then there is a 5% chance this result will be a false negative. These quantities are sampled from a uniform distribution.
 
-The _testPositiveAccuracy_ and _testNegativeAccuracy_ fields represent the probability of a test result being a false positive or false negative. For example, if a test result is negative and the _testNegativeAccuracy_ value is 0.95, then there is a 5% chance this result will be a false negative. These quantities are sampled from a uniform (or LINEAR) distribution and not the distribution specified by the _progressionDistribution_ field.
-
-The _exposureThreshold_ field is a minimum exposure value that is used to determine
+The _exposure-threshold_ field is a minimum exposure value that is used to determine
 if a contact is close enough to spread the infection. This works as a
 high pass filter value with the weight field.
 
-The _randomInfectionRate_ field allows a proportion of the population to be
+The _random-infection-rate_ field allows a proportion of the population to be
 randomly exposed from outside the contact network per day. This is to simulate people
 from outside the network interacting with the population. This is the probability an individual will randomly get infected per timestep. For example, a _randomInfectionRate_ of 0.05 will result in 5 people in a population of 100, per
 timestep, to get infected.
 
-The _exposureProbability4UnitContact_ (expUnitContact) and _exposureExponent_ (exp) values are 
+The _exposure-probability-4-unit-contact_ (expUnitContact) and _exposure-exponent_ (exp) values are 
 used to determine the chance of infection for a given contact, along with the weighting value in the _Contact Data_ file. The mathematical implementation of the aforementioned quantites can be found in the images below.
 
 <img src="exposureBias.png" alt="exposureBias" width="400">
 <img src="exposureProb.png" alt="exposureProb" width="400">
+
+
+#### Isolation Policies
+
+The _Isolation Policy_ file has its own [section](#main-isolation-policies).
+
+#### Tracing Policies
+
+The _Tracing Policy_ file has its own [section](#main-tracing-policies).
 
 <a id="main-isolation-policies"></a>
 # Isolation Policies
@@ -280,6 +320,8 @@ These follow the same rules as the Virus Policy. The alert policy is related to 
 
 <img src="alertPolicy.png" alt="alert Policy Example" width="500">
 
+
+<a id="main-tracing-policies"></a>
 ## Tracing Policies
 
 The tracing policy allows specification of alerts to be triggered when a person enters a 
