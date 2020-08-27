@@ -6,16 +6,18 @@ Author: Sam Brett & Ed Townsend
 
   - [Introduction](#introduction)
   - [Input Files](#input-files)
-    - [Input Locations](#input-locations)
-    - [Contact Data](#contact-data)
-    - [Disease Settings](#disease-settings)
-    - [Infection Rates](#infection-rates)
-    - [Population Settings](#population-settings)
-    - [Initial Exposures](#initial-exposures)
-    - [Run Settings](#run-settings)
-    - [Age Data](#age-data)
-    - [Isolation Policies](#isolation-policies)
-    - [Tracing Policies](#tracing-policies)
+    - [Local Input Files](#local-input-file)
+      - [Input Locations](#input-locations)
+      - [Contact Data](#contact-data)
+      - [Infection Rates](#infection-rates)
+      - [Initial Exposures](#initial-exposures)
+      - [Run Settings](#run-settings)
+      - [Age Data](#age-data)
+      - [Isolation Policies](#isolation-policies)
+      - [Tracing Policies](#tracing-policies)
+    - [Data Pipeline Input Files](#data-pipeline-input-files)
+      - [Disease Settings](#disease-settings)
+      - [Population Settings](#population-settings)
   - [Isolation Policies](#main-isolation-policies)
 
 ## Introduction
@@ -51,11 +53,15 @@ this document.
 
 ## Input Files
 
-The inputs are contained in the _/inputs_ folder, located in the root directory of the Contact Tracing Model. All input files come in one of two formats: CSV and JSON.
+The inputs are contained in the _/inputs_ folder, located in the root directory of the Contact Tracing Model. All input files come in one of three formats: CSV, JSON and TOML.
 
-### Input Locations
+Some of the input files used by the Contact Tracing Model are obtained through the Data Pipeline API (**#REF!**). These files have the extension _.toml_.
 
-The _Input Locations_ file allows the user to specify the location of all input files relative to the _/input_ folder, which is located in the root of the Contract Tracing Model directory. This allows the user to organise multiple simulation configurations without overwriting existing configurations within the _/input_ folder.
+### Local Input Files
+
+#### Input Locations
+
+The _Input Locations_ file allows the user to specify the location of all input files, except those retrieved through the Data Pipeline API, relative to the _/input_ folder, which is located in the root of the Contract Tracing Model directory. This allows the user to organise multiple simulation configurations without overwriting existing configurations within the _/input_ folder.
 
 The name of the _Input Locations_ file must be set to _inputLocations.json_.
 
@@ -69,7 +75,7 @@ Should the Contact Tracing Model fail to acquire a specified file, an error will
 
 The directory of the input files defaults to the _/input_ folder, but may be overridden via the command line. See XXXX for more details.
 
-### Contact Data
+#### Contact Data
 
 The _Contact Data_ is stored within a CSV file that contains the data of a temporal network of contacts between individuals in a population.
 The columns in the _Contact Data_ file are:
@@ -95,7 +101,96 @@ An example of the contents of a _Contacts Data_ file can be found in Figure 2.
 
 **Figure 2.** Example contact data file.
 
-### Disease Settings
+
+
+#### Infection Rates
+
+The _Infection Rates_ file allows the user to provide a weighting factor to individuals in an infectious virus compartment. Figure 4 shows an example _Infection Rates_ file. The specified weighting factor values must lie in the range (0, 1], otherwise an error is thrown.
+
+<img src="infectionRates.png" alt="infectionRatesExample" width="400">
+
+**Figure 4.** Example _Infection Rates_ file.
+
+
+
+#### Initial Exposures
+
+At the beginning of a simulation there needs to be a number of infected individuals to start the spread of the disease. The IDs of individuals who are initially infected are specified in an _Initial Exposures_ file. This file is a CSV with one column of IDs of the individuals to be infected. 
+
+Should the number of individuals specified in the _Initial Exposures_ file differ from the value specified in the [_Run Settings_](#runsettings) file, then the data will be truncated if too long, or randomly allocated if too short.  
+
+#### Run Settings
+
+The _Run Settings_ file contains the main fields that a user may want to
+change. An example of a _Run Settings_ file can be found below in Figure 6.
+
+<img src="runSettings.png" alt="Run Settings Example" width="300">
+
+**Figure 6.** Example _Run Settings_ file.
+
+The _populationSize_ field defines the total number of individuals in a population. This value can be smaller or larger than the number of people in the contact network.
+
+The _timeLimitDays_ field defines the absolute limit for how many (simulation) days the simulation will run for.
+
+The _initialExposures_ field defines the number of initially infected individuals. This value must be greater than zero.
+
+The _steadyState_ flag is not used. It is likely to be removed in future versions of the Contact Tracing Model.
+
+The _timeStepsPerDay_ field sets the number of timesteps to occur each day, e.g. half days ('2') or quarter days ('4').
+
+The _timeStepSpread_ field sets the probability for spreading the disease in each chosen timestep, , e.g. for half days [0.4, 0.6] or quarter days [0.2, 0.2, 0.4, 0.2]. If the sum of the probabilities does not add to 1 an error will be thrown.
+
+**NOTE:** It is recommended to use a combination of _timeStepsPerDay_ and _timeStepSpread_ such that recurring decimal values are avoided to ensure the probabilties sum to 1. Alternatively, the remainder can be calculated and added to one of the probabilities.
+
+The _seed_ field can be specified via the command line or in the _Run Settings_ file. If no seed is provided, a seed will be generated randomly.
+
+**NOTE:** Currently, the Contact Tracing Model does not log which seed is being used when randomly generated.
+
+The _dayOffset_ field offsets the contact data by the specified number of days. This allows flexibility when using contact data from different sources who may employ differing convections of labelling the first day. For example, the Contact Tracing Model considers the first day to occur between timesteps [0, 1), however some contact data may start from the first day being indexed by 1. To avoid missing contact data, the _dayOffset_ field aligns the Contact Tracing Model to the _Contact Data_ file.
+
+#### Age Data
+
+The _Age Data_ file assigns an age to an individual via their ID. The _Age Data_ takes precedence over the age data within the _Population Settings_ file. Figure 7 shows an example _Age Data_ file.
+
+<img src="ageData.png" alt="Age Data Example" width="100">
+
+**Figure 7.** Example _Age Data_ file.
+
+#### Isolation Policies
+
+#### Tracing Policies
+
+### Data Pipeline Input Files
+
+#### Population Settings
+
+The _Population Settings_ file contains details that define the population for a given simulation. The file contains data pertaining to:
+  * The age distribution of a population.
+  * The population gender balance.
+  * The proportion of the population that can be tested per day.
+  * The proportion of the population that use the contact tracing app.
+  
+An example of the a _Population Settings_ file can be found below in Figure 5.
+
+<img src="populationSettings.png" alt="populationSettings Example" width="300">
+
+**Figure 5.** Example population settings file.
+
+The _populationDistribution_ field contains the fraction of the population whose age falls within a given age bin (seen in the _populationAges_ field). The sum of fractions should equal to 1. A warning/error will be raised if the values do not sum to 1.
+
+The _populationAges_ field define the upper and lower (inclusive) bounds of the age bin. If an individual has not been assigned an age (see [here](#agedata)), the age bins, together with the fractions in _populationDistribution_ field, will be used to assigne an age to the individual by sampling from a uniform distribution.
+
+**NOTE:** The population distribution must have 5 bins, otherwise an error will be thrown.
+
+The _genderBalance_ field is the ratio of men:women, so there are 99 men for
+every 100 women in this example. This data has been taken from Index
+Mundi.
+
+The _testCapacity_ field is the proportion of the population that can be tested per day. Should the testing capacity be exceeded, an individual waiting to be tested will be tested on the next available testing day.
+
+The _appUptake_ field defines the proportion of the population that is actively using the contact tracing app. 
+
+#### Disease Settings
 
 The _Disease Settings_ file contains the parameters that define the behaviour of the disease. Within this file, the user can change the following quantities:
   * The parameters of the distributions used to sample the duration an individual spends in a given virus compartment.
@@ -139,91 +234,8 @@ used to determine the chance of infection for a given contact, along with the we
 <img src="exposureBias.png" alt="exposureBias" width="400">
 <img src="exposureProb.png" alt="exposureProb" width="400">
 
-### Infection Rates
-
-The _Infection Rates_ file allows the user to provide a weighting factor to individuals in an infectious virus compartment. Figure 4 shows an example _Infection Rates_ file. The specified weighting factor values must lie in the range (0, 1], otherwise an error is thrown.
-
-<img src="infectionRates.png" alt="infectionRatesExample" width="400">
-
-**Figure 4.** Example _Infection Rates_ file.
-
-### Population Settings
-
-The _Population Settings_ file contains details that define the population for a given simulation. The file contains data pertaining to:
-  * The age distribution of a population.
-  * The population gender balance.
-  * The proportion of the population that can be tested per day.
-  * The proportion of the population that use the contact tracing app.
-  
-An example of the a _Population Settings_ file can be found below in Figure 5.
-
-<img src="populationSettings.png" alt="populationSettings Example" width="300">
-
-**Figure 5.** Example population settings file.
-
-The _populationDistribution_ field contains the fraction of the population whose age falls within a given age bin (seen in the _populationAges_ field). The sum of fractions should equal to 1. A warning/error will be raised if the values do not sum to 1.
-
-The _populationAges_ field define the upper and lower (inclusive) bounds of the age bin. If an individual has not been assigned an age (see [here](#agedata)), the age bins, together with the fractions in _populationDistribution_ field, will be used to assigne an age to the individual by sampling from a uniform distribution.
-
-**NOTE:** The population distribution must have 5 bins, otherwise an error will be thrown.
-
-The _genderBalance_ field is the ratio of men:women, so there are 99 men for
-every 100 women in this example. This data has been taken from Index
-Mundi.
-
-The _testCapacity_ field is the proportion of the population that can be tested per day. Should the testing capacity be exceeded, an individual waiting to be tested will be tested on the next available testing day.
-
-The _appUptake_ field defines the proportion of the population that is actively using the contact tracing app. 
-
-### Initial Exposures
-
-At the beginning of a simulation there needs to be a number of infected individuals to start the spread of the disease. The IDs of individuals who are initially infected are specified in an _Initial Exposures_ file. This file is a CSV with one column of IDs of the individuals to be infected. 
-
-Should the number of individuals specified in the _Initial Exposures_ file differ from the value specified in the [_Run Settings_](#runsettings) file, then the data will be truncated if too long, or randomly allocated if too short.  
-
-### Run Settings
-
-The _Run Settings_ file contains the main fields that a user may want to
-change. An example of a _Run Settings_ file can be found below in Figure 6.
-
-<img src="image5.png" alt="Run Settings Example" width="300">
-
-**Figure 6.** Example _Run Settings_ file.
-
-The _populationSize_ field defines the total number of individuals in a population. This value can be smaller or larger than the number of people in the contact network.
-
-The _timeLimitDays_ field defines the absolute limit for how many (simulation) days the simulation will run for.
-
-The _initialExposures_ field defines the number of initially infected individuals. This value must be greater than zero.
-
-The _steadyState_ flag is not used. It is likely to be removed in future versions of the Contact Tracing Model.
-
-The _timeStepsPerDay_ field sets the number of timesteps to occur each day, e.g. half days ('2') or quarter days ('4').
-
-The _timeStepSpread_ field sets the probability for spreading the disease in each chosen timestep, , e.g. for half days [0.4, 0.6] or quarter days [0.2, 0.2, 0.4, 0.2]. If the sum of the probabilities does not add to 1 an error will be thrown.
-
-**NOTE:** It is recommended to use a combination of _timeStepsPerDay_ and _timeStepSpread_ such that recurring decimal values are avoided to ensure the probabilties sum to 1. Alternatively, the remainder can be calculated and added to one of the probabilities.
-
-The _seed_ field can be specified via the command line or in the _Run Settings_ file. If no seed is provided, a seed will be generated randomly.
-
-**NOTE:** Currently, the Contact Tracing Model does not log which seed is being used when randomly generated.
-
-The _dayOffset_ field offsets the contact data by the specified number of days. This allows flexibility when using contact data from different sources who may employ differing convections of labelling the first day. For example, the Contact Tracing Model considers the first day to occur between timesteps [0, 1), however some contact data may start from the first day being indexed by 1. To avoid missing contact data, the _dayOffset_ field aligns the Contact Tracing Model to the _Contact Data_ file.
-
-### Age Data
-
-The _Age Data_ file assigns an age to an individual via their ID. The _Age Data_ takes precedence over the age data within the _Population Settings_ file. Figure 7 shows an example _Age Data_ file.
-
-<img src="ageData.png" alt="Age Data Example" width="100">
-
-**Figure 7.** Example _Age Data_ file.
-
-### Isolation Policies
-
-### Tracing Policies
-
 <a id="main-isolation-policies"></a>
-## Isolation Policies
+# Isolation Policies
 
 There are four types of isolation policies:
   * Global Policy
@@ -256,7 +268,6 @@ or the time they are aware of being infected.
 
 The default policy allows a global baseline to be set. For example, 
 10% of the population may be shielding by default.
-
 
 <img src="defaultPolicy.png" alt="default Policy Example" width="500">
 
