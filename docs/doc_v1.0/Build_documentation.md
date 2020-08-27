@@ -2,6 +2,22 @@ Build Documention
 ================
 Author: Sam Brett & Ed Townsend
 
+## Contents
+
+  - [Introduction](#introduction)
+  - [Input Files](#input-files)
+    - [Input Locations](#input-locations)
+    - [Contact Data](#contact-data)
+    - [Disease Settings](#disease-settings)
+    - [Infection Rates](#infection-rates)
+    - [Population Settings](#population-settings)
+    - [Initial Exposures](#initial-exposures)
+    - [Run Settings](#run-settings)
+    - [Age Data](#age-data)
+    - [Isolation Policies](#isolation-policies)
+    - [Tracing Policies](#tracing-policies)
+  - [Isolation Policies](#main-isolation-policies)
+
 ## Introduction
 
 This document is to describe the structure, design and assumptions made in
@@ -87,7 +103,7 @@ The _Disease Settings_ file contains the parameters that define the behaviour of
   * The distribution used to sample the duration a test takes to be administered.
   * The distribution used to sample the duration a test result takes to be delivered.
   * The parameters to determine the probability of being exposed through an interaction.
-  * Proportion of population randomly infected per day.
+  * Proportion of population randomly infected per timestep.
   
  <img src="diseaseSettings.png" alt="Contacts File" width="400">
 
@@ -114,7 +130,7 @@ high pass filter value with the weight field.
 
 The _randomInfectionRate_ field allows a proportion of the population to be
 randomly exposed from outside the contact network per day. This is to simulate people
-from outside the network interacting with the population. This is the probability an individual will randomly get infected per timestep. For example, a _randomInfectionRate_ of  0.05 will result in 5 people in a population of 100, per
+from outside the network interacting with the population. This is the probability an individual will randomly get infected per timestep. For example, a _randomInfectionRate_ of 0.05 will result in 5 people in a population of 100, per
 timestep, to get infected.
 
 The _exposureProbability4UnitContact_ (expUnitContact) and _exposureExponent_ (exp) values are 
@@ -122,6 +138,14 @@ used to determine the chance of infection for a given contact, along with the we
 
 <img src="exposureBias.png" alt="exposureBias" width="400">
 <img src="exposureProb.png" alt="exposureProb" width="400">
+
+### Infection Rates
+
+The _Infection Rates_ file allows the user to provide a weighting factor to individuals in an infectious virus compartment. Figure 4 shows an example _Infection Rates_ file. The specified weighting factor values must lie in the range (0, 1], otherwise an error is thrown.
+
+<img src="infectionRates.png" alt="infectionRatesExample" width="400">
+
+**Figure 4.** Example _Infection Rates_ file.
 
 ### Population Settings
 
@@ -131,11 +155,11 @@ The _Population Settings_ file contains details that define the population for a
   * The proportion of the population that can be tested per day.
   * The proportion of the population that use the contact tracing app.
   
-An example of the a _populationSettings.json_ file can be found below in Figure 4.
+An example of the a _Population Settings_ file can be found below in Figure 5.
 
 <img src="populationSettings.png" alt="populationSettings Example" width="300">
 
-**Figure 4.** Example population settings file.
+**Figure 5.** Example population settings file.
 
 The _populationDistribution_ field contains the fraction of the population whose age falls within a given age bin (seen in the _populationAges_ field). The sum of fractions should equal to 1. A warning/error will be raised if the values do not sum to 1.
 
@@ -160,11 +184,11 @@ Should the number of individuals specified in the _Initial Exposures_ file diffe
 ### Run Settings
 
 The _Run Settings_ file contains the main fields that a user may want to
-change. An example of a _Run Settings_ file can be found below in Figure 5.
+change. An example of a _Run Settings_ file can be found below in Figure 6.
 
 <img src="image5.png" alt="Run Settings Example" width="300">
 
-**Figure 5.** Example _Run Settings_ file.
+**Figure 6.** Example _Run Settings_ file.
 
 The _populationSize_ field defines the total number of individuals in a population. This value can be smaller or larger than the number of people in the contact network.
 
@@ -176,7 +200,7 @@ The _steadyState_ flag is not used. It is likely to be removed in future version
 
 The _timeStepsPerDay_ field sets the number of timesteps to occur each day, e.g. half days ('2') or quarter days ('4').
 
-The _timeStepSpread_ field sets the probability for spreading the disease in each chosen timestep, , e.g. for half days [0.4,0.6] or quarter days [0.2, 0.2, 0.4, 0.2]. If the sum of the probabilities does not add to 1 an error will be thrown.
+The _timeStepSpread_ field sets the probability for spreading the disease in each chosen timestep, , e.g. for half days [0.4, 0.6] or quarter days [0.2, 0.2, 0.4, 0.2]. If the sum of the probabilities does not add to 1 an error will be thrown.
 
 **NOTE:** It is recommended to use a combination of _timeStepsPerDay_ and _timeStepSpread_ such that recurring decimal values are avoided to ensure the probabilties sum to 1. Alternatively, the remainder can be calculated and added to one of the probabilities.
 
@@ -184,21 +208,38 @@ The _seed_ field can be specified via the command line or in the _Run Settings_ 
 
 **NOTE:** Currently, the Contact Tracing Model does not log which seed is being used when randomly generated.
 
-The _dayOffset_ field offsets the contact data by the specified number of days. This allows flexibility when using contact data from different sources who may employ differing convections of labelling the first day. For example, the Contact Tracing Model considers the first day to occur between timesteps [0, 1), however some contact data may start from the first day being indexed by 1. To avoid missing contact data, the _dayOffset_ field alings the Contact Tracing Model to the _Contact Data_ file.
+The _dayOffset_ field offsets the contact data by the specified number of days. This allows flexibility when using contact data from different sources who may employ differing convections of labelling the first day. For example, the Contact Tracing Model considers the first day to occur between timesteps [0, 1), however some contact data may start from the first day being indexed by 1. To avoid missing contact data, the _dayOffset_ field aligns the Contact Tracing Model to the _Contact Data_ file.
 
-## Age Data
+### Age Data
 
-The _Age Data_ file assigns an age to an individual via their ID. The _Age Data_ takes precedence over the age data within the _Population Settings_ file. Figure 6 shows an example _Age Data_ file.
+The _Age Data_ file assigns an age to an individual via their ID. The _Age Data_ takes precedence over the age data within the _Population Settings_ file. Figure 7 shows an example _Age Data_ file.
 
-<img src="ageData.png" alt="age Data Example" width="100">
+<img src="ageData.png" alt="Age Data Example" width="100">
 
-**Figure 6.** Example _Age Data_ file.
+**Figure 7.** Example _Age Data_ file.
 
+### Isolation Policies
+
+### Tracing Policies
+
+<a id="main-isolation-policies"></a>
 ## Isolation Policies
 
-An isolation policy can be split into 3 sections.
+There are four types of isolation policies:
+  * Global Policy
+  * Virus Policy
+  * Alert Policy
+  * Default Policy
+  
+All four policy types are definied with an _Isolation Policies_ file.
+
+### Global Policy
 
 ### Virus Policy
+
+A _Virus Policy_ defines the probability of an individual isolating and duration over which they will isolate, in a given virus compartment. A _Virus Policy_ can be varied by a distribution type and parameters, as seen in section [_Disease Settings_](#diseasesettings), and priority associated with the _Virus Policy_.
+
+A _Virus Policy_ can be specified in the _Isolation Policies_ file under the field named _virusStatusPolicies_.
 
 This policy determines the probability of a person in a given compartment 
 isolating, and for how long they will isolate. These can be modified and 
@@ -208,6 +249,8 @@ they will either isolate for the isolation time from either the time of contact
 or the time they are aware of being infected.
 
 <img src="virusPolicy.png" alt="virus Policy Example" width="400">
+
+**Figure 8.** Example _Virus Policy_.
 
 ### Default Policy
 
@@ -232,7 +275,6 @@ and trigger alerts to their contacts.
 
 ![](tracingPolicy.png)
 <img src="tracingPolicy.png" alt="tracing Policy Example" width="600">
-
 
 ## Virus and Alert Statuses
 
