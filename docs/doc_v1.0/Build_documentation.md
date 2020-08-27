@@ -216,7 +216,7 @@ The _Population Settings_ file contains details that define the population for a
   
 An example of the a _Population Settings_ file can be found below in Figure 8.
 
-<img src="populationSettings.png" alt="populationSettings Example" width="300">
+<img src="populationSettings.png" alt="populationSettings Example" width="700" height="400">
 
 **Figure 8.** Example population settings file.
 
