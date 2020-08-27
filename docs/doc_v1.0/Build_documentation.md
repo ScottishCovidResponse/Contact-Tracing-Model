@@ -6,7 +6,7 @@ Author: Sam Brett & Ed Townsend
 
   - [Introduction](#introduction)
   - [Input Files](#input-files)
-    - [Local Input Files](#local-input-file)
+    - [Local Input Files](#local-input-files)
       - [Input Locations](#input-locations)
       - [Contact Data](#contact-data)
       - [Infection Rates](#infection-rates)
@@ -19,6 +19,7 @@ Author: Sam Brett & Ed Townsend
       - [Disease Settings](#disease-settings)
       - [Population Settings](#population-settings)
   - [Isolation Policies](#main-isolation-policies)
+
 
 ## Introduction
 
@@ -53,11 +54,12 @@ this document.
 
 ## Input Files
 
-The inputs are contained in the _/inputs_ folder, located in the root directory of the Contact Tracing Model. All input files come in one of three formats: CSV, JSON and TOML.
+The Contact Tracing Model's input files can be split into two categories: those created locally ([Local Input Files](#local-input-files)), and those created via the Data Pipeline API ([Data Pipeline Input Files](#data-pipeline-input-files)). This section describes the parameters and data stored in each input file.
 
-Some of the input files used by the Contact Tracing Model are obtained through the Data Pipeline API (**#REF!**). These files have the extension _.toml_.
 
 ### Local Input Files
+
+The _Local Input Files_ are files that are created/stored/edited locally, as opposed to those generated through the [Data Pipeline API](#data-pipeline-input-files). The _Local Input Files_ are contained in the _/inputs_ folder, located in the root directory of the Contact Tracing Model. All _Local Input Files_ come in one of two formats: CSV, JSON.
 
 #### Input Locations
 
