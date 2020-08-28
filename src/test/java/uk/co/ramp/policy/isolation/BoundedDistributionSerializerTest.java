@@ -7,10 +7,10 @@ import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.module.SimpleModule;
+import com.fasterxml.jackson.databind.node.TextNode;
 import java.io.IOException;
-import java.io.StringReader;
 import java.io.StringWriter;
-import java.util.Iterator;
+import java.util.AbstractMap;
 import java.util.List;
 import java.util.Map;
 import org.apache.commons.math3.random.JDKRandomGenerator;
@@ -49,7 +49,7 @@ public class BoundedDistributionSerializerTest {
             .distribution(
                 ImmutableDistribution.builder()
                     .internalType(Distribution.DistributionType.empirical)
-                    .empiricalSamples(List.of(Double.MAX_VALUE))
+                    .empiricalSamples(List.of(Math.PI))
                     .rng(rng)
                     .build())
             .max(Double.MAX_VALUE)
@@ -61,40 +61,32 @@ public class BoundedDistributionSerializerTest {
     mapper.registerModule(simpleModule);
 
     bds.serialize(dist, generator, mapper.getSerializerProvider());
-    assertThat(writer.toString()).contains("\"distributionValue\" : 2147483647");
+    assertThat(writer.toString())
+        .isEqualToNormalizingPunctuationAndWhitespace("\"distributionValue\" : 3");
   }
 
   @Test
   public void write() throws IOException {
-    JsonFactory factory = new JsonFactory();
     StringWriter writer = new StringWriter();
-    String input =
-        "{\n"
-            + "  \"runSettings\": \"runSettings.json\",\n"
-            + "  \"contactData\": \"homogeneous_contacts.csv\",\n"
-            + "  \"ageData\": \"ids_Paul.csv\",\n"
-            + "  \"initialExposures\": \"initialExposures.csv\",\n"
-            + "  \"tracingPolicies\": \"tracingPolicies.json\",\n"
-            + "  \"isolationPolicies\": \"isolationPolicies.json\",\n"
-            + "  \"infectionRates\": \"infectionRates.json\",\n"
-            + "  \"ageDependentHealth\": \"ageDependentHealth.json\"\n"
-            + "}";
-    StringReader reader = new StringReader(input);
+    JsonGenerator generator = setup(writer);
 
+    String expected = "{ \"runSettings\": \"runSettings.json\" }";
+    Map.Entry<String, JsonNode> entry =
+        new AbstractMap.SimpleImmutableEntry<String, JsonNode>(
+            "runSettings", new TextNode("runSettings.json"));
+
+    generator.writeStartObject();
+    bds.write(generator, entry);
+    generator.writeEndObject();
+
+    assertThat(writer.toString()).isEqualToNormalizingPunctuationAndWhitespace(expected);
+  }
+
+  private JsonGenerator setup(StringWriter writer) throws IOException {
+    JsonFactory factory = new JsonFactory();
     JsonGenerator generator = factory.createGenerator(writer);
     generator.setCodec(new ObjectMapper());
     generator.useDefaultPrettyPrinter();
-    generator.writeStartObject();
-    ObjectMapper objectMapper = new ObjectMapper();
-    JsonNode rootNode = objectMapper.readTree(reader);
-    Iterator<Map.Entry<String, JsonNode>> fields = rootNode.fields();
-
-    while (fields.hasNext()) {
-      Map.Entry<String, JsonNode> entry = fields.next();
-      bds.write(generator, entry);
-    }
-    generator.writeEndObject();
-
-    assertThat(writer.toString()).isEqualToNormalizingPunctuationAndWhitespace(input);
+    return generator;
   }
 }

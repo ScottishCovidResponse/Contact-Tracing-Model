@@ -3,7 +3,6 @@ package uk.co.ramp.io;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import java.io.StringReader;
-import java.io.StringWriter;
 import org.junit.Before;
 import org.junit.Test;
 import uk.co.ramp.io.readers.AgeDependentHealthReader;
@@ -95,12 +94,5 @@ public class AgeDependentHealthListTest {
     StringReader reader = new StringReader(input);
     var output = ageDependentHealthReader.read(reader);
     assertThat(output).isEqualToComparingFieldByField(dummyList);
-  }
-
-  @Test
-  public void testCreate() {
-    StringWriter writer = new StringWriter();
-    ageDependentHealthReader.create(writer);
-    assertThat(writer.toString()).isEqualTo(input);
   }
 }

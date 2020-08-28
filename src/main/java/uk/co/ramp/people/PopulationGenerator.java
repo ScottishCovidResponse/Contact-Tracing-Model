@@ -22,7 +22,7 @@ public class PopulationGenerator {
   private AgeRetriever ageRetriever;
   private Map<MinMax, Double> ageMap;
 
-  public static Map<VirusStatus, Integer> getCmptCounts(Map<Integer, Case> population) {
+  public static Map<VirusStatus, Integer> getCompartmentCounts(Map<Integer, Case> population) {
 
     Map<VirusStatus, Integer> pop =
         population.values().stream()

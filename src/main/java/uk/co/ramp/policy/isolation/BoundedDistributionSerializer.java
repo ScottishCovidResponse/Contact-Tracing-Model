@@ -47,10 +47,9 @@ public class BoundedDistributionSerializer extends JsonSerializer<BoundedDistrib
                 innerDist.remove("rng");
                 JsonNode innerTree = objectMapper.valueToTree(innerDist);
                 write(gen, new SimpleImmutableEntry<>("distribution", innerTree));
-                return;
+              } else {
+                write(gen, stringJsonNodeEntry);
               }
-
-              write(gen, stringJsonNodeEntry);
             });
     gen.writeEndObject();
   }

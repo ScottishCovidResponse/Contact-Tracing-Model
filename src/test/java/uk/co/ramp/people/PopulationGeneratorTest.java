@@ -62,7 +62,7 @@ public class PopulationGeneratorTest {
     v = RECOVERED;
     createPeople(var, start, end, v);
 
-    Map<VirusStatus, Integer> result = PopulationGenerator.getCmptCounts(var);
+    Map<VirusStatus, Integer> result = PopulationGenerator.getCompartmentCounts(var);
 
     Assert.assertEquals(s, result.get(SUSCEPTIBLE).intValue());
     Assert.assertEquals(e, result.get(EXPOSED).intValue());

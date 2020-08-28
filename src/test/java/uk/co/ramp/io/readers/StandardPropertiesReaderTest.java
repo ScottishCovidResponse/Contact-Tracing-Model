@@ -2,7 +2,6 @@ package uk.co.ramp.io.readers;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-import com.google.gson.JsonParser;
 import java.io.*;
 import org.junit.Before;
 import org.junit.Test;
@@ -39,22 +38,5 @@ public class StandardPropertiesReaderTest {
     assertThat(standardProperties.steadyState()).isTrue();
     assertThat(standardProperties.timeStepsPerDay()).isEqualTo(4);
     assertThat(standardProperties.timeStepSpread()).containsExactly(0.25, 0.25, 0.25, 0.25);
-  }
-
-  @Test
-  public void testCreate() throws IOException {
-    var stringWriter = new StringWriter();
-    try (BufferedWriter bw = new BufferedWriter(stringWriter)) {
-      standardPropertiesReader.create(bw);
-    }
-
-    var expectedStandardPropertiesJsonElement = JsonParser.parseString(mockStandardProperties);
-
-    var actualStandardPropertiesString = stringWriter.toString();
-    var actualStandardPropertiesJsonElement =
-        JsonParser.parseString(actualStandardPropertiesString);
-
-    assertThat(actualStandardPropertiesJsonElement)
-        .isEqualTo(expectedStandardPropertiesJsonElement);
   }
 }
