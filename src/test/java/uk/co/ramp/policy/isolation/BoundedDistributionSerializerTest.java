@@ -28,22 +28,23 @@ public class BoundedDistributionSerializerTest {
 
   private BoundedDistributionSerializer bds;
   private RandomGenerator rng;
+  private StringWriter writer;
+  private JsonGenerator generator;
 
   @Before
-  public void setup() {
+  public void setup() throws IOException {
     bds = new BoundedDistributionSerializer(rng);
     rng = new JDKRandomGenerator(123);
+
+    writer = new StringWriter();
+    JsonFactory factory = new JsonFactory();
+    generator = factory.createGenerator(writer);
+    generator.setCodec(new ObjectMapper());
+    generator.useDefaultPrettyPrinter();
   }
 
   @Test
   public void serialize() throws IOException {
-    JsonFactory factory = new JsonFactory();
-    StringWriter writer = new StringWriter();
-
-    JsonGenerator generator = factory.createGenerator(writer);
-    generator.setCodec(new ObjectMapper());
-    generator.useDefaultPrettyPrinter();
-
     BoundedDistribution dist =
         ImmutableBoundedDistribution.builder()
             .distribution(
@@ -67,9 +68,6 @@ public class BoundedDistributionSerializerTest {
 
   @Test
   public void write() throws IOException {
-    StringWriter writer = new StringWriter();
-    JsonGenerator generator = setup(writer);
-
     String expected = "{ \"runSettings\": \"runSettings.json\" }";
     Map.Entry<String, JsonNode> entry =
         new AbstractMap.SimpleImmutableEntry<String, JsonNode>(
@@ -80,13 +78,5 @@ public class BoundedDistributionSerializerTest {
     generator.writeEndObject();
 
     assertThat(writer.toString()).isEqualToNormalizingPunctuationAndWhitespace(expected);
-  }
-
-  private JsonGenerator setup(StringWriter writer) throws IOException {
-    JsonFactory factory = new JsonFactory();
-    JsonGenerator generator = factory.createGenerator(writer);
-    generator.setCodec(new ObjectMapper());
-    generator.useDefaultPrettyPrinter();
-    return generator;
   }
 }
