@@ -15,6 +15,7 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import uk.co.ramp.TestUtils;
+import uk.co.ramp.io.types.ImmutableAgeDependentHealth;
 import uk.co.ramp.io.types.StandardProperties;
 
 public class PopulationGeneratorTest {
@@ -29,6 +30,7 @@ public class PopulationGeneratorTest {
     populationGenerator.setProperties(TestUtils.populationProperties());
     populationGenerator.setDataGenerator(TestUtils.dataGenerator());
     populationGenerator.setAgeRetriever(TestUtils.ageRetriever());
+    populationGenerator.setAgeDependentHealthList(TestUtils.ageDependentHealth());
   }
 
   @Test
@@ -60,7 +62,7 @@ public class PopulationGeneratorTest {
     v = RECOVERED;
     createPeople(var, start, end, v);
 
-    Map<VirusStatus, Integer> result = PopulationGenerator.getCmptCounts(var);
+    Map<VirusStatus, Integer> result = PopulationGenerator.getCompartmentCounts(var);
 
     Assert.assertEquals(s, result.get(SUSCEPTIBLE).intValue());
     Assert.assertEquals(e, result.get(EXPOSED).intValue());
@@ -89,12 +91,11 @@ public class PopulationGeneratorTest {
     double women =
         population.values().stream().map(Case::gender).filter(a -> a.equals(Gender.FEMALE)).count()
             / (double) popSize;
-    double healthModifier = 1;
-    // TODO: Re-implement ageDependence
-    //        TestUtils.populationProperties().ageDependence().values().stream()
-    //            .mapToDouble(Double::doubleValue)
-    //            .average()
-    //            .orElse(0);
+    double healthModifier =
+        TestUtils.ageDependentHealth().ageDependentList().stream()
+            .mapToDouble(ImmutableAgeDependentHealth::modifier)
+            .average()
+            .orElse(0);
     double hasApp = population.values().stream().filter(Case::hasApp).count() / (double) popSize;
 
     Assert.assertEquals(0.5, compliance, 0.01);
@@ -110,26 +111,26 @@ public class PopulationGeneratorTest {
 
     Map<Integer, Double> expected = new HashMap<>();
     expected.put(-10, 1d);
-    expected.put(0, 0.9d);
-    expected.put(10, 0.9d);
-    expected.put(19, 0.9d);
-    expected.put(20, 0.8d);
-    expected.put(21, 0.8d);
-    expected.put(30, 0.8d);
-    expected.put(40, 0.6d);
-    expected.put(50, 0.6d);
-    expected.put(60, 0.4d);
-    expected.put(70, 0.4d);
-    expected.put(80, 0.2d);
-    expected.put(90, 0.2d);
+    expected.put(0, 1.d);
+    expected.put(10, 1.d);
+    expected.put(19, 1.d);
+    expected.put(20, 0.9d);
+    expected.put(21, 0.9d);
+    expected.put(30, 0.9d);
+    expected.put(40, 0.8d);
+    expected.put(50, 0.8d);
+    expected.put(60, 0.6d);
+    expected.put(70, 0.6d);
+    expected.put(80, 0.4d);
+    expected.put(90, 0.4d);
     expected.put(110, 1d);
     expected.put(120, 1d);
 
     for (int age : expected.keySet()) {
+      System.out.println(age);
+
       double modifier = populationGenerator.getHealthModifier(age);
-      assertThat(modifier).isCloseTo(1, Offset.offset(DELTA));
-      // TODO: Re-implement ageDependence
-      // assertThat(modifier).isCloseTo(expected.get(age), Offset.offset(DELTA));
+      assertThat(modifier).isCloseTo(expected.get(age), Offset.offset(DELTA));
     }
   }
 

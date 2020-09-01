@@ -23,6 +23,8 @@ public interface InputFiles {
 
   String infectionRates();
 
+  String ageDependentHealth();
+
   @Check
   default void check() {
     Preconditions.checkState(!runSettings().isBlank(), "Run settings location should not be blank");
@@ -35,5 +37,7 @@ public interface InputFiles {
         !isolationPolicies().isBlank(), "Isolation policies location should not be blank");
     Preconditions.checkState(
         !infectionRates().isBlank(), "Infection rates location should not be blank");
+    Preconditions.checkState(
+        !ageDependentHealth().isBlank(), "Age-dependent health location should not be blank");
   }
 }

@@ -1,0 +1,39 @@
+{
+  "ageDependentList": [
+    {
+      "range": {
+        "min": 0,
+        "max": 19
+      },
+      "modifier": 1.0
+    },
+    {
+      "range": {
+        "min": 20,
+        "max": 39
+      },
+      "modifier": 1.0
+    },
+    {
+      "range": {
+        "min": 40,
+        "max": 59
+      },
+      "modifier": 1.0
+    },
+    {
+      "range": {
+        "min": 60,
+        "max": 79
+      },
+      "modifier": 1.0
+    },
+    {
+      "range": {
+        "min": 80,
+        "max": 100
+      },
+      "modifier": 1.0
+    }
+  ]
+}

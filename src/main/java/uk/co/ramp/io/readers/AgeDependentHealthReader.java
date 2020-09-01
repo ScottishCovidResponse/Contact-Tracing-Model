@@ -4,13 +4,13 @@ import com.google.gson.GsonBuilder;
 import com.google.gson.TypeAdapterFactory;
 import java.io.Reader;
 import java.util.ServiceLoader;
-import uk.co.ramp.io.types.StandardProperties;
+import uk.co.ramp.io.types.AgeDependentHealthList;
 
-public class StandardPropertiesReader {
+public class AgeDependentHealthReader {
 
-  public StandardProperties read(Reader reader) {
+  public AgeDependentHealthList read(Reader reader) {
     GsonBuilder gsonBuilder = new GsonBuilder();
     ServiceLoader.load(TypeAdapterFactory.class).forEach(gsonBuilder::registerTypeAdapterFactory);
-    return gsonBuilder.setPrettyPrinting().create().fromJson(reader, StandardProperties.class);
+    return gsonBuilder.create().fromJson(reader, AgeDependentHealthList.class);
   }
 }
