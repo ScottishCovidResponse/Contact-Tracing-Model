@@ -341,7 +341,7 @@ Only one _Default Policy_ can be specified within the _Isolation Policies_ file.
 
 Figure 15 shows an example of a _Default Policy_.
 
-<img src="defaultPolicyExample.png" alt="default Policy Example" width="500">
+<img src="defaultPoliciesExample.png" alt="default Policy Example" width="500">
 
 **Figure 15.** Example _Default Policy_.
 
@@ -376,7 +376,7 @@ Each element in the _policies_ list defines the tracing behaviour for a given _A
    * The distribution defining the likelihood of a given trace link, or individual, not being traced.
    * Available parameters identical to those available in either _isolationProbabilityDistribution_ and _isolationTimeDistribution_ in the [Isolation Policies](#main-isolation-policies) section.
 
-<img src="tracingPoliciesExamply.png" alt="tracing Policy Example" width="600">
+<img src="tracingPoliciesExample.png" alt="tracing Policy Example" width="1000">
 
 **Figure 16.** Example _Tracing Policy_.
 
