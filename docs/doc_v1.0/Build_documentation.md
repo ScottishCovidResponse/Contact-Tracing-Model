@@ -1,4 +1,4 @@
-Build Documention
+Contact Tracing Model - Build Documention
 ================
 Author: Sam Brett & Ed Townsend
 
@@ -19,27 +19,21 @@ Author: Sam Brett & Ed Townsend
       - [Population Settings](#population-settings)
       - [Isolation Policies](#isolation-policies)
       - [Tracing Policies](#tracing-policies)
-  - [Isolation Policy File](#main-isolation-policies)
-    - [Global Policy](#global-policy)
-    - [Virus Policy](#virus-policy)
-    - [Alert Policy](#alert-policy)
-    - [Default Policy](#default-policy)
-  - [Tracing Policy File](#main-tracing-policies)
   - [Virus Statuses](#virus-statuses)
   - [Alert Statuses](#alert-statuses)
 
 
 ## Introduction
 
-This document is to describe the structure, design and assumptions made in
+This document describes the structure, design and assumptions made in
 the creation of the Contact Tracing Model through the SCRC/RAMP
 collaboration.
 
-This model uses a S-E-Asym-Pre-Sym-Sev-R-D model that allows the following transitions:
+The Contact Tracing Model uses a S-E-Asym-Pre-Sym-Sev-R-D model that defines how an individual may progress through different virus statuses during a pandemic. The model allows the following virust status transitions:
 
 <img src="image1.png" alt="Compartment diagram" width="800">
 
-**Figure 1.** The compartment model
+**Figure 1.** The modelled virus statuses and transitions.
 
 S – Susceptible – the default condition
 
@@ -56,9 +50,6 @@ Sev – Infected and severely symptomatic, will test positive
 R – Recovered
 
 D – Dead
-
-The progression through these transitions will be discussed throughout
-this document.
 
 
 ## Input Files
@@ -81,9 +72,7 @@ The name of the _Input Locations_ file must be set to _inputLocations.json_.
 
 **Figure 2.** Example _inputLocations.json_ file.
 
-An example of the expected input files is illustrated above in Figure 2. If a file is omitted from _inputLocations.json_ then the Contact Tracing Model will default to the corresponding file in the _/input_ folder. 
-
-Should the Contact Tracing Model fail to acquire a specified file, an error will be thrown.
+An example of the expected input files is illustrated above in Figure 2. If a file is omitted from _inputLocations.json_ then the Contact Tracing Model will default to the corresponding file in the _/input_ folder. Should the Contact Tracing Model fail to acquire a specified file, an error will be thrown.
 
 The directory of the input files defaults to the _/input_ folder, but may be overridden via the command line. See XXXX for more details.
 
@@ -118,7 +107,7 @@ An example of the contents of a _Contacts Data_ file can be found in Figure 3.
 
 #### Infection Rates
 
-The _Infection Rates_ file allows the user to provide a weighting factor to individuals in an infectious virus state. Figure 4 shows an example _Infection Rates_ file. The specified weighting factor values must lie in the range (0, 1], otherwise an error is thrown.
+The _Infection Rates_ file allows the user to provide a weighting factor to individuals in an infectious virus status. Figure 4 shows an example _Infection Rates_ file. The specified weighting factor values must lie in the range (0, 1], otherwise an error is thrown.
 
 <img src="infectionRates.png" alt="infectionRatesExample" width="400">
 
@@ -151,11 +140,11 @@ The _steadyState_ flag is not used. It is likely to be removed in future version
 
 The _timeStepsPerDay_ field sets the number of timesteps to occur each day, e.g. half days ('2') or quarter days ('4').
 
-The _timeStepSpread_ field sets the probability for spreading the disease in each chosen timestep, , e.g. for half days [0.4, 0.6] or quarter days [0.2, 0.2, 0.4, 0.2]. If the sum of the probabilities does not add to 1 an error will be thrown.
+The _timeStepSpread_ field sets the probability for spreading the disease in each chosen timestep, , e.g. for half days [0.4, 0.6] or quarter days [0.2, 0.2, 0.4, 0.2]. If the sum of the probabilities does not add to unity an error will be thrown.
 
-**NOTE:** It is recommended to use a combination of _timeStepsPerDay_ and _timeStepSpread_ such that recurring decimal values are avoided to ensure the probabilties sum to 1. Alternatively, the remainder can be calculated and added to one of the probabilities.
+**NOTE:** It is recommended to use a combination of _timeStepsPerDay_ and _timeStepSpread_ such that recurring decimal values are avoided to ensure the probabilties sum to unity. Alternatively, the remainder can be calculated and added to one of the probability bins.
 
-The _seed_ field can be specified via the command line or in the _Run Settings_ file. If no seed is provided, a seed will be generated randomly.
+The _seed_ field is used to seed the random number generators, and can be specified via the command line or in the _Run Settings_ file. If no seed is provided, a seed will be generated randomly.
 
 **NOTE:** Currently, the Contact Tracing Model does not log which seed is being used when randomly generated.
 
@@ -172,7 +161,9 @@ The _Age Data_ file assigns an age to an individual via their ID. The _Age Data_
 
 ### Data Pipeline Input Files
 
-Input files that interact via the Data Pipeline API are stored in either a _.TOML_, ._YAML_ or _.JSON_ file format. All files listed within this section interface with the Data Pipeline API to retrieve the desired data. All data files that interact withth the Data Pipeline API contain the common field _type_ that designates the data type for a specific parameter.
+Input files that interact via the Data Pipeline API are stored in either a _.TOML_, ._YAML_ or _.JSON_ file format. All files listed within this section interface with the Data Pipeline API to retrieve the desired data. 
+
+All _.TOML_ data files that interact with the Data Pipeline API contain the common field _type_ that designates the data type for a specific parameter. The other input files having different naming conventions, but accept the same parameters unless are titled as such, i.e. _isolationTimeDistribution_ only accepts _"distribution"_.
 
 The _type_ field has two values that the Contact Tracing Model accepts:
   - _"point-estimate"_
@@ -196,7 +187,8 @@ If the value of _type_ is set to _"distribution"_, the relevant contextual field
         - _bins_
         - _weights_
         
-For more information, see the Java Data Pipeline API (**#REF**).
+        
+For more information, see the [Java Data Pipeline API](https://github.com/ScottishCovidResponse/data_pipeline_api).
 
 #### Configuration File
   
@@ -241,29 +233,28 @@ The _app-uptake_ field defines the proportion of the population that is actively
 #### Disease Settings
 
 The _Disease Settings_ file contains the parameters that define the behaviour of the disease. Within this file, the user can change the following quantities:
-  * The parameters of the distributions used to sample the duration an individual spends in a given virus state.
+  * The parameters of the distributions used to sample the duration an individual spends in a given virus status.
   * The likelihood of a test producing a false negative or false positive result.
   * The distribution used to sample the duration a test takes to be administered.
   * The distribution used to sample the duration a test result takes to be delivered.
   * The parameters to determine the probability of being exposed through an interaction.
   * Proportion of population randomly infected per timestep.
   
- <img src="diseaseSettings.png" alt="Contacts File" width="400">
+ <img src="diseaseSettings.png" alt="Contacts File" width="700">
 
 **Figure 9.** Example _Disease Settings_ file
-  
-Figure 9 shows the contents of an example _Disease Settings_ file.
 
-The fields not mentioned below describe the distribution of the time taken for an individual to progress to the next virus state, or for virus tests to be administered and the results delivered. 
+
+The fields not mentioned below describe the distribution of the time taken for an individual to progress to the next virus status, or for virus tests to be administered and the results delivered. 
 
 The _test-positive-accuracy_ and _test-negative-accuracy_ fields represent the probability of a test result being a false positive or false negative. For example, if a test result is negative and the _test-negative-accuracy_ value is 0.95, then there is a 5% chance this result will be a false negative. These quantities are sampled from a uniform distribution.
 
 The _exposure-threshold_ field is a minimum exposure value that is used to determine
 if a contact is close enough to spread the infection. This works as a
-high pass filter value with the weight field.
+high pass filter value with the weight field in the _Contact Data_ file.
 
 The _random-infection-rate_ field allows a proportion of the population to be
-randomly exposed from outside the contact network per day. This is to simulate people
+randomly exposed to the virus per day. This is to simulate people
 from outside the network interacting with the population. This is the probability an individual will randomly get infected per timestep. For example, a _randomInfectionRate_ of 0.05 will result in 5 people in a population of 100, per
 timestep, to get infected.
 
@@ -273,17 +264,7 @@ used to determine the chance of infection for a given contact, along with the we
 <img src="exposureBias.png" alt="exposureBias" width="400">
 <img src="exposureProb.png" alt="exposureProb" width="400">
 
-
 #### Isolation Policies
-
-The _Isolation Policies_ file has its own [section](#main-isolation-policies).
-
-#### Tracing Policies
-
-The _Tracing Policies_ file has its own [section](#main-tracing-policies).
-
-<a id="main-isolation-policies"></a>
-## Isolation Policies
 
 There are four types of isolation policies:
   * Global Policy
@@ -291,9 +272,9 @@ There are four types of isolation policies:
   * Alert Policy
   * Default Policy
   
-All four policy types are definied with an _Isolation Policies_ file.
+All four policy types are defined within the _Isolation Policies_ file.
 
-The _Isolation Policies_ file follow a similar set of available parameter values to those described in the [Data Pipeline Input Files](#data-pipeline-input-file) section. However, the file format is _.JSON_ meaning the implemention of the available parameters is slightly different. 
+The _Isolation Policies_ file follows a similar set of available parameter values to those described in the [Data Pipeline Input Files](#data-pipeline-input-file) section. However, the file format is _.JSON_ meaning the implemention of the available parameters is slightly different. 
 
 The first three types of isolation policy, i.e. excluding Default Policy, have an associated field named _isolationProperty_ that allows the user to define the following fields:
  * _id_
@@ -314,9 +295,9 @@ The first three types of isolation policy, i.e. excluding Default Policy, have a
     * Precedence of the isolation policy over others.
     * A higher value corresponds to a higher priority.
 
-### Global Policy
+#### Global Policy
 
-A _Global Policy_ triggers an isolation policy based upon whether the proportion of infected individuals falls between a user-defined threshold. The _Global Policy_ is defined in the _globalIsolationPolicies_ field within the _Isolation Policies_ file. 
+A _Global Policy_ triggers an isolation policy when the proportion of infected individuals falls between a user-defined threshold. The _Global Policy_ is defined in the _globalIsolationPolicies_ field within the _Isolation Policies_ file. 
 
 Figure 12 shows an example _Isolation Policies_ file, where only the _Global Policy_ is specified. 
 
@@ -330,11 +311,11 @@ The _Global Policy_ has a unique field named _proportionInfected_ that defines t
  * _max_
    * Maximum fraction of population infected to enforce the policy.
 
-### Virus Policy
+#### Virus Policy
 
-A _Virus Policy_ defines the isolation policy for an individual in a given _Virus Status_. Within the _Isolation Policies_ files, the user can specify a _Virus Policy_ under the field named _virusIsolationPolicies_.
+A _Virus Policy_ defines the isolation policy for an individual with a given _Virus Status_. Within the _Isolation Policies_ files, the user can specify a _Virus Policy_ under the field named _virusIsolationPolicies_.
 
-Each _Virus Policy_ can be linked to a corresponding _Virus Status_ (see [Virus Statuses](#virus-statuses) for more details) via the sub-field _virusStatus_. The user can specify up to one policy per _Virus Statuses_. Each _Virus Policy_ can be defined by an _isolationProperty_ field.
+Each _Virus Policy_ can be linked to a corresponding _Virus Status_ (see [Virus Statuses](#virus-statuses) for more details) via the sub-field _virusStatus_. The user can specify up to one policy per _Virus Status_. Each _Virus Policy_ can be defined by an _isolationProperty_ field.
 
 An example can be found in Figure 13.
 
@@ -342,7 +323,7 @@ An example can be found in Figure 13.
 
 **Figure 13.** Example _Virus Policy_.
 
-### Alert Policy
+#### Alert Policy
 
 The _Alert Policy_ defines the isolation policy for a person in a given _Alert Status_.
 These follow the same rules as a _Virus Policy_.
@@ -351,7 +332,7 @@ These follow the same rules as a _Virus Policy_.
 
 **Figure 14.** Example _Alert Policy_.
 
-### Default Policy
+#### Default Policy
 
 The _Default Policy_ allows a baseline isolation policy to be set. For example, 
 10% of the population may be shielding by default.
@@ -365,9 +346,9 @@ Figure 15 shows an example of a _Default Policy_.
 **Figure 15.** Example _Default Policy_.
 
 <a id="main-tracing-policies"></a>
-## Tracing Policies
+#### Tracing Policies
 
-The _Tracing Policies_ file is similar to the _Isolation Policies_ files, but follows different naming conventions to the fields.
+The _Tracing Policies_ file is similar to the _Isolation Policies_ file, but follows different naming conventions of the fields.
 
 Within a _Tracing Policies_ file, the user get set the following fields:
  * _description_
@@ -395,17 +376,13 @@ Each element in the _policies_ list defines the tracing behaviour for a given _A
    * The distribution defining the likelihood of a given trace link, or individual, not being traced.
    * Available parameters identical to those available in either _isolationProbabilityDistribution_ and _isolationTimeDistribution_ in the [Isolation Policies](#main-isolation-policies) section.
 
-The tracing policy allows specification of alerts to be triggered when a person enters a 
-combined alert and virus status. The code will review their contacts for a number of specified days
-and trigger alerts to their contacts. 
-
 <img src="tracingPoliciesExamply.png" alt="tracing Policy Example" width="600">
 
 **Figure 16.** Example _Tracing Policy_.
 
 ## Virus Statuses
 
-The Contact Tracing Model uses the following _Virus Statuses_ to track the spread of the virus, and to define status-specific behaviours, e.g. tracing policies. The allows available _Virust States_ can be found below and in the [Introduction](#introduction) section.
+The Contact Tracing Model uses the following _Virus Statuses_ to track the spread of the virus, and to define status-specific behaviours, e.g. tracing policies. The available _Virust Statuses_ can be found below and in the [Introduction](#introduction) section.
 
 Available _Virus Statuses_:
 
