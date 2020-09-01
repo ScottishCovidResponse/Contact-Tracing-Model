@@ -37,6 +37,7 @@ public class TestUtils {
     Distribution dist =
         ImmutableDistribution.builder()
             .internalType(DistributionType.empirical)
+            .internalScale(5)
             .empiricalSamples(List.of(5))
             .rng(dataGenerator().getRandomGenerator())
             .build();
@@ -47,6 +48,7 @@ public class TestUtils {
         ImmutableDistribution.builder()
             .internalType(DistributionType.empirical)
             .empiricalSamples(List.of(2))
+            .internalScale(2)
             .rng(dataGenerator().getRandomGenerator())
             .build();
     BoundedDistribution boundedDistTest =
