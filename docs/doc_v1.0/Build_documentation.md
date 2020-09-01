@@ -25,7 +25,8 @@ Author: Sam Brett & Ed Townsend
     - [Alert Policy](#alert-policy)
     - [Default Policy](#default-policy)
   - [Tracing Policy File](#main-tracing-policies)
-  - [Virus and Alert Statuses](#virus-and-alert-statuses)
+  - [Virus Statuses](#virus-statuses)
+  - [Alert Statuses](#alert-statuses)
 
 
 ## Introduction
@@ -331,9 +332,9 @@ The _Global Policy_ has a unique field named _proportionInfected_ that defines t
 
 ### Virus Policy
 
-A _Virus Policy_ defines the isolation policy for an individual in a given _Virus State_. Within the _Isolation Policies_ files, the user can specify a _Virus Policy_ under the field named _virusIsolationPolicies_.
+A _Virus Policy_ defines the isolation policy for an individual in a given _Virus Status_. Within the _Isolation Policies_ files, the user can specify a _Virus Policy_ under the field named _virusIsolationPolicies_.
 
-Each _Virus Policy_ can be linked to a corresponding _Virus State_ (see [Virus and Alert Statuses](#virus-and-alert-statuses) for more details) via the sub-field _virusStatus_. The user can specify up to one policy per _Virus State_. Each _Virus Policy_ can be defined by an _isolationProperty_ field.
+Each _Virus Policy_ can be linked to a corresponding _Virus Status_ (see [Virus Statuses](#virus-statuses) for more details) via the sub-field _virusStatus_. The user can specify up to one policy per _Virus Statuses_. Each _Virus Policy_ can be defined by an _isolationProperty_ field.
 
 An example can be found in Figure 13.
 
@@ -343,40 +344,71 @@ An example can be found in Figure 13.
 
 ### Alert Policy
 
-The _Alert Policy_ defines the isolation policy for a person in a given _Alert State_.
-These follow the same rules as the Virus Policy.
+The _Alert Policy_ defines the isolation policy for a person in a given _Alert Status_.
+These follow the same rules as a _Virus Policy_.
 
 <img src="alertPoliciesExample.png" alt="alert Policy Example" width="500">
 
+**Figure 14.** Example _Alert Policy_.
+
 ### Default Policy
 
-The default policy allows a global baseline to be set. For example, 
+The _Default Policy_ allows a baseline isolation policy to be set. For example, 
 10% of the population may be shielding by default.
 
-<img src="defaultPolicy.png" alt="default Policy Example" width="500">
+Only one _Default Policy_ can be specified within the _Isolation Policies_ file. 
+
+Figure 15 shows an example of a _Default Policy_.
+
+<img src="defaultPolicyExample.png" alt="default Policy Example" width="500">
+
+**Figure 15.** Example _Default Policy_.
 
 <a id="main-tracing-policies"></a>
 ## Tracing Policies
+
+The _Tracing Policies_ file is similar to the _Isolation Policies_ files, but follows different naming conventions to the fields.
+
+Within a _Tracing Policies_ file, the user get set the following fields:
+ * _description_
+   * A brief description of the tracing policies.
+ * _policies_
+   * A list of different tracing policies for a given _Virus Status_ and _Alert Status_.
+ * _noOfTracingLevels_
+   * The number of interactions generations to trace.
+   * For example, if _noOfTraceLevels_ is 2, then those who were in contact with someone who was in contact with an infected individual would be traced and told to isolate. In other words, the tracing look back through two generations or 'levels' of contacts.
+ * _probabilitySkippingTraceLinkThreshold_
+   * Specifies the distribution defining the threshold below which an individual is not traced.  
+   * Available parameters identical to those available in either _isolationProbabilityDistribution_ and _isolationTimeDistribution_ in the [Isolation Policies](#main-isolation-policies) section.
+   
+Each element in the _policies_ list defines the tracing behaviour for a given _Alert Status_ and _Virus Status_, and is defined by the following parameters:
+ * _reporterAlertStatus_
+   * The _Alert Status_ that this policy applies to.
+ * _reporterVirusStatus_
+   * The _Virus Status_ that this policy applies to.
+ * _recentContactsLookBackTime_
+   * How far back in time should contacts be traced.
+ * _timeDelayPerTraceLink_
+   * Delay after which the traced individual will respond to the tracing.
+   * Available parameters identical to those available in either _isolationProbabilityDistribution_ and _isolationTimeDistribution_ in the [Isolation Policies](#main-isolation-policies) section.
+ * _probabilitySkippingTraceLink_
+   * The distribution defining the likelihood of a given trace link, or individual, not being traced.
+   * Available parameters identical to those available in either _isolationProbabilityDistribution_ and _isolationTimeDistribution_ in the [Isolation Policies](#main-isolation-policies) section.
 
 The tracing policy allows specification of alerts to be triggered when a person enters a 
 combined alert and virus status. The code will review their contacts for a number of specified days
 and trigger alerts to their contacts. 
 
-![](tracingPolicy.png)
-<img src="tracingPolicy.png" alt="tracing Policy Example" width="600">
+<img src="tracingPoliciesExamply.png" alt="tracing Policy Example" width="600">
 
-## Virus and Alert Statuses
+**Figure 16.** Example _Tracing Policy_.
 
-Following the schema described in Figure 1
+## Virus Statuses
 
-<img src="image1.png" alt="Compartments" width="500">
+The Contact Tracing Model uses the following _Virus Statuses_ to track the spread of the virus, and to define status-specific behaviours, e.g. tracing policies. The allows available _Virust States_ can be found below and in the [Introduction](#introduction) section.
 
+Available _Virus Statuses_:
 
-
-the status of the virus infections in the code is referred to by an
-enumeration called Virus Status, which has the options:
-
-  
   - SUSCEPTIBLE
 
   - EXPOSED
@@ -393,33 +425,40 @@ enumeration called Virus Status, which has the options:
     
   - DEAD
   
-Similarly, the Alert Status that a person is at is described by the
-enumeration:
+The valid transitions between _Virus Statuses_ can be seen in Figure 1.
+  
+## Alert Statuses
+
+The _Alert Statuses_ represents the status an individual has been assigned when conducting the contact tracing. 
 
   - NONE
+    - The default status.
 
   - ALERTED
+    - The individual has been in contact with an infectious individual.
 
   - REQUESTED\_TEST
 
   - AWAITING\_RESULT
 
   - TESTED\_POSITIVE
+  
+  - TESTED\_NEGATIVE
 
-Where the valid transitions are shown in Figure 6.
+The valid transitions between _Alert Statuses_ is shown in Figure 17.
 
 ![](image6.png)
 
-Figure 6. The alert status transitions
+**Figure 17.** The alert status transitions
 
 ## Code Structure
 
 The structure of the model follows the maven/gradle standard project
-layout as shown in Figure 7.
+layout as shown in Figure 18.
 
 ![](image7.png)
 
-Figure 7. Project and Package Layout
+**Figure 18.** Project and Package Layout
 
 The code is built using the SpringBoot library with the main entry point
 of the code being Framework.java. After loading and initialising the
