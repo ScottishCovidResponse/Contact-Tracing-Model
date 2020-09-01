@@ -20,7 +20,7 @@ Author: Sam Brett & Ed Townsend
       - [Isolation Policies](#isolation-policies)
       - [Tracing Policies](#tracing-policies)
   - [Isolation Policy File](#main-isolation-policies)
-  - [Tracing Policy Files](#main-tracing-polciies
+  - [Tracing Policy Files](#main-tracing-policies)
 
 
 ## Introduction
@@ -270,11 +270,11 @@ used to determine the chance of infection for a given contact, along with the we
 
 #### Isolation Policies
 
-The _Isolation Policy_ file has its own [section](#main-isolation-policies).
+The _Isolation Policies_ file has its own [section](#main-isolation-policies).
 
 #### Tracing Policies
 
-The _Tracing Policy_ file has its own [section](#main-tracing-policies).
+The _Tracing Policies_ file has its own [section](#main-tracing-policies).
 
 <a id="main-isolation-policies"></a>
 # Isolation Policies
@@ -287,7 +287,42 @@ There are four types of isolation policies:
   
 All four policy types are definied with an _Isolation Policies_ file.
 
+The _Isolation Policies_ file follow a similar set of available parameter values to those described in the [Data Pipeline Input Files](#data-pipeline-input-file) section. However, the file format is _.JSON_ meaning the implemention of the available parameters is slightly different. 
+
+The first three types of isolation policy, i.e. excluding Default Policy, have an associated field named _isolationProperty_ that allows the user to define the following fields:
+ * _id_
+   * A name associated with the isolation property.
+ * _isolationProbabilityDistribution_
+   * Defines the probability distribution of an individual isolating.
+ * _isolationTimeDistribution_
+   * Defines the distribution an individual will isolate for.
+ * _overrideComplianceAndForcePolicy_
+   * Boolean flag.
+   * If _true_ then compliance parameters are overridden. 
+ * _startOfIsolationTime_
+   * Defines the start of when the isolation period is considered.
+   * Two available options:
+     * _ABSOLUTE_ - Immediately.
+     * _CONTACT_TIME_ - From when the possibly infectious contact occurred.
+  * _priority_
+    * Precedence of the isolation policy over others.
+    * A higher value corresponds to a higher priority.
+
 ### Global Policy
+
+A _Global Policy_ triggers an isolation policy based upon whether the proportion of infected individuals falls between a user-defined threshold. The _Global Policy_ is defined in the _globalIsolationPolicies_ field within the _Isolation Policies_ file. 
+
+Figure 12 shows an example _Isolation Policies_ file, where only the _Global Policy_ is specified. 
+
+<img scr="globalPoliciesExample.png" alt="Example Global Policy" width="400">
+
+**Figure 12.** Example _Isolation Policies_ file with only the _Global Policy_ defined.
+
+The _Global Policy_ has a unique field named _proportionInfected_ that defines the threshold in which the isolation policy will be enforced - assuming the a higher priority that other policies - regardless of virus and alert status. The _proportionInfected_ field has two sub-fields that must be specified:
+ * _min_
+   * Minimum fraction of population infected to enforce the policy.
+ * _max_
+   * Maximum fraction of population infected to enforce the policy.
 
 ### Virus Policy
 
@@ -306,13 +341,6 @@ or the time they are aware of being infected.
 
 **Figure 8.** Example _Virus Policy_.
 
-### Default Policy
-
-The default policy allows a global baseline to be set. For example, 
-10% of the population may be shielding by default.
-
-<img src="defaultPolicy.png" alt="default Policy Example" width="500">
-
 ### Alert Policy
 
 The alert policy defines the isolation policy for a person in any alert state. 
@@ -322,6 +350,15 @@ These follow the same rules as the Virus Policy. The alert policy is related to 
 
 
 <a id="main-tracing-policies"></a>
+
+### Default Policy
+
+The default policy allows a global baseline to be set. For example, 
+10% of the population may be shielding by default.
+
+<img src="defaultPolicy.png" alt="default Policy Example" width="500">
+
+
 ## Tracing Policies
 
 The tracing policy allows specification of alerts to be triggered when a person enters a 
