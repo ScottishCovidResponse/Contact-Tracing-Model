@@ -337,7 +337,7 @@ Each _Virus Policy_ can be linked to a corresponding _Virus State_ (see [Virus a
 
 An example can be found in Figure 13.
 
-<img src="virusPolicyExample.png" alt="virus Policy Example" width="400">
+<img src="virusPoliciesExample.png" alt="virus Policy Example" width="400">
 
 **Figure 13.** Example _Virus Policy_.
 
@@ -346,7 +346,7 @@ An example can be found in Figure 13.
 The _Alert Policy_ defines the isolation policy for a person in a given _Alert State_.
 These follow the same rules as the Virus Policy.
 
-<img src="alertPolicyExample.png" alt="alert Policy Example" width="500">
+<img src="alertPoliciesExample.png" alt="alert Policy Example" width="500">
 
 ### Default Policy
 
