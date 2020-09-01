@@ -95,7 +95,8 @@ public abstract class CommonVirusEventProcessor<T extends Event> implements Even
 
   public BoundedDistribution scaleWithTimeSteps(BoundedDistribution distribution) {
 
-    double scale = distribution.distribution().internalScale().orElse(distribution.max())
+    double scale =
+        distribution.distribution().internalScale().orElse(distribution.max())
             * properties.timeStepsPerDay();
 
     Distribution internalDistribution =
