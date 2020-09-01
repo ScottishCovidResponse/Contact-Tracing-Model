@@ -20,7 +20,12 @@ Author: Sam Brett & Ed Townsend
       - [Isolation Policies](#isolation-policies)
       - [Tracing Policies](#tracing-policies)
   - [Isolation Policy File](#main-isolation-policies)
-  - [Tracing Policy Files](#main-tracing-policies)
+    - [Global Policy](#global-policy)
+    - [Virus Policy](#virus-policy)
+    - [Alert Policy](#alert-policy)
+    - [Default Policy](#default-policy)
+  - [Tracing Policy File](#main-tracing-policies)
+  - [Virus and Alert Statuses](#virus-and-alert-statuses)
 
 
 ## Introduction
@@ -112,7 +117,7 @@ An example of the contents of a _Contacts Data_ file can be found in Figure 3.
 
 #### Infection Rates
 
-The _Infection Rates_ file allows the user to provide a weighting factor to individuals in an infectious virus compartment. Figure 4 shows an example _Infection Rates_ file. The specified weighting factor values must lie in the range (0, 1], otherwise an error is thrown.
+The _Infection Rates_ file allows the user to provide a weighting factor to individuals in an infectious virus state. Figure 4 shows an example _Infection Rates_ file. The specified weighting factor values must lie in the range (0, 1], otherwise an error is thrown.
 
 <img src="infectionRates.png" alt="infectionRatesExample" width="400">
 
@@ -235,7 +240,7 @@ The _app-uptake_ field defines the proportion of the population that is actively
 #### Disease Settings
 
 The _Disease Settings_ file contains the parameters that define the behaviour of the disease. Within this file, the user can change the following quantities:
-  * The parameters of the distributions used to sample the duration an individual spends in a given virus compartment.
+  * The parameters of the distributions used to sample the duration an individual spends in a given virus state.
   * The likelihood of a test producing a false negative or false positive result.
   * The distribution used to sample the duration a test takes to be administered.
   * The distribution used to sample the duration a test result takes to be delivered.
@@ -248,7 +253,7 @@ The _Disease Settings_ file contains the parameters that define the behaviour of
   
 Figure 9 shows the contents of an example _Disease Settings_ file.
 
-The fields not mentioned below describe the distribution of the time taken for an individual to progress to the next virus compartment, or for virus tests to be administered and the results delivered. 
+The fields not mentioned below describe the distribution of the time taken for an individual to progress to the next virus state, or for virus tests to be administered and the results delivered. 
 
 The _test-positive-accuracy_ and _test-negative-accuracy_ fields represent the probability of a test result being a false positive or false negative. For example, if a test result is negative and the _test-negative-accuracy_ value is 0.95, then there is a 5% chance this result will be a false negative. These quantities are sampled from a uniform distribution.
 
@@ -277,7 +282,7 @@ The _Isolation Policies_ file has its own [section](#main-isolation-policies).
 The _Tracing Policies_ file has its own [section](#main-tracing-policies).
 
 <a id="main-isolation-policies"></a>
-# Isolation Policies
+## Isolation Policies
 
 There are four types of isolation policies:
   * Global Policy
@@ -314,7 +319,7 @@ A _Global Policy_ triggers an isolation policy based upon whether the proportion
 
 Figure 12 shows an example _Isolation Policies_ file, where only the _Global Policy_ is specified. 
 
-<img scr="globalPoliciesExample.png" alt="Example Global Policy" width="400">
+<img src="globalPoliciesExample.png" alt="Example Global Policy" width="400">
 
 **Figure 12.** Example _Isolation Policies_ file with only the _Global Policy_ defined.
 
@@ -326,30 +331,22 @@ The _Global Policy_ has a unique field named _proportionInfected_ that defines t
 
 ### Virus Policy
 
-A _Virus Policy_ defines the probability of an individual isolating and duration over which they will isolate, in a given virus compartment. A _Virus Policy_ can be varied by a distribution type and parameters, as seen in section [_Disease Settings_](#diseasesettings), and priority associated with the _Virus Policy_.
+A _Virus Policy_ defines the isolation policy for an individual in a given _Virus State_. Within the _Isolation Policies_ files, the user can specify a _Virus Policy_ under the field named _virusIsolationPolicies_.
 
-A _Virus Policy_ can be specified in the _Isolation Policies_ file under the field named _virusStatusPolicies_.
+Each _Virus Policy_ can be linked to a corresponding _Virus State_ (see [Virus and Alert Statuses](#virus-and-alert-statuses) for more details) via the sub-field _virusStatus_. The user can specify up to one policy per _Virus State_. Each _Virus Policy_ can be defined by an _isolationProperty_ field.
 
-This policy determines the probability of a person in a given compartment 
-isolating, and for how long they will isolate. These can be modified and 
-varied using the distribution times. Also the time in isolation can vary 
-between ABSOLUTE or CONTACT_TIME. This means if a person becomes infected 
-they will either isolate for the isolation time from either the time of contact 
-or the time they are aware of being infected.
+An example can be found in Figure 13.
 
-<img src="virusPolicy.png" alt="virus Policy Example" width="400">
+<img src="virusPolicyExample.png" alt="virus Policy Example" width="400">
 
-**Figure 8.** Example _Virus Policy_.
+**Figure 13.** Example _Virus Policy_.
 
 ### Alert Policy
 
-The alert policy defines the isolation policy for a person in any alert state. 
-These follow the same rules as the Virus Policy. The alert policy is related to the status of the individual. 
+The _Alert Policy_ defines the isolation policy for a person in a given _Alert State_.
+These follow the same rules as the Virus Policy.
 
-<img src="alertPolicy.png" alt="alert Policy Example" width="500">
-
-
-<a id="main-tracing-policies"></a>
+<img src="alertPolicyExample.png" alt="alert Policy Example" width="500">
 
 ### Default Policy
 
@@ -358,7 +355,7 @@ The default policy allows a global baseline to be set. For example,
 
 <img src="defaultPolicy.png" alt="default Policy Example" width="500">
 
-
+<a id="main-tracing-policies"></a>
 ## Tracing Policies
 
 The tracing policy allows specification of alerts to be triggered when a person enters a 
