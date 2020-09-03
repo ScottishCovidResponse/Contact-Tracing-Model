@@ -61,8 +61,7 @@ public class EventContext {
             diseaseProperties,
             distributionSampler,
             statisticsRecorder,
-            populationProperties,
-            rng.getRandomGenerator());
+            populationProperties);
     VirusEventProcessor virusEventProcessor =
         new VirusEventProcessor(
             population, properties, diseaseProperties, distributionSampler, alertChecker);

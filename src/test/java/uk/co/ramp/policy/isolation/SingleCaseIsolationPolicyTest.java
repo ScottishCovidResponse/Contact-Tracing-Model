@@ -6,6 +6,7 @@ import static org.mockito.AdditionalAnswers.returnsElementsOf;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
+import static uk.co.ramp.TestUtils.*;
 import static uk.co.ramp.people.AlertStatus.*;
 import static uk.co.ramp.people.VirusStatus.*;
 
@@ -13,7 +14,6 @@ import java.util.List;
 import org.apache.commons.math3.random.RandomGenerator;
 import org.junit.Before;
 import org.junit.Test;
-import uk.co.ramp.TestUtils;
 import uk.co.ramp.distribution.BoundedDistribution;
 import uk.co.ramp.distribution.DistributionSampler;
 import uk.co.ramp.io.types.StandardProperties;
@@ -23,14 +23,13 @@ import uk.co.ramp.utilities.MinMax;
 
 public class SingleCaseIsolationPolicyTest {
   private DistributionSampler distributionSampler;
-  private StandardProperties properties = TestUtils.standardProperties();
-  private StatisticsRecorder statisticsRecorder = mock(StatisticsRecorder.class);
+  private final StandardProperties properties = standardProperties();
+  private final StatisticsRecorder statisticsRecorder = mock(StatisticsRecorder.class);
 
-  private final BoundedDistribution flatZeroPercent = mock(BoundedDistribution.class);
-
-  private final BoundedDistribution flatHundredPercent = mock(BoundedDistribution.class);
-
-  private final BoundedDistribution flatOneDay = mock(BoundedDistribution.class);
+  private final BoundedDistribution flatZeroPercent = createMockBoundedDistribution(0, 1);
+  private final BoundedDistribution flatHundredPercent = createMockBoundedDistribution(100, 100);
+  private final BoundedDistribution flatOneDay = createMockBoundedDistribution(1, 1);
+  private final BoundedDistribution flatThreeDays = createMockBoundedDistribution(3, 3);
 
   private final ImmutableIsolationProperty defaultZeroIsolationProperty =
       ImmutableIsolationProperty.builder()
@@ -125,10 +124,7 @@ public class SingleCaseIsolationPolicyTest {
                       .build())
               .build();
 
-  private final BoundedDistribution flatThreeDays = mock(BoundedDistribution.class);
-
-  private final BoundedDistribution thresholdLinearBoundedDistribution =
-      mock(BoundedDistribution.class);
+  private BoundedDistribution thresholdLinearBoundedDistribution = mock(BoundedDistribution.class);
 
   private final int currentTime = 0;
   private final int exposedTime = 0;
@@ -141,17 +137,27 @@ public class SingleCaseIsolationPolicyTest {
 
   @Before
   public void setUp() {
-    when(flatZeroPercent.getDistributionValue()).thenReturn(0);
-    when(flatZeroPercent.max()).thenReturn(0D);
-    when(flatHundredPercent.getDistributionValue()).thenReturn(100);
-    when(flatHundredPercent.max()).thenReturn(100D);
-    when(flatOneDay.getDistributionValue()).thenReturn(1);
-    when(flatOneDay.max()).thenReturn(1D);
-    when(flatThreeDays.getDistributionValue()).thenReturn(3);
-    when(flatThreeDays.max()).thenReturn(3D);
+
+    //    flatZeroPercent = createMockBoundedDistribution(0,0);
+    //    flatHundredPercent = createMockBoundedDistribution(100,100);
+    //    flatOneDay = createMockBoundedDistribution(1,1);
+    //    flatThreeDays = createMockBoundedDistribution(3,3);
+    //    thresholdLinearBoundedDistribution = TestUtils.createMockBoundedDistribution(50,100);
+    //    when(flatZeroPercent.getDistributionValue()).thenReturn(0);
+    //    when(flatZeroPercent.max()).thenReturn(0D);
+    //    when(flatHundredPercent.getDistributionValue()).thenReturn(100);
+    //    when(flatHundredPercent.max()).thenReturn(100D);
+    //    when(flatOneDay.getDistributionValue()).thenReturn(1);
+    //    when(flatOneDay.max()).thenReturn(1D);
+    //    when(flatThreeDays.getDistributionValue()).thenReturn(3);
+    //    when(flatThreeDays.max()).thenReturn(3D);
+    thresholdLinearBoundedDistribution = createMockBoundedDistribution(50, 100);
     when(thresholdLinearBoundedDistribution.getDistributionValue())
         .thenAnswer(returnsElementsOf(List.of(5, 15, 25, 35, 45, 55, 65, 75, 85, 95)));
     when(thresholdLinearBoundedDistribution.max()).thenReturn(100D);
+    //    Distribution distribution = mock(Distribution.class);
+    //    when(distribution.internalScale()).thenReturn(OptionalDouble.of(50));
+    //    when(thresholdLinearBoundedDistribution.distribution()).thenReturn(distribution);
 
     IsolationProperties isolationProperties =
         ImmutableIsolationProperties.builder()
@@ -166,9 +172,6 @@ public class SingleCaseIsolationPolicyTest {
             .build();
 
     this.distributionSampler = mock(DistributionSampler.class);
-    //    when(this.distributionSampler.getDistributionValue(any(BoundedDistribution.class)))
-    //        .thenAnswer(invocation -> (int) invocation.getArgument(0,
-    // BoundedDistribution.class).mean());
     when(distributionSampler.uniformBetweenZeroAndOne())
         .thenAnswer(
             returnsElementsOf(List.of(0.05, 0.15, 0.25, 0.35, 0.45, 0.55, 0.65, 0.75, 0.85, 0.95)));
