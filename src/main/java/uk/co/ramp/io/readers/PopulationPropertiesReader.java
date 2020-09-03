@@ -1,50 +1,32 @@
 package uk.co.ramp.io.readers;
 
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
-import com.google.gson.TypeAdapterFactory;
-import java.io.Reader;
-import java.io.Writer;
-import java.util.ServiceLoader;
 import uk.co.ramp.io.types.ImmutablePopulationProperties;
 import uk.co.ramp.io.types.PopulationProperties;
-import uk.co.ramp.utilities.ImmutableMinMax;
+import uk.ramp.api.StandardApi;
+import uk.ramp.distribution.Distribution;
 
 public class PopulationPropertiesReader {
+  private final StandardApi dataPipelineApi;
 
-  public PopulationProperties read(Reader reader) {
-    GsonBuilder gsonBuilder = new GsonBuilder();
-    ServiceLoader.load(TypeAdapterFactory.class).forEach(gsonBuilder::registerTypeAdapterFactory);
-    return gsonBuilder.setPrettyPrinting().create().fromJson(reader, PopulationProperties.class);
+  public PopulationPropertiesReader(StandardApi dataPipelineApi) {
+    this.dataPipelineApi = dataPipelineApi;
   }
 
-  public void create(Writer writer) {
+  public PopulationProperties read() {
+    double genderBalance =
+        dataPipelineApi.readEstimate("population_parameters", "gender-balance").doubleValue();
+    Distribution populationDistribution =
+        dataPipelineApi.readDistribution("population_parameters", "population-distribution");
+    double appUptake =
+        dataPipelineApi.readEstimate("population_parameters", "app-uptake").doubleValue();
+    double testCapacity =
+        dataPipelineApi.readEstimate("population_parameters", "test-capacity").doubleValue();
 
-    // index and proportion
-    // data taken from census
-    PopulationProperties wrapper =
-        ImmutablePopulationProperties.builder()
-            .putPopulationDistribution(0, 0.1759)
-            .putPopulationDistribution(1, 0.1171)
-            .putPopulationDistribution(2, 0.4029)
-            .putPopulationDistribution(3, 0.1222)
-            .putPopulationDistribution(4, 0.1819)
-            .putPopulationAges(0, ImmutableMinMax.of(0, 14))
-            .putPopulationAges(1, ImmutableMinMax.of(15, 24))
-            .putPopulationAges(2, ImmutableMinMax.of(25, 54))
-            .putPopulationAges(3, ImmutableMinMax.of(55, 64))
-            .putPopulationAges(4, ImmutableMinMax.of(65, 90))
-            .putAgeDependence(0, 0.9)
-            .putAgeDependence(1, 0.6)
-            .putAgeDependence(2, 0.2)
-            .putAgeDependence(3, 0.8)
-            .putAgeDependence(4, 0.4)
-            .genderBalance(0.99)
-            .appUptake(0.7)
-            .testCapacity(0.01)
-            .build();
-
-    Gson gson = new GsonBuilder().setPrettyPrinting().create();
-    gson.toJson(wrapper, writer);
+    return ImmutablePopulationProperties.builder()
+        .genderBalance(genderBalance)
+        .distribution(populationDistribution)
+        .appUptake(appUptake)
+        .testCapacity(testCapacity)
+        .build();
   }
 }

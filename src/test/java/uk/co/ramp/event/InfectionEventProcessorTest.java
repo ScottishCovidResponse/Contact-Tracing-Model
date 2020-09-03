@@ -14,7 +14,6 @@ import org.junit.Test;
 import org.springframework.test.util.ReflectionTestUtils;
 import uk.co.ramp.Population;
 import uk.co.ramp.TestUtils;
-import uk.co.ramp.distribution.Distribution;
 import uk.co.ramp.distribution.DistributionSampler;
 import uk.co.ramp.event.types.ImmutableInfectionEvent;
 import uk.co.ramp.event.types.InfectionEvent;
@@ -45,8 +44,8 @@ public class InfectionEventProcessorTest {
     when(properties.timeStepsPerDay()).thenReturn(1);
     distributionSampler = mock(DistributionSampler.class);
 
-    when(distributionSampler.getDistributionValue(any()))
-        .thenAnswer(i -> ((int) Math.round(((Distribution) i.getArgument(0)).mean())));
+    //    when(distributionSampler.getDistributionValue(any()))
+    //        .thenAnswer(i -> ((int) Math.round(((BoundedDistribution) i.getArgument(0)).mean())));
 
     statisticsRecorder = mock(StatisticsRecorder.class);
 
@@ -122,7 +121,9 @@ public class InfectionEventProcessorTest {
     VirusEvent evnt = processedEventResult.newVirusEvents().get(0);
 
     Assert.assertEquals(
-        diseaseProperties.timeLatent().mean() * properties.timeStepsPerDay(), evnt.time(), DELTA);
+        diseaseProperties.timeLatent().getDistributionValue() * properties.timeStepsPerDay(),
+        evnt.time(),
+        DELTA);
     Assert.assertEquals(0, evnt.id());
     Assert.assertEquals(EXPOSED, evnt.oldStatus());
     Assert.assertTrue(EXPOSED.getValidTransitions().contains(evnt.nextStatus()));

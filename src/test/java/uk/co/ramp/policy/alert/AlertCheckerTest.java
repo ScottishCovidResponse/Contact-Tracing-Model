@@ -9,55 +9,55 @@ import java.util.List;
 import java.util.Set;
 import org.junit.Before;
 import org.junit.Test;
-import uk.co.ramp.distribution.Distribution;
+import uk.co.ramp.distribution.BoundedDistribution;
 import uk.co.ramp.distribution.DistributionSampler;
 import uk.co.ramp.event.types.ImmutableAlertEvent;
 import uk.co.ramp.people.AlertStatus;
 import uk.co.ramp.people.VirusStatus;
-import uk.co.ramp.policy.alert.TracingPolicy.TracingPolicyItem;
 
 public class AlertCheckerTest {
   private AlertContactTracer contactTracer;
   private TracingPolicy tracingPolicy;
   private DistributionSampler distributionSampler;
-  private Distribution tracingDelay1Day;
-  private Distribution tracingDelay2Days;
-  private Distribution noSkipTracingProbability;
-  private Distribution allSkipTracingProbability;
-  private Distribution thresholdSkipTracingProbability;
-  private TracingPolicyItem tracingPolicyItem;
+  private BoundedDistribution tracingDelay1Day;
+  private BoundedDistribution tracingDelay2Days;
+  private BoundedDistribution noSkipTracingProbability;
+  private BoundedDistribution allSkipTracingProbability;
+  private BoundedDistribution thresholdSkipTracingProbability;
+  private ImmutableTracingPolicyItem tracingPolicyItem;
 
   @Before
   public void setUp() {
     contactTracer = mock(AlertContactTracer.class);
     tracingPolicy = mock(TracingPolicy.class);
     distributionSampler = mock(DistributionSampler.class);
-    tracingDelay1Day = mock(Distribution.class);
-    tracingDelay2Days = mock(Distribution.class);
-    noSkipTracingProbability = mock(Distribution.class);
-    allSkipTracingProbability = mock(Distribution.class);
-    thresholdSkipTracingProbability = mock(Distribution.class);
-    tracingPolicyItem = mock(TracingPolicyItem.class);
+    tracingDelay1Day = mock(BoundedDistribution.class);
+    tracingDelay2Days = mock(BoundedDistribution.class);
+    noSkipTracingProbability = mock(BoundedDistribution.class);
+    allSkipTracingProbability = mock(BoundedDistribution.class);
+    thresholdSkipTracingProbability = mock(BoundedDistribution.class);
 
     when(contactTracer.traceRecentContacts(eq(7), eq(20), eq(1))).thenReturn(Set.of(2, 3));
-    when(tracingPolicy.policies()).thenReturn(List.of(tracingPolicyItem));
-    when(tracingPolicyItem.recentContactsLookBackTime()).thenReturn(14);
-    when(distributionSampler.getDistributionValue(eq(tracingDelay1Day))).thenReturn(1);
-    when(distributionSampler.getDistributionValue(eq(tracingDelay2Days))).thenReturn(2);
-    when(distributionSampler.getDistributionValue(eq(noSkipTracingProbability))).thenReturn(0);
-    when(distributionSampler.getDistributionValue(eq(allSkipTracingProbability))).thenReturn(100);
-    when(distributionSampler.getDistributionValue(eq(thresholdSkipTracingProbability)))
-        .thenReturn(50);
+    when(tracingDelay1Day.getDistributionValue()).thenReturn(1);
+    when(tracingDelay2Days.getDistributionValue()).thenReturn(2);
+    when(noSkipTracingProbability.getDistributionValue()).thenReturn(0);
+    when(allSkipTracingProbability.getDistributionValue()).thenReturn(100);
+    when(thresholdSkipTracingProbability.getDistributionValue()).thenReturn(50);
     when(tracingPolicy.probabilitySkippingTraceLinkThreshold())
         .thenReturn(thresholdSkipTracingProbability);
   }
 
   @Test
   public void testFindRecentContacts_AlertTriggeredWhenSymptomatic() {
-    when(tracingPolicyItem.reporterAlertStatus()).thenReturn(AlertStatus.NONE);
-    when(tracingPolicyItem.reporterVirusStatus()).thenReturn(VirusStatus.SYMPTOMATIC);
-    when(tracingPolicyItem.timeDelayPerTraceLink()).thenReturn(tracingDelay1Day);
-    when(tracingPolicyItem.probabilitySkippingTraceLink()).thenReturn(noSkipTracingProbability);
+    tracingPolicyItem =
+        ImmutableTracingPolicyItem.builder()
+            .recentContactsLookBackTime(14)
+            .reporterAlertStatus(AlertStatus.NONE)
+            .reporterVirusStatus(VirusStatus.SYMPTOMATIC)
+            .timeDelayPerTraceLink(tracingDelay1Day)
+            .probabilitySkippingTraceLink(noSkipTracingProbability)
+            .build();
+    when(tracingPolicy.policies()).thenReturn(List.of(tracingPolicyItem));
 
     var alertChecker = new AlertChecker(tracingPolicy, contactTracer, distributionSampler);
 
@@ -75,10 +75,15 @@ public class AlertCheckerTest {
 
   @Test
   public void testFindRecentContacts_OnlyAlertAfterPositiveTest_RequestTest() {
-    when(tracingPolicyItem.reporterAlertStatus()).thenReturn(AlertStatus.TESTED_POSITIVE);
-    when(tracingPolicyItem.reporterVirusStatus()).thenReturn(VirusStatus.SYMPTOMATIC);
-    when(tracingPolicyItem.timeDelayPerTraceLink()).thenReturn(tracingDelay1Day);
-    when(tracingPolicyItem.probabilitySkippingTraceLink()).thenReturn(noSkipTracingProbability);
+    tracingPolicyItem =
+        ImmutableTracingPolicyItem.builder()
+            .recentContactsLookBackTime(14)
+            .reporterAlertStatus(AlertStatus.TESTED_POSITIVE)
+            .reporterVirusStatus(VirusStatus.SYMPTOMATIC)
+            .timeDelayPerTraceLink(tracingDelay1Day)
+            .probabilitySkippingTraceLink(noSkipTracingProbability)
+            .build();
+    when(tracingPolicy.policies()).thenReturn(List.of(tracingPolicyItem));
 
     var alertChecker = new AlertChecker(tracingPolicy, contactTracer, distributionSampler);
 
@@ -95,10 +100,15 @@ public class AlertCheckerTest {
 
   @Test
   public void testFindRecentContacts_OnlyAlertAfterPositiveTest_AlertContacts() {
-    when(tracingPolicyItem.reporterAlertStatus()).thenReturn(AlertStatus.TESTED_POSITIVE);
-    when(tracingPolicyItem.reporterVirusStatus()).thenReturn(VirusStatus.SYMPTOMATIC);
-    when(tracingPolicyItem.timeDelayPerTraceLink()).thenReturn(tracingDelay1Day);
-    when(tracingPolicyItem.probabilitySkippingTraceLink()).thenReturn(noSkipTracingProbability);
+    tracingPolicyItem =
+        ImmutableTracingPolicyItem.builder()
+            .recentContactsLookBackTime(14)
+            .reporterAlertStatus(AlertStatus.TESTED_POSITIVE)
+            .reporterVirusStatus(VirusStatus.SYMPTOMATIC)
+            .timeDelayPerTraceLink(tracingDelay1Day)
+            .probabilitySkippingTraceLink(noSkipTracingProbability)
+            .build();
+    when(tracingPolicy.policies()).thenReturn(List.of(tracingPolicyItem));
 
     var alertChecker = new AlertChecker(tracingPolicy, contactTracer, distributionSampler);
 
@@ -116,10 +126,15 @@ public class AlertCheckerTest {
 
   @Test
   public void testFindRecentContacts_DelayedTracing() {
-    when(tracingPolicyItem.reporterAlertStatus()).thenReturn(AlertStatus.NONE);
-    when(tracingPolicyItem.reporterVirusStatus()).thenReturn(VirusStatus.SYMPTOMATIC);
-    when(tracingPolicyItem.timeDelayPerTraceLink()).thenReturn(tracingDelay2Days);
-    when(tracingPolicyItem.probabilitySkippingTraceLink()).thenReturn(noSkipTracingProbability);
+    tracingPolicyItem =
+        ImmutableTracingPolicyItem.builder()
+            .recentContactsLookBackTime(14)
+            .reporterAlertStatus(AlertStatus.NONE)
+            .reporterVirusStatus(VirusStatus.SYMPTOMATIC)
+            .timeDelayPerTraceLink(tracingDelay2Days)
+            .probabilitySkippingTraceLink(noSkipTracingProbability)
+            .build();
+    when(tracingPolicy.policies()).thenReturn(List.of(tracingPolicyItem));
 
     var alertChecker = new AlertChecker(tracingPolicy, contactTracer, distributionSampler);
 
@@ -139,10 +154,15 @@ public class AlertCheckerTest {
 
   @Test
   public void testFindRecentContacts_SkipTracing() {
-    when(tracingPolicyItem.reporterAlertStatus()).thenReturn(AlertStatus.NONE);
-    when(tracingPolicyItem.reporterVirusStatus()).thenReturn(VirusStatus.SYMPTOMATIC);
-    when(tracingPolicyItem.timeDelayPerTraceLink()).thenReturn(tracingDelay1Day);
-    when(tracingPolicyItem.probabilitySkippingTraceLink()).thenReturn(allSkipTracingProbability);
+    tracingPolicyItem =
+        ImmutableTracingPolicyItem.builder()
+            .recentContactsLookBackTime(14)
+            .reporterAlertStatus(AlertStatus.NONE)
+            .reporterVirusStatus(VirusStatus.SYMPTOMATIC)
+            .timeDelayPerTraceLink(tracingDelay1Day)
+            .probabilitySkippingTraceLink(allSkipTracingProbability)
+            .build();
+    when(tracingPolicy.policies()).thenReturn(List.of(tracingPolicyItem));
 
     var alertChecker = new AlertChecker(tracingPolicy, contactTracer, distributionSampler);
 

@@ -16,6 +16,7 @@ mainClassName = 'uk.co.ramp.Framework'
 repositories {
     mavenCentral()
     jcenter()
+    maven { url 'https://jitpack.io' }
 }
 
 dependencies {
@@ -30,7 +31,9 @@ dependencies {
     implementation 'com.fasterxml.jackson.dataformat:jackson-dataformat-csv:2.11.0'
     implementation "org.immutables:value-annotations:2.8.8"
     implementation "org.immutables:gson:2.8.8"
-
+    implementation 'com.github.ScottishCovidResponse:data_pipeline_api:master-SNAPSHOT' // TODO replace master-SNAPSHOT with data_pipeline_api release tag number once >= 0.7.0 is released
+    compile group: 'com.fasterxml.jackson.datatype', name: 'jackson-datatype-guava', version: '2.11.1'
+    compile group: 'com.fasterxml.jackson.datatype', name: 'jackson-datatype-jdk8', version: '2.11.1'
     testAnnotationProcessor "org.immutables:value:2.8.8"
     testImplementation 'org.springframework.boot:spring-boot-starter-test:2.2.7.RELEASE'
     testImplementation 'junit:junit:4.12'
@@ -60,7 +63,7 @@ sonarqube {
 }
 
 task copyFilesToInstall(type: Copy) {
-    from "contacts.csv", "populationSettings.json", "runSettings.json", "diseaseProperies.json", "isolationPolicies.json"
+    from "contacts.csv", "runSettings.json", "isolationPolicies.json"
     into "$buildDir/install/ContactTracing/bin/"
 }
 

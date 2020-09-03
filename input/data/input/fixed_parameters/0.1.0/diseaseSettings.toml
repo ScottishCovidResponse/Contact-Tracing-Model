@@ -1,0 +1,105 @@
+[test-positive-accuracy]
+type = "point-estimate"
+value = 0.95
+
+[test-negative-accuracy]
+type = "point-estimate"
+value = 0.95
+
+[exposure-threshold]
+type = "point-estimate"
+value = 50.0
+
+[exposure-probability-4-unit-contact]
+type = "point-estimate"
+value = 0.01
+
+[exposure-exponent]
+type = "point-estimate"
+value = 1.0
+
+[random-infection-rate]
+type = "point-estimate"
+value = 0.0005
+
+[time-latent-distribution]
+type = "distribution"
+distribution = "exponential"
+scale = 5.0
+
+[time-latent-max]
+type = "point-estimate"
+value = 8.0
+
+[time-recovery-asymp-distribution]
+type = "distribution"
+distribution = "exponential"
+scale = 5.0
+
+[time-recovery-asymp-max]
+type = "point-estimate"
+value = 8.0
+
+[time-recovery-symp-distribution]
+type = "distribution"
+distribution = "exponential"
+scale = 5.0
+
+[time-recovery-symp-max]
+type = "point-estimate"
+value = 8.0
+
+
+[time-recovery-sev-distribution]
+type = "distribution"
+distribution = "exponential"
+scale = 5.0
+
+[time-recovery-sev-max]
+type = "point-estimate"
+value = 8.0
+
+[time-symptoms-onset-distribution]
+type = "distribution"
+distribution = "exponential"
+scale = 5.0
+
+[time-symptoms-onset-max]
+type = "point-estimate"
+value = 8.0
+
+[time-decline-distribution]
+type = "distribution"
+distribution = "exponential"
+scale = 5.0
+
+[time-decline-max]
+type = "point-estimate"
+value = 8.0
+
+[time-death-distribution]
+type = "distribution"
+distribution = "exponential"
+scale = 5.0
+
+[time-death-max]
+type = "point-estimate"
+value = 8.0
+
+[time-test-administered-distribution]
+type = "distribution"
+distribution = "exponential"
+scale = 1.0
+
+[time-test-administered-max]
+type = "point-estimate"
+value = 3.0
+
+[time-test-result-distribution]
+type = "distribution"
+distribution = "exponential"
+scale = 1.0
+
+[time-test-result-max]
+type = "point-estimate"
+value = 3.0

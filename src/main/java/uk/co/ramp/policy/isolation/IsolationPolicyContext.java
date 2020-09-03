@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.Reader;
+import org.apache.commons.math3.random.RandomDataGenerator;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.boot.SpringBootConfiguration;
@@ -25,18 +26,23 @@ public class IsolationPolicyContext {
       DiseaseProperties diseaseProperties,
       DistributionSampler distributionSampler,
       IsolationProperties isolationProperties,
-      StatisticsRecorder statisticsRecorder) {
+      StatisticsRecorder statisticsRecorder,
+      RandomDataGenerator rng) {
     var singleCaseIsolationPolicy =
         new SingleCaseIsolationPolicy(
-            isolationProperties, distributionSampler, standardProperties, statisticsRecorder);
+            isolationProperties,
+            distributionSampler,
+            standardProperties,
+            statisticsRecorder,
+            rng.getRandomGenerator());
     return new ContactIsolationPolicy(singleCaseIsolationPolicy, diseaseProperties);
   }
 
   @Bean
-  IsolationProperties isolationProperties(InputFiles inputFiles) {
+  IsolationProperties isolationProperties(InputFiles inputFiles, RandomDataGenerator rng) {
     String location = inputFiles.isolationPolicies();
     try (Reader reader = new FileReader(new File(location))) {
-      return new IsolationPropertiesReader().read(reader);
+      return new IsolationPropertiesReader(rng.getRandomGenerator()).read(reader);
     } catch (IOException e) {
       String message =
           "An error occurred while parsing the isolation policy properties at " + location;

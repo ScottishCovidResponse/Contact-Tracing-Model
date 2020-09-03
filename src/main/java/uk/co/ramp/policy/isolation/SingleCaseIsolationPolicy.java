@@ -1,30 +1,26 @@
 package uk.co.ramp.policy.isolation;
 
-import static uk.co.ramp.distribution.ProgressionDistribution.FLAT;
-
 import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+import org.apache.commons.math3.random.RandomGenerator;
 import org.immutables.value.Value;
-import uk.co.ramp.distribution.Distribution;
+import uk.co.ramp.distribution.BoundedDistribution;
 import uk.co.ramp.distribution.DistributionSampler;
-import uk.co.ramp.distribution.ImmutableDistribution;
+import uk.co.ramp.distribution.ImmutableBoundedDistribution;
 import uk.co.ramp.io.types.StandardProperties;
 import uk.co.ramp.people.AlertStatus;
 import uk.co.ramp.people.Case;
 import uk.co.ramp.people.VirusStatus;
 import uk.co.ramp.statistics.StatisticsRecorder;
+import uk.ramp.distribution.Distribution.DistributionType;
+import uk.ramp.distribution.ImmutableDistribution;
 
 class SingleCaseIsolationPolicy {
   private final IsolationProperties isolationProperties;
   private final StandardProperties properties;
   private final DistributionSampler distributionSampler;
-  private final Distribution infinityDistribution =
-      ImmutableDistribution.builder()
-          .type(FLAT)
-          .mean(Double.MAX_VALUE)
-          .max(Double.MAX_VALUE)
-          .build();
+  private final BoundedDistribution infinityBoundedDistribution;
 
   @Value.Immutable
   interface IsolationMapValue {
@@ -42,11 +38,22 @@ class SingleCaseIsolationPolicy {
       IsolationProperties isolationProperties,
       DistributionSampler distributionSampler,
       StandardProperties properties,
-      StatisticsRecorder statisticsRecorder) {
+      StatisticsRecorder statisticsRecorder,
+      RandomGenerator rng) {
     this.isolationProperties = isolationProperties;
     this.distributionSampler = distributionSampler;
     this.properties = properties;
     this.statisticsRecorder = statisticsRecorder;
+    this.infinityBoundedDistribution =
+        ImmutableBoundedDistribution.builder()
+            .distribution(
+                ImmutableDistribution.builder()
+                    .internalType(DistributionType.empirical)
+                    .empiricalSamples(List.of(Double.MAX_VALUE))
+                    .rng(rng)
+                    .build())
+            .max(Double.MAX_VALUE)
+            .build();
   }
 
   private IsolationProperty findRelevantIsolationProperty(
@@ -179,15 +186,15 @@ class SingleCaseIsolationPolicy {
             currentTime,
             exposedTime);
     int requiredIsolationTime =
-        distributionSampler.getDistributionValue(
-                matchingIsolationProperty.isolationTimeDistribution().orElse(infinityDistribution))
+        matchingIsolationProperty
+                .isolationTimeDistribution()
+                .orElse(infinityBoundedDistribution)
+                .getDistributionValue()
             * properties.timeStepsPerDay();
     double threshold =
-        distributionSampler.getDistributionValue(
-            isolationProperties.isolationProbabilityDistributionThreshold());
+        isolationProperties.isolationProbabilityDistributionThreshold().getDistributionValue();
     double requiredIsolationFactor =
-        distributionSampler.getDistributionValue(
-            matchingIsolationProperty.isolationProbabilityDistribution());
+        matchingIsolationProperty.isolationProbabilityDistribution().getDistributionValue();
     boolean timedPolicy = matchingIsolationProperty.isolationTimeDistribution().isPresent();
     boolean isDefaultPolicy = isolationProperties.defaultPolicy().equals(matchingIsolationProperty);
     boolean overrideComplianceAndForcePolicy =

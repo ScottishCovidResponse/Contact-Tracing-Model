@@ -3,7 +3,6 @@ package uk.co.ramp.io.readers;
 import static org.assertj.core.api.Assertions.assertThat;
 import static uk.co.ramp.people.VirusStatus.*;
 
-import com.google.gson.JsonParser;
 import java.io.*;
 import org.junit.Test;
 import uk.co.ramp.io.InfectionRates;
@@ -33,19 +32,5 @@ public class InfectionRateReaderTest {
     assertThat(infectionRates.getInfectionRate(ASYMPTOMATIC)).isEqualTo(0.5);
     assertThat(infectionRates.getInfectionRate(PRESYMPTOMATIC)).isEqualTo(0.4);
     assertThat(infectionRates.getInfectionRate(DEAD)).isEqualTo(0d);
-  }
-
-  @Test
-  public void testCreate() throws IOException {
-    var stringWriter = new StringWriter();
-    try (BufferedWriter bw = new BufferedWriter(stringWriter)) {
-      new InfectionRateReader().create(bw);
-    }
-
-    var expectedInputFilesJsonElement = JsonParser.parseString(object);
-    var actualRatesString = stringWriter.toString();
-    var actualRatesJsonElement = JsonParser.parseString(actualRatesString);
-
-    assertThat(actualRatesJsonElement).isEqualTo(expectedInputFilesJsonElement);
   }
 }

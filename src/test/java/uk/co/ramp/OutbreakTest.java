@@ -22,10 +22,7 @@ import uk.co.ramp.event.CompletionEventListGroup;
 import uk.co.ramp.event.types.ContactEvent;
 import uk.co.ramp.event.types.ImmutableContactEvent;
 import uk.co.ramp.io.InitialCaseReader;
-import uk.co.ramp.io.types.CmptRecord;
-import uk.co.ramp.io.types.DiseaseProperties;
-import uk.co.ramp.io.types.PopulationProperties;
-import uk.co.ramp.io.types.StandardProperties;
+import uk.co.ramp.io.types.*;
 import uk.co.ramp.people.Case;
 import uk.co.ramp.people.Human;
 
@@ -45,13 +42,15 @@ public class OutbreakTest {
   @Autowired private Outbreak outbreak;
   @Autowired private CompletionEventListGroup eventListGroup;
   @Autowired private PopulationProperties populationProperties;
+  @Autowired private AgeDependentHealthList ageDependentHealthList;
 
   private DiseaseProperties diseaseProperties;
 
   @Before
-  public void setUp() throws FileNotFoundException {
+  public void setUp() {
     this.diseaseProperties = TestUtils.diseaseProperties();
     populationProperties = mock(PopulationProperties.class);
+    ageDependentHealthList = mock(AgeDependentHealthList.class);
     when(populationProperties.testCapacity()).thenReturn(1d);
     when(populationProperties.appUptake()).thenReturn(1d);
   }

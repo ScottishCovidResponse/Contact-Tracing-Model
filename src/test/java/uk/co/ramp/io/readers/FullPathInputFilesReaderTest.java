@@ -23,20 +23,20 @@ public class FullPathInputFilesReaderTest {
           + "  \"initialExposures\": \"initialExposures.csv\",\n"
           + "  \"tracingPolicies\": \"tracingPolicies.json\",\n"
           + "  \"isolationPolicies\": \"isolationPolicies.json\",\n"
-          + "  \"infectionRates\": \"infectionRates.json\"\n"
+          + "  \"infectionRates\": \"infectionRates.json\",\n"
+          + "  \"ageDependentHealth\": \"ageDependentHealth.json\"\n"
           + "}";
 
   private final InputFiles baseInputFiles =
       ImmutableInputFiles.builder()
           .contactData("contactData.csv")
           .ageData("ageData.csv")
-          .diseaseSettings("diseaseSettings.json")
           .initialExposures("initialExposures.csv")
           .isolationPolicies("isolationPolicies.json")
-          .populationSettings("populationSettings.json")
           .runSettings("runSettings.json")
           .tracingPolicies("tracingPolicies.json")
           .infectionRates("infectionRates.json")
+          .ageDependentHealth("ageDependentHealth.json")
           .build();
 
   private final String overrideInputFolderLocation = "overrideFolder1";
@@ -61,13 +61,12 @@ public class FullPathInputFilesReaderTest {
         ImmutableInputFiles.builder()
             .contactData("defaultInputFolder/contactData.csv")
             .ageData("defaultInputFolder/ageData.csv")
-            .diseaseSettings("defaultInputFolder/diseaseSettings.json")
             .initialExposures("defaultInputFolder/initialExposures.csv")
             .isolationPolicies("overrideFolder1/isolationPolicies.json")
-            .populationSettings("defaultInputFolder/populationSettings.json")
             .runSettings("defaultInputFolder/runSettings.json")
             .tracingPolicies("overrideFolder1/tracingPolicies.json")
             .infectionRates("defaultInputFolder/infectionRates.json")
+            .ageDependentHealth("defaultInputFolder/ageDependentHealth.json")
             .build();
 
     assertThat(reader.read(underLyingBaseInputFilesReader)).isEqualTo(expectedInputFiles);

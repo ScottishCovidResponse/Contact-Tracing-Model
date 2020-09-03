@@ -2,99 +2,91 @@ package uk.co.ramp.io.readers;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.data.Offset.offset;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
-import com.google.gson.JsonParser;
 import java.io.*;
+import org.apache.commons.math3.random.RandomGenerator;
+import org.junit.Before;
 import org.junit.Test;
 import uk.co.ramp.io.types.PopulationProperties;
-import uk.co.ramp.utilities.ImmutableMinMax;
+import uk.ramp.api.StandardApi;
+import uk.ramp.distribution.Distribution;
+import uk.ramp.distribution.Distribution.DistributionType;
+import uk.ramp.distribution.ImmutableDistribution;
+import uk.ramp.distribution.ImmutableMinMax;
+import uk.ramp.distribution.MinMax;
 
 public class PopulationPropertiesReaderTest {
-  private static final String mockPopulationProperties =
-      "{ "
-          + "  'populationDistribution': { "
-          + "    '0': 0.1759, "
-          + "    '1': 0.1171, "
-          + "    '2': 0.4029, "
-          + "    '3': 0.1222, "
-          + "    '4': 0.1819 "
-          + "  }, "
-          + "  'ageDependence': { "
-          + "    '0': 0.9, "
-          + "    '1': 0.6, "
-          + "    '2': 0.2, "
-          + "    '3': 0.8, "
-          + "    '4': 0.4 "
-          + "  }, "
-          + "  populationAges: { "
-          + "    '0': { "
-          + "      'min': 0, "
-          + "      'max': 14 "
-          + "    }, "
-          + "    '1': { "
-          + "      'min': 15, "
-          + "      'max': 24 "
-          + "    }, "
-          + "    '2': { "
-          + "      'min': 25, "
-          + "      'max': 54 "
-          + "    }, "
-          + "    '3': { "
-          + "      'min': 55, "
-          + "      'max': 64 "
-          + "    }, "
-          + "    '4': { "
-          + "      'min': 65, "
-          + "      'max': 90 "
-          + "    } "
-          + "  }, "
-          + "  'genderBalance': 0.99 ,"
-          + "  'testCapacity' : 0.01,"
-          + "  'appUptake' : 0.7"
-          + "}";
+  private final MinMax bin1 =
+      ImmutableMinMax.builder()
+          .lowerBoundary(0)
+          .upperBoundary(14)
+          .isLowerInclusive(true)
+          .isUpperInclusive(true)
+          .build();
+  private final MinMax bin2 =
+      ImmutableMinMax.builder()
+          .lowerBoundary(15)
+          .upperBoundary(24)
+          .isLowerInclusive(true)
+          .isUpperInclusive(true)
+          .build();
+  private final MinMax bin3 =
+      ImmutableMinMax.builder()
+          .lowerBoundary(25)
+          .upperBoundary(54)
+          .isLowerInclusive(true)
+          .isUpperInclusive(true)
+          .build();
+  private final MinMax bin4 =
+      ImmutableMinMax.builder()
+          .lowerBoundary(55)
+          .upperBoundary(64)
+          .isLowerInclusive(true)
+          .isUpperInclusive(true)
+          .build();
+  private final MinMax bin5 =
+      ImmutableMinMax.builder()
+          .lowerBoundary(65)
+          .upperBoundary(90)
+          .isLowerInclusive(true)
+          .isUpperInclusive(true)
+          .build();
+  private final Distribution distribution =
+      ImmutableDistribution.builder()
+          .internalType(DistributionType.categorical)
+          .addBins(bin1, bin2, bin3, bin4, bin5)
+          .addWeights(0.1759, 0.1171, 0.4029, 0.1222, 0.1819)
+          .rng(mock(RandomGenerator.class))
+          .build();
 
-  @Test
-  public void testRead() {
-    var underlyingReader = new BufferedReader(new StringReader(mockPopulationProperties));
-    var reader = new PopulationPropertiesReader();
-    PopulationProperties populationProperties = reader.read(underlyingReader);
+  private StandardApi dataPipelineApi;
 
-    assertThat(populationProperties.genderBalance()).isCloseTo(0.99, offset(1e-6));
-
-    assertThat(populationProperties.populationDistribution()).containsOnlyKeys(0, 1, 2, 3, 4);
-    assertThat(populationProperties.populationDistribution().get(0))
-        .isCloseTo(0.1759, offset(1e-6));
-    assertThat(populationProperties.populationDistribution().get(1))
-        .isCloseTo(0.1171, offset(1e-6));
-    assertThat(populationProperties.populationDistribution().get(2))
-        .isCloseTo(0.4029, offset(1e-6));
-    assertThat(populationProperties.populationDistribution().get(3))
-        .isCloseTo(0.1222, offset(1e-6));
-    assertThat(populationProperties.populationDistribution().get(4))
-        .isCloseTo(0.1819, offset(1e-6));
-
-    assertThat(populationProperties.populationAges()).containsOnlyKeys(0, 1, 2, 3, 4);
-    assertThat(populationProperties.populationAges().get(0)).isEqualTo(ImmutableMinMax.of(0, 14));
-    assertThat(populationProperties.populationAges().get(1)).isEqualTo(ImmutableMinMax.of(15, 24));
-    assertThat(populationProperties.populationAges().get(2)).isEqualTo(ImmutableMinMax.of(25, 54));
-    assertThat(populationProperties.populationAges().get(3)).isEqualTo(ImmutableMinMax.of(55, 64));
-    assertThat(populationProperties.populationAges().get(4)).isEqualTo(ImmutableMinMax.of(65, 90));
+  @Before
+  public void setUp() {
+    this.dataPipelineApi = mock(StandardApi.class);
+    when(dataPipelineApi.readDistribution(
+            eq("population_parameters"), eq("population-distribution")))
+        .thenReturn(distribution);
+    when(dataPipelineApi.readEstimate(eq("population_parameters"), eq("gender-balance")))
+        .thenReturn(0.99);
+    when(dataPipelineApi.readEstimate(eq("population_parameters"), eq("app-uptake")))
+        .thenReturn(0.7);
+    when(dataPipelineApi.readEstimate(eq("population_parameters"), eq("test-capacity")))
+        .thenReturn(0.01);
   }
 
   @Test
-  public void testCreate() throws IOException {
-    var stringWriter = new StringWriter();
-    try (BufferedWriter bw = new BufferedWriter(stringWriter)) {
-      new PopulationPropertiesReader().create(bw);
-    }
+  public void testRead() {
+    var reader = new PopulationPropertiesReader(dataPipelineApi);
+    PopulationProperties populationProperties = reader.read();
 
-    var expectedPopulationSettingsJsonElement = JsonParser.parseString(mockPopulationProperties);
+    assertThat(populationProperties.genderBalance()).isCloseTo(0.99, offset(1e-6));
+    assertThat(populationProperties.appUptake()).isCloseTo(0.7, offset(1e-6));
+    assertThat(populationProperties.testCapacity()).isCloseTo(0.01, offset(1e-6));
 
-    var actualPopulationSettingsString = stringWriter.toString();
-    var actualPopulationSettingsJsonElement =
-        JsonParser.parseString(actualPopulationSettingsString);
-
-    assertThat(actualPopulationSettingsJsonElement)
-        .isEqualTo(expectedPopulationSettingsJsonElement);
+    assertThat(populationProperties.distribution()).isEqualTo(distribution);
   }
 }

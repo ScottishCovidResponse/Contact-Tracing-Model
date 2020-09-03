@@ -1,27 +1,29 @@
 package uk.co.ramp.policy.isolation;
 
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.google.common.base.Preconditions;
 import java.util.List;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
-import org.immutables.gson.Gson.TypeAdapters;
 import org.immutables.value.Value;
 import org.immutables.value.Value.Immutable;
-import uk.co.ramp.distribution.Distribution;
+import uk.co.ramp.distribution.BoundedDistribution;
 
-@TypeAdapters
+@JsonSerialize
+@JsonDeserialize
 @Immutable
 interface IsolationProperties {
-  List<ProportionInfectedIsolationProperty> globalIsolationPolicies();
+  List<ImmutableProportionInfectedIsolationProperty> globalIsolationPolicies();
 
-  List<VirusStatusIsolationProperty> virusStatusPolicies();
+  List<ImmutableVirusStatusIsolationProperty> virusStatusPolicies();
 
-  List<AlertStatusIsolationProperty> alertStatusPolicies();
+  List<ImmutableAlertStatusIsolationProperty> alertStatusPolicies();
 
-  IsolationProperty defaultPolicy();
+  ImmutableIsolationProperty defaultPolicy();
 
-  Distribution isolationProbabilityDistributionThreshold();
+  BoundedDistribution isolationProbabilityDistributionThreshold();
 
   @Value.Check
   default void check() {

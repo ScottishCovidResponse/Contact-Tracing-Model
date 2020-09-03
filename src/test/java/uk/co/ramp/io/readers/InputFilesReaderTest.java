@@ -2,7 +2,6 @@ package uk.co.ramp.io.readers;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-import com.google.gson.JsonParser;
 import java.io.*;
 import org.junit.Test;
 import uk.co.ramp.io.types.ImmutableInputFiles;
@@ -13,14 +12,13 @@ public class InputFilesReaderTest {
   private static final String mockInputLocations =
       "{\n"
           + "  \"runSettings\": \"runSettings.json\",\n"
-          + "  \"populationSettings\": \"populationSettings.json\",\n"
-          + "  \"diseaseSettings\": \"diseaseSettings.json\",\n"
           + "  \"contactData\": \"contactData.csv\",\n"
           + "  \"ageData\": \"ageData.csv\",\n"
           + "  \"initialExposures\": \"initialExposures.csv\",\n"
           + "  \"tracingPolicies\": \"tracingPolicies.json\",\n"
           + "  \"isolationPolicies\": \"isolationPolicies.json\",\n"
-          + "  \"infectionRates\": \"infectionRates.json\"\n"
+          + "  \"infectionRates\": \"infectionRates.json\",\n"
+          + "  \"ageDependentHealth\": \"ageDependentHealth.json\"\n"
           + "}";
 
   @Test
@@ -32,31 +30,15 @@ public class InputFilesReaderTest {
 
     var expectedInputLocation =
         ImmutableInputFiles.builder()
-            .diseaseSettings("diseaseSettings.json")
             .contactData("contactData.csv")
             .ageData("ageData.csv")
             .initialExposures("initialExposures.csv")
-            .populationSettings("populationSettings.json")
             .runSettings("runSettings.json")
             .tracingPolicies("tracingPolicies.json")
             .isolationPolicies("isolationPolicies.json")
             .infectionRates("infectionRates.json")
+            .ageDependentHealth("ageDependentHealth.json")
             .build();
     assertThat(actualInputLocations).isEqualTo(expectedInputLocation);
-  }
-
-  @Test
-  public void testCreate() throws IOException {
-    var stringWriter = new StringWriter();
-    try (BufferedWriter bw = new BufferedWriter(stringWriter)) {
-      new InputFilesReader().create(bw);
-    }
-
-    var expectedInputFilesJsonElement = JsonParser.parseString(mockInputLocations);
-
-    var actualInputFilesString = stringWriter.toString();
-    var actualInputFilesJsonElement = JsonParser.parseString(actualInputFilesString);
-
-    assertThat(actualInputFilesJsonElement).isEqualTo(expectedInputFilesJsonElement);
   }
 }
