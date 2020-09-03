@@ -16,8 +16,6 @@ public class InfectionRateReaderTest {
           + "  \"ASYMPTOMATIC\": 0.5,\n"
           + "  \"PRESYMPTOMATIC\":0.4\n"
           + "}";
-  private final String object =
-      "{\"infectionRates\":{\"PRESYMPTOMATIC\":0.4,\"SEVERELY_SYMPTOMATIC\":1.0,\"SYMPTOMATIC\":0.9,\"ASYMPTOMATIC\":0.5}}";
 
   private final Reader reader = new StringReader(mockRates);
 

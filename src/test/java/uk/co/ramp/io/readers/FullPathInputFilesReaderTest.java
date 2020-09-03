@@ -13,19 +13,6 @@ import uk.co.ramp.io.types.ImmutableInputFiles;
 import uk.co.ramp.io.types.InputFiles;
 
 public class FullPathInputFilesReaderTest {
-  private final String baseInputLocations =
-      "{\n"
-          + "  \"runSettings\": \"runSettings.json\",\n"
-          + "  \"populationSettings\": \"populationSettings.json\",\n"
-          + "  \"diseaseSettings\": \"diseaseSettings.json\",\n"
-          + "  \"contactData\": \"contactData.csv\",\n"
-          + "  \"ageData\": \"ageData.csv\",\n"
-          + "  \"initialExposures\": \"initialExposures.csv\",\n"
-          + "  \"tracingPolicies\": \"tracingPolicies.json\",\n"
-          + "  \"isolationPolicies\": \"isolationPolicies.json\",\n"
-          + "  \"infectionRates\": \"infectionRates.json\",\n"
-          + "  \"ageDependentHealth\": \"ageDependentHealth.json\"\n"
-          + "}";
 
   private final InputFiles baseInputFiles =
       ImmutableInputFiles.builder()

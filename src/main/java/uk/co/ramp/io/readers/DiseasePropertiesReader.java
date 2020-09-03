@@ -10,55 +10,50 @@ import uk.ramp.distribution.ImmutableDistribution;
 
 public class DiseasePropertiesReader {
   private final StandardApi dataPipelineApi;
+  private final String fixed_parameters = "fixed_parameters";
 
   public DiseasePropertiesReader(StandardApi dataPipelineApi) {
     this.dataPipelineApi = dataPipelineApi;
   }
 
   public DiseaseProperties read() {
-    double testPositiveAccuracy = readEstimate("fixed_parameters", "test-positive-accuracy");
-    double testNegativeAccuracy = readEstimate("fixed_parameters", "test-negative-accuracy");
-    double exposureThreshold = readEstimate("fixed_parameters", "exposure-threshold");
-    double exposureProbability4UnitContact =
-        readEstimate("fixed_parameters", "exposure-probability-4-unit-contact");
-    double exposureExponent = readEstimate("fixed_parameters", "exposure-exponent");
-    double randomInfectionRate = readEstimate("fixed_parameters", "random-infection-rate");
 
-    Distribution timeLatentDistribution =
-        readDistribution("fixed_parameters", "time-latent-distribution");
-    double timeLatentMax = readEstimate("fixed_parameters", "time-latent-max");
+    double testPositiveAccuracy = readEstimate("test-positive-accuracy");
+    double testNegativeAccuracy = readEstimate("test-negative-accuracy");
+    double exposureThreshold = readEstimate("exposure-threshold");
+    double exposureProbability4UnitContact = readEstimate("exposure-probability-4-unit-contact");
+    double exposureExponent = readEstimate("exposure-exponent");
+    double randomInfectionRate = readEstimate("random-infection-rate");
+
+    Distribution timeLatentDistribution = readDistribution("time-latent-distribution");
+    double timeLatentMax = readEstimate("time-latent-max");
 
     Distribution timeRecoveryAsympDistribution =
-        readDistribution("fixed_parameters", "time-recovery-asymp-distribution");
-    double timeRecoveryAsympMax = readEstimate("fixed_parameters", "time-recovery-asymp-max");
+        readDistribution("time-recovery-asymp-distribution");
+    double timeRecoveryAsympMax = readEstimate("time-recovery-asymp-max");
 
-    Distribution timeRecoverySympDistribution =
-        readDistribution("fixed_parameters", "time-recovery-symp-distribution");
-    double timeRecoverySympMax = readEstimate("fixed_parameters", "time-recovery-symp-max");
+    Distribution timeRecoverySympDistribution = readDistribution("time-recovery-symp-distribution");
+    double timeRecoverySympMax = readEstimate("time-recovery-symp-max");
 
-    Distribution timeRecoverySevDistribution =
-        readDistribution("fixed_parameters", "time-recovery-sev-distribution");
-    double timeRecoverySevMax = readEstimate("fixed_parameters", "time-recovery-sev-max");
+    Distribution timeRecoverySevDistribution = readDistribution("time-recovery-sev-distribution");
+    double timeRecoverySevMax = readEstimate("time-recovery-sev-max");
 
     Distribution timeSymptomsOnsetDistribution =
-        readDistribution("fixed_parameters", "time-symptoms-onset-distribution");
-    double timeSymptomsOnsetMax = readEstimate("fixed_parameters", "time-symptoms-onset-max");
+        readDistribution("time-symptoms-onset-distribution");
+    double timeSymptomsOnsetMax = readEstimate("time-symptoms-onset-max");
 
-    Distribution timeDeclineDistribution =
-        readDistribution("fixed_parameters", "time-decline-distribution");
-    double timeDeclineMax = readEstimate("fixed_parameters", "time-decline-max");
+    Distribution timeDeclineDistribution = readDistribution("time-decline-distribution");
+    double timeDeclineMax = readEstimate("time-decline-max");
 
-    Distribution timeDeathDistribution =
-        readDistribution("fixed_parameters", "time-death-distribution");
-    double timeDeathMax = readEstimate("fixed_parameters", "time-death-max");
+    Distribution timeDeathDistribution = readDistribution("time-death-distribution");
+    double timeDeathMax = readEstimate("time-death-max");
 
     Distribution timeTestAdministeredDistribution =
-        readDistribution("fixed_parameters", "time-test-administered-distribution");
-    double timeTestAdministeredMax = readEstimate("fixed_parameters", "time-test-administered-max");
+        readDistribution("time-test-administered-distribution");
+    double timeTestAdministeredMax = readEstimate("time-test-administered-max");
 
-    Distribution timeTestResultDistribution =
-        readDistribution("fixed_parameters", "time-test-result-distribution");
-    double timeTestResultMax = readEstimate("fixed_parameters", "time-test-result-max");
+    Distribution timeTestResultDistribution = readDistribution("time-test-result-distribution");
+    double timeTestResultMax = readEstimate("time-test-result-max");
 
     return ImmutableDiseaseProperties.builder()
         .testPositiveAccuracy(testPositiveAccuracy)
@@ -87,11 +82,11 @@ public class DiseasePropertiesReader {
         .build();
   }
 
-  private Distribution readDistribution(String dataProduct, String component) {
-    return dataPipelineApi.readDistribution(dataProduct, component);
+  private Distribution readDistribution(String component) {
+    return dataPipelineApi.readDistribution(fixed_parameters, component);
   }
 
-  private double readEstimate(String dataProduct, String component) {
-    return dataPipelineApi.readEstimate(dataProduct, component).doubleValue();
+  private double readEstimate(String component) {
+    return dataPipelineApi.readEstimate(fixed_parameters, component).doubleValue();
   }
 }

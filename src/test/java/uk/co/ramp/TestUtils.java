@@ -1,5 +1,8 @@
 package uk.co.ramp;
 
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
+
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.Reader;
@@ -177,5 +180,20 @@ public class TestUtils {
                 .modifier(0.4)
                 .build())
         .build();
+  }
+
+  public static BoundedDistribution createMockBoundedDistribution(int mean, int max) {
+    var boundedDistribution = mock(BoundedDistribution.class);
+    Distribution distribution =
+        ImmutableDistribution.builder()
+            .internalType(Distribution.DistributionType.empirical)
+            .internalScale(mean)
+            .empiricalSamples(List.of(mean))
+            .rng(TestUtils.dataGenerator().getRandomGenerator())
+            .build();
+    when(boundedDistribution.distribution()).thenReturn(distribution);
+    when(boundedDistribution.getDistributionValue()).thenReturn(mean);
+    when(boundedDistribution.max()).thenReturn(Double.valueOf(max));
+    return boundedDistribution;
   }
 }

@@ -1,6 +1,5 @@
 package uk.co.ramp.people;
 
-import java.io.FileNotFoundException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -10,7 +9,7 @@ import uk.co.ramp.TestUtils;
 
 public class AgeRetrieverTest {
   @Test
-  public void findAge() throws FileNotFoundException {
+  public void findAge() {
     var ageRetriever = new AgeRetriever(TestUtils.populationProperties(), Map.of());
     int n = 20000;
     List<Integer> ages = new ArrayList<>();
