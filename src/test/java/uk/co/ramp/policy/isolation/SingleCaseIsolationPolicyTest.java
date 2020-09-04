@@ -124,7 +124,8 @@ public class SingleCaseIsolationPolicyTest {
                       .build())
               .build();
 
-  private BoundedDistribution thresholdLinearBoundedDistribution = mock(BoundedDistribution.class);
+  private final BoundedDistribution thresholdLinearBoundedDistribution =
+      createMockBoundedDistribution(50, 100);
 
   private final int currentTime = 0;
   private final int exposedTime = 0;
@@ -138,26 +139,8 @@ public class SingleCaseIsolationPolicyTest {
   @Before
   public void setUp() {
 
-    //    flatZeroPercent = createMockBoundedDistribution(0,0);
-    //    flatHundredPercent = createMockBoundedDistribution(100,100);
-    //    flatOneDay = createMockBoundedDistribution(1,1);
-    //    flatThreeDays = createMockBoundedDistribution(3,3);
-    //    thresholdLinearBoundedDistribution = TestUtils.createMockBoundedDistribution(50,100);
-    //    when(flatZeroPercent.getDistributionValue()).thenReturn(0);
-    //    when(flatZeroPercent.max()).thenReturn(0D);
-    //    when(flatHundredPercent.getDistributionValue()).thenReturn(100);
-    //    when(flatHundredPercent.max()).thenReturn(100D);
-    //    when(flatOneDay.getDistributionValue()).thenReturn(1);
-    //    when(flatOneDay.max()).thenReturn(1D);
-    //    when(flatThreeDays.getDistributionValue()).thenReturn(3);
-    //    when(flatThreeDays.max()).thenReturn(3D);
-    thresholdLinearBoundedDistribution = createMockBoundedDistribution(50, 100);
     when(thresholdLinearBoundedDistribution.getDistributionValue())
         .thenAnswer(returnsElementsOf(List.of(5, 15, 25, 35, 45, 55, 65, 75, 85, 95)));
-    when(thresholdLinearBoundedDistribution.max()).thenReturn(100D);
-    //    Distribution distribution = mock(Distribution.class);
-    //    when(distribution.internalScale()).thenReturn(OptionalDouble.of(50));
-    //    when(thresholdLinearBoundedDistribution.distribution()).thenReturn(distribution);
 
     IsolationProperties isolationProperties =
         ImmutableIsolationProperties.builder()
