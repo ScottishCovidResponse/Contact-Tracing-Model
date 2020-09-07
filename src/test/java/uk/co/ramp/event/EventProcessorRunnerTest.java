@@ -2,7 +2,6 @@ package uk.co.ramp.event;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.mockito.Mockito.*;
-import static uk.co.ramp.people.VirusStatus.*;
 
 import java.util.List;
 import org.junit.Before;

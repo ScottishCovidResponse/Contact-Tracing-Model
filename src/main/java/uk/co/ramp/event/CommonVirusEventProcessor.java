@@ -8,15 +8,12 @@ import org.apache.logging.log4j.Logger;
 import uk.co.ramp.Population;
 import uk.co.ramp.distribution.BoundedDistribution;
 import uk.co.ramp.distribution.DistributionSampler;
-import uk.co.ramp.distribution.ImmutableBoundedDistribution;
 import uk.co.ramp.event.types.CommonVirusEvent;
 import uk.co.ramp.event.types.Event;
 import uk.co.ramp.event.types.EventProcessor;
 import uk.co.ramp.io.types.DiseaseProperties;
 import uk.co.ramp.io.types.StandardProperties;
 import uk.co.ramp.people.VirusStatus;
-import uk.ramp.distribution.Distribution;
-import uk.ramp.distribution.ImmutableDistribution;
 
 public abstract class CommonVirusEventProcessor<T extends Event> implements EventProcessor<T> {
   private static final Logger LOGGER = LogManager.getLogger(CommonVirusEventProcessor.class);
@@ -62,26 +59,40 @@ public abstract class CommonVirusEventProcessor<T extends Event> implements Even
     BoundedDistribution progressionData;
     switch (currentStatus) {
       case EXPOSED:
-        progressionData = scaleWithTimeSteps(diseaseProperties.timeLatent());
+        progressionData =
+            EventProcessor.scaleWithTimeSteps(
+                diseaseProperties.timeLatent(), properties.timeStepsPerDay());
         break;
       case PRESYMPTOMATIC:
-        progressionData = scaleWithTimeSteps(diseaseProperties.timeSymptomsOnset());
+        progressionData =
+            EventProcessor.scaleWithTimeSteps(
+                diseaseProperties.timeSymptomsOnset(), properties.timeStepsPerDay());
         break;
       case ASYMPTOMATIC:
-        progressionData = scaleWithTimeSteps(diseaseProperties.timeRecoveryAsymp());
+        progressionData =
+            EventProcessor.scaleWithTimeSteps(
+                diseaseProperties.timeRecoveryAsymp(), properties.timeStepsPerDay());
         break;
       case SYMPTOMATIC:
         if (newStatus == SEVERELY_SYMPTOMATIC) {
-          progressionData = scaleWithTimeSteps(diseaseProperties.timeDecline());
+          progressionData =
+              EventProcessor.scaleWithTimeSteps(
+                  diseaseProperties.timeDecline(), properties.timeStepsPerDay());
         } else {
-          progressionData = scaleWithTimeSteps(diseaseProperties.timeRecoverySymp());
+          progressionData =
+              EventProcessor.scaleWithTimeSteps(
+                  diseaseProperties.timeRecoverySymp(), properties.timeStepsPerDay());
         }
         break;
       case SEVERELY_SYMPTOMATIC:
         if (newStatus == RECOVERED) {
-          progressionData = scaleWithTimeSteps(diseaseProperties.timeRecoverySev());
+          progressionData =
+              EventProcessor.scaleWithTimeSteps(
+                  diseaseProperties.timeRecoverySev(), properties.timeStepsPerDay());
         } else {
-          progressionData = scaleWithTimeSteps(diseaseProperties.timeDeath());
+          progressionData =
+              EventProcessor.scaleWithTimeSteps(
+                  diseaseProperties.timeDeath(), properties.timeStepsPerDay());
         }
         break;
       default:
@@ -91,27 +102,6 @@ public abstract class CommonVirusEventProcessor<T extends Event> implements Even
     }
 
     return progressionData.getDistributionValue();
-  }
-
-  public BoundedDistribution scaleWithTimeSteps(BoundedDistribution distribution) {
-
-    double scale =
-        distribution.distribution().internalScale().orElse(distribution.max())
-            * properties.timeStepsPerDay();
-
-    Distribution internalDistribution =
-        ImmutableDistribution.builder()
-            .from(distribution.distribution())
-            .internalScale(scale)
-            .rng(distribution.distribution().rng())
-            .internalType(distribution.distribution().internalType())
-            .build();
-
-    return ImmutableBoundedDistribution.builder()
-        .from(distribution)
-        .max(distribution.max() * properties.timeStepsPerDay())
-        .distribution(internalDistribution)
-        .build();
   }
 
   VirusStatus determineInfection(CommonVirusEvent e) {

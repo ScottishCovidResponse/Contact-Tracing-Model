@@ -5,7 +5,6 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static uk.co.ramp.people.VirusStatus.*;
 
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
@@ -71,7 +70,7 @@ public class PopulationGeneratorTest {
   }
 
   @Test
-  public void generate() throws FileNotFoundException {
+  public void generate() {
     int popSize = 100000;
     StandardProperties runSettings = mock(StandardProperties.class);
     when(runSettings.populationSize()).thenReturn(popSize);

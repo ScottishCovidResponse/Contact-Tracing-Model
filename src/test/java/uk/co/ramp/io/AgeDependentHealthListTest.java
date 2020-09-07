@@ -13,48 +13,7 @@ import uk.co.ramp.utilities.ImmutableMinMax;
 
 public class AgeDependentHealthListTest {
 
-  String input =
-      "{\n"
-          + "  \"ageDependentList\": [\n"
-          + "    {\n"
-          + "      \"range\": {\n"
-          + "        \"min\": 0,\n"
-          + "        \"max\": 19\n"
-          + "      },\n"
-          + "      \"modifier\": 1.0\n"
-          + "    },\n"
-          + "    {\n"
-          + "      \"range\": {\n"
-          + "        \"min\": 20,\n"
-          + "        \"max\": 39\n"
-          + "      },\n"
-          + "      \"modifier\": 0.9\n"
-          + "    },\n"
-          + "    {\n"
-          + "      \"range\": {\n"
-          + "        \"min\": 40,\n"
-          + "        \"max\": 59\n"
-          + "      },\n"
-          + "      \"modifier\": 0.8\n"
-          + "    },\n"
-          + "    {\n"
-          + "      \"range\": {\n"
-          + "        \"min\": 60,\n"
-          + "        \"max\": 79\n"
-          + "      },\n"
-          + "      \"modifier\": 0.6\n"
-          + "    },\n"
-          + "    {\n"
-          + "      \"range\": {\n"
-          + "        \"min\": 80,\n"
-          + "        \"max\": 100\n"
-          + "      },\n"
-          + "      \"modifier\": 0.4\n"
-          + "    }\n"
-          + "  ]\n"
-          + "}";
-
-  AgeDependentHealthList dummyList =
+  private final AgeDependentHealthList dummyList =
       ImmutableAgeDependentHealthList.builder()
           .addAgeDependentList(
               ImmutableAgeDependentHealth.builder()
@@ -91,6 +50,46 @@ public class AgeDependentHealthListTest {
 
   @Test
   public void testRead() {
+    String input =
+        "{\n"
+            + "  \"ageDependentList\": [\n"
+            + "    {\n"
+            + "      \"range\": {\n"
+            + "        \"min\": 0,\n"
+            + "        \"max\": 19\n"
+            + "      },\n"
+            + "      \"modifier\": 1.0\n"
+            + "    },\n"
+            + "    {\n"
+            + "      \"range\": {\n"
+            + "        \"min\": 20,\n"
+            + "        \"max\": 39\n"
+            + "      },\n"
+            + "      \"modifier\": 0.9\n"
+            + "    },\n"
+            + "    {\n"
+            + "      \"range\": {\n"
+            + "        \"min\": 40,\n"
+            + "        \"max\": 59\n"
+            + "      },\n"
+            + "      \"modifier\": 0.8\n"
+            + "    },\n"
+            + "    {\n"
+            + "      \"range\": {\n"
+            + "        \"min\": 60,\n"
+            + "        \"max\": 79\n"
+            + "      },\n"
+            + "      \"modifier\": 0.6\n"
+            + "    },\n"
+            + "    {\n"
+            + "      \"range\": {\n"
+            + "        \"min\": 80,\n"
+            + "        \"max\": 100\n"
+            + "      },\n"
+            + "      \"modifier\": 0.4\n"
+            + "    }\n"
+            + "  ]\n"
+            + "}";
     StringReader reader = new StringReader(input);
     var output = ageDependentHealthReader.read(reader);
     assertThat(output).isEqualToComparingFieldByField(dummyList);

@@ -23,7 +23,7 @@ public class StatisticsWriterTest {
 
   private StatisticsWriter statisticsWriter;
   private final Random random = TestUtils.getRandom();
-  private List<ImmutableRValueOutput> rollingAverage = new ArrayList<>();
+  private final List<ImmutableRValueOutput> rollingAverage = new ArrayList<>();
 
   @Before
   public void setup() {

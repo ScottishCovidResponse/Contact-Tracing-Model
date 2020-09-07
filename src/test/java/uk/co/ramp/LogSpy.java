@@ -3,7 +3,6 @@ package uk.co.ramp;
 import ch.qos.logback.classic.Logger;
 import ch.qos.logback.classic.spi.ILoggingEvent;
 import ch.qos.logback.core.read.ListAppender;
-import java.util.List;
 import org.junit.rules.ExternalResource;
 import org.slf4j.LoggerFactory;
 
@@ -27,13 +26,6 @@ public final class LogSpy extends ExternalResource {
   @Override
   protected void after() {
     logger.detachAppender(appender);
-  }
-
-  public List<ILoggingEvent> getEvents() {
-    if (appender == null) {
-      throw new RuntimeException("LogSpy needs to be annotated with @Rule");
-    }
-    return appender.list;
   }
 
   public String getOutput() {

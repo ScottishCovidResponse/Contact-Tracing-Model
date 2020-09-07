@@ -4,38 +4,38 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
+import static uk.co.ramp.TestUtils.createMockBoundedDistribution;
 
 import java.util.List;
 import java.util.Set;
 import org.junit.Before;
 import org.junit.Test;
+import uk.co.ramp.TestUtils;
 import uk.co.ramp.distribution.BoundedDistribution;
-import uk.co.ramp.distribution.DistributionSampler;
 import uk.co.ramp.event.types.ImmutableAlertEvent;
+import uk.co.ramp.io.types.StandardProperties;
 import uk.co.ramp.people.AlertStatus;
 import uk.co.ramp.people.VirusStatus;
 
 public class AlertCheckerTest {
   private AlertContactTracer contactTracer;
   private TracingPolicy tracingPolicy;
-  private DistributionSampler distributionSampler;
   private BoundedDistribution tracingDelay1Day;
   private BoundedDistribution tracingDelay2Days;
   private BoundedDistribution noSkipTracingProbability;
   private BoundedDistribution allSkipTracingProbability;
-  private BoundedDistribution thresholdSkipTracingProbability;
   private ImmutableTracingPolicyItem tracingPolicyItem;
+  private final StandardProperties properties = TestUtils.standardProperties();
 
   @Before
   public void setUp() {
     contactTracer = mock(AlertContactTracer.class);
     tracingPolicy = mock(TracingPolicy.class);
-    distributionSampler = mock(DistributionSampler.class);
     tracingDelay1Day = mock(BoundedDistribution.class);
     tracingDelay2Days = mock(BoundedDistribution.class);
     noSkipTracingProbability = mock(BoundedDistribution.class);
     allSkipTracingProbability = mock(BoundedDistribution.class);
-    thresholdSkipTracingProbability = mock(BoundedDistribution.class);
+    BoundedDistribution thresholdSkipTracingProbability = mock(BoundedDistribution.class);
 
     when(contactTracer.traceRecentContacts(eq(7), eq(20), eq(1))).thenReturn(Set.of(2, 3));
     when(tracingDelay1Day.getDistributionValue()).thenReturn(1);
@@ -45,6 +45,9 @@ public class AlertCheckerTest {
     when(thresholdSkipTracingProbability.getDistributionValue()).thenReturn(50);
     when(tracingPolicy.probabilitySkippingTraceLinkThreshold())
         .thenReturn(thresholdSkipTracingProbability);
+
+    tracingDelay1Day = createMockBoundedDistribution(1, 1);
+    tracingDelay2Days = createMockBoundedDistribution(2, 2);
   }
 
   @Test
@@ -59,7 +62,7 @@ public class AlertCheckerTest {
             .build();
     when(tracingPolicy.policies()).thenReturn(List.of(tracingPolicyItem));
 
-    var alertChecker = new AlertChecker(tracingPolicy, contactTracer, distributionSampler);
+    var alertChecker = new AlertChecker(tracingPolicy, contactTracer, properties);
 
     var event =
         ImmutableAlertEvent.builder()
@@ -85,7 +88,7 @@ public class AlertCheckerTest {
             .build();
     when(tracingPolicy.policies()).thenReturn(List.of(tracingPolicyItem));
 
-    var alertChecker = new AlertChecker(tracingPolicy, contactTracer, distributionSampler);
+    var alertChecker = new AlertChecker(tracingPolicy, contactTracer, properties);
 
     var event =
         ImmutableAlertEvent.builder()
@@ -110,7 +113,7 @@ public class AlertCheckerTest {
             .build();
     when(tracingPolicy.policies()).thenReturn(List.of(tracingPolicyItem));
 
-    var alertChecker = new AlertChecker(tracingPolicy, contactTracer, distributionSampler);
+    var alertChecker = new AlertChecker(tracingPolicy, contactTracer, properties);
 
     var event =
         ImmutableAlertEvent.builder()
@@ -136,7 +139,7 @@ public class AlertCheckerTest {
             .build();
     when(tracingPolicy.policies()).thenReturn(List.of(tracingPolicyItem));
 
-    var alertChecker = new AlertChecker(tracingPolicy, contactTracer, distributionSampler);
+    var alertChecker = new AlertChecker(tracingPolicy, contactTracer, properties);
 
     var event =
         ImmutableAlertEvent.builder()
@@ -164,7 +167,7 @@ public class AlertCheckerTest {
             .build();
     when(tracingPolicy.policies()).thenReturn(List.of(tracingPolicyItem));
 
-    var alertChecker = new AlertChecker(tracingPolicy, contactTracer, distributionSampler);
+    var alertChecker = new AlertChecker(tracingPolicy, contactTracer, properties);
 
     var event =
         ImmutableAlertEvent.builder()
