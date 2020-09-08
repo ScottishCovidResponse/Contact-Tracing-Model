@@ -144,7 +144,7 @@ public class StatisticsRecorderImpl implements StatisticsRecorder {
 
         rValueOutputs.add(
             ImmutableRValueOutput.builder()
-                .time(i)
+                .time((double) i / properties.timeStepsPerDay())
                 .newInfectors(orDefault.size())
                 .newInfections(seeded)
                 .r(r)

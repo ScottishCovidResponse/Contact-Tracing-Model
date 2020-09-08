@@ -13,7 +13,7 @@ import org.immutables.value.Value;
 @JsonPropertyOrder({"time", "newInfectors", "newInfections", "r", "sevenDayAverageR"})
 public interface RValueOutput {
 
-  int time();
+  double time();
 
   int newInfectors();
 
