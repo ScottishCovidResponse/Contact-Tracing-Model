@@ -1,7 +1,5 @@
 package uk.co.ramp.io.readers;
 
-import static uk.co.ramp.people.VirusStatus.*;
-
 import com.google.gson.GsonBuilder;
 import com.google.gson.TypeAdapterFactory;
 import com.google.gson.reflect.TypeToken;

@@ -1,7 +1,6 @@
 package uk.co.ramp.policy.isolation;
 
 import com.fasterxml.jackson.core.JsonParser;
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.DeserializationContext;
 import com.fasterxml.jackson.databind.JsonDeserializer;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -27,7 +26,7 @@ public class BoundedDistributionDeserializer extends JsonDeserializer<BoundedDis
 
   @Override
   public BoundedDistribution deserialize(JsonParser jsonParser, DeserializationContext ctxt)
-      throws IOException, JsonProcessingException {
+      throws IOException {
     ObjectNode rootNode = jsonParser.getCodec().readTree(jsonParser);
 
     ObjectNode distributionNode = rootNode.get("distribution").deepCopy();

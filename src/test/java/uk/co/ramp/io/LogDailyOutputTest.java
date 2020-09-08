@@ -18,7 +18,7 @@ import uk.co.ramp.people.VirusStatus;
 public class LogDailyOutputTest {
 
   private final Random random = TestUtils.getRandom();
-  @Rule public LogSpy logSpy = new LogSpy();
+  @Rule public final LogSpy logSpy = new LogSpy();
   private LogDailyOutput logger;
 
   @Before
@@ -73,7 +73,7 @@ public class LogDailyOutputTest {
     Assert.assertEquals(map.get(SEVERELY_SYMPTOMATIC).intValue(), numbers[i++]);
     Assert.assertEquals(map.get(RECOVERED).intValue(), numbers[i++]);
     Assert.assertEquals(map.get(DEAD).intValue(), numbers[i++]);
-    Assert.assertEquals(dActive, numbers[i++]);
+    Assert.assertEquals(dActive, numbers[i]);
   }
 
   @Test

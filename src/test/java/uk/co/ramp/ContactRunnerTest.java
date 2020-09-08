@@ -21,14 +21,13 @@ import uk.co.ramp.io.ContactReader;
 import uk.co.ramp.io.csv.CsvException;
 import uk.co.ramp.io.types.CmptRecord;
 import uk.co.ramp.io.types.InputFiles;
-import uk.co.ramp.io.types.StandardProperties;
 import uk.co.ramp.people.Case;
 import uk.co.ramp.people.PopulationGenerator;
 import uk.ramp.api.StandardApi;
 
 public class ContactRunnerTest {
 
-  @Rule public LogSpy logSpy = new LogSpy();
+  @Rule public final LogSpy logSpy = new LogSpy();
   private ContactRunner runner;
   private ApplicationContext applicationContext;
 
@@ -52,7 +51,6 @@ public class ContactRunnerTest {
 
     // Stub classes
     PopulationGenerator populationGenerator = mock(PopulationGenerator.class);
-    StandardProperties runProperties = mock(StandardProperties.class);
     Outbreak outbreak = mock(Outbreak.class);
     ContactReader reader = mock(ContactReader.class);
     CompartmentWriter compartmentWriter = mock(CompartmentWriter.class);

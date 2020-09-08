@@ -70,8 +70,7 @@ public class BoundedDistributionSerializerTest {
   public void write() throws IOException {
     String expected = "{ \"runSettings\": \"runSettings.json\" }";
     Map.Entry<String, JsonNode> entry =
-        new AbstractMap.SimpleImmutableEntry<String, JsonNode>(
-            "runSettings", new TextNode("runSettings.json"));
+        new AbstractMap.SimpleImmutableEntry<>("runSettings", new TextNode("runSettings.json"));
 
     generator.writeStartObject();
     bds.write(generator, entry);

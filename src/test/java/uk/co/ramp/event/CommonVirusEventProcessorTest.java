@@ -3,10 +3,10 @@ package uk.co.ramp.event;
 import static org.hamcrest.CoreMatchers.containsString;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
+import static uk.co.ramp.TestUtils.createMockBoundedDistribution;
 import static uk.co.ramp.people.VirusStatus.*;
 
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import org.junit.Assert;
 import org.junit.Before;
@@ -16,7 +16,6 @@ import org.springframework.test.util.ReflectionTestUtils;
 import uk.co.ramp.LogSpy;
 import uk.co.ramp.Population;
 import uk.co.ramp.TestUtils;
-import uk.co.ramp.distribution.BoundedDistribution;
 import uk.co.ramp.distribution.DistributionSampler;
 import uk.co.ramp.event.types.CommonVirusEvent;
 import uk.co.ramp.event.types.Event;
@@ -27,18 +26,16 @@ import uk.co.ramp.io.types.StandardProperties;
 import uk.co.ramp.people.Case;
 import uk.co.ramp.people.Human;
 import uk.co.ramp.people.VirusStatus;
-import uk.ramp.distribution.Distribution;
-import uk.ramp.distribution.ImmutableDistribution;
 
 public class CommonVirusEventProcessorTest {
-  @Rule public LogSpy logSpy = new LogSpy();
+  @Rule public final LogSpy logSpy = new LogSpy();
   public DistributionSampler distributionSampler;
   private CommonVirusEventProcessor<Event> eventProcessor;
   private DiseaseProperties diseaseProperties;
   private StandardProperties properties;
 
   @Before
-  public void setUp() throws Exception {
+  public void setUp() {
     diseaseProperties = TestUtils.diseaseProperties();
     distributionSampler = mock(DistributionSampler.class);
     when(distributionSampler.uniformBetweenZeroAndOne()).thenReturn(0.5d);
@@ -95,21 +92,6 @@ public class CommonVirusEventProcessorTest {
     var = eventProcessor.determineNextStatus(commonVirusEvent);
 
     Assert.assertTrue(SEVERELY_SYMPTOMATIC.getValidTransitions().contains(var));
-  }
-
-  private BoundedDistribution createMockBoundedDistribution(int mean, int max) {
-    var boundedDistribution = mock(BoundedDistribution.class);
-    Distribution distribution =
-        ImmutableDistribution.builder()
-            .internalType(Distribution.DistributionType.empirical)
-            .internalScale(mean)
-            .empiricalSamples(List.of(mean))
-            .rng(TestUtils.dataGenerator().getRandomGenerator())
-            .build();
-    when(boundedDistribution.distribution()).thenReturn(distribution);
-    when(boundedDistribution.getDistributionValue()).thenReturn(mean);
-    when(boundedDistribution.max()).thenReturn(Double.valueOf(max));
-    return boundedDistribution;
   }
 
   @Test

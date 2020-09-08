@@ -6,7 +6,6 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static uk.co.ramp.people.VirusStatus.SUSCEPTIBLE;
 
-import java.io.FileNotFoundException;
 import java.util.*;
 import org.junit.Assert;
 import org.junit.Before;
@@ -26,7 +25,6 @@ import uk.co.ramp.io.types.*;
 import uk.co.ramp.people.Case;
 import uk.co.ramp.people.Human;
 
-@SuppressWarnings("unchecked")
 @DirtiesContext
 @RunWith(SpringRunner.class)
 @Import({TestConfig.class, AppConfig.class})
@@ -34,15 +32,14 @@ public class OutbreakTest {
 
   private final Random random = TestUtils.getRandom();
 
-  @Rule public LogSpy logSpy = new LogSpy();
+  @Rule public final LogSpy logSpy = new LogSpy();
 
-  @Autowired Population population;
+  @Autowired private Population population;
   @Autowired private StandardProperties standardProperties;
   @Autowired private InitialCaseReader initialCaseReader;
   @Autowired private Outbreak outbreak;
   @Autowired private CompletionEventListGroup eventListGroup;
   @Autowired private PopulationProperties populationProperties;
-  @Autowired private AgeDependentHealthList ageDependentHealthList;
 
   private DiseaseProperties diseaseProperties;
 
@@ -50,7 +47,6 @@ public class OutbreakTest {
   public void setUp() {
     this.diseaseProperties = TestUtils.diseaseProperties();
     populationProperties = mock(PopulationProperties.class);
-    ageDependentHealthList = mock(AgeDependentHealthList.class);
     when(populationProperties.testCapacity()).thenReturn(1d);
     when(populationProperties.appUptake()).thenReturn(1d);
   }
@@ -104,7 +100,7 @@ public class OutbreakTest {
 
   @Test
   @DirtiesContext
-  public void testPropagate() throws FileNotFoundException {
+  public void testPropagate() {
     int popSize = 100;
     double[] array = {1};
 

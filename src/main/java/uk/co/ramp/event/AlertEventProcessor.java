@@ -4,7 +4,6 @@ import static uk.co.ramp.people.AlertStatus.*;
 
 import java.util.List;
 import java.util.Optional;
-import org.apache.commons.math3.random.RandomGenerator;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import uk.co.ramp.Population;
@@ -25,7 +24,6 @@ public class AlertEventProcessor implements EventProcessor<AlertEvent> {
   private final StandardProperties properties;
   private final StatisticsRecorder statisticsRecorder;
   private final PopulationProperties populationProperties;
-  private final RandomGenerator rng;
 
   public AlertEventProcessor(
       Population population,
@@ -33,15 +31,13 @@ public class AlertEventProcessor implements EventProcessor<AlertEvent> {
       DiseaseProperties diseaseProperties,
       DistributionSampler distributionSampler,
       StatisticsRecorder statisticsRecorder,
-      PopulationProperties populationProperties,
-      RandomGenerator rng) {
+      PopulationProperties populationProperties) {
     this.population = population;
     this.diseaseProperties = diseaseProperties;
     this.distributionSampler = distributionSampler;
     this.properties = properties;
     this.statisticsRecorder = statisticsRecorder;
     this.populationProperties = populationProperties;
-    this.rng = rng;
   }
 
   @Override
@@ -143,13 +139,15 @@ public class AlertEventProcessor implements EventProcessor<AlertEvent> {
         break;
       case AWAITING_RESULT:
         timeStepsInStatus =
-            diseaseProperties.timeTestResult().getDistributionValue()
-                * properties.timeStepsPerDay();
+            EventProcessor.scaleWithTimeSteps(
+                    diseaseProperties.timeTestResult(), properties.timeStepsPerDay())
+                .getDistributionValue();
         break;
       case REQUESTED_TEST:
         timeStepsInStatus =
-            diseaseProperties.timeTestAdministered().getDistributionValue()
-                * properties.timeStepsPerDay();
+            EventProcessor.scaleWithTimeSteps(
+                    diseaseProperties.timeTestAdministered(), properties.timeStepsPerDay())
+                .getDistributionValue();
         break;
       case NONE:
         break;
