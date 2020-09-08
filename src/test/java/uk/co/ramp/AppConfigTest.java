@@ -175,7 +175,6 @@ public class AppConfigTest {
     StandardProperties standardProperties = appConfig.standardProperties();
 
     Assert.assertNotNull(standardProperties);
-    Assert.assertNotNull(standardProperties.steadyState());
     Assert.assertTrue(standardProperties.initialExposures() > 0);
     Assert.assertTrue(standardProperties.populationSize() > 0);
     Assert.assertTrue(standardProperties.seed().isEmpty());

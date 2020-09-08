@@ -2,7 +2,6 @@
   "populationSize": 5000,
   "timeLimitDays": 500,
   "initialExposures": 500,
-  "steadyState": true,
   "timeStepsPerDay": 2,
   "timeStepSpread": [0.4,0.6],
   "dayOffset": 1

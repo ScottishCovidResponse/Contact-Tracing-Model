@@ -34,7 +34,6 @@ public class ContactReaderTest {
           .timeLimitDays(100)
           .initialExposures(1000)
           .seed(0)
-          .steadyState(true)
           .timeStepsPerDay(1)
           .timeStepSpread(1)
           .build();

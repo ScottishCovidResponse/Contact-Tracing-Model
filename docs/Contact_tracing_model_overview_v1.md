@@ -8,7 +8,7 @@ Author: Sibylle Mohr
 
 Modelling lead: Sibylle Mohr (University of Glasgow, EPIC)
 
-RSE core team: Sam Brett (AWE), John Nonweiler (UKAEA), Vino Mano (Man
+RSE core team: Sam Brett, John Nonweiler (UKAEA), Vino Mano (Man
 Group)
 
 Epidemiologist: Louise Matthews (University of Glasgow, EPIC)
