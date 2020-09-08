@@ -8,5 +8,5 @@ import org.immutables.value.Value.Immutable;
 @Immutable
 public interface OutputFolder {
 
-  public File outputFolder();
+  File outputFolder();
 }

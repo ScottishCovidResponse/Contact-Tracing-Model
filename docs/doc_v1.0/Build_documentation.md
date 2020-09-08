@@ -1,190 +1,441 @@
-Build Documention
+Contact Tracing Model - Build Documention
 ================
-Author: Sam Brett
+Author: Sam Brett & Ed Townsend
+
+## Contents
+
+  - [Introduction](#introduction)
+  - [Input Files](#input-files)
+    - [Local Input Files](#local-input-files)
+      - [Input Locations](#input-locations)
+      - [Contact Data](#contact-data)
+      - [Infection Rates](#infection-rates)
+      - [Initial Exposures](#initial-exposures)
+      - [Run Settings](#run-settings)
+      - [Age Data](#age-data)
+    - [Data Pipeline Input Files](#data-pipeline-input-files)
+      - [Configuration File](#configuration-file)
+      - [Disease Settings](#disease-settings)
+      - [Population Settings](#population-settings)
+      - [Isolation Policies](#isolation-policies)
+      - [Tracing Policies](#tracing-policies)
+  - [Virus Statuses](#virus-statuses)
+  - [Alert Statuses](#alert-statuses)
 
 
-## Intro
+## Introduction
 
-This document is to describe structure, design and assumptions made in
-the creation of the Contact Tracing model through the SCRC/RAMP
+This document describes the structure, design and assumptions made in
+the creation of the Contact Tracing Model through the SCRC/RAMP
 collaboration.
 
-This model using a
-SE<sub>1</sub>E<sub>2</sub>I<sub>a</sub>I<sub>s</sub>RD model with the
-following transitions allowed:
+The Contact Tracing Model uses a S-E-Asym-Pre-Sym-Sev-R-D model that defines how an individual may progress through different virus statuses during a pandemic. The model allows the following virust status transitions:
 
-![](image1.png)
+<img src="image1.png" alt="Compartment diagram" width="800">
 
-Figure 1. The compartment model
+**Figure 1.** The modelled virus statuses and transitions.
 
 S – Susceptible – the default condition
 
-E<sub>1</sub> – Exposed, but not infectious
+E – Exposed, but not infectious
 
-E<sub>2</sub> – Exposed, infectious, but not detectable by a test
+Asym – Infected and asymptomatic, will test positive
 
-I<sub>a</sub> – Infected and asymptomatic, will test positive
+Pre – Infected and developing symptoms, will test positive
 
-I<sub>s</sub> – Infected and symptomatic, will test positive
+Sym – Infected and symptomatic, will test positive
+
+Sev – Infected and severely symptomatic, will test positive 
 
 R – Recovered
 
 D – Dead
 
-The progression through these transitions will be discussed throughout
-this document.
 
-## Inputs
+## Input Files
 
-The inputs are contained in the /inputs folder. They are in two formats,
-CSV and JSON.
+The Contact Tracing Model's input files can be split into two categories: those that contain data locally ([Local Input Files](#local-input-files)), and those that get data via the Data Pipeline API ([Data Pipeline Input Files](#data-pipeline-input-files)). This section describes the parameters and data stored in each input file.
 
-### Contacts.csv
 
-The contact data is a CSV file contain network data that shows contacts
-between nodes in the network. The columns are time, from, to and weight.
-An example can be shown in Figure 2. The to and from fields are the ids
-of the nodes in contact. The weight field is a measure of the duration,
-intensity or proximity of the contact. This is dimensionless number and
-is used for determining the spread of the infection and is used for
-filtering the contacts should a node be alerted. NB. The time and nodes
-in the CSV file are indexed from 1, the code subtracts 1 so they are
-zero indexed.
+### Local Input Files
 
-![](image2.png)
+The _Local Input Files_ are files that are store their data locally, as opposed to being retrieved through the [Data Pipeline API](#data-pipeline-input-files). The _Local Input Files_ are contained in the _/inputs_ folder, located in the root directory of the Contact Tracing Model. All _Local Input Files_ come in one of two formats: CSV, JSON.
 
-Figure 2. Contacts.csv example
 
-### DiseaseSettings.json
+#### Input Locations
 
-Figure 3 shows the contents of the disease properties file. It shows the
-mean and max times between compartments of the disease. These are used
-to vary the propagation between nodes. These values are used with the
-random number generator to produce distributions based on the
-progression distribution field. The values for this can be GAUSSIAN,
-LINEAR, EXPONENTIAL or FLAT. NB LINEAR uses a uniform distribution and
-FLAT returns the mean.
+The _Input Locations_ file allows the user to specify the location of all input files, except those retrieved through the Data Pipeline API, relative to the _/input_ folder, which is located in the root of the Contract Tracing Model directory. This allows the user to organise multiple simulation configurations without overwriting existing configurations within the _/input_ folder.
 
-Exposure threshold is a minimum exposure value that is used to determine
-if the contact is close enough to spread the infection. This works as a
-high pass filter value with the weight field.
+The name of the _Input Locations_ file must be set to _inputLocations.json_.
 
-Exposure tuning is used to scale the weight factor when an exposure
-occurs. So, if two people interact with the possibility of infection
-spreading the chance of the spread occurring can be modified by dividing
-the contact weight by the tuning value.
+<img src="inputLocations.png" alt="input Locations" width="600">
 
-Random Exposure: this allows a proportion of the population to be
-randomly exposed from outside the network. This is to simulate people
-from outside the network interacting. This is the probability per
-person, per timestep. So, 0.05 is 5 people in a population of 100 per
-day. This value is likely to be much smaller than 0.05.
+**Figure 2.** Example _inputLocations.json_ file.
 
-![](image3.png)
+An example of the expected input files is illustrated above in Figure 2. If a file is omitted from _inputLocations.json_ then the Contact Tracing Model will default to the corresponding file in the _/input_ folder. Should the Contact Tracing Model fail to acquire a specified file, an error will be thrown.
 
-Figure 3. The diseaseSettings.json file
+The directory of the input files defaults to the _/input_ folder, but may be overridden via the command line. See XXXX for more details.
 
-### PopulationSettings.json
 
-An example of the population input can be seen in Figure 4. This file
-contains three variables.
+#### Contact Data
 
-Population ages: this is a range of ages that make up a proportion of
-the population, the proportion is given in the population distribution
-variable
+The _Contact Data_ is stored within a CSV file that contains the data of a temporal network of contacts between individuals in a population.
+The columns in the _Contact Data_ file are:
+  * _time_
+    * The time that the contact occurs.
+  * _from_
+    * The first individual's ID.
+    * Sometimes referred to as a node in the contact network.
+  * _to_
+    * The second individual's ID.
+    * Sometimes referred to as a node in the contact network.
+  * _weight_
+    * The weighting associated with the interaction. 
+    * The likelihood of an infectious individual infecting the other is proportional to the weighting factor.
+    * More details regarding the use of the weighting factor can be found [here](#diseasesettings).
+  * _label_
+    * The location of where the interaction occurs.
+    * The label is not currently used in the current version of the Contact Tracing Model.
 
-Population distribution: this is the fractional proportion of the
-population that are in the group.
+An example of the contents of a _Contacts Data_ file can be found in Figure 3.
 
-NB. Both population ages and distribution have to have 5 bins labelled
-from 0-4.
+<img src="image2.png" alt="Contacts File" width="500">
 
-Gender balance: this is the ratio of men:women, so there are 99 men for
+**Figure 3.** Example contact data file.
+
+
+
+#### Infection Rates
+
+The _Infection Rates_ file allows the user to provide a weighting factor to individuals in an infectious virus status. Figure 4 shows an example _Infection Rates_ file. The specified weighting factor values must lie in the range (0, 1], otherwise an error is thrown.
+
+<img src="infectionRates.png" alt="infectionRatesExample" width="400">
+
+**Figure 4.** Example _Infection Rates_ file.
+
+
+#### Initial Exposures
+
+At the beginning of a simulation there needs to be a number of infected individuals to start the spread of the disease. The IDs of individuals who are initially infected are specified in an _Initial Exposures_ file. This file is a CSV with one column of IDs of the individuals to be infected. 
+
+Should the number of individuals specified in the _Initial Exposures_ file differ from the value specified in the [_Run Settings_](#runsettings) file, then the data will be truncated if too long, or randomly allocated if too short.  
+
+
+#### Run Settings
+
+The _Run Settings_ file contains the main fields that a user may want to
+change. An example of a _Run Settings_ file can be found below in Figure 5.
+
+<img src="runSettings.png" alt="Run Settings Example" width="300">
+
+**Figure 5.** Example _Run Settings_ file.
+
+The _populationSize_ field defines the total number of individuals in a population. This value can be smaller or larger than the number of people in the contact network.
+
+The _timeLimitDays_ field defines the absolute limit for how many (simulation) days the simulation will run for.
+
+The _initialExposures_ field defines the number of initially infected individuals. This value must be greater than zero.
+
+The _steadyState_ flag is not used. It is likely to be removed in future versions of the Contact Tracing Model.
+
+The _timeStepsPerDay_ field sets the number of timesteps to occur each day, e.g. half days ('2') or quarter days ('4').
+
+The _timeStepSpread_ field sets the probability for spreading the disease in each chosen timestep, , e.g. for half days [0.4, 0.6] or quarter days [0.2, 0.2, 0.4, 0.2]. If the sum of the probabilities does not add to unity an error will be thrown.
+
+**NOTE:** It is recommended to use a combination of _timeStepsPerDay_ and _timeStepSpread_ such that recurring decimal values are avoided to ensure the probabilties sum to unity. Alternatively, the remainder can be calculated and added to one of the probability bins.
+
+The _seed_ field is used to seed the random number generators, and can be specified via the command line or in the _Run Settings_ file. If no seed is provided, a seed will be generated randomly.
+
+**NOTE:** Currently, the Contact Tracing Model does not log which seed is being used when randomly generated.
+
+The _dayOffset_ field offsets the contact data by the specified number of days. This allows flexibility when using contact data from different sources who may employ differing convections of labelling the first day. For example, the Contact Tracing Model considers the first day to occur between timesteps [0, 1), however some contact data may start from the first day being indexed by 1. To avoid missing contact data, the _dayOffset_ field aligns the Contact Tracing Model to the _Contact Data_ file.
+
+
+#### Age Data
+
+The _Age Data_ file assigns an age to an individual via their ID. The _Age Data_ takes precedence over the age data within the _Population Settings_ file. Figure 6 shows an example _Age Data_ file.
+
+<img src="ageData.png" alt="Age Data Example" width="100">
+
+**Figure 6.** Example _Age Data_ file.
+
+### Data Pipeline Input Files
+
+Input files that interact via the Data Pipeline API are stored in either a _.TOML_, ._YAML_ or _.JSON_ file format. All files listed within this section interface with the Data Pipeline API to retrieve the desired data. 
+
+All _.TOML_ data files that interact with the Data Pipeline API contain the common field _type_ that designates the data type for a specific parameter. The other input files having different naming conventions, but accept the same parameters unless are titled as such, i.e. _isolationTimeDistribution_ only accepts _"distribution"_.
+
+The _type_ field has two values that the Contact Tracing Model accepts:
+  - _"point-estimate"_
+    - A constant value.
+  - _"distribution"_
+  
+If the value of _type_ is set to _"point-estimate"_, the relevant contextual field is _value_, the constant value.
+  
+If the value of _type_ is set to _"distribution"_, the relevant contextual fields are:
+  - _distribution_
+    - Available values:
+      - "gamma"
+        - _shape_
+        - _scale_
+      - "exponential"
+        - _scale_
+      - "uniform"
+      - "empirical"
+        - _empiricalSamples_
+      - "categorical"
+        - _bins_
+        - _weights_
+        
+        
+For more information, see the [Java Data Pipeline API](https://github.com/ScottishCovidResponse/data_pipeline_api).
+
+#### Configuration File
+  
+The _Configuration File_ is parsed by the Data Pipeline API to initialise the locations and names of input files to read, and output files to write. Figure 7 shows an example of a _Configuration File_.
+
+<img src="config.png" alt="Config File Example" width="400">
+
+**Figure 7.** Example _Configuration File_
+
+Similar to the [_Input Locations_](#input-locations) file, the _Configuration File_ allows the user to specify the directory where the _.TOML_ files are that interact with the Data Pipeline API via the _data_directory_ field.
+
+The _read_ field contains the various subdirectories, of _data_directory_, in which the _.TOML_ files reside.
+
+The _write_ filed specifies the location of the output files.
+
+#### Population Settings
+
+The _Population Settings_ file contains details that define the population for a given simulation. The file contains data pertaining to:
+  * The age distribution of a population.
+  * The population gender balance.
+  * The proportion of the population that can be tested per day.
+  * The proportion of the population that use the contact tracing app.
+  
+An example of the a _Population Settings_ file can be found below in Figure 8.
+
+<img src="populationSettings.png" alt="populationSettings Example" width="700" height="400">
+
+**Figure 8.** Example population settings file.
+
+The _population-distribution_ field contains the distribution data of the population's ages.
+
+**NOTE:** The population distribution must have 5 bins, otherwise an error will be thrown.
+
+The _gender-balance_ field is the ratio of men:women, so there are 99 men for
 every 100 women in this example. This data has been taken from Index
 Mundi.
 
-![](image4.png)
+The _test-capacity_ field is the proportion of the population that can be tested per day. Should the testing capacity be exceeded, an individual waiting to be tested will be tested on the next available testing day.
 
-Figure 4. The population input
+The _app-uptake_ field defines the proportion of the population that is actively using the contact tracing app. 
 
-### RunSettings.json
+#### Disease Settings
 
-The run settings file contains the main fields that a user may want to
-change.
+The _Disease Settings_ file contains the parameters that define the behaviour of the disease. Within this file, the user can change the following quantities:
+  * The parameters of the distributions used to sample the duration an individual spends in a given virus status.
+  * The likelihood of a test producing a false negative or false positive result.
+  * The distribution used to sample the duration a test takes to be administered.
+  * The distribution used to sample the duration a test result takes to be delivered.
+  * The parameters to determine the probability of being exposed through an interaction.
+  * Proportion of population randomly infected per timestep.
+  
+ <img src="diseaseSettings.png" alt="Contacts File" width="700">
 
-Population size: the number of nodes in a network. This can be larger or
-smaller than the number of people in the contact network.
+**Figure 9.** Example _Disease Settings_ file
 
-Time Limit: this is an absolute limit for how long the simulation will
-go on in timesteps.
 
-Infected: the number of the population initially infected at t=0. Must
-be greater than 0.
+The fields not mentioned below describe the distribution of the time taken for an individual to progress to the next virus status, or for virus tests to be administered and the results delivered. 
 
-Seed: the seed for the random number generator. Will be modified by the
-command line argument if included. This ensure a reproducible output.
+The _test-positive-accuracy_ and _test-negative-accuracy_ fields represent the probability of a test result being a false positive or false negative. For example, if a test result is negative and the _test-negative-accuracy_ value is 0.95, then there is a 5% chance this result will be a false negative. These quantities are sampled from a uniform distribution.
 
-Steady state: if there are still active infections when the contact data
-has been processed, the steady state flag enables the active cases to
-reach a resolution (recovered or dead) with no further random infections
-occurring.
+The _exposure-threshold_ field is a minimum exposure value that is used to determine
+if a contact is close enough to spread the infection. This works as a
+high pass filter value with the weight field in the _Contact Data_ file.
 
-Contacts file: points to the CSV file being used in this run.
+The _random-infection-rate_ field allows a proportion of the population to be
+randomly exposed to the virus per day. This is to simulate people
+from outside the network interacting with the population. This is the probability an individual will randomly get infected per timestep. For example, a _randomInfectionRate_ of 0.05 will result in 5 people in a population of 100, per
+timestep, to get infected.
 
-![](image5.png)
+The _exposure-probability-4-unit-contact_ (expUnitContact) and _exposure-exponent_ (exp) values are 
+used to determine the chance of infection for a given contact, along with the weighting value in the _Contact Data_ file. The mathematical implementation of the aforementioned quantites can be found in the images below.
 
-Figure 5. the run settings file
+<img src="exposureBias.png" alt="exposureBias" width="400">
+<img src="exposureProb.png" alt="exposureProb" width="400">
 
-## Virus and Alert Statuses
+#### Isolation Policies
 
-Following the schema described in Figure 1
+There are four types of isolation policies:
+  * Global Policy
+  * Virus Policy
+  * Alert Policy
+  * Default Policy
+  
+All four policy types are defined within the _Isolation Policies_ file.
 
-![](image1.png)
+The _Isolation Policies_ file follows a similar set of available parameter values to those described in the [Data Pipeline Input Files](#data-pipeline-input-file) section. However, the file format is _.JSON_ meaning the implemention of the available parameters is slightly different. 
 
-the status of the virus infections in the code is referred to by an
-enumeration called Virus Status, which has the options:
+The first three types of isolation policy, i.e. excluding Default Policy, have an associated field named _isolationProperty_ that allows the user to define the following fields:
+ * _id_
+   * A name associated with the isolation property.
+ * _isolationProbabilityDistribution_
+   * Defines the probability distribution of an individual isolating.
+ * _isolationTimeDistribution_
+   * Defines the distribution an individual will isolate for.
+ * _overrideComplianceAndForcePolicy_
+   * Boolean flag.
+   * If _true_ then compliance parameters are overridden. 
+ * _startOfIsolationTime_
+   * Defines the start of when the isolation period is considered.
+   * Two available options:
+     * _ABSOLUTE_ - Immediately.
+     * _CONTACT_TIME_ - From when the possibly infectious contact occurred.
+  * _priority_
+    * Precedence of the isolation policy over others.
+    * A higher value corresponds to a higher priority.
+
+#### Global Policy
+
+A _Global Policy_ triggers an isolation policy when the proportion of infected individuals falls between a user-defined threshold. The _Global Policy_ is defined in the _globalIsolationPolicies_ field within the _Isolation Policies_ file. 
+
+Figure 12 shows an example _Isolation Policies_ file, where only the _Global Policy_ is specified. 
+
+<img src="globalPoliciesExample.png" alt="Example Global Policy" width="400">
+
+**Figure 12.** Example _Isolation Policies_ file with only the _Global Policy_ defined.
+
+The _Global Policy_ has a unique field named _proportionInfected_ that defines the threshold in which the isolation policy will be enforced - assuming the a higher priority that other policies - regardless of virus and alert status. The _proportionInfected_ field has two sub-fields that must be specified:
+ * _min_
+   * Minimum fraction of population infected to enforce the policy.
+ * _max_
+   * Maximum fraction of population infected to enforce the policy.
+
+#### Virus Policy
+
+A _Virus Policy_ defines the isolation policy for an individual with a given _Virus Status_. Within the _Isolation Policies_ files, the user can specify a _Virus Policy_ under the field named _virusIsolationPolicies_.
+
+Each _Virus Policy_ can be linked to a corresponding _Virus Status_ (see [Virus Statuses](#virus-statuses) for more details) via the sub-field _virusStatus_. The user can specify up to one policy per _Virus Status_. Each _Virus Policy_ can be defined by an _isolationProperty_ field.
+
+An example can be found in Figure 13.
+
+<img src="virusPoliciesExample.png" alt="virus Policy Example" width="400">
+
+**Figure 13.** Example _Virus Policy_.
+
+#### Alert Policy
+
+The _Alert Policy_ defines the isolation policy for a person in a given _Alert Status_.
+These follow the same rules as a _Virus Policy_.
+
+<img src="alertPoliciesExample.png" alt="alert Policy Example" width="500">
+
+**Figure 14.** Example _Alert Policy_.
+
+#### Default Policy
+
+The _Default Policy_ allows a baseline isolation policy to be set. For example, 
+10% of the population may be shielding by default.
+
+Only one _Default Policy_ can be specified within the _Isolation Policies_ file. 
+
+Figure 15 shows an example of a _Default Policy_.
+
+<img src="defaultPoliciesExample.png" alt="default Policy Example" width="500">
+
+**Figure 15.** Example _Default Policy_.
+
+<a id="main-tracing-policies"></a>
+#### Tracing Policies
+
+The _Tracing Policies_ file is similar to the _Isolation Policies_ file, but follows different naming conventions of the fields.
+
+Within a _Tracing Policies_ file, the user get set the following fields:
+ * _description_
+   * A brief description of the tracing policies.
+ * _policies_
+   * A list of different tracing policies for a given _Virus Status_ and _Alert Status_.
+ * _noOfTracingLevels_
+   * The number of interactions generations to trace.
+   * For example, if _noOfTraceLevels_ is 2, then those who were in contact with someone who was in contact with an infected individual would be traced and told to isolate. In other words, the tracing look back through two generations or 'levels' of contacts.
+ * _probabilitySkippingTraceLinkThreshold_
+   * Specifies the distribution defining the threshold below which an individual is not traced.  
+   * Available parameters identical to those available in either _isolationProbabilityDistribution_ and _isolationTimeDistribution_ in the [Isolation Policies](#main-isolation-policies) section.
+   
+Each element in the _policies_ list defines the tracing behaviour for a given _Alert Status_ and _Virus Status_, and is defined by the following parameters:
+ * _reporterAlertStatus_
+   * The _Alert Status_ that this policy applies to.
+ * _reporterVirusStatus_
+   * The _Virus Status_ that this policy applies to.
+ * _recentContactsLookBackTime_
+   * How far back in time should contacts be traced.
+ * _timeDelayPerTraceLink_
+   * Delay after which the traced individual will respond to the tracing.
+   * Available parameters identical to those available in either _isolationProbabilityDistribution_ and _isolationTimeDistribution_ in the [Isolation Policies](#main-isolation-policies) section.
+ * _probabilitySkippingTraceLink_
+   * The distribution defining the likelihood of a given trace link, or individual, not being traced.
+   * Available parameters identical to those available in either _isolationProbabilityDistribution_ and _isolationTimeDistribution_ in the [Isolation Policies](#main-isolation-policies) section.
+
+<img src="tracingPoliciesExample.png" alt="tracing Policy Example" width="1000">
+
+**Figure 16.** Example _Tracing Policy_.
+
+## Virus Statuses
+
+The Contact Tracing Model uses the following _Virus Statuses_ to track the spread of the virus, and to define status-specific behaviours, e.g. tracing policies. The available _Virust Statuses_ can be found below and in the [Introduction](#introduction) section.
+
+Available _Virus Statuses_:
 
   - SUSCEPTIBLE
 
   - EXPOSED
-
-  - EXPOSED\_2
-
-  - INFECTED
-
-  - INFECTED\_SYMP
-
+  
+  - ASYMPTOMATIC
+  
+  - PRESYMPTOMATIC
+  
+  - SYMPTOMATIC
+  
+  - SEVERELY_SYMPTOMATIC
+  
   - RECOVERED
-
+    
   - DEAD
+  
+The valid transitions between _Virus Statuses_ can be seen in Figure 1.
+  
+## Alert Statuses
 
-Similarly, the Alert Status that a person is at is described by the
-enumeration:
+The _Alert Statuses_ represents the status an individual has been assigned when conducting the contact tracing. 
 
   - NONE
+    - The default status.
 
   - ALERTED
+    - The individual has been in contact with an infectious individual.
 
   - REQUESTED\_TEST
 
   - AWAITING\_RESULT
 
   - TESTED\_POSITIVE
+  
+  - TESTED\_NEGATIVE
 
-Where the valid transitions are shown in Figure 6.
+The valid transitions between _Alert Statuses_ is shown in Figure 17.
 
 ![](image6.png)
 
-Figure 6. The alert status transitions
+**Figure 17.** The alert status transitions
 
 ## Code Structure
 
 The structure of the model follows the maven/gradle standard project
-layout as shown in Figure 7.
+layout as shown in Figure 18.
 
 ![](image7.png)
 
-Figure 7. Project and Package Layout
+**Figure 18.** Project and Package Layout
 
 The code is built using the SpringBoot library with the main entry point
 of the code being Framework.java. After loading and initialising the
@@ -205,10 +456,10 @@ should these resources not be loaded, so the code may exit here. A log
 message is printed describing the error and a Configuration Exception is
 thrown.
 
-It is worth noting that this is where the command line parameters are
-dealt with. At the point of writing, the only parameter is a job
-identifier that can be used to modify the random number seed in a batch
-job. This parameter is optional.
+There are three optional command line interfaces:
+- **seed:** allows a seed to be input. Defaults to a random seed.
+- **overrideInputFolderLocation:** allows a different input folder to be assigned. Defaults to /input.
+- **overrideOutputFolderLocation:** allows a different output folder to be assigned. Defaults to /output.
 
 The input files are described in Inputs.
 
@@ -224,12 +475,11 @@ step. These are output to a csv file.
 The population is parameterised from the population properties file and
 the run settings. These contain census data on the age and gender
 breakdown of the population. The size of the population is read from the
-run settings. The “Human” class contains 4 fields that are populated
+run settings. The “Human” class contains 5 fields that are populated
 here:
 
 #### Age
-
-The age is determined from the census data and a uniform random number
+If the ages are not provided in the AgeData file, the ages are determined from the census data and a uniform random number
 generator.
 
 | Age Range | Proportion | Random \# Range  |
@@ -276,11 +526,17 @@ At present, health is randomly sampled from a uniform distribution. It
 may later have some relation to age. A health score of 1 is assumed to
 be a very healthy individual, a score of 0 is a very frail individual.
 
-#### Compliance
+#### Isolation Compliance
 
 At present, the compliance field is randomly sampled from a uniform
 distribution. A score of 0 is someone who will ignore any restrictions
 placed upon them totally, a score of 1 will obey totally.
+
+#### Reporting Compliance
+
+At present, the compliance field is randomly sampled from a uniform
+distribution. A score of 0 is someone who will not report an illness, 
+a score of 1 means they are guaranteed to report. 
 
 ### Contact Reader
 
@@ -294,9 +550,7 @@ simulation.
 
 ### Outbreak
 
-The outbreak class will be handled in much more detail later on in
-\<\<Section XYZ\>\>. This section will focus purely on the
-initialisation.
+This section will focus purely on the initialisation.
 
 The Outbreak class is a Service Bean, so it is created as part of the
 App Config section, it is initialised with data in Contact Runner. It
@@ -324,9 +578,9 @@ section fills in the details on how this section works. Figure 10 shows
 the top level of how the propagation algorithm works and where it calls
 to. These will be broken down in turn in the following sections.
 
-Upon entering the method, a set of infected cases are created based on
-the input value from the run settings. These members of the population
-are randomly sampled and set to EXPOSED to begin the simulation.
+Upon entering the method, a set of initial infections (index cases) are read from the initial exposures 
+file ('initialExposures.csv'). If this file is shorter than the value of initially infecteds specified 
+in RunSettings.json, they will be filled to the required length by randomly infecting individuals in the population.
 
 Once the initial infections are allocated the runToCompletion method is
 called. This extracts some key variables from the input parameters,
@@ -336,9 +590,6 @@ timeLimit : the maximum duration of the simulation. This will exit the
 code even if active cases are present. It has the highest precedent.
 This is to stop any codes hanging should an error occur that is not
 foreseen.
-
-steadyState: this allows the code to run until there are no active cases
-(everyone is S, R or D), but will exit if timeLimit is reached.
 
 maxContact: this take the contact data and finds the last time point at
 which we have a record.
@@ -381,97 +632,104 @@ Figure 11. Infection map example
 
 ### Run Contact Data
 
-Running the propagation of infection is the heart of the calculation.
-Figure 12 shows the flow of data.
+The runContactData method within Outbreak.java is where the main calculations are triggered. 
 
-To begin with the update population method is called. This changes the
-state of any infection that is due to change on this day. This is
-explained further in 5.3. This is also where random infections are added
-to the mix. This is done by running a random number test against each
-susceptible case and setting their status to EXPOSED.
+## Event Runner
 
-Following this, the contact data for this timestep is extracted along
-with the number of active cases (those not S, R or D), if this is zero
-and random infections are off, it will exit here. Otherwise, it will
-loop over the contact data.
+The events within the model are handled by a group of lists that contain specific events that can occur in the model. These are:
 
-The contact data is evaluated using a series of conditionals. Firstly,
-the alert status and weight of the contact are reviewed to see if this
-is a significant contact. If both alert statuses are NONE and the weight
-of the contact is greater than exposureThreshold, it is a contact of
-interest. Before evaluating the contact further, the two cases are
-checked to see if their virus statuses are different, if they are the
-contact is evaluated.
+1.	Virus Event
+2.	Infection Event
+3.	Contact Event
+4.	Alert Event
 
-The two cases are evaluated to see who is in the more severe state,
-these are described by the rankings:
+Each of these events are processed in different ways and can trigger other events to occur at a future time. 
 
-| \-1 | DEAD           |
-| :-- | :------------- |
-| 0   | SUSCEPTIBLE    |
-| 1   | RECOVERED      |
-| 2   | EXPOSED        |
-| 3   | EXPOSED\_2     |
-| 4   | INFECTED       |
-| 5   | INFECTED\_SYMP |
+![](RunContactData.png)
 
-PersonA is the more severe case; the least severe case is personB. A
-dangerous mix is when personA is infectious (E2, I, IA) and personB is
-susceptible. If this is the case, the following test is conducted:
+### Contact Event
 
-![](eq6.gif)
+Contact events are set in the contacts.csv file. They involve the interaction between two people at a given time. 
+The duration/proximity of the event is measured using the weight parameter. 
 
-Where n is a random number.
+When a contact event takes place the two people are assessed based on their Virus Statuses, this allows the model to 
+assess if the contact has the potential to spread the infection. One or both of the contacts may be in isolation, 
+so the contact may not take place. The isolation policies are expanded upon below. 
 
-![](image12.png)
+![](ContactEvent.png)
 
-Figure 12. The logic flow for reviewing contact data
+### Alert Event
 
-### Run to Steady State
+The alert event processor is used to cycle through the states of disease alert that a member of the population can be in at any one point. 
 
-During the run to Steady-state routine, shown in Figure 13, updates the
-population statuses until the existing active cases are resolved, i.e.
-all active cases resolve in recovery or death. The exit condition is
+![](image6.png)
 
-![](eq7.gif)
+The person has their alert status set to accordingly and the next status is calculated for a time in the future. 
+The result of a test is determined by whether the individual is currently infectious and a dice roll against the accuracy of a test. The number of false positives and negatives is recorded as an output statistic. 
 
-![](image13.png)
+![](AlertEvent.png)
 
-Figure 13. The run to completion algorithm
+### Infection Event
 
-### Update population
+An infection event can be triggered in three ways:
 
-The update population algorithm, shown in Figure 14, is run as part of
-Run Contact Data and Steady State. Each case has fields containing the
-next time their statuses change.
+1. The individual (id) has been chosen as a seed infection.
+2. The individual (id) has been randomly chosen to be a seed.
+3. The individual (id) has been in contact with an infectious individual and has subsequently contracted the infection. 
 
-![](image14.png)
+Once a SUSCEPTIBLE individual is exposed to the infection, an infection event is triggered which in turn creates a virus event. 
+The infection event occurs one time step after the contact. 
 
-Figure 14. The update population algorithm
+### Virus Event
 
-#### Virus Status
+A virus event is the progression of the virus through its compartments. The initial infection is not included as this is 
+an infection event. The processing of the event is very similar to the previous sections, with the exception of checking 
+for alerts based on the virus status of an individual. This process creates alert events for people who have been in 
+contact with an infectious individual. An individual has a reportingCompliance field that may reduce the chance of 
+reporting symptoms. The alert checker and tracing policies are covered below.  
 
-The virus status is updated first, both Exposed and Infected have a
-single option, which they progress to, the next status change is
-calculated using the mean and max times from the disease properties and
-the chosen random number distribution. Exposed<sub>2</sub> and
-Infected<sub>symp</sub> have two options, denoted by the red box. These
-are chosen by random number, n:
+## Isolation Policy
 
-![](eq8.gif)
+The isolation policy logic is stored in the policy.isolation package. A list of policies is input from the 
+isolationPolicies.json file. These include policies for global, virus status, alert status and a default. 
+The default policy will typically be to not isolate. Each policy has a priority value which allows the most 
+relevant policy to be chosen. 
 
-Likewise, the outcome of an Infected<sub>symp</sub> is determined by:
 
-![](eq9.gif)
+### Global Policies
+Global policies are based on the proportion of the population infected. For example, a “stay at home” policy may be put 
+into place if more than 10% of the population are infected, whereas a “stay alert” policy may be in place if 
+between 5-10% of the population are infected. These values are as an example and can be configured in the input. 
 
-#### Alert Status
+### 	Virus Status Policies
+An isolation policy can be defined based on the virus status of an individual. For example, symptomatic individuals 
+may be required to stay at home for a defined period. The proportion required to isolate and duration of the isolation 
+can be defined in the input. 
 
-The alert status only has one choice, the outcome of the test. In this
-method, the result of the test is determined by the step before, i.e.
-the recipient of the test needs to be infectious when tested, not when
-receiving the result. The red box here denotes the storing of a Boolean
-of ‘wasInfected’ at the time the test was taken. This is then used when
-the test result is in.
+
+### 	Alert Status Policies
+A policy can be defined for any of the alert statuses, much like with a virus status, the proportion required to isolate 
+and duration of the isolation can be defined in the input. 
+
+
+### 	Determining Isolation Policy
+
+The isolation status of all individuals is cached. These are used to determine if an individual has already 
+been isolation, in which case they may not need a further isolation applied to them. 
+
+![](IsIsolating.png)
+
+The policies are grouped, sorted and selected by:
+
+![](FindPolicy.png)
+
+## Tracing Policy
+
+A tracing policy is triggered when an individual reports themselves as having symptoms. The policy input has been 
+covered above. A combination of Virus and Alert statuses are used to trigger contact tracing. It is possible to look 
+back through the contacts over a number of days and inform individuals that they should isolate. 
+
+![](CheckForAlert.png)
 
 ## Assumptions
 
@@ -498,3 +756,4 @@ the test result is in.
 ## Document version history
 
 Version 1 – drafted 27 May 2020
+Version 2 - updated 12 August 2020

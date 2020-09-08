@@ -6,9 +6,10 @@ import static uk.co.ramp.people.AlertStatus.REQUESTED_TEST;
 
 import java.util.Optional;
 import java.util.stream.Stream;
-import uk.co.ramp.distribution.DistributionSampler;
 import uk.co.ramp.event.types.AlertEvent;
+import uk.co.ramp.event.types.EventProcessor;
 import uk.co.ramp.event.types.ImmutableAlertEvent;
+import uk.co.ramp.io.types.StandardProperties;
 import uk.co.ramp.people.AlertStatus;
 import uk.co.ramp.people.VirusStatus;
 import uk.co.ramp.policy.alert.TracingPolicy.TracingPolicyItem;
@@ -16,15 +17,15 @@ import uk.co.ramp.policy.alert.TracingPolicy.TracingPolicyItem;
 public class AlertChecker {
   private final TracingPolicy tracingPolicy;
   private final AlertContactTracer alertContactTracer;
-  private final DistributionSampler distributionSampler;
+  private final StandardProperties properties;
 
   AlertChecker(
       TracingPolicy tracingPolicy,
       AlertContactTracer alertContactTracer,
-      DistributionSampler distributionSampler) {
+      StandardProperties properties) {
     this.tracingPolicy = tracingPolicy;
     this.alertContactTracer = alertContactTracer;
-    this.distributionSampler = distributionSampler;
+    this.properties = properties;
   }
 
   private Optional<ImmutableTracingPolicyItem> findPolicyItem(
@@ -71,9 +72,9 @@ public class AlertChecker {
                         .id(id)
                         .time(
                             currentTime
-                                + tracingPolicyItem
-                                    .get()
-                                    .timeDelayPerTraceLink()
+                                + EventProcessor.scaleWithTimeSteps(
+                                        tracingPolicyItem.get().timeDelayPerTraceLink(),
+                                        properties.timeStepsPerDay())
                                     .getDistributionValue())
                         .oldStatus(NONE)
                         .nextStatus(ALERTED)

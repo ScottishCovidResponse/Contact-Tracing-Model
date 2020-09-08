@@ -34,12 +34,12 @@ import uk.co.ramp.policy.isolation.IsolationPolicy;
 @DirtiesContext
 @Import({TestUtils.class})
 public class ContactEventProcessorTest {
-  @Rule public LogSpy logSpy = new LogSpy();
+  @Rule public final LogSpy logSpy = new LogSpy();
 
   private ContactEventProcessor eventProcessor;
 
   @Before
-  public void setUp() throws Exception {
+  public void setUp() {
     DiseaseProperties diseaseProperties = TestUtils.diseaseProperties();
 
     Human human = mock(Human.class);

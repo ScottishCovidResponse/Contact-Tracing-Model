@@ -1,5 +1,8 @@
 package uk.co.ramp;
 
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
+
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.Reader;
@@ -11,12 +14,7 @@ import org.springframework.context.annotation.Bean;
 import uk.co.ramp.distribution.BoundedDistribution;
 import uk.co.ramp.distribution.ImmutableBoundedDistribution;
 import uk.co.ramp.io.readers.AgeDataReader;
-import uk.co.ramp.io.types.DiseaseProperties;
-import uk.co.ramp.io.types.ImmutableDiseaseProperties;
-import uk.co.ramp.io.types.ImmutablePopulationProperties;
-import uk.co.ramp.io.types.ImmutableStandardProperties;
-import uk.co.ramp.io.types.PopulationProperties;
-import uk.co.ramp.io.types.StandardProperties;
+import uk.co.ramp.io.types.*;
 import uk.co.ramp.people.AgeRetriever;
 import uk.ramp.distribution.Distribution;
 import uk.ramp.distribution.Distribution.DistributionType;
@@ -42,6 +40,7 @@ public class TestUtils {
     Distribution dist =
         ImmutableDistribution.builder()
             .internalType(DistributionType.empirical)
+            .internalScale(5)
             .empiricalSamples(List.of(5))
             .rng(dataGenerator().getRandomGenerator())
             .build();
@@ -52,6 +51,7 @@ public class TestUtils {
         ImmutableDistribution.builder()
             .internalType(DistributionType.empirical)
             .empiricalSamples(List.of(2))
+            .internalScale(2)
             .rng(dataGenerator().getRandomGenerator())
             .build();
     BoundedDistribution boundedDistTest =
@@ -137,7 +137,6 @@ public class TestUtils {
         .initialExposures(10)
         .populationSize(1000)
         .seed(123)
-        .steadyState(true)
         .timeLimitDays(100)
         .timeStepsPerDay(1)
         .timeStepSpread(1)
@@ -150,5 +149,50 @@ public class TestUtils {
     Reader reader = new FileReader(file);
     var agesData = new AgeDataReader().read(reader);
     return new AgeRetriever(populationProperties(), agesData);
+  }
+
+  public static AgeDependentHealthList ageDependentHealth() {
+    return ImmutableAgeDependentHealthList.builder()
+        .addAgeDependentList(
+            ImmutableAgeDependentHealth.builder()
+                .range(uk.co.ramp.utilities.ImmutableMinMax.of(0, 19))
+                .modifier(1.d)
+                .build())
+        .addAgeDependentList(
+            ImmutableAgeDependentHealth.builder()
+                .range(uk.co.ramp.utilities.ImmutableMinMax.of(20, 39))
+                .modifier(0.9)
+                .build())
+        .addAgeDependentList(
+            ImmutableAgeDependentHealth.builder()
+                .range(uk.co.ramp.utilities.ImmutableMinMax.of(40, 59))
+                .modifier(0.8)
+                .build())
+        .addAgeDependentList(
+            ImmutableAgeDependentHealth.builder()
+                .range(uk.co.ramp.utilities.ImmutableMinMax.of(60, 79))
+                .modifier(0.6)
+                .build())
+        .addAgeDependentList(
+            ImmutableAgeDependentHealth.builder()
+                .range(uk.co.ramp.utilities.ImmutableMinMax.of(80, 100))
+                .modifier(0.4)
+                .build())
+        .build();
+  }
+
+  public static BoundedDistribution createMockBoundedDistribution(int mean, int max) {
+    var boundedDistribution = mock(BoundedDistribution.class);
+    Distribution distribution =
+        ImmutableDistribution.builder()
+            .internalType(Distribution.DistributionType.empirical)
+            .internalScale(mean)
+            .empiricalSamples(List.of(mean))
+            .rng(TestUtils.dataGenerator().getRandomGenerator())
+            .build();
+    when(boundedDistribution.distribution()).thenReturn(distribution);
+    when(boundedDistribution.getDistributionValue()).thenReturn(mean);
+    when(boundedDistribution.max()).thenReturn(Double.valueOf(max));
+    return boundedDistribution;
   }
 }

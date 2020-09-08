@@ -6,7 +6,6 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static uk.co.ramp.people.VirusStatus.SUSCEPTIBLE;
 
-import java.io.FileNotFoundException;
 import java.util.*;
 import org.junit.Assert;
 import org.junit.Before;
@@ -22,14 +21,10 @@ import uk.co.ramp.event.CompletionEventListGroup;
 import uk.co.ramp.event.types.ContactEvent;
 import uk.co.ramp.event.types.ImmutableContactEvent;
 import uk.co.ramp.io.InitialCaseReader;
-import uk.co.ramp.io.types.CmptRecord;
-import uk.co.ramp.io.types.DiseaseProperties;
-import uk.co.ramp.io.types.PopulationProperties;
-import uk.co.ramp.io.types.StandardProperties;
+import uk.co.ramp.io.types.*;
 import uk.co.ramp.people.Case;
 import uk.co.ramp.people.Human;
 
-@SuppressWarnings("unchecked")
 @DirtiesContext
 @RunWith(SpringRunner.class)
 @Import({TestConfig.class, AppConfig.class})
@@ -37,9 +32,9 @@ public class OutbreakTest {
 
   private final Random random = TestUtils.getRandom();
 
-  @Rule public LogSpy logSpy = new LogSpy();
+  @Rule public final LogSpy logSpy = new LogSpy();
 
-  @Autowired Population population;
+  @Autowired private Population population;
   @Autowired private StandardProperties standardProperties;
   @Autowired private InitialCaseReader initialCaseReader;
   @Autowired private Outbreak outbreak;
@@ -49,7 +44,7 @@ public class OutbreakTest {
   private DiseaseProperties diseaseProperties;
 
   @Before
-  public void setUp() throws FileNotFoundException {
+  public void setUp() {
     this.diseaseProperties = TestUtils.diseaseProperties();
     populationProperties = mock(PopulationProperties.class);
     when(populationProperties.testCapacity()).thenReturn(1d);
@@ -105,7 +100,7 @@ public class OutbreakTest {
 
   @Test
   @DirtiesContext
-  public void testPropagate() throws FileNotFoundException {
+  public void testPropagate() {
     int popSize = 100;
     double[] array = {1};
 
@@ -178,7 +173,6 @@ public class OutbreakTest {
     ReflectionTestUtils.setField(standardProperties, "timeLimitDays", 100);
     ReflectionTestUtils.setField(standardProperties, "initialExposures", infections);
     ReflectionTestUtils.setField(standardProperties, "populationSize", popSize);
-    ReflectionTestUtils.setField(standardProperties, "steadyState", false);
 
     List<ContactEvent> contacts = createContactRecords(500, population);
     eventListGroup.addNewContactEvents(contacts);

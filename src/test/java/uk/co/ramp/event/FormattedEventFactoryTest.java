@@ -106,8 +106,6 @@ public class FormattedEventFactoryTest {
     AlertStatus old = AlertStatus.NONE;
     AlertStatus next = AlertStatus.ALERTED;
 
-    AlertEventProcessor eventProcessor = mock(AlertEventProcessor.class);
-
     AlertEvent alertEvent =
         ImmutableAlertEvent.builder().time(time).id(id).nextStatus(next).oldStatus(old).build();
 

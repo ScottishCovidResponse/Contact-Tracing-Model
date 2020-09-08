@@ -9,7 +9,6 @@ import static uk.co.ramp.people.AlertStatus.REQUESTED_TEST;
 import static uk.co.ramp.people.VirusStatus.PRESYMPTOMATIC;
 import static uk.co.ramp.people.VirusStatus.SYMPTOMATIC;
 
-import java.io.FileNotFoundException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.stream.Stream;
@@ -39,10 +38,10 @@ public class VirusEventProcessorTest {
           .time(2)
           .build();
 
-  private static final double DELTA = 1e-6;;
+  private static final double DELTA = 1e-6;
 
   @Before
-  public void setUp() throws FileNotFoundException {
+  public void setUp() {
     properties = mock(StandardProperties.class);
     DistributionSampler distributionSampler = mock(DistributionSampler.class);
     AlertChecker alertChecker = mock(AlertChecker.class);
@@ -51,8 +50,6 @@ public class VirusEventProcessorTest {
 
     when(alertChecker.checkForAlert(eq(0), eq(NONE), eq(SYMPTOMATIC), eq(1)))
         .thenReturn(Stream.of(alertEvent));
-    //    when(distributionSampler.getDistributionValue(any()))
-    //        .thenAnswer(i -> ((int) Math.round(((BoundedDistribution) i.getArgument(0)).mean())));
 
     when(properties.timeStepsPerDay()).thenReturn(1);
 

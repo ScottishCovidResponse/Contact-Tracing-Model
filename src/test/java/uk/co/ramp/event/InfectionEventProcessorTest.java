@@ -1,11 +1,9 @@
 package uk.co.ramp.event;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
 import static uk.co.ramp.people.VirusStatus.*;
 
-import java.io.FileNotFoundException;
 import java.util.HashMap;
 import java.util.Map;
 import org.junit.Assert;
@@ -32,20 +30,17 @@ public class InfectionEventProcessorTest {
   private DistributionSampler distributionSampler;
   private StatisticsRecorder statisticsRecorder;
 
-  private static final double DELTA = 1e-6;;
+  private static final double DELTA = 1e-6;
 
   private Case thisCase;
   private InfectionEvent event;
 
   @Before
-  public void setUp() throws FileNotFoundException {
+  public void setUp() {
 
     properties = mock(StandardProperties.class);
     when(properties.timeStepsPerDay()).thenReturn(1);
     distributionSampler = mock(DistributionSampler.class);
-
-    //    when(distributionSampler.getDistributionValue(any()))
-    //        .thenAnswer(i -> ((int) Math.round(((BoundedDistribution) i.getArgument(0)).mean())));
 
     statisticsRecorder = mock(StatisticsRecorder.class);
 

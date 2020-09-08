@@ -1,23 +1,15 @@
 package uk.co.ramp.event;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.Mockito.mock;
 
-import org.junit.Before;
 import org.junit.Test;
 import uk.co.ramp.event.types.ContactEvent;
 import uk.co.ramp.event.types.ImmutableContactEvent;
 
 public class EventListTest {
 
-  private FormattedEventFactory formattedEventFactory;
   private final ImmutableContactEvent event =
       ImmutableContactEvent.builder().time(1).from(0).to(1).label("school").weight(0.5).build();
-
-  @Before
-  public void setUp() throws Exception {
-    this.formattedEventFactory = mock(FormattedEventFactory.class);
-  }
 
   @Test
   public void testGetEventsInPeriod() {

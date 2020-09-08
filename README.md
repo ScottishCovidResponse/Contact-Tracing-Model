@@ -43,106 +43,6 @@ yum install gradle
 
 Follow instructions [here](https://gradle.org/install/).
 
-## Inputs
-
-There are three input files that are user editable for starters. They are JSON files that contain:
-
-### General Settings
-
-```json
-{
-  "populationSize": 10000,
-  "timeLimit": 1000,
-  "infected": 10,
-  "seed": 123,
-  "steadyState": true,
-  "contactsFile": "input/homogeneous_contacts.csv"
-}
-```
-
-* **populationSize**: the number of people
-* **infected**: the initial number of exposed individuals (TODO: update name)
-* **seed**: the random number seed used for this run. 
-* **timeLimit**: The max time it can run, regardless of contact data provided.
-* **steadyState**: if the model continues when to a steady state when it has run out of contact data. 
-* **contactsFile**: the location of the contacts.csv input file
-
-### Population Demographics
-```json
-{
-  "populationDistribution": {
-    "0": 0.1759,
-    "1": 0.1171,
-    "2": 0.4029,
-    "3": 0.1222,
-    "4": 0.1819
-  },
-  "populationAges": {
-    "0": {
-      "min": 0,
-      "max": 14
-    },
-    "1": {
-      "min": 15,
-      "max": 24
-    },
-    "2": {
-      "min": 25,
-      "max": 54
-    },
-    "3": {
-      "min": 55,
-      "max": 64
-    },
-    "4": {
-      "min": 65,
-      "max": 90
-    }
-  },
-  "genderBalance": 0.99
-}
-```
-
-NB this is hardcoded to 5 bins, starting at index 0. 
-
-* **populationDistributions**: the proportion of the population in each bin
-* **populationAges**: the widths of each population bin
-* **genderBalance**: the proportion of men to women across the population
-
-The data has been taken from the index mundi data found [here](https://www.indexmundi.com/united_kingdom/demographics_profile.html)
-
-## Contacts.csv
-
-This file describes the networks and the interactions between individuals
-
-```csv
-"time","from","to","weight"
-1,9999,10000,6.71441028630399
-1,9998,9999,8.27809024361994
-1,9997,9998,1.75194953106576
-1,9996,9997,8.28598198646246
-```
-
-* **time**: the time the interaction occurs
-* **from**: the initiator of the interaction
-* **to**: the receipient of the interaction
-* **weight**: the relative strength of the interaction, high may be family, low may be shop worker
-
-N.B.: Note that the example input files 'contact.csv' and 'contacts_homogeneous.csv' represent very sparse networks (comparable to movements in lockdown).
-
-
-## Outputs
-
-Besides the fairly coarse console output, a CSV file called "Compartments.csv" is output that contains the SEIR numbers for each day. 
-
-```csv
-"time","s","e1","e2","ia","is","r","d"
-0,9990,10,0,0,0,0,0
-1,9984,14,2,0,0,0,0
-2,9980,12,6,2,0,0,0
-3,9975,14,8,2,0,1,0
-```
-
 ## Infection Map
 
 The infection map shows how a single individual passes the infection to others sets of people. The receiving set is denoted in the square brackets. The depths of the tabbing shows how far away from the source case it is. 
@@ -169,7 +69,7 @@ To compile the project without running tests:
 gradle assemble
 ```
 
-To compile and run the tests (there are none at present :-/):
+To compile and run the tests:
 ```shell script
 gradle build
 ```
@@ -179,10 +79,17 @@ To run the project:
 gradle run
 ```
 
+To run with command line arguments:
+```shell script
+gradle run --args='--overrideInputFolderLocation=input/scenarios/scenario1a_tracinglevel1 --overrideOutputFolderLocation=output0 --seed=3
+```
+
 ## Version History
 
 0.1 - the initial implementation of an SEIR model
 
 1.0 - new Schema with basic alerting
+
+1.1 - removing some of the out of date input data. This is covered in the build docs.
 
 
