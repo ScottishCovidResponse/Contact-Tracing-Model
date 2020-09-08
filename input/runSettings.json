@@ -4,6 +4,6 @@
   "initialExposures": 500,
   "timeStepsPerDay": 2,
   "timeStepSpread": [0.4,0.6],
-  "dayOffset": 1
+  "dayOffset": 0
 }
 
