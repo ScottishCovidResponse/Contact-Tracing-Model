@@ -9,8 +9,10 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 import java.io.IOException;
 import java.util.AbstractMap.SimpleImmutableEntry;
 import java.util.Map.Entry;
-import java.util.function.Consumer;
 import org.apache.commons.math3.random.RandomGenerator;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import uk.co.ramp.ConfigurationException;
 import uk.co.ramp.distribution.BoundedDistribution;
 import uk.ramp.mapper.DataPipelineMapper;
 
@@ -20,6 +22,7 @@ import uk.ramp.mapper.DataPipelineMapper;
  * pipeline.
  */
 public class BoundedDistributionSerializer extends JsonSerializer<BoundedDistribution> {
+  private static final Logger LOGGER = LogManager.getLogger(BoundedDistributionSerializer.class);
   private final RandomGenerator rng;
 
   public BoundedDistributionSerializer(RandomGenerator rng) {
@@ -38,17 +41,13 @@ public class BoundedDistributionSerializer extends JsonSerializer<BoundedDistrib
     componentsObjectNode
         .fields()
         .forEachRemaining(
-            new Consumer<Entry<String, JsonNode>>() {
-              @Override
-              public void accept(Entry<String, JsonNode> stringJsonNodeEntry) {
-                if (stringJsonNodeEntry.getKey().equals("distribution")) {
-                  ObjectNode innerDist = stringJsonNodeEntry.getValue().deepCopy();
-                  innerDist.remove("rng");
-                  JsonNode innerTree = objectMapper.valueToTree(innerDist);
-                  write(gen, new SimpleImmutableEntry<>("distribution", innerTree));
-                  return;
-                }
-
+            stringJsonNodeEntry -> {
+              if (stringJsonNodeEntry.getKey().equals("distribution")) {
+                ObjectNode innerDist = stringJsonNodeEntry.getValue().deepCopy();
+                innerDist.remove("rng");
+                JsonNode innerTree = objectMapper.valueToTree(innerDist);
+                write(gen, new SimpleImmutableEntry<>("distribution", innerTree));
+              } else {
                 write(gen, stringJsonNodeEntry);
               }
             });
@@ -59,7 +58,9 @@ public class BoundedDistributionSerializer extends JsonSerializer<BoundedDistrib
     try {
       gen.writeObjectField(entry.getKey(), entry.getValue());
     } catch (IOException e) {
-      e.printStackTrace();
+      String message = "An error occurred writing a JSON object in BoundedDistributionSerializer.";
+      LOGGER.error(message);
+      throw new ConfigurationException(message, e);
     }
   }
 }

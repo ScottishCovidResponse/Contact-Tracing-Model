@@ -30,14 +30,14 @@ import uk.ramp.distribution.MinMax;
 
 public class AppConfigTest {
 
-  @Rule public LogSpy appender = new LogSpy();
+  @Rule public final LogSpy appender = new LogSpy();
   AppConfig appConfig;
   private StandardApi stdApi;
-  private RandomGenerator rng;
 
   @Before
   public void setUp() {
-    rng = new RandomDataGenerator().getRandomGenerator(); // TODO ideally we would want to mock this
+    RandomGenerator rng =
+        new RandomDataGenerator().getRandomGenerator(); // TODO ideally we would want to mock this
     MinMax bin1 =
         ImmutableMinMax.builder()
             .lowerBoundary(0)
@@ -175,7 +175,6 @@ public class AppConfigTest {
     StandardProperties standardProperties = appConfig.standardProperties();
 
     Assert.assertNotNull(standardProperties);
-    Assert.assertNotNull(standardProperties.steadyState());
     Assert.assertTrue(standardProperties.initialExposures() > 0);
     Assert.assertTrue(standardProperties.populationSize() > 0);
     Assert.assertTrue(standardProperties.seed().isEmpty());
@@ -241,7 +240,7 @@ public class AppConfigTest {
   }
 
   @Test(expected = ConfigurationException.class)
-  public void diseasePropertiesError() throws IOException, ConfigurationException {
+  public void diseasePropertiesError() throws ConfigurationException {
     StandardApi dataApi = mock(StandardApi.class);
     when(dataApi.readEstimate(anyString(), anyString())).thenThrow(ConfigurationException.class);
     when(dataApi.readDistribution(anyString(), anyString()))

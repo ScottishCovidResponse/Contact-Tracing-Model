@@ -1,7 +1,6 @@
 package uk.co.ramp.io;
 
 import static org.hamcrest.CoreMatchers.containsString;
-import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
 import java.io.IOException;
@@ -21,7 +20,7 @@ import uk.co.ramp.io.types.StandardProperties;
 
 public class InitialCaseReaderTest {
 
-  @Rule public LogSpy logSpy = new LogSpy();
+  @Rule public final LogSpy logSpy = new LogSpy();
   private InitialCaseReader caseReader;
   private RandomDataGenerator generator;
   private StandardProperties standardProperties;

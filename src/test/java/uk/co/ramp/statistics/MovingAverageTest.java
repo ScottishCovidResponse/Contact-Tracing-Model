@@ -12,8 +12,8 @@ import uk.co.ramp.TestUtils;
 
 public class MovingAverageTest {
 
-  Random random = TestUtils.getRandom();
-  List<Double> data;
+  private final Random random = TestUtils.getRandom();
+  private List<Double> data;
   private MovingAverage movingAverage;
   private int duration;
 

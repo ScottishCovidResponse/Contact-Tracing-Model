@@ -59,26 +59,40 @@ public abstract class CommonVirusEventProcessor<T extends Event> implements Even
     BoundedDistribution progressionData;
     switch (currentStatus) {
       case EXPOSED:
-        progressionData = diseaseProperties.timeLatent();
+        progressionData =
+            EventProcessor.scaleWithTimeSteps(
+                diseaseProperties.timeLatent(), properties.timeStepsPerDay());
         break;
       case PRESYMPTOMATIC:
-        progressionData = diseaseProperties.timeSymptomsOnset();
+        progressionData =
+            EventProcessor.scaleWithTimeSteps(
+                diseaseProperties.timeSymptomsOnset(), properties.timeStepsPerDay());
         break;
       case ASYMPTOMATIC:
-        progressionData = diseaseProperties.timeRecoveryAsymp();
+        progressionData =
+            EventProcessor.scaleWithTimeSteps(
+                diseaseProperties.timeRecoveryAsymp(), properties.timeStepsPerDay());
         break;
       case SYMPTOMATIC:
         if (newStatus == SEVERELY_SYMPTOMATIC) {
-          progressionData = diseaseProperties.timeDecline();
+          progressionData =
+              EventProcessor.scaleWithTimeSteps(
+                  diseaseProperties.timeDecline(), properties.timeStepsPerDay());
         } else {
-          progressionData = diseaseProperties.timeRecoverySymp();
+          progressionData =
+              EventProcessor.scaleWithTimeSteps(
+                  diseaseProperties.timeRecoverySymp(), properties.timeStepsPerDay());
         }
         break;
       case SEVERELY_SYMPTOMATIC:
         if (newStatus == RECOVERED) {
-          progressionData = diseaseProperties.timeRecoverySev();
+          progressionData =
+              EventProcessor.scaleWithTimeSteps(
+                  diseaseProperties.timeRecoverySev(), properties.timeStepsPerDay());
         } else {
-          progressionData = diseaseProperties.timeDeath();
+          progressionData =
+              EventProcessor.scaleWithTimeSteps(
+                  diseaseProperties.timeDeath(), properties.timeStepsPerDay());
         }
         break;
       default:
@@ -87,7 +101,7 @@ public abstract class CommonVirusEventProcessor<T extends Event> implements Even
         throw new EventException(message);
     }
 
-    return progressionData.getDistributionValue() * properties.timeStepsPerDay();
+    return progressionData.getDistributionValue();
   }
 
   VirusStatus determineInfection(CommonVirusEvent e) {

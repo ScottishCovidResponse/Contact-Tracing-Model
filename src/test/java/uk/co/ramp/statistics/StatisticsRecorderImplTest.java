@@ -19,9 +19,9 @@ import uk.co.ramp.statistics.types.Infection;
 
 public class StatisticsRecorderImplTest {
 
-  StatisticsRecorder recorder;
-  Random random = TestUtils.getRandom();
-  StandardProperties properties = TestUtils.standardProperties();
+  private final Random random = TestUtils.getRandom();
+  private final StandardProperties properties = TestUtils.standardProperties();
+  private StatisticsRecorder recorder;
 
   @Before
   public void setUp() {

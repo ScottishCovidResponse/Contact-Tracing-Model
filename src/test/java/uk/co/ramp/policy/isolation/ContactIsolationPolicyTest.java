@@ -1,8 +1,6 @@
 package uk.co.ramp.policy.isolation;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.ArgumentMatchers.anyDouble;
-import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.Mockito.*;
 
 import org.junit.Before;
@@ -14,13 +12,13 @@ import uk.co.ramp.people.VirusStatus;
 
 public class ContactIsolationPolicyTest {
 
+  private final double contactWeight = 0.2;
+  private final double actualInfectedProportion = 0.1;
+  private final int currentTime = 0;
   private SingleCaseIsolationPolicy singleCaseIsolationPolicy;
   private DiseaseProperties diseaseProperties;
   private Case caseA;
   private Case caseB;
-  double contactWeight = 0.2;
-  double actualInfectedProportion = 0.1;
-  int currentTime = 0;
 
   @Before
   public void setUp() {

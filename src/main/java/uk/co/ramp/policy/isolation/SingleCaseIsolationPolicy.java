@@ -8,6 +8,7 @@ import org.immutables.value.Value;
 import uk.co.ramp.distribution.BoundedDistribution;
 import uk.co.ramp.distribution.DistributionSampler;
 import uk.co.ramp.distribution.ImmutableBoundedDistribution;
+import uk.co.ramp.event.types.EventProcessor;
 import uk.co.ramp.io.types.StandardProperties;
 import uk.co.ramp.people.AlertStatus;
 import uk.co.ramp.people.Case;
@@ -186,11 +187,12 @@ class SingleCaseIsolationPolicy {
             currentTime,
             exposedTime);
     int requiredIsolationTime =
-        matchingIsolationProperty
-                .isolationTimeDistribution()
-                .orElse(infinityBoundedDistribution)
-                .getDistributionValue()
-            * properties.timeStepsPerDay();
+        EventProcessor.scaleWithTimeSteps(
+                matchingIsolationProperty
+                    .isolationTimeDistribution()
+                    .orElse(infinityBoundedDistribution),
+                properties.timeStepsPerDay())
+            .getDistributionValue();
     double threshold =
         isolationProperties.isolationProbabilityDistributionThreshold().getDistributionValue();
     double requiredIsolationFactor =

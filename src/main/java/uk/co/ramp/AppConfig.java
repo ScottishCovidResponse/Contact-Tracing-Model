@@ -95,6 +95,20 @@ public class AppConfig {
   }
 
   @Bean
+  public AgeDependentHealthList ageDependentHealthList() {
+
+    try (Reader reader = getReader(inputFiles().ageDependentHealth())) {
+      return new AgeDependentHealthReader().read(reader);
+    } catch (IOException e) {
+      String message =
+          "An error occurred while parsing the age dependent health at "
+              + inputFiles().ageDependentHealth();
+      LOGGER.error(message);
+      throw new ConfigurationException(message, e);
+    }
+  }
+
+  @Bean
   public InputFiles inputFiles() {
     var baseInputFilesReader = new InputFilesReader();
     var directoryList = new DirectoryList();
