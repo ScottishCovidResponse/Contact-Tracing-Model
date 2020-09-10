@@ -139,7 +139,7 @@ public class InfectionMapTest {
     infectionMap.recurseSet(target, infectors, writer, tab);
 
     String expected =
-        "0(10)         ->  [1(10)]\n" + "              ->  1(10)          ->  [2(10)]";
+        "0(10.0)       ->  [1(10.0)]\n" + "              ->  1(10.0)        ->  [2(10.0)]";
 
     Assert.assertEquals(expected, writer.toString().trim());
   }
