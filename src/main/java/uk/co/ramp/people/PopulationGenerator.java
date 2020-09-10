@@ -8,7 +8,7 @@ import java.util.stream.Stream;
 import org.apache.commons.math3.random.RandomDataGenerator;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import uk.co.ramp.io.types.AgeDependentHealthList;
+import uk.co.ramp.io.types.PopulationOverrides;
 import uk.co.ramp.io.types.PopulationProperties;
 import uk.co.ramp.io.types.StandardProperties;
 import uk.co.ramp.utilities.MinMax;
@@ -21,6 +21,7 @@ public class PopulationGenerator {
   private RandomDataGenerator dataGenerator;
   private AgeRetriever ageRetriever;
   private Map<MinMax, Double> ageMap;
+  private PopulationOverrides populationOverrides;
 
   public static Map<VirusStatus, Integer> getCompartmentCounts(Map<Integer, Case> population) {
 
@@ -55,13 +56,14 @@ public class PopulationGenerator {
   }
 
   @Autowired
-  public void setAgeDependentHealthList(AgeDependentHealthList ageDependentHealthList) {
+  public void setPopulationOverrides(PopulationOverrides populationOverrides) {
+    this.populationOverrides = populationOverrides;
     ageMap =
-        ageDependentHealthList.ageDependentList().stream()
+        populationOverrides.ageDependentList().stream()
             .collect(
                 Collectors.toMap(
-                    AgeDependentHealthList.AgeDependentHealth::range,
-                    AgeDependentHealthList.AgeDependentHealth::modifier));
+                    PopulationOverrides.AgeDependentHealth::range,
+                    PopulationOverrides.AgeDependentHealth::modifier));
   }
 
   public Map<Integer, Case> generate() {
@@ -77,8 +79,17 @@ public class PopulationGenerator {
           dataGenerator.nextUniform(0, 1) > properties.genderBalance() / 2d
               ? Gender.FEMALE
               : Gender.MALE;
-      double isolationCompliance = dataGenerator.nextUniform(0, 1);
-      double reportingCompliance = dataGenerator.nextUniform(0, 1);
+
+      double isolationCompliance =
+          populationOverrides.fixedIsolationCompliance().isPresent()
+              ? populationOverrides.fixedIsolationCompliance().getAsDouble()
+              : dataGenerator.nextUniform(0, 1);
+
+      double reportingCompliance =
+          populationOverrides.fixedReportingCompliance().isPresent()
+              ? populationOverrides.fixedReportingCompliance().getAsDouble()
+              : dataGenerator.nextUniform(0, 1);
+
       double health = healthModifier * dataGenerator.nextUniform(0, 1);
 
       boolean hasApp = dataGenerator.nextUniform(0, 1) < properties.appUptake();

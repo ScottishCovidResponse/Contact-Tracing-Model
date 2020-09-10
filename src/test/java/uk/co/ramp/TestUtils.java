@@ -151,8 +151,8 @@ public class TestUtils {
     return new AgeRetriever(populationProperties(), agesData);
   }
 
-  public static AgeDependentHealthList ageDependentHealth() {
-    return ImmutableAgeDependentHealthList.builder()
+  public static PopulationOverrides populationOverrides() {
+    return ImmutablePopulationOverrides.builder()
         .addAgeDependentList(
             ImmutableAgeDependentHealth.builder()
                 .range(uk.co.ramp.utilities.ImmutableMinMax.of(0, 19))

@@ -15,13 +15,15 @@ import org.junit.Before;
 import org.junit.Test;
 import uk.co.ramp.TestUtils;
 import uk.co.ramp.io.types.ImmutableAgeDependentHealth;
+import uk.co.ramp.io.types.ImmutablePopulationOverrides;
+import uk.co.ramp.io.types.PopulationOverrides;
 import uk.co.ramp.io.types.StandardProperties;
 
 public class PopulationGeneratorTest {
 
-  private PopulationGenerator populationGenerator;
-  private final Random random = TestUtils.getRandom();
   private static final double DELTA = 1e-6;
+  private final Random random = TestUtils.getRandom();
+  private PopulationGenerator populationGenerator;
 
   @Before
   public void setup() throws IOException {
@@ -29,7 +31,7 @@ public class PopulationGeneratorTest {
     populationGenerator.setProperties(TestUtils.populationProperties());
     populationGenerator.setDataGenerator(TestUtils.dataGenerator());
     populationGenerator.setAgeRetriever(TestUtils.ageRetriever());
-    populationGenerator.setAgeDependentHealthList(TestUtils.ageDependentHealth());
+    populationGenerator.setPopulationOverrides(TestUtils.populationOverrides());
   }
 
   @Test
@@ -84,6 +86,12 @@ public class PopulationGeneratorTest {
         population.values().stream().mapToDouble(Case::isolationCompliance).average().orElseThrow();
     double health = population.values().stream().mapToDouble(Case::health).average().orElseThrow();
     double age = population.values().stream().mapToDouble(Case::age).average().orElseThrow();
+
+    double reporting =
+        population.values().stream().mapToDouble(Case::reportingCompliance).average().orElseThrow();
+    double isolation =
+        population.values().stream().mapToDouble(Case::isolationCompliance).average().orElseThrow();
+
     double men =
         population.values().stream().map(Case::gender).filter(a -> a.equals(Gender.MALE)).count()
             / (double) popSize;
@@ -91,7 +99,7 @@ public class PopulationGeneratorTest {
         population.values().stream().map(Case::gender).filter(a -> a.equals(Gender.FEMALE)).count()
             / (double) popSize;
     double healthModifier =
-        TestUtils.ageDependentHealth().ageDependentList().stream()
+        TestUtils.populationOverrides().ageDependentList().stream()
             .mapToDouble(ImmutableAgeDependentHealth::modifier)
             .average()
             .orElse(0);
@@ -103,6 +111,37 @@ public class PopulationGeneratorTest {
     Assert.assertEquals(0.5, men, 0.01);
     Assert.assertEquals(0.5, women, 0.01);
     Assert.assertEquals(0.7, hasApp, 0.01);
+    Assert.assertEquals(0.5, reporting, 0.01);
+    Assert.assertEquals(0.5, isolation, 0.01);
+  }
+
+  @Test
+  public void testOptionalValues() {
+
+    PopulationOverrides populationOverrides =
+        ImmutablePopulationOverrides.builder()
+            .from(TestUtils.populationOverrides())
+            .fixedIsolationCompliance(0.312)
+            .fixedReportingCompliance(0.768)
+            .build();
+
+    int popSize = 100000;
+    StandardProperties runSettings = mock(StandardProperties.class);
+    when(runSettings.populationSize()).thenReturn(popSize);
+    populationGenerator.setRunProperties(runSettings);
+    populationGenerator.setPopulationOverrides(populationOverrides);
+
+    Map<Integer, Case> population = populationGenerator.generate();
+
+    Assert.assertEquals(popSize, population.size());
+
+    double reporting =
+        population.values().stream().mapToDouble(Case::reportingCompliance).average().orElseThrow();
+    double isolation =
+        population.values().stream().mapToDouble(Case::isolationCompliance).average().orElseThrow();
+
+    Assert.assertEquals(populationOverrides.fixedReportingCompliance().orElse(0), reporting, 0.01);
+    Assert.assertEquals(populationOverrides.fixedIsolationCompliance().orElse(0), isolation, 0.01);
   }
 
   @Test

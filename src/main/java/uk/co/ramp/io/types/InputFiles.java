@@ -23,7 +23,7 @@ public interface InputFiles {
 
   String infectionRates();
 
-  String ageDependentHealth();
+  String populationOverrides();
 
   @Check
   default void check() {
@@ -38,6 +38,6 @@ public interface InputFiles {
     Preconditions.checkState(
         !infectionRates().isBlank(), "Infection rates location should not be blank");
     Preconditions.checkState(
-        !ageDependentHealth().isBlank(), "Age-dependent health location should not be blank");
+        !populationOverrides().isBlank(), "Population Overrides location should not be blank");
   }
 }

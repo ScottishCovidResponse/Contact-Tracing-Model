@@ -6,5 +6,5 @@
   "tracingPolicies": "tracingPolicies.json",
   "isolationPolicies": "isolationPolicies.json",
   "infectionRates": "infectionRates.json",
-  "ageDependentHealth": "ageDependentHealth.json"
+  "populationOverrides": "populationOverrides.json"
 }
