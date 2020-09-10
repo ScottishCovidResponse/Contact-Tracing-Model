@@ -115,6 +115,6 @@ public class InfectionMap {
 
   public String getSource(Case c) {
     return Strings.padEnd(
-        c.id() + "(" + c.exposedTime() / properties.timeStepsPerDay() + ")", 12, ' ');
+        c.id() + "(" + c.exposedTime() / (double) properties.timeStepsPerDay() + ")", 12, ' ');
   }
 }
