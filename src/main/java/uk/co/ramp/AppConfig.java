@@ -95,14 +95,14 @@ public class AppConfig {
   }
 
   @Bean
-  public AgeDependentHealthList ageDependentHealthList() {
+  public PopulationOverrides ageDependentHealthList() {
 
-    try (Reader reader = getReader(inputFiles().ageDependentHealth())) {
-      return new AgeDependentHealthReader().read(reader);
+    try (Reader reader = getReader(inputFiles().populationOverrides())) {
+      return new PopulationOverridesReader().read(reader);
     } catch (IOException e) {
       String message =
           "An error occurred while parsing the age dependent health at "
-              + inputFiles().ageDependentHealth();
+              + inputFiles().populationOverrides();
       LOGGER.error(message);
       throw new ConfigurationException(message, e);
     }

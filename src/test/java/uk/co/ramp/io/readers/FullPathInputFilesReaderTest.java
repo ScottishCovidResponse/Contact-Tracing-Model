@@ -23,7 +23,7 @@ public class FullPathInputFilesReaderTest {
           .runSettings("runSettings.json")
           .tracingPolicies("tracingPolicies.json")
           .infectionRates("infectionRates.json")
-          .ageDependentHealth("ageDependentHealth.json")
+          .populationOverrides("populationOverrides.json")
           .build();
 
   private final String overrideInputFolderLocation = "overrideFolder1";
@@ -53,7 +53,7 @@ public class FullPathInputFilesReaderTest {
             .runSettings("defaultInputFolder/runSettings.json")
             .tracingPolicies("overrideFolder1/tracingPolicies.json")
             .infectionRates("defaultInputFolder/infectionRates.json")
-            .ageDependentHealth("defaultInputFolder/ageDependentHealth.json")
+            .populationOverrides("defaultInputFolder/populationOverrides.json")
             .build();
 
     assertThat(reader.read(underLyingBaseInputFilesReader)).isEqualTo(expectedInputFiles);

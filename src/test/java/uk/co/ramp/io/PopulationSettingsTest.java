@@ -5,16 +5,16 @@ import static org.assertj.core.api.Assertions.assertThat;
 import java.io.StringReader;
 import org.junit.Before;
 import org.junit.Test;
-import uk.co.ramp.io.readers.AgeDependentHealthReader;
-import uk.co.ramp.io.types.AgeDependentHealthList;
+import uk.co.ramp.io.readers.PopulationOverridesReader;
 import uk.co.ramp.io.types.ImmutableAgeDependentHealth;
-import uk.co.ramp.io.types.ImmutableAgeDependentHealthList;
+import uk.co.ramp.io.types.ImmutablePopulationOverrides;
+import uk.co.ramp.io.types.PopulationOverrides;
 import uk.co.ramp.utilities.ImmutableMinMax;
 
-public class AgeDependentHealthListTest {
+public class PopulationSettingsTest {
 
-  private final AgeDependentHealthList dummyList =
-      ImmutableAgeDependentHealthList.builder()
+  private final PopulationOverrides dummyList =
+      ImmutablePopulationOverrides.builder()
           .addAgeDependentList(
               ImmutableAgeDependentHealth.builder()
                   .range(ImmutableMinMax.of(0, 19))
@@ -41,11 +41,11 @@ public class AgeDependentHealthListTest {
                   .modifier(0.4)
                   .build())
           .build();
-  private AgeDependentHealthReader ageDependentHealthReader;
+  private PopulationOverridesReader populationOverridesReader;
 
   @Before
   public void setup() {
-    ageDependentHealthReader = new AgeDependentHealthReader();
+    populationOverridesReader = new PopulationOverridesReader();
   }
 
   @Test
@@ -91,7 +91,7 @@ public class AgeDependentHealthListTest {
             + "  ]\n"
             + "}";
     StringReader reader = new StringReader(input);
-    var output = ageDependentHealthReader.read(reader);
+    var output = populationOverridesReader.read(reader);
     assertThat(output).isEqualToComparingFieldByField(dummyList);
   }
 }
