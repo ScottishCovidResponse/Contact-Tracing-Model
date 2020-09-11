@@ -169,7 +169,7 @@ This value is multiplied by a random number between 0 and 1 to give the final ag
 This allows the populations susceptibility to the more serious branches of the infection to be adjusted based on age.
 
 2. The optional inputs to hardwire the isolation compliance using _fixedIsolationCompliance_ and the reporting compliance using _fixedReportingCompliance_. 
-These fields can be omitted, and the values will be populated randomly.
+These fields can be omitted, and the values will be populated randomly from a uniform distribution.
 
 <img src="populationOverrides.png" alt="Population Overrides Example" width="400">
 
