@@ -171,7 +171,7 @@ This allows the populations susceptibility to the more serious branches of the i
 2. The optional inputs to hardwire the isolation compliance using _fixedIsolationCompliance_ and the reporting compliance using _fixedReportingCompliance_. 
 These fields can be omitted, and the values will be populated randomly.
 
-<img src="populationOverrides.png" alt="Population Overrides Example" width="200">
+<img src="populationOverrides.png" alt="Population Overrides Example" width="400">
 
 ### Data Pipeline Input Files
 
