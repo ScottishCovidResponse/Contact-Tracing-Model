@@ -10,7 +10,7 @@ apply plugin: 'idea'
 apply plugin: 'eclipse'
 apply plugin: 'org.sonarqube'
 
-project.version = "1.0-SNAPSHOT"
+project.version = "2.0"
 mainClassName = 'uk.co.ramp.Framework'
 
 repositories {

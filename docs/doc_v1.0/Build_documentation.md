@@ -13,6 +13,7 @@ Author: Sam Brett & Ed Townsend
       - [Initial Exposures](#initial-exposures)
       - [Run Settings](#run-settings)
       - [Age Data](#age-data)
+      - [Population Overrides](#population-overrides)
     - [Data Pipeline Input Files](#data-pipeline-input-files)
       - [Configuration File](#configuration-file)
       - [Disease Settings](#disease-settings)
@@ -158,6 +159,19 @@ The _Age Data_ file assigns an age to an individual via their ID. The _Age Data_
 <img src="ageData.png" alt="Age Data Example" width="100">
 
 **Figure 6.** Example _Age Data_ file.
+
+#### Population Overrides
+
+The population overrides file provides the user with the ability to modify the population properties. These fall into two categories:
+
+1. The age dependent health modifier - This is a list containing an age range and a maximum health for someone in that age. 
+This value is multiplied by a random number between 0 and 1 to give the final age of each person.
+This allows the populations susceptibility to the more serious branches of the infection to be adjusted based on age.
+
+2. The optional inputs to hardwire the isolation compliance using _fixedIsolationCompliance_ and the reporting compliance using _fixedReportingCompliance_. 
+These fields can be omitted, and the values will be populated randomly from a uniform distribution.
+
+<img src="populationOverrides.png" alt="Population Overrides Example" width="400">
 
 ### Data Pipeline Input Files
 
